@@ -856,6 +856,10 @@ function ld_course_list( $attr ) {
 	//}
 	
 	//error_log('filter<pre>'. print_r($filter, true) .'</pre>');
+	$filter['orderby'] = [
+      		//'date' =>'ASC',
+      		'menu_order'=>'ASC',
+     	];
 	$loop = new WP_Query( $filter );
 	//error_log('loop<pre>'. print_r($loop, true) .'</pre>');
 	
