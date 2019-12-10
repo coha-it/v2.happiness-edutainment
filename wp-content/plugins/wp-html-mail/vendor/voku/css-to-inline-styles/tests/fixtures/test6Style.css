@@ -1,0 +1,26 @@
+
+* {
+  color: blue;
+}
+
+.preheaderContent {
+  color: pink !important;
+}
+
+td {
+  margin: 0;
+}
+
+td.body-cell  {
+  margin-bottom: 20px;
+}
+
+td.body-cell  {
+  margin-bottom: 99px;
+}
+
+td {
+  margin: 0;
+}
+
+

@@ -1,0 +1,368 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: LearnDash Pro Panel v1.5.3\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2015-01-09 00:55:56+0000\n"
+"Last-Translator: amche <kursawe@coporate-happiness.de>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: CSL v1.x\n"
+"X-Poedit-Language: German\n"
+"X-Poedit-Country: GERMANY\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_n:1,2;__ngettext_noop:1,2;_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2;\n"
+"X-Poedit-Basepath: ../\n"
+"X-Poedit-Bookmarks: \n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Textdomain-Support: yes"
+
+#: learndash-propanel.php:28
+#@ default
+msgid "LearnDash Pro Panel #2"
+msgstr ""
+
+#: learndash-propanel.php:34
+#@ default
+msgid "LearnDash Pro Panel #3"
+msgstr ""
+
+#: learndash-propanel.php:50
+#@ ld_propanel
+msgid "LearnDash Dashboard"
+msgstr "Lernplattform Einstellungen"
+
+#: learndash-propanel.php:314
+#@ ld_propanel
+msgid "Generating Report"
+msgstr "Bericht erstellen"
+
+#: learndash-propanel.php:314
+#@ ld_propanel
+msgid "Next"
+msgstr "Nächstes"
+
+#: learndash-propanel.php:314
+#@ ld_propanel
+msgid "Prev"
+msgstr "Vorheriges"
+
+#: learndash-propanel.php:314
+#, php-format
+#@ ld_propanel
+msgid "%s's Profile"
+msgstr "Profile"
+
+#: learndash-propanel.php:381
+#@ ld_propanel
+msgid "Message Sent"
+msgstr "Nachricht gesendet"
+
+#: learndash-propanel.php:430
+#@ learndash
+msgid "No attempts"
+msgstr ""
+
+#: tpl/activity_panel.php:5
+#@ ld_propanel
+msgid "Export Quiz Data"
+msgstr "Exportiere Quiz Daten"
+
+#: tpl/activity_panel.php:7
+#@ ld_propanel
+msgid "Export Course Data"
+msgstr "Exportiere Kursdaten"
+
+#: tpl/activity_panel.php:16
+#: tpl/assignments_panel.php:13
+#@ ld_propanel
+msgid "See user progress"
+msgstr "Nutzer Fortschritt anzeigen"
+
+#: tpl/activity_panel.php:30
+#@ ld_propanel
+msgid "Quiz"
+msgstr "Quiz"
+
+#: tpl/activity_panel.php:30
+#@ ld_propanel
+msgid "completed"
+msgstr "vollendet"
+
+#: tpl/activity_panel.php:32
+#@ ld_propanel
+msgid "Passed"
+msgstr "bestanden"
+
+#: tpl/activity_panel.php:32
+#@ ld_propanel
+msgid "Not Passed"
+msgstr "nicht bestanden"
+
+#: tpl/activity_panel.php:34
+#@ ld_propanel
+msgid "Score"
+msgstr "Punktestand"
+
+#: tpl/activity_panel.php:34
+#: tpl/activity_panel.php:40
+#@ ld_propanel
+msgid "out of"
+msgstr ""
+
+#: tpl/activity_panel.php:38
+#@ ld_propanel
+msgid "Course"
+msgstr "Kurs"
+
+#: tpl/activity_panel.php:38
+#@ ld_propanel
+msgid "updated"
+msgstr "updated"
+
+#: tpl/activity_panel.php:40
+#: tpl/assignments_panel.php:33
+#: tpl/assignments_panel.php:59
+#@ ld_propanel
+msgid "Completed"
+msgstr "abgeschlossen"
+
+#: tpl/activity_panel.php:40
+#@ ld_propanel
+msgid "steps"
+msgstr "Schritte"
+
+#: tpl/activity_panel.php:50
+#@ ld_propanel
+msgid "No activity found."
+msgstr "Keine Aktivität gefunden"
+
+#: tpl/assignments_panel.php:4
+#@ ld_propanel
+msgid "Assignment Management"
+msgstr "Aufgaben Management"
+
+#: tpl/assignments_panel.php:15
+#@ ld_propanel
+msgid "in"
+msgstr "in"
+
+#: tpl/assignments_panel.php:17
+#@ ld_propanel
+msgid "See lesson assignments"
+msgstr "Kursaufgaben anzeigen"
+
+#: tpl/assignments_panel.php:19
+#@ ld_propanel
+msgid "uploaded"
+msgstr "hochgeladen"
+
+#: tpl/assignments_panel.php:27
+#@ ld_propanel
+msgid "Download"
+msgstr "Download"
+
+#: tpl/assignments_panel.php:37
+#@ ld_propanel
+msgid "Mark as completed"
+msgstr "Als erfüllt markieren"
+
+#: tpl/assignments_panel.php:43
+#@ ld_propanel
+msgid "Delete"
+msgstr "löschen"
+
+#: tpl/assignments_panel.php:47
+#@ ld_propanel
+msgid "Marking as completed ..."
+msgstr "Als erfüllt markieren ..."
+
+#: tpl/assignments_panel.php:49
+#@ ld_propanel
+msgid "Deleting ..."
+msgstr "löschen ..."
+
+#: tpl/assignments_panel.php:55
+#@ ld_propanel
+msgid "No assigments found."
+msgstr "Keine Aufgaben gefunden."
+
+#: tpl/assignments_panel.php:61
+#@ ld_propanel
+msgid "Are you sure you want to delete this assignment?"
+msgstr "Sind Sie sicher das Sie die Aufgabe löschen wollen?"
+
+#: tpl/course_progress.php:4
+#, php-format
+#@ ld_propanel
+msgid "Send message to all %s users"
+msgstr "Sende die Nachricht an alle Benutzer"
+
+#: tpl/course_progress.php:5
+#@ ld_propanel
+msgid "Subject:"
+msgstr "Thema:"
+
+#: tpl/course_progress.php:7
+#@ ld_propanel
+msgid "Message:"
+msgstr "Nachricht:"
+
+#: tpl/course_progress.php:8
+#@ ld_propanel
+msgid "Send Message"
+msgstr "Nachricht senden"
+
+#: tpl/course_progress.php:16
+#@ ld_propanel
+msgid "Not Started:"
+msgstr "Nicht begonnen:"
+
+#: tpl/course_progress.php:21
+#@ ld_propanel
+msgid "In Progress:"
+msgstr "In Bearbeitung:"
+
+#: tpl/course_progress.php:27
+#@ ld_propanel
+msgid "Complete:"
+msgstr "Abgeschlossen:"
+
+#: tpl/course_progress.php:39
+#@ ld_propanel
+msgid "Export User Information"
+msgstr "Exportiere Nutzerdaten"
+
+#: tpl/course_progress.php:41
+#@ ld_propanel
+msgid "Filter"
+msgstr "Filter"
+
+#: tpl/course_progress.php:43
+#@ ld_propanel
+msgid "All"
+msgstr "alle"
+
+#: tpl/course_progress.php:44
+#@ ld_propanel
+msgid "Not Started"
+msgstr "Nicht begonnen"
+
+#: tpl/course_progress.php:45
+#@ ld_propanel
+msgid "In Progress"
+msgstr "In Bearbeitung"
+
+#: tpl/course_progress.php:46
+#@ ld_propanel
+msgid "Complete"
+msgstr "abgeschlossen"
+
+#: tpl/course_progress.php:48
+#@ ld_propanel
+msgid "Search"
+msgstr "Suche"
+
+#: tpl/course_progress.php:54
+#@ ld_propanel
+msgid "S. No."
+msgstr ""
+
+#: tpl/course_progress.php:55
+#@ ld_propanel
+msgid "Username"
+msgstr "Nutzername"
+
+#: tpl/course_progress.php:56
+#@ ld_propanel
+msgid "Email"
+msgstr "Email"
+
+#: tpl/course_progress.php:57
+#@ ld_propanel
+msgid "Progress"
+msgstr "Fortschritt"
+
+#: tpl/course_progress.php:58
+#@ ld_propanel
+msgid "Edit Profile"
+msgstr "Profil bearbeiten"
+
+#: tpl/course_progress.php:90
+#@ ld_propanel
+msgid "Press the button below to export user information."
+msgstr "Drücke den Button unten, um die Nutzerinformationen zu exportieren"
+
+#: tpl/course_progress.php:91
+#@ ld_propanel
+msgid "Export User Info"
+msgstr "Exportiere Nutzerdaten"
+
+#: tpl/dashboard.php:6
+#@ ld_propanel
+msgid "Overview"
+msgstr "Übersicht"
+
+#: tpl/dashboard.php:7
+#@ ld_propanel
+msgid "Activity Stream"
+msgstr "Aktuelle Aktivitäten"
+
+#: tpl/dashboard.php:8
+#@ ld_propanel
+msgid "Assignments"
+msgstr "Aufgaben"
+
+#: tpl/overview_panel.php:5
+#@ ld_propanel
+msgid "Total Courses"
+msgstr "Kurse insgesamt"
+
+#: tpl/overview_panel.php:9
+#@ ld_propanel
+msgid "Total Students"
+msgstr "Studenten insgesamt"
+
+#: tpl/overview_panel.php:14
+#@ ld_propanel
+msgid "Manage Groups"
+msgstr "Gruppen bearbeiten"
+
+#: tpl/overview_panel.php:18
+#@ ld_propanel
+msgid "View All"
+msgstr "Alles anzeigen"
+
+#: tpl/overview_panel.php:19
+#@ ld_propanel
+msgid "Most Popular Courses"
+msgstr "Beliebteste Kurse"
+
+#: tpl/overview_panel.php:31
+#@ ld_propanel
+msgid "Course Reports"
+msgstr "Kursberichte"
+
+#: tpl/overview_panel.php:35
+#@ ld_propanel
+msgid "-- Select --"
+msgstr "-- auswählen --"
+
+#: wp_autoupdate_propanel.php:204
+#@ default
+msgid "You do not have sufficient permissions to access this page."
+msgstr ""
+
+#: wp_autoupdate_propanel.php:227
+#@ learndash
+msgid "settings saved."
+msgstr ""
+
+#: wp_autoupdate_propanel.php:250
+#@ learndash
+msgid "Update License"
+msgstr ""
+

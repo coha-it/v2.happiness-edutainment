@@ -1,0 +1,66 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: BuddyPress Notifications Widget\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-08-07 15:16+0530\n"
+"PO-Revision-Date: 2018-01-04 16:37+0100\n"
+"Last-Translator: Brajesh Singh <brajesh@gmail.com>\n"
+"Language-Team: \n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-KeywordsList: __;_e\n"
+"X-Poedit-Basepath: ..\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 2.0.5\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: core/class-bp-notification-widget.php:18
+msgid "(BuddyDev) BuddPress Notifications"
+msgstr ""
+
+#: core/class-bp-notification-widget.php:67
+#, php-format
+msgid "You have %d new notifications"
+msgstr "Du hast %d neue Benachrichtigungen"
+
+#: core/class-bp-notification-widget.php:75
+msgid "clearing..."
+msgstr "Lösche..."
+
+#: core/class-bp-notification-widget.php:76
+msgid "[x] Clear All Notifications"
+msgstr "[x] Lösche alle Benachrichtigungen"
+
+#: core/class-bp-notification-widget.php:113
+msgid "Notifications"
+msgstr "Benachrichtigungen"
+
+#: core/class-bp-notification-widget.php:131
+msgid "Title:"
+msgstr "Titel :"
+
+#: core/class-bp-notification-widget.php:139
+msgid "Show Notification count in title"
+msgstr "Zeige die Anzahl der Benachrichtigungen im Titel"
+
+#: core/class-bp-notification-widget.php:147
+msgid "Show Notification count text"
+msgstr "Zeige die Anzahl der Meldungen im Text"
+
+#: core/class-bp-notification-widget.php:154
+msgid "Show the list of Notifications"
+msgstr "Zeige die Liste der Benachrichtigungen"
+
+#: core/class-bp-notification-widget.php:161
+msgid "Show widget even when there are no notifications?"
+msgstr "Zeige das Widget auch wenn keine Benachrichtigungen vorhanden sind?"
+
+#: core/class-bp-notification-widget.php:168
+msgid "Show the Clear Notifications button"
+msgstr "Zeige den Button, um Meldungen zu entfernen"
+
+#: core/class-bp-notification-widget.php:209
+msgid "You don't have any new notification."
+msgstr "Du hast keine neuen Benachrichtigungen."

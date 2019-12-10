@@ -1,0 +1,3 @@
+[submodule "wp-content/themes/edu-2019"]
+	path = wp-content/themes/edu-2019
+	url = https://github.com/coha-it/edu-2019.git

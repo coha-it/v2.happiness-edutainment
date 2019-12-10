@@ -1,0 +1,934 @@
+# Copyright (C) 2015 bbP private groups
+# This file is distributed under the same license as the bbP private groups package.
+msgid ""
+msgstr ""
+"Project-Id-Version: bbP private groups 3.0.3\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/bbp-private-"
+"groups\n"
+"POT-Creation-Date: 2015-09-10 17:33:56+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2018-11-04 17:14+0100\n"
+"Language-Team: \n"
+"X-Generator: Poedit 2.2\n"
+"Last-Translator: \n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: de\n"
+
+#: includes/functions.php:248 includes/pg_forum_widgets.php:346
+msgid "No Topics"
+msgstr "Keine Themen"
+
+#: includes/help.php:16
+msgid "Forum Visibility Settings"
+msgstr "Forum Sichtbarkeitseinstellungen"
+
+#: includes/help.php:19
+msgid "You have various display options"
+msgstr "Sie haben verschiedene Anzeigeoptionen"
+
+#: includes/help.php:21
+msgid ""
+"Only logged in users see group forums, and even then only ones that they "
+"have access to."
+msgstr ""
+"Nur angemeldete Benutzer Gruppe Foren zu sehen, und auch dann nur "
+"diejenigen, die sie Zugriff haben."
+
+#: includes/help.php:24
+msgid ""
+"DESCRIPTION: the default view.  Allows unlimited groups with unique "
+"combination of access to forums, but they only see those they have access to."
+msgstr ""
+"Beschreibung: die Standardansicht.  Erlaubt unbegrenzte Gruppen mit einer "
+"einzigartigen Kombination von Zugang zu Foren, aber Sie sehen nur "
+"diejenigen, auf die Sie Zugriff haben."
+
+#: includes/help.php:26
+msgid "TO SET : Do not set the visibility."
+msgstr "ZUM setzen: nicht die Sichtbarkeit einstellen."
+
+#: includes/help.php:29
+msgid ""
+"All forum titles (and optionally descriptions) visible to both logged on and "
+"non-logged on users."
+msgstr ""
+"Alle Forums Titel (und optional Beschreibungen) sind sowohl für die "
+"eingeloggten als auch für die nicht angemeldeten Benutzer sichtbar."
+
+#: includes/help.php:33
+msgid ""
+"DESCRIPTION : Users and non-users will be able to see that group forums "
+"exist, but not access topics/replies."
+msgstr ""
+"Beschreibung: Benutzer und nicht-Benutzer werden in der Lage sein, zu sehen, "
+"dass Gruppenforen existieren, aber nicht auf Themen/Antworten zugreifen."
+
+#: includes/help.php:37
+msgid ""
+"POSSIBLE USAGE : show that lots of forums exist, with ability to go to “sign-"
+"up” page."
+msgstr ""
+"MÖGLICHE Verwendung: zeigen Sie, dass es viele Foren gibt, mit der "
+"Fähigkeit, auf \"Sign-up\"-Seite zu gehen."
+
+#: includes/help.php:40
+msgid ""
+"TO SET : Set visibility to public and set forums to public in each forum’s "
+"attributes (dashboard>forums)."
+msgstr ""
+"ZU setzen: die Sichtbarkeit auf die Öffentlichkeit zu setzen und Foren in "
+"den Attributen jedes Forums öffentlich zu setzen (Dashboard > Foren)."
+
+#: includes/help.php:43
+msgid ""
+"Public forums titles (and optionally descriptions) visible to logged on and "
+"non-logged on users. Private forums set visible to logged on users"
+msgstr ""
+"Öffentliche Foren-Titel (und optional Beschreibungen), die für die "
+"eingeloggten und nicht protokollierten Benutzer sichtbar sind. Private "
+"Foren, die sichtbar sind, um Nutzer zu protokollieren"
+
+#: includes/help.php:47
+msgid ""
+"DESCRIPTION : Non-logged in will only see group forums that are public, but "
+"not access topics/replies.  Logged in users will see and access topics/"
+"replies for Private Group forums that are set to public, private forums that "
+"have no groups set will be accessible to all logged in users, but private "
+"group forums that the user does not belong to will be hidden."
+msgstr ""
+"Beschreibung: nicht eingeloggt wird nur Gruppenforen sehen, die öffentlich "
+"sind, aber keine Zugriffs Themen/Antworten.  Eingeloggte Benutzer werden "
+"Themen/Antworten für private Gruppenforen sehen und abrufen, die an die "
+"Öffentlichkeit gesetzt werden, private Foren, die keine Gruppen setzen, "
+"werden für alle angemeldeten Benutzer zugänglich sein, aber private "
+"Gruppenforen, zu denen der Benutzer nicht gehört, werden ausgeblendet."
+
+#: includes/help.php:50
+msgid ""
+"POSSIBLE USAGE : Show some group forums exists, whilst keeping others "
+"visible only for private groups.  Allows rich display options for each "
+"group, and user."
+msgstr ""
+"MÖGLICHE Nutzung: zeigen Sie, dass einige Gruppenforen existieren, während "
+"andere nur für private Gruppen sichtbar bleiben.  Ermöglicht reichhaltige "
+"Anzeigemöglichkeiten für jede Gruppe und jeden Benutzer."
+
+#: includes/help.php:53
+msgid ""
+"TO SET : Set visibility to public and set any private forums to private in "
+"that forum’s attributes (dashboard>forums)."
+msgstr ""
+"ZU setzen: die Sichtbarkeit auf die Öffentlichkeit zu setzen und alle "
+"privaten Foren in den Attributen des Forums (Dashboard > Foren) auf privates "
+"zu setzen."
+
+#: includes/help.php:62 includes/role-new.php:82
+msgid "Role Capabilities"
+msgstr "Berechtigungen"
+
+#: includes/help.php:75
+msgid "Group Allocation"
+msgstr "GruppenZuweisung"
+
+#: includes/help.php:79
+msgid "You can allocate users to groups in two places"
+msgstr "Sie können Nutzer an zwei Stellen an Gruppen verteilen"
+
+#: includes/help.php:81
+msgid ""
+"1. Within this settings area, you can use \"user management\" To set single "
+"groups, you can use either \"bulk actions\" or edit each user (you will see "
+"an edit when you hover over the user). "
+msgstr ""
+"1. in diesem Einstellungsbereich können Sie \"User Management\" verwenden, "
+"um einzelne Gruppen zu setzen, Sie können entweder \"Bulk-Aktionen\" "
+"verwenden oder jeden Benutzer bearbeiten (Sie werden eine Bearbeitung sehen, "
+"wenn Sie über dem Benutzer schweben)."
+
+#: includes/help.php:82
+msgid ""
+"The \"bulk actions\" CANNOT be used to set a multiple groups group against a "
+"user or users.  To set multiple groups, edit each user."
+msgstr ""
+"Die \"Bulk-Aktionen\" können nicht dazu verwendet werden, eine Gruppe von "
+"mehreren Gruppen gegen einen Benutzer oder Benutzer zu setzen.  Um mehrere "
+"Gruppen zu setzen, bearbeiten Sie jeden Benutzer."
+
+#: includes/help.php:84
+msgid ""
+" 2. Within Dashboard>users and edit user you can set one or more groups "
+"against the user."
+msgstr ""
+"2. im Dashboard > Benutzer und Edit User können Sie eine oder mehrere "
+"Gruppen gegen den Benutzer einstellen."
+
+#: includes/help.php:94
+msgid ""
+"EXAMPLE 1 : A simple relationship where a forum belongs to a group, and "
+"users are allocated to that group."
+msgstr ""
+"Beispiel 1: eine einfache Beziehung, in der ein Forum zu einer Gruppe "
+"gehört, und Benutzer werden dieser Gruppe zugeordnet."
+
+#: includes/help.php:96
+msgid ""
+"EXAMPLE 2 : Group 1 users can only see forum A, but group 2 users can see "
+"both forum A and B."
+msgstr ""
+"Beispiel 2: die Benutzer der Gruppe 1 können nur das Forum A sehen, aber die "
+"Benutzer der Gruppe 2 können sowohl das Forum A als auch B sehen."
+
+#: includes/help.php:98
+msgid ""
+"EXAMPLE 3 : A complex arrangement.  User M can only see forum A, User N can "
+"see forum A and C, and users P and Q can see both Forum A and B."
+msgstr ""
+"Beispiel 3: eine komplexe Anordnung.  User M kann nur das Forum A sehen, der "
+"Benutzer N kann das Forum A und C sehen, und die Benutzer P und Q können "
+"sowohl das Forum A als auch B sehen."
+
+#: includes/meta-box.php:17
+#, fuzzy
+msgid "Forum Groups"
+msgstr "Forums Gruppen"
+
+#: includes/meta-box.php:33
+msgid ""
+"<strong>Groups:</strong> Restrict the content to these groups on the front "
+"end of the site.  If all boxes are left unchecked, everyone can view the "
+"content."
+msgstr ""
+"<strong> Gruppen: </strong> Beschränken Sie den Inhalt auf diese Gruppen am "
+"vorderen Ende der Website.  Wenn alle Boxen unkontrolliert bleiben, kann "
+"jeder den Inhalt einsehen."
+
+#: includes/meta-box.php:47
+msgid ""
+"<b>No groups have yet been set up - go to Dashboard>Settings>bbp Private "
+"Groups to set</b>"
+msgstr ""
+"<b> es wurden noch keine Gruppen eingerichtet-gehen Sie zum Dashboard > "
+"Einstellungen > BBP private Gruppen zu setzen </b>"
+
+#: includes/meta-box.php:59 includes/role_assignment.php:72
+#: includes/settings.php:248 includes/settings.php:302
+#: includes/user-profile.php:34 includes/user_management.php:63
+#: includes/user_management.php:84 includes/user_management.php:145
+#: includes/user_management.php:153
+msgid "Group"
+msgstr "Gruppe"
+
+#: includes/pg_forum_widgets.php:37
+msgid "A list of forums with an option to set the parent."
+msgstr "Eine Liste von Foren mit einer Option ein Elternforum zu bestimmen."
+
+#: includes/pg_forum_widgets.php:40 includes/widget_warning.php:28
+msgid "(PG) Forums List"
+msgstr "(PG) Foren Liste"
+
+#: includes/pg_forum_widgets.php:114
+msgid "No Forums"
+msgstr "Keine Foren."
+
+#: includes/pg_forum_widgets.php:174 includes/pg_forum_widgets.php:435
+#: includes/pg_forum_widgets.php:679 includes/pg_forum_widgets.php:971
+msgid "Title:"
+msgstr "Titel :"
+
+#: includes/pg_forum_widgets.php:180 includes/pg_forum_widgets.php:439
+#: includes/pg_forum_widgets.php:975
+msgid "Parent Forum ID:"
+msgstr "ID des übergeordneten Forums"
+
+#: includes/pg_forum_widgets.php:186 includes/pg_forum_widgets.php:445
+#: includes/pg_forum_widgets.php:981
+msgid "\"0\" to show only root - \"any\" to show all"
+msgstr "\"0\" um nur die Startseite anzuzeigen - \"any\" um alle anzuzeigen"
+
+#: includes/pg_forum_widgets.php:202
+msgid "Forums"
+msgstr "Foren"
+
+#: includes/pg_forum_widgets.php:233
+msgid "A list of recent topics, sorted by popularity or freshness."
+msgstr ""
+"Eine Liste der neuesten Themen, sortiert nach Beliebtheit oder Aktualität."
+
+#: includes/pg_forum_widgets.php:236 includes/widget_warning.php:29
+msgid "(PG) Recent Topics"
+msgstr "(PG) Neueste Antworten"
+
+#: includes/pg_forum_widgets.php:372
+msgctxt "widgets"
+msgid "by %1$s"
+msgstr "von %1$s"
+
+#: includes/pg_forum_widgets.php:436 includes/pg_forum_widgets.php:972
+msgid "Maximum topics to show:"
+msgstr "Maximal angezeigte Themen:"
+
+#: includes/pg_forum_widgets.php:448 includes/pg_forum_widgets.php:681
+msgid "Show post date:"
+msgstr "Zeige Beitragsdatum:"
+
+#: includes/pg_forum_widgets.php:449 includes/pg_forum_widgets.php:986
+msgid "Show topic author:"
+msgstr "Autor anzeigen:"
+
+#: includes/pg_forum_widgets.php:451 includes/pg_forum_widgets.php:991
+msgid "Order By:"
+msgstr "Anordnen nach:"
+
+#: includes/pg_forum_widgets.php:453 includes/pg_forum_widgets.php:994
+msgid "Newest Topics"
+msgstr "Aktuellste Themen"
+
+#: includes/pg_forum_widgets.php:454 includes/pg_forum_widgets.php:995
+msgid "Popular Topics"
+msgstr "Beliebteste Themen"
+
+#: includes/pg_forum_widgets.php:455 includes/pg_forum_widgets.php:993
+msgid "Topics With Recent Replies"
+msgstr "Themen mit neuesten Antworten"
+
+#: includes/pg_forum_widgets.php:472
+msgid "Recent Topics"
+msgstr "Aktuelle Themen"
+
+#: includes/pg_forum_widgets.php:505
+msgid "A list of the most recent replies."
+msgstr "Eine Liste der letzten Antworten"
+
+#: includes/pg_forum_widgets.php:508 includes/widget_warning.php:30
+msgid "(PG) Recent Replies"
+msgstr "(PG) Neueste Antworten"
+
+#: includes/pg_forum_widgets.php:583
+msgid "No Replies"
+msgstr "Keine Antworten"
+
+#. translators: 1: reply author, 2: reply link, 3: reply timestamp
+#: includes/pg_forum_widgets.php:611
+msgctxt "widgets"
+msgid "%1$s on %2$s %3$s"
+msgstr "%1$s zu %2$s %3$s"
+
+#. translators: 1: reply link, 2: reply timestamp
+#: includes/pg_forum_widgets.php:617
+msgctxt "widgets"
+msgid "%1$s %2$s"
+msgstr "%1$s %2$s"
+
+#. translators: 1: reply author, 2: reply link
+#: includes/pg_forum_widgets.php:623
+msgctxt "widgets"
+msgid "%1$s on %2$s"
+msgstr "%1$s zu %2$s"
+
+#. translators: 1: reply link
+#: includes/pg_forum_widgets.php:629
+msgctxt "widgets"
+msgid "%1$s"
+msgstr "%1$s"
+
+#: includes/pg_forum_widgets.php:680
+msgid "Maximum replies to show:"
+msgstr "Maximal angezeigte Antworten:"
+
+#: includes/pg_forum_widgets.php:682
+msgid "Show reply author:"
+msgstr "Autor der Antwort anzeigen"
+
+#: includes/pg_forum_widgets.php:697
+msgid "Recent Replies"
+msgstr "Aktuelle Antworten"
+
+#: includes/pg_forum_widgets.php:724
+msgid ""
+"A list of latest activity, sorted by popularity or freshness with latest "
+"author."
+msgstr ""
+"Eine Liste der aktuellen Aktivität, sortiert nach Beliebtheit oder Frische "
+"mit den neuesten Autor."
+
+#: includes/pg_forum_widgets.php:727
+msgid "(PG) Latest Activity"
+msgstr "(PG) Letzte Aktivität"
+
+#: includes/pg_forum_widgets.php:842
+msgid "No activity"
+msgstr "Keine Aktivitäten"
+
+#: includes/pg_forum_widgets.php:886
+msgctxt "widgets"
+msgid "topic by %1$s"
+msgstr "Thema von %1$s"
+
+#: includes/pg_forum_widgets.php:887
+msgctxt "widgets"
+msgid "reply by %1$s"
+msgstr "Antwort von %1$s"
+
+#: includes/pg_forum_widgets.php:984
+msgid "Show Freshness:"
+msgstr "Aktualität:"
+
+#: includes/pg_forum_widgets.php:985
+msgid "Shorten freshness:"
+msgstr "Letzte Aktualisierung:"
+
+#: includes/pg_forum_widgets.php:987
+msgid "Hide Avatar"
+msgstr "Avatar verstecken"
+
+#: includes/pg_forum_widgets.php:988
+msgid "Show Forum:"
+msgstr "Show Forum:"
+
+#: includes/pg_forum_widgets.php:1013
+msgid "Latest Activity"
+msgstr "Neueste Aktivität"
+
+#: includes/role-new.php:44
+msgid "Add New Role"
+msgstr "Neue Rolle hinzuf&uuml;gen"
+
+#: includes/role-new.php:46
+msgid "The %s role has been created."
+msgstr "Die Rolle %s wurde erstellt."
+
+#: includes/role-new.php:60
+msgid "Role Name"
+msgstr "Rollenname"
+
+#: includes/role-new.php:65
+msgid ""
+"<strong>Required:</strong> The role name should be unique and contain only "
+"alphanumeric characters and underscores."
+msgstr ""
+"<strong> erforderlich: </strong> Der Rollenname sollte einzigartig sein und "
+"nur alphanumerische Zeichen und Unterstriche enthalten."
+
+#: includes/role-new.php:71
+msgid "Role Label"
+msgstr "Role Label"
+
+#: includes/role-new.php:76
+msgid ""
+"<strong>Required:</strong> The role label is used to represent your role in "
+"the WordPress admin."
+msgstr ""
+"<strong> erforderlich: </strong> Das Rollen Etikett wird verwendet, um ihre "
+"Rolle im WordPress-admin darzustellen."
+
+#: includes/role-new.php:86
+msgid ""
+"<strong>Optional:</strong> Select the capabilities this role should have. "
+"These may be updated later."
+msgstr ""
+"<strong>Optional:</strong> Wählen Sie die Berechtigungen, die diese "
+"Benutzerrolle haben soll. Diese können auch später bearbeitet/aktualisiert "
+"werden."
+
+#: includes/role-new.php:102
+msgid "Add Role"
+msgstr "Rolle hinzufügen"
+
+#: includes/role_assignment.php:17
+msgid ""
+"This section is optional and designed to allow those of you who use "
+"membership plugins etc. to assign a group against a wordpress or custom role."
+msgstr ""
+"Dieser Abschnitt ist optional und so konzipiert, dass diejenigen von Ihnen, "
+"die Mitglieds-Plugins etc. verwenden, eine Gruppe gegen eine WordPress oder "
+"Custom-Rolle zuweisen können."
+
+#: includes/role_assignment.php:20
+msgid ""
+"By entering a group against a role, new users with that role will be "
+"allocated the group automatically as part of the registration process.  You "
+"can subsequently change individual users, and changing elements in this tab "
+"will only affect new registrations, not change anyone who has already "
+"registered."
+msgstr ""
+"Durch die Eingabe einer Gruppe gegen eine Rolle werden neue Benutzer mit "
+"dieser Rolle die Gruppe automatisch im Rahmen des Registrierungsprozesses "
+"zugewiesen.  Sie können nachträglich einzelne Benutzer ändern, und das "
+"Ändern von Elementen in diesem Tab wird sich nur auf neue Registrierungen "
+"auswirken, nicht auf jemanden, der sich bereits registriert hat."
+
+#: includes/role_assignment.php:23
+msgid ""
+"For instance you may want all wordpress authors to automatically belong to a "
+"particular group, or you may have created a role called \"member\" in your "
+"membership plugin, and want to automatically give these access to a private "
+"group called say membership."
+msgstr ""
+"Zum Beispiel möchten Sie, dass alle WordPress-Autoren automatisch zu einer "
+"bestimmten Gruppe gehören, oder Sie haben eine Rolle namens \"Mitglied\" in "
+"Ihrem Mitglieds-Plugin erstellt, und möchten diesen Zugang automatisch zu "
+"einer privaten Gruppe namens Say-Mitgliedschaft geben."
+
+#: includes/role_assignment.php:26
+msgid ""
+"This section only applies to wordpress or custom or membership roles, NOT "
+"bbpress roles !"
+msgstr ""
+"Dieser Abschnitt gilt nur für WordPress oder Custom oder Mitgliedschafts "
+"Rollen, nicht für bbPress-Rollen!"
+
+#: includes/role_assignment.php:35
+msgid ""
+"Additionally you can optionally select to assign roles on login for users "
+"who do not have a role assigned. This is useful where your membership plugin "
+"does not use Wordpress registration, so the above does not work!. You can "
+"assign a <i> different </i> role to individual users manually, but if you "
+"change an individual user to have no groups, then the group for that role "
+"will be assigned on next login as the plugin sees this as blank!"
+msgstr ""
+"Zusätzlich können Sie optional wählen, um Funktionen beim Login für "
+"Benutzer, die keine Rolle zugewiesen haben, zuzuweisen. Dies ist nützlich, "
+"wenn Ihr Mitgliedschafts-Plugin nicht verwendet WordPress-Registrierung, so "
+"dass die oben nicht funktioniert!. Sie können einzelnen Benutzern manuell "
+"eine <i> andere </i> Rolle zuweisen, aber wenn Sie einen einzelnen Benutzer "
+"wechseln, um keine Gruppen zu haben, dann wird die Gruppe für diese Rolle "
+"beim nächsten Login zugewiesen, da das Plugin dies als leer ansieht!"
+
+#: includes/role_assignment.php:38
+msgid "Add group on login"
+msgstr "Gruppe auf Login HinzuFügen"
+
+#: includes/role_assignment.php:65
+msgid "no-Group"
+msgstr "No-Group"
+
+#: includes/role_assignment.php:88
+msgid "Save Changes"
+msgstr "Änderungen übernehmen"
+
+#: includes/settings.php:17
+msgid "Private Group Settings"
+msgstr "Private GruppenEinstellungen"
+
+#: includes/settings.php:23
+msgid "Group saved"
+msgstr "Gruppe gespeichert"
+
+#: includes/settings.php:38
+msgid "Forum Visibility settings"
+msgstr "Forum Sichtbarkeitseinstellungen"
+
+#: includes/settings.php:39
+msgid "General Settings"
+msgstr "Allgemeine Einstellungen"
+
+#: includes/settings.php:40
+msgid "Group Name Settings"
+msgstr "GruppenNamen Einstellungen"
+
+#: includes/settings.php:41
+msgid "Help"
+msgstr "Hilfe"
+
+#: includes/settings.php:42
+msgid "Management Information"
+msgstr "Management Informationen"
+
+#: includes/settings.php:43
+msgid "User Management"
+msgstr "Nutzerverwaltung"
+
+#: includes/settings.php:44
+msgid "Assign groups to roles"
+msgstr "Gruppen in Rollen zuweisen"
+
+#: includes/settings.php:45
+msgid "Widget Warning !"
+msgstr "Widget Warning!"
+
+#: includes/settings.php:58
+msgid ""
+"If you find this plugin useful, please consider donating just a couple of "
+"dollars to help me develop and maintain it. You support will be appreciated"
+msgstr ""
+"Wenn Sie dieses Plugin nützlich finden, erwägen Sie bitte, nur ein paar "
+"Dollar zu spenden, um mir zu helfen, es zu entwickeln und zu pflegen. Ihre "
+"Unterstützung wird geschätzt"
+
+#: includes/settings.php:77
+msgid "Forum Visibility"
+msgstr "Forum Visibility"
+
+#: includes/settings.php:78
+msgid ""
+"By default only users with access to a forum will see the forum titles in "
+"the indexes.  However you may want everyone to see that a forum exists (ie "
+"see the title) but not be able to access topics and replies within this.  In "
+"this case, set the forum visibility below.  If you want only logged in users "
+"to see these forums exist, then also set the forum to private within the "
+"dashboard>forums settings"
+msgstr ""
+"Standardmäßig werden nur Benutzer, die Zugang zu einem Forum haben, die "
+"Forentitel in den Indizes sehen.  AllerDings möchten Sie vielleicht, dass "
+"jeder sieht, dass es ein Forum gibt (dh siehe den Titel), aber nicht in der "
+"Lage sein, auf Themen und Antworten in diesem zu zugreifen.  In diesem Fall "
+"stellen Sie das Forum Sichtbarkeit unten.  Wenn Sie nur eingeloggte Benutzer "
+"haben wollen, um diese Foren zu sehen, dann setzen Sie das Forum auch auf "
+"private in den Dashboard > Forums Einstellungen"
+
+#: includes/settings.php:78
+msgid "See help tab for more information"
+msgstr "Weitere Informationen finden Sie unter Hilfe-Tab"
+
+#: includes/settings.php:83 includes/settings.php:121 includes/settings.php:166
+#: includes/settings.php:178 includes/settings.php:191
+#: includes/settings.php:204
+msgid "Activate"
+msgstr "Aktivieren"
+
+#: includes/settings.php:92
+msgid "Redirect Pages"
+msgstr "Seiten umleiten"
+
+#: includes/settings.php:93
+msgid ""
+"<b>If you have activated forum visibility above</b>, then users without "
+"access will see forums headings and descriptions.  When they click these  "
+"forum titles, they need to be sent somewhere, if only to say that they do "
+"not have access.  However this is an excellent opportunity to \"sign them up"
+"\" so you can send them to say a register or buy access page. "
+msgstr ""
+"<b> Wenn Sie Forum-Sichtbarkeit über </b> aktiviert haben, dann werden "
+"Benutzer ohne Zugriff Foren-Überschriften und-Beschreibungen sehen.  Wenn "
+"Sie auf diese Forums Titel klicken, müssen Sie irgendwo verschickt werden, "
+"und sei es nur, um zu sagen, dass Sie keinen Zugriff haben.  Dies ist jedoch "
+"eine ausgezeichnete Gelegenheit, \"Sie anzumelden\", so dass Sie Sie "
+"schicken können, um ein Register zu sagen oder eine Zugriffs Seite zu kaufen."
+
+#: includes/settings.php:97
+msgid "URL of redirect page for LOGGED-IN user"
+msgstr "URL der Redirect-Seite für EINGELOGGTE Benutzer"
+
+#: includes/settings.php:100
+msgid ""
+"Enter the full url (permalink) of the page to redirect users without access "
+"to eg http://www.mysite.com/sign-up.  If you leave this blank, users will "
+"see your sites \"404 not-found\" page"
+msgstr ""
+"Geben Sie die vollständige URL (permalink) der Seite ein, um Benutzer ohne "
+"Zugriff auf EG http://www.mysite.com/Sign-up umzuleiten.  Wenn Sie diese "
+"leer lassen, werden die Benutzer Ihre Seiten \"404 nicht gefunden\" Seite "
+"sehen"
+
+#: includes/settings.php:105
+msgid "URL of redirect page for NON-LOGGED-IN"
+msgstr "URL der Redirect-Seite für nicht angemeldete"
+
+#: includes/settings.php:108
+msgid ""
+"Enter the full url (permalink) of the page to redirect users without access "
+"to eg http://www.mysite.com/sign-up.  This can be the same as the LOGGED-IN "
+"page, just giving the opportunity to have different pages if you want "
+"them !  If you leave this blank, users will be sent to the Wordpress login "
+"page"
+msgstr ""
+"Geben Sie die vollständige URL (permalink) der Seite ein, um Benutzer ohne "
+"Zugriff auf EG http://www.mysite.com/Sign-up umzuleiten.  Dies kann das "
+"gleiche sein wie die EINGELOGGTE Seite, nur die Möglichkeit zu geben, "
+"verschiedene Seiten zu haben, wenn Sie Sie wollen!  Wenn Sie diese leer "
+"lassen, werden die Benutzer auf die WordPress-Login-Seite gesendet"
+
+#: includes/settings.php:115
+msgid "Freshness Settings"
+msgstr "Frische Einstellungen"
+
+#: includes/settings.php:116
+msgid ""
+"<b>If you have activated forum visibility above</b>, for private group "
+"forums, when user does not have access, you can either show a message in "
+"freshness column, or leave it as the default time since last post.  In both "
+"cases for users without access they will be taken to the redirect page "
+"above. "
+msgstr ""
+"<b> Wenn Sie die Sicht des Forums über </b> aktiviert haben, können Sie für "
+"private Gruppenforen, wenn der Benutzer keinen Zugriff hat, entweder eine "
+"Nachricht in der frische-Spalte anzeigen oder Sie als Standardzeit seit dem "
+"letzten Beitrag belassen.  In beiden Fällen werden Sie für Benutzer ohne "
+"Zugriff auf die Umleitung-Seite oben gebracht."
+
+#: includes/settings.php:128
+msgid "Freshness Message"
+msgstr "Letzte Aktualisierung"
+
+#: includes/settings.php:131
+msgid "Enter the message to be shown e.g. Click here to sign up"
+msgstr ""
+"Geben Sie die zu gezeigte Nachricht ein, z.b. Klicken Sie hier, um sich "
+"anzumelden"
+
+#: includes/settings.php:139 includes/settings.php:217
+msgid "Save Options"
+msgstr "Optionen speichern"
+
+#: includes/settings.php:162 includes/settings.php:442
+msgid "Hide topic and reply counts"
+msgstr "Thema und Antwort Punkte verbergen"
+
+#: includes/settings.php:173
+msgid "List Sub-forums in Columns"
+msgstr "Liste Unterforen in Spalten"
+
+#: includes/settings.php:186
+msgid "Show Descriptions"
+msgstr "Zeige Beschreibungen"
+
+#: includes/settings.php:199
+msgid "Remove 'Private' prefix"
+msgstr "\"Privates\" Präfix entfernen"
+
+#: includes/settings.php:210
+msgid ""
+"By default bbPress shows the prefix \"Private\" before each private forum. "
+"Activate this checkbox to remove this prefix."
+msgstr ""
+"Standardmäßig zeigt bbPress vor jedem privaten Forum das Präfix \"Privat\" "
+"an. Aktivieren Sie dieses Kästchen, um dieses Präfix zu entfernen."
+
+#: includes/settings.php:241
+msgid ""
+"This section allows you to set up groups.  Enter a Description for each "
+"group eg gamers, teachers, group1 etc."
+msgstr ""
+"In diesem Abschnitt können Sie Gruppen einrichten.  Geben Sie eine "
+"Beschreibung für jede Gruppe, z.b. Gamer, Lehrer, group1 etc."
+
+#: includes/settings.php:265
+msgid "Add new group"
+msgstr "Gruppe hinzufügen"
+
+#: includes/settings.php:276
+msgid "Save Groups"
+msgstr "Gruppen speichern"
+
+#: includes/settings.php:310
+msgid "Group name :"
+msgstr "Gruppenname:"
+
+#: includes/settings.php:312
+msgid "No. users in this group : "
+msgstr "Nein. Nutzer in dieser Gruppe:"
+
+#: includes/settings.php:329
+msgid "Forums in this group :"
+msgstr "Foren in dieser Gruppe:"
+
+#: includes/settings.php:348
+msgid "No. forums that have this group set : "
+msgstr "Nein. Foren, die diese Gruppe gesetzt haben:"
+
+#: includes/settings.php:414
+msgid "bbp Private Groups"
+msgstr "BBP private Groups"
+
+#: includes/settings.php:423
+msgid "Click to activate forum visibility"
+msgstr "Klicken Sie auf Forum-Sichtbarkeit aktivieren"
+
+#: includes/settings.php:429
+msgid "Click to activate a freshness message"
+msgstr "Klicken Sie, um eine frische-Nachricht zu aktivieren"
+
+#: includes/settings.php:436
+msgid "List Sub-forums in column"
+msgstr "Liste Unterforen in Spalte"
+
+#: includes/settings.php:448
+msgid ""
+"Show sub-forum content (Descriptions) on main index - sub-forums will "
+"display in columns"
+msgstr ""
+"Zeigen Sie Sub-Forum-Inhalte (Beschreibungen) im Hauptindex-Sub-Foren werden "
+"in Spalten angezeigt"
+
+#: includes/settings.php:454
+msgid "Remove Private prefix"
+msgstr "Private Vorwahl entfernen"
+
+#: includes/settings.php:460
+msgid "Click and then press \"save groups\" to add a new group"
+msgstr ""
+"Klicken Sie und drücken Sie dann auf \"Gruppen speichern\", um eine neue "
+"Gruppe hinzuzufügen"
+
+#: includes/user-profile.php:17
+msgid "Private Groups"
+msgstr "Privaten Gruppen"
+
+#: includes/user-profile.php:23
+msgid "&mdash; No groups yet set up &mdash;"
+msgstr "&mdash; Noch keine Gruppen eingerichtet &mdash;"
+
+#: includes/user-profile.php:45
+msgid "Click to add this group"
+msgstr "Klicken Sie auf diese Gruppe hinzufügen"
+
+#: includes/user_management.php:42
+msgid ""
+"Warning : The \"bulk actions\" CANNOT be used to set a multiple groups group "
+"against a user or users"
+msgstr ""
+"Warnung: die \"Bulk-Aktionen\" können nicht verwendet werden, um eine Gruppe "
+"von mehreren Gruppen gegen einen Benutzer oder Benutzer zu setzen"
+
+#: includes/user_management.php:44
+msgid "Edit users at individual level if allocating multiple groups to users."
+msgstr ""
+"Bearbeiten Sie Benutzer auf individueller Ebene, wenn Sie mehrere Gruppen "
+"den Benutzern zuweisen."
+
+#: includes/user_management.php:54
+msgid "Bulk Actions"
+msgstr "Massenaktionen"
+
+#: includes/user_management.php:55
+msgid "No-Group"
+msgstr "No-Group"
+
+#: includes/user_management.php:70
+msgid "Apply"
+msgstr "Anwenden"
+
+#: includes/user_management.php:74
+msgid "Filter user list"
+msgstr "Filter Benutzerliste"
+
+#: includes/user_management.php:75
+msgid "All Groups"
+msgstr "Alle Gruppen"
+
+#: includes/user_management.php:76
+msgid "No-Group-set"
+msgstr "No-Gruppe-Set"
+
+#: includes/user_management.php:91
+msgid "Filter"
+msgstr "Auswahl einschränken"
+
+#: includes/user_management.php:98
+msgid "Gravatar"
+msgstr "Gravatar"
+
+#: includes/user_management.php:99
+msgid "Name"
+msgstr "Name"
+
+#: includes/user_management.php:100
+msgid "Private Group(s)"
+msgstr "Private Group (s)"
+
+#: includes/user_management.php:101
+msgid "Wordpress & bbPress Roles"
+msgstr "WordPress & bbPress Rollen"
+
+#: includes/user_management.php:127
+msgid "Edit"
+msgstr "Bearbeiten"
+
+#: includes/user_management.php:133
+msgid "Delete"
+msgstr "Löschen"
+
+#: includes/user_management.php:140
+msgid "no group set"
+msgstr "keine Gruppe gesetzt"
+
+#: includes/user_management.php:183
+msgid "No Users found"
+msgstr "Keine Nutzer gefunden"
+
+#: includes/user_management.php:217 includes/user_management.php:247
+#, fuzzy
+msgid "1 user amended"
+msgstr "1 Benutzer geändert"
+
+#: includes/user_management.php:219 includes/user_management.php:249
+#, fuzzy
+msgid "users amended"
+msgstr "Nutzer geänderten"
+
+#: includes/widget_warning.php:16
+#, fuzzy
+msgid "Widget Warning"
+msgstr "Widget Warning"
+
+#: includes/widget_warning.php:19
+#, fuzzy
+msgid ""
+"The <i>(bbpress) recent topics</i> and <i>(bbpress) recent replies</i> "
+"widgets will still show all topic and reply titles etc."
+msgstr ""
+"Die <i> (bbPress) aktuelle Themen </i> und <i> (bbPress) aktuelle Antworten "
+"</i> Widgets werden immer noch alle Themen-und Antwort Titel etc. zeigen."
+
+#: includes/widget_warning.php:20
+#, fuzzy
+msgid "The <i>(bbpress) Forums List</i> will still show all the forums."
+msgstr "Die <i> (bbPress) Forums Liste </i> wird noch alle Foren zeigen."
+
+#: includes/widget_warning.php:23
+#, fuzzy
+msgid ""
+"If a forum/topic/reply is selected this will give an error message, but "
+"titles and authors will be visible, which might be embarrassing !"
+msgstr ""
+"Wenn ein Forum/Thema/Antwort ausgewählt wird, wird dies eine Fehlermeldung "
+"geben, aber Titel und Autoren werden sichtbar sein, was peinlich sein könnte!"
+
+#: includes/widget_warning.php:25
+#, fuzzy
+msgid ""
+"Use the new widget versions which you will see in the "
+"Dashboard>appearance>widgets"
+msgstr ""
+"Verwenden Sie die neuen Widget-Versionen, die Sie im Dashboard > Appearance "
+"> Widgets sehen werden"
+
+#: includes/widget_warning.php:32
+#, fuzzy
+msgid ""
+"Or use the <i>(PG) Latest Activity </i> widget - combines the best of recent "
+"topics and replies, and customisable to show just what you want!"
+msgstr ""
+"Oder verwenden Sie die <i> (PG) neueste Aktivität </i> Widget-kombiniert das "
+"Beste aus aktuellen Themen und Antworten, und anpassbar, um zu zeigen, was "
+"Sie wollen!"
+
+#. Plugin Name of the plugin/theme
+#, fuzzy
+msgid "bbP private groups"
+msgstr "bbP private Groups"
+
+#. Plugin URI of the plugin/theme
+#, fuzzy
+msgid "http://www.rewweb.co.uk/bbp-private-groups/"
+msgstr "http://www.rewweb.co.uk/BBP-private-Groups/"
+
+#. Description of the plugin/theme
+#, fuzzy
+msgid ""
+"This plugin adds private groups to the forums, allocating users to groups, "
+"and combinations of forums to those groups, creating multiple closed forums."
+msgstr ""
+"Dieses Plugin fügt private Gruppen in die Foren ein, verteilt die Benutzer "
+"an Gruppen und Kombinationen von Foren zu diesen Gruppen, wodurch mehrere "
+"geschlossene Foren erstellt werden."
+
+#. Author of the plugin/theme
+msgid "Robin Wilson"
+msgstr "Robin Wilson"
+
+#. Author URI of the plugin/theme
+msgid "http://www.rewweb.co.uk"
+msgstr "http://www.rewweb.co.uk"

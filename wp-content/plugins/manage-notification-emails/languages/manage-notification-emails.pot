@@ -1,0 +1,112 @@
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Famne\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2018-10-19 21:04:29+0000\n"
+"Last-Translator: none\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_n:1,2;__ngettext_noop:1,2;_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2\n"
+"X-Poedit-Basepath: ..\n"
+"X-Textdomain-Support: yes\n"
+"Language: en_US\n"
+"X-Generator: Poedit 2.2\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: includes/class.FAMNESettingsPage.php:62
+msgid "Manage the notification e-mails"
+msgstr ""
+
+#: includes/class.FAMNESettingsPage.php:73
+msgid "If you find this plugin useful, you can show your appreciation here :-)"
+msgstr ""
+
+#: includes/class.FAMNESettingsPage.php:106
+msgid "New user notification to admin"
+msgstr ""
+
+#: includes/class.FAMNESettingsPage.php:114
+msgid "New user notification to user"
+msgstr ""
+
+#: includes/class.FAMNESettingsPage.php:122
+msgid "Notify post author"
+msgstr ""
+
+#: includes/class.FAMNESettingsPage.php:130
+msgid "Notify moderator"
+msgstr ""
+
+#: includes/class.FAMNESettingsPage.php:138
+msgid "Password change notification to admin"
+msgstr ""
+
+#: includes/class.FAMNESettingsPage.php:146
+msgid "Password change notification to user"
+msgstr ""
+
+#: includes/class.FAMNESettingsPage.php:154
+msgid "E-mail address change notification to user"
+msgstr ""
+
+#: includes/class.FAMNESettingsPage.php:162
+msgid "Password forgotten e-mail to user"
+msgstr ""
+
+#: includes/class.FAMNESettingsPage.php:170
+msgid "Password forgotten e-mail to administrator"
+msgstr ""
+
+#: includes/class.FAMNESettingsPage.php:199
+msgid "Manage your notification e-mail preferences below."
+msgstr ""
+
+#: includes/class.FAMNESettingsPage.php:201
+msgid "By unchecking the checkbox you prevent sending the specific e-mails."
+msgstr ""
+
+#: includes/class.FAMNESettingsPage.php:213
+msgid "Enable sending e-mail"
+msgstr ""
+
+#: includes/class.FAMNESettingsPage.php:220
+msgid "Sends an e-mail to the site admin after a new user is registered."
+msgstr ""
+
+#: includes/class.FAMNESettingsPage.php:225
+msgid "Send e-mail with login credentials to a newly-registered user."
+msgstr ""
+
+#: includes/class.FAMNESettingsPage.php:230
+msgid "Send e-mail to an author (and/or others) of a comment/trackback/pingback on a post."
+msgstr ""
+
+#: includes/class.FAMNESettingsPage.php:235
+msgid "Send e-mail to the moderator of the blog about a new comment that is awaiting approval."
+msgstr ""
+
+#: includes/class.FAMNESettingsPage.php:240
+msgid "Send e-mail to the blog admin of a user changing his or her password."
+msgstr ""
+
+#: includes/class.FAMNESettingsPage.php:245
+msgid "Send e-mail to registered user about changing his or her password. Be careful with this option, because when unchecked, the forgotten password request e-mails will be blocked too."
+msgstr ""
+
+#: includes/class.FAMNESettingsPage.php:250
+msgid "Send e-mail to registered user about changing his or her E-mail address."
+msgstr ""
+
+#: includes/class.FAMNESettingsPage.php:255
+msgid "Send the forgotten password e-mail to registered user.<br/>(To prevent locking yourself out, sending of the forgotten password e-mail for administrators will still work)"
+msgstr ""
+
+#: includes/class.FAMNESettingsPage.php:259
+msgid "Send the forgotten password e-mail to administrators. Okay, this is a <strong style=\"color:#900\">DANGEROUS OPTION !</strong><br/> So be warned, because unchecking this option prevents sending out the forgotten password e-mail to all administrators. So hold on to your own password and uncheck this one at your own risk ;-)"
+msgstr ""

@@ -1,0 +1,2959 @@
+/*
+Theme Name: Edutainment 2016
+Theme URI: http://underscores.me/
+Author: Sebastian Kursawe
+Author URI: sebi@nameless-crew.de
+Description: Edutainment Wordpress Theme 2016
+Version: 2.0.2
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: edu
+
+This theme, like WordPress, is licensed under the GPL.
+Use it to make something cool, have fun, and share what you've learned with others.
+
+Edutainment 2016 is based on Underscores http://underscores.me/, (C) 2012-2015 Automattic, Inc.
+Underscores is distributed under the terms of the GNU GPL v2 or later.
+
+Normalizing styles have been helped along thanks to the fine work of
+Nicolas Gallagher and Jonathan Neal http://necolas.github.com/normalize.css/
+*/
+
+/*--------------------------------------------------------------
+>>> MAIN STYLES
+----------------------------------------------------------------
+Font-Size:14px
+Font-Color: 
+Font-Color_link: 
+Content-BG-Color:
+BG-Color:
+Button-Color:
+
+*/
+
+/*--------------------------------------------------------------
+Structure
+--------------------------------------------------------------*/
+
+.full {
+
+}
+
+.main-page {
+	max-width:1200px;
+	margin:0 auto;
+}
+
+.inner {
+    padding:0em;
+}
+
+.site-content {
+background:#fff;
+padding:20px;
+border:1px solid #ebe9e1;
+border-top-right-radius:8px;
+padding-top:10px;
+}
+
+#primary {
+float:left;
+width:72%;
+padding-right:40px;
+}
+
+#primary-home {
+float:left;
+width:72%;
+padding-right:40px;
+}
+
+#primary-full {
+float:left;
+width:100%;
+}
+
+#primary-bbpress {
+float:left;
+width:75%;
+padding-right:40px;
+}
+
+#secondary {
+float:left;
+width:28%;
+padding-top:0.8em;
+}
+
+#secondary-home {
+float:right;
+width:28%;
+padding-top:0.8em;
+}
+
+#secondary-bbpress {
+float:left;
+width:25%;
+padding-top:0.8em;
+}
+
+#secondary-full {
+float:left;
+width:100%;
+padding-top:0.8em;
+}
+
+
+
+/*--------------------------------------------------------------
+Reset
+--------------------------------------------------------------*/
+html {
+	font-family: sans-serif;
+	-webkit-text-size-adjust: 100%;
+	-ms-text-size-adjust:     100%;
+}
+
+body {
+	margin: 0;
+}
+
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+main,
+menu,
+nav,
+section,
+summary {
+	display: block;
+}
+
+audio,
+canvas,
+progress,
+video {
+	display: inline-block;
+	vertical-align: baseline;
+}
+
+audio:not([controls]) {
+	display: none;
+	height: 0;
+}
+
+[hidden],
+template {
+	display: none;
+}
+
+a {
+	background-color: transparent;
+}
+
+a:active,
+a:hover {
+	outline: 0;
+}
+
+
+abbr[title] {
+	border-bottom: 1px dotted;
+}
+
+b,
+strong {
+	font-weight: bold;
+}
+
+dfn {
+	font-style: italic;
+}
+
+
+mark {
+	background: #ff0;
+	color: #000;
+}
+
+small {
+	font-size: 80%;
+}
+
+sub,
+sup {
+	font-size: 75%;
+	line-height: 0;
+	position: relative;
+	vertical-align: baseline;
+}
+
+sup {
+	top: -0.5em;
+}
+
+sub {
+	bottom: -0.25em;
+}
+
+img {
+	border: 0;
+}
+
+svg:not(:root) {
+	overflow: hidden;
+}
+
+figure {
+	margin: 0;
+}
+
+hr {
+	box-sizing: content-box;
+	height: 0;
+}
+
+pre {
+	overflow: auto;
+}
+
+code,
+kbd,
+pre,
+samp {
+	font-family: monospace, monospace;
+	font-size: 1em;
+}
+
+button,
+input,
+optgroup,
+select,
+textarea {
+	color: inherit;
+	font: inherit;
+	margin: 0;
+}
+
+button {
+	overflow: visible;
+}
+
+button,
+select {
+	text-transform: none;
+}
+
+button,
+html input[type="button"],
+input[type="reset"],
+input[type="submit"] {
+	-webkit-appearance: button;
+	cursor: pointer;
+}
+
+button[disabled],
+html input[disabled] {
+	cursor: default;
+}
+
+button::-moz-focus-inner,
+input::-moz-focus-inner {
+	border: 0;
+	padding: 0;
+}
+
+input {
+	line-height: normal;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+	box-sizing: border-box;
+	padding: 0;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+	height: auto;
+}
+
+input[type="search"] {
+	-webkit-appearance: textfield;
+	box-sizing: content-box;
+}
+
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration {
+	-webkit-appearance: none;
+}
+
+fieldset {
+	border: 1px solid #c0c0c0;
+	margin: 0 2px;
+	padding: 0.35em 0.625em 0.75em;
+}
+
+legend {
+	border: 0;
+	padding: 0;
+}
+
+textarea {
+	overflow: auto;
+}
+
+optgroup {
+	font-weight: bold;
+}
+
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+	text-align:left;
+}
+
+td,
+th {
+	padding: 0;
+	font-weight: normal;
+}
+
+/*--------------------------------------------------------------
+# Global Settings
+--------------------------------------------------------------*/
+
+
+body,
+button,
+input,
+select,
+textarea {
+	color: #4F4F4F;
+	font-family: 'Roboto', sans-serif;
+	font-size: 14px;
+	line-height: 1.5;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	clear: both;
+	font-family: 'Roboto Slab', serif;
+	font-weight: 300; 
+}
+
+p {
+	margin-bottom: 1.5em;
+	text-align:left;
+}
+
+dfn,
+cite,
+em,
+i {
+	font-style: italic;
+}
+
+blockquote {
+	margin: 0 1.5em;
+}
+
+address {
+	margin: 0 0 1.5em;
+}
+
+pre {
+	background: #eee;
+	font-family: "Courier 10 Pitch", Courier, monospace;
+	font-size: 15px;
+	font-size: 0.9375rem;
+	line-height: 1.6;
+	margin-bottom: 1.6em;
+	max-width: 100%;
+	overflow: auto;
+	padding: 1.6em;
+}
+
+code,
+kbd,
+tt,
+var {
+	font-family: Monaco, Consolas, "Andale Mono", "DejaVu Sans Mono", monospace;
+	font-size: 15px;
+	font-size: 0.9375rem;
+}
+
+abbr,
+acronym {
+	border-bottom: 1px dotted #666;
+	cursor: help;
+}
+
+mark,
+ins {
+	background: #fff9c0;
+	text-decoration: none;
+}
+
+big {
+	font-size: 125%;
+}
+
+/*--------------------------------------------------------------
+# Elements & Lists 
+--------------------------------------------------------------*/
+html {
+	box-sizing: border-box;
+}
+
+*,
+*:before,
+*:after { /* Inherit box-sizing to make it easier to change the property for components that leverage other behavior; see http://css-tricks.com/inheriting-box-sizing-probably-slightly-better-best-practice/ */
+	box-sizing: inherit;
+}
+
+body {
+		background-color:#f9f9f6; /* Fallback for when there is no custom background color defined. */
+}
+
+blockquote:before,
+blockquote:after,
+q:before,
+q:after {
+	content: "";
+}
+
+blockquote,
+q {
+	quotes: "" "";
+}
+
+hr {
+	background-color: #ccc;
+	border: 0;
+	height: 1px;
+	margin-bottom: 1.5em;
+}
+
+ul,
+ol {
+	margin: 0 0 1.5em 3em;
+	padding:0;
+}
+
+ul {
+	list-style: disc;
+}
+
+ol {
+	list-style: decimal;
+}
+
+li > ul,
+li > ol {
+	margin-bottom: 0;
+	margin-left: 1.5em;
+}
+
+dt {
+	font-weight: bold;
+}
+
+dd {
+	margin: 0 1.5em 1.5em;
+}
+
+img {
+	height: auto; /* Make sure images are scaled correctly. */
+	max-width: 100%; /* Adhere to container width. */
+	border-radius:4px;
+}
+
+img.avatar {
+	border-radius: 100px;
+    margin-top: 0.5em;
+}
+
+table {
+	margin: 0 0 1.5em;
+	width: 100%;
+}
+
+
+/*--------------------------------------------------------------
+## Links
+--------------------------------------------------------------*/
+
+a {
+	color: #F3A614;
+	text-decoration:none;
+}
+
+a:visited {
+	color: #F3A614;
+	text-decoration:none;
+}
+
+a:hover,
+a:focus,
+a:active {
+	color: #F3A614;
+	text-decoration:underline;
+}
+
+a:focus {
+	outline: thin dotted;
+}
+
+a:hover,
+a:active {
+	outline: 0;
+}
+
+
+a img {
+	border: 0;
+}
+
+
+/*--------------------------------------------------------------
+### Buttons & Inputs
+--------------------------------------------------------------*/
+button,
+input[type="button"],
+input[type="reset"],
+input[type="submit"] {
+	position: relative;
+	top:-3px;
+	border:0px;
+	border-radius: 3px;
+	background-color: #EFEFEF;
+    -webkit-box-shadow: 1px 4px 0px 0px rgba(196, 196, 196, 1);
+	-moz-box-shadow:    1px 4px 0px 0px rgba(196, 196, 196, 1);
+	box-shadow:    1px 4px 0px 0px rgba(196, 196, 196, 1);
+	color: rgba(0, 0, 0, .8);
+	font-size: 120%;
+    font-weight:none;
+	line-height: 1;
+	padding: .5em .6em .5em .6em;
+}
+
+button:hover,
+input[type="button"]:hover,
+input[type="reset"]:hover,
+input[type="submit"]:hover {
+	background:#FFA500;
+	top:0px;
+	-webkit-transition: all 0.2s ease;
+	-moz-transition: all 0.3s  ease;
+	-ms-transition: all 0.3s  ease;
+	-o-transition: all 0.3s  ease;
+	transition: all 0.3s  ease;
+    -webkit-box-shadow: 1px 1px 0px 0px rgba(196, 196, 196, 1);
+	-moz-box-shadow:    1px 1px 0px 0px rgba(196, 196, 196, 1);
+	box-shadow:    1px 1px 0px 0px rgba(196, 196, 196, 1);
+}
+
+button:focus,
+input[type="button"]:focus,
+input[type="reset"]:focus,
+input[type="submit"]:focus,
+button:active,
+input[type="button"]:active,
+input[type="reset"]:active,
+input[type="submit"]:active {
+	border-color: #aaa #bbb #bbb;
+	box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.5), inset 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+input[type="text"],
+input[type="email"],
+input[type="url"],
+input[type="password"],
+input[type="search"],
+input[type="number"],
+input[type="tel"],
+input[type="range"],
+input[type="date"],
+input[type="month"],
+input[type="week"],
+input[type="time"],
+input[type="datetime"],
+input[type="datetime-local"],
+input[type="color"],
+textarea {
+	color: #666;
+	border: 1px solid #ccc;
+	border-radius: 3px;
+}
+
+select {
+	border: 1px solid #ccc;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="url"]:focus,
+input[type="password"]:focus,
+input[type="search"]:focus,
+input[type="number"]:focus,
+input[type="tel"]:focus,
+input[type="range"]:focus,
+input[type="date"]:focus,
+input[type="month"]:focus,
+input[type="week"]:focus,
+input[type="time"]:focus,
+input[type="datetime"]:focus,
+input[type="datetime-local"]:focus,
+input[type="color"]:focus,
+textarea:focus {
+	color: #111;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="url"],
+input[type="password"],
+input[type="search"],
+input[type="number"],
+input[type="tel"],
+input[type="range"],
+input[type="date"],
+input[type="month"],
+input[type="week"],
+input[type="time"],
+input[type="datetime"],
+input[type="datetime-local"],
+input[type="color"] {
+	padding: 3px;
+}
+
+textarea {
+	padding-left: 3px;
+	width: 100%;
+}
+
+/*--------------------------------------------------------------
+HEADER
+--------------------------------------------------------------*/
+.header-brand {
+background:#fff;
+text-align:center;
+border-bottom:1px solid #b3b3b3;
+padding-top:3px;
+-webkit-box-shadow: 0px 2px 3px 0px rgba(0,0,0,0.11);
+-moz-box-shadow: 0px 2px 3px 0px rgba(0,0,0,0.11);
+box-shadow: 0px 2px 3px 0px rgba(0,0,0,0.11);
+}
+
+.site-branding {
+float:left;
+padding-top:2em;
+
+}
+
+/* SUBNAVIGATION */
+
+.sub-navigation {
+float:right;
+background: #F0F0F0;
+padding: 0.5em;
+border: 1px solid #eeeeee;
+border-bottom-left-radius:3px;
+border-bottom-right-radius:3px;
+}
+
+.sub-navigation ul {
+list-style:none;
+margin:0;
+}
+
+.sub-navigation ul li {
+float:left;
+
+}
+
+.sub-navigation a {
+color: #404040;
+padding:0.7em;
+text-decoration:none;
+font-size: 95%;
+}
+
+.sub-navigation a:hover {
+text-decoration:underline;
+}
+
+
+/*--------------------------------------------------------------
+# Navigation
+--------------------------------------------------------------*/
+
+.main-navigation {
+	clear: both;
+	display: block;
+	float: left;
+	width: 100%;
+	padding:1.5em 0 0 0em;
+}
+
+.main-navigation ul {
+	display: none;
+	list-style: none;
+	margin: 0;
+	padding-left: 0;
+}
+
+.main-navigation li {
+	float: left;
+	position: relative;
+		margin-right:2px;
+}
+
+.main-navigation ul a {
+	display: block;
+	text-decoration: none;
+	color:#211f19;
+	font-size:115%;
+	font-weight: 300; 
+	text-transform:uppercase;
+	padding:10px 15px 10px 43px;
+	background-color:#F0F0F0;
+	border: 1px solid #eeeeee;
+}
+
+
+.main-navigation ul .icohome1 a, .main-navigation ul .icolektion1 a, .main-navigation ul .icoprofil1 a, .main-navigation ul .icostatus1 a, .main-navigation ul .icoforum1 a, .main-navigation ul .icohilfe1 a, .main-navigation ul .bp-profile-nav a  {
+background-repeat: no-repeat;
+background-position: 0.5em 0.5em;
+}
+
+.main-navigation ul .icohome1 a {
+background-image:url(./img/icohome1.png);
+padding-left:40px;
+border-top-left-radius:6px;
+}
+
+.main-navigation ul .icolektion1 a {
+background-image:url(./img/icolektion1.png);
+}
+
+.main-navigation ul .icoprofil1 a, .main-navigation ul .bp-profile-nav a {
+background-image:url(./img/icoprofil1.png);
+}
+
+.main-navigation ul .icostatus1 a {
+background-image:url(./img/icostatus1.png);
+}
+
+.main-navigation ul .icoforum1 a {
+background-image:url(./img/icoforum2.png);
+}
+
+.main-navigation ul .icohilfe1 a {
+background-image:url(./img/icohilfe1.png);
+border-top-right-radius:6px;
+}
+
+.main-navigation ul .icosubmenuarrow a {
+background:url(./img/icosubmenuarrow.png) no-repeat 0.5em 0.5em #F0F0F0;
+}
+
+.main-navigation ul ul {
+	float: left;
+	position: absolute;
+	top: 3.1em;
+	border-top:2px solid #fff;
+	left: -999em;
+	z-index: 99999;
+}
+
+.main-navigation ul ul ul {
+	left: -999em;
+	top: 0;
+}
+
+.main-navigation ul ul a {
+background:#F0F0F0;
+padding-left:30px;
+	width: 200px;
+	font-size:90%;
+	 display:block;
+}
+
+
+.main-navigation ul ul li {
+border-bottom:2px solid #fff;
+}
+
+
+/* basis 2016
+
+.main-navigation a {
+	display: block;
+	text-decoration: none;
+}
+
+
+.main-navigation ul ul {
+	box-shadow: 0 3px 3px rgba(0, 0, 0, 0.2);
+	float: left;
+	position: absolute;
+	top: 1.5em;
+	left: -999em;
+	z-index: 99999;
+}
+
+.main-navigation ul ul ul {
+	left: -999em;
+	top: 0;
+}
+
+.main-navigation ul ul a {
+	width: 200px;
+}
+
+.main-navigation ul ul li {
+
+}
+
+*/
+
+
+.main-navigation li:hover > a,
+.main-navigation li.focus > a {
+background-color:#FFCC00;
+-webkit-transition: all 1s ease;
+  -moz-transition: all 1s ease;
+  -ms-transition: all 1s ease;
+  -o-transition: all 1s ease;
+  transition: all 1s ease;
+  border: 1px solid #FFCC00;
+}
+
+/* basis 2016
+
+.main-navigation li:hover > a,
+.main-navigation li.focus > a {
+}
+
+.main-navigation ul ul :hover > a,
+.main-navigation ul ul .focus > a {
+}
+
+.main-navigation ul ul a:hover,
+.main-navigation ul ul a.focus {
+}
+
+.main-navigation ul li:hover > ul,
+.main-navigation ul li.focus > ul {
+	left: auto;
+}
+
+.main-navigation ul ul li:hover > ul,
+.main-navigation ul ul li.focus > ul {
+	left: 100%;
+}
+*/
+
+.main-navigation .current_page_item > a,
+.main-navigation .current-menu-item > a,
+.main-navigation .current_page_ancestor > a,
+.main-navigation .current-menu-ancestor > a {
+
+}
+
+/* Sidebar Menu */
+
+
+.menu-menu-sidebar-profil-container, .menu-menu-sidebar-kurs-container {
+margin:0;
+ }
+ 
+.menu-menu-sidebar-profil-container ul, .menu-menu-sidebar-kurs-container ul {
+list-style:none;
+display:block;
+margin:0;
+padding-top:1em;
+padding-bottom:1em;
+overflow:hidden;
+}
+
+.menu-menu-sidebar-profil-container ul li a, .menu-menu-sidebar-kurs-container ul li a {
+list-style:none;
+background-color:#3F4753;
+padding:0.4em 0.9em 0.4em 1.2em;
+color:#fff;
+width:100%;
+float:left;
+margin-bottom:2px;
+font-size:105%;
+}
+
+.menu-menu-sidebar-profil-container ul li a:hover, .menu-menu-sidebar-kurs-container ul li a:hover  {
+background:#FFA500;
+cursor:pointer;
+}
+
+/* Content Navigation e.g. MyCred Karma Seite */
+
+.content-navigation  {
+    width:100%;
+	display: block;
+	margin-bottom:3em;
+}
+
+.content-navigation ul {
+	list-style: none;
+	margin:0;
+	padding-bottom:2em;
+	width:100%;
+		display: block;
+		border-top:2px #F1F1F1 solid;
+}
+
+.content-navigation ul li {
+float:left;
+	display: block;
+}
+
+.content-navigation ul li a {
+padding:8px 12px 12px 12px;
+font-size:110%;
+	display: block;
+}
+
+.content-navigation li.selected a {
+color:#4F4F4F;
+background:#F1F1F1;
+}
+
+
+/* Small menu. */
+
+.menu-toggle,
+.main-navigation.toggled ul {
+	display: block;
+}
+
+@media screen and (min-width: 37.5em) {
+	.menu-toggle {
+		display: none;
+	}
+	.main-navigation ul {
+		display: block;
+	}
+}
+
+.site-main .comment-navigation,
+.site-main .posts-navigation,
+.site-main .post-navigation {
+	margin: 0 0 1.5em;
+	overflow: hidden;
+}
+
+.comment-navigation .nav-previous,
+.posts-navigation .nav-previous,
+.post-navigation .nav-previous {
+	float: left;
+	width: 50%;
+}
+
+.comment-navigation .nav-next,
+.posts-navigation .nav-next,
+.post-navigation .nav-next {
+	float: right;
+	text-align: right;
+	width: 50%;
+}
+
+/*--------------------------------------------------------------
+CONTENT
+--------------------------------------------------------------*
+
+/* ---- Posts and pages ---*/
+
+.sticky {
+	display: block;
+}
+
+.hentry {
+	margin: 0 0 1.5em;
+}
+
+.byline,
+.updated:not(.published) {
+	display: none;
+}
+
+.single .byline,
+.group-blog .byline {
+	display: none;
+}
+
+
+.page-content,
+.entry-content,
+.entry-summary {
+	margin: 1.5em 0 0;
+}
+
+.page-content  h2,
+.entry-content  h2,
+.entry-summary h2 {
+	margin: 0 0 1em 0;
+}
+
+
+
+.page-content  h6,
+.entry-content  h6,
+.entry-summary h6 {
+	font-size:120%;
+	margin:2em 0 1em 0;
+	border-bottom:1px solid #ccc;
+}
+
+h2.entry-title a {
+color: #404040;
+}
+
+.bbpress h1.entry-title a {
+border-bottom:1px solid #404040;
+
+}
+
+span.comments-link,
+span.edit-link {
+padding-left:0.5em;
+}
+
+
+
+.page-links {
+	clear: both;
+	margin: 0 0 1.5em;
+}
+
+.page-content a,
+.entry-content a,
+.entry-summary a {
+text-decoration:underline;
+}
+
+.page-content a:hover,
+.entry-content a:hover,
+.entry-summary a:hover {
+font-weight:bold;
+}
+
+
+
+/*---- Content Link Pfeil für z.B. Vorlagen im Kurs------*/
+a.arrow {
+font-size: 110%;
+color:#000;
+padding:20px 20px 20px 40px;
+background: transparent url("./img/arrow_right.png") no-repeat scroll left center;
+border: 1px solid #ffcc00;
+margin-top: 15px;
+margin-bottom: 15px;
+display: block;
+clear:both;
+}
+
+a.arrow:hover {
+background:#ffcc00 url("./img/hole_arrow_right.png") no-repeat scroll left center;
+}
+
+a.arrow-to-forum {
+font-size: 110%;
+color:#000;
+padding:20px 20px 20px 60px;
+background: transparent url("./img/arrowcircle_right.png") no-repeat scroll left center;
+margin-top: 15px;
+margin-bottom: 15px;
+display: block;
+clear:both;
+}
+
+/*-----Zusatzinfos oder Veränderungen (Datum, wer erstellt, Kategorie etc. am Anfang und Ende Posts/Topics nicht anzeigen)------*/
+
+.entry-meta {
+display:none;
+
+}
+
+.entry-date {
+border-radius:3px;
+padding: 1px;
+border: 1px solid #ebe9e1;
+background: #f2efe9;
+color: #4F4F4F;
+font-size:90%;
+}
+
+.entry-date a:hover {
+text-decoration:none;
+}
+
+.entry-footer {
+display:none;
+}
+
+/*-----Anpassungen für Template Kurs-seite-with-sidebar ------*/
+
+.site-main-kurs  .comment-navigation,
+.site-main-kurs  .paging-navigation,
+.site-main-kurs  .post-navigation {
+	margin: 0 0 1.5em;
+	overflow: hidden;
+}
+
+
+.kurs-grid  {
+float:left;
+width:25%;
+}
+
+.site-main-kurs .entry-title a  {
+font-size:80%;
+}
+
+.site-main-kurs .attachment-post-thumbnail {
+    float: left;
+    margin: 10px;
+	max-width:200px;
+}
+
+.site-main-kurs .entry-content p  {
+
+}
+
+/*--------------------------------------------------------------
+## Asides
+--------------------------------------------------------------*/
+.blog .format-aside .entry-title,
+.archive .format-aside .entry-title {
+	display: none;
+}
+
+/*--------------------------------------------------------------
+## Comments
+--------------------------------------------------------------*/
+.comment-content a {
+	word-wrap: break-word;
+}
+
+.bypostauthor {
+	display: block;
+}
+
+
+/*--------------------------------------------------------------
+# Accessibility
+--------------------------------------------------------------*/
+/* Text meant only for screen readers. */
+.screen-reader-text {
+	clip: rect(1px, 1px, 1px, 1px);
+	position: absolute !important;
+	height: 1px;
+	width: 1px;
+	overflow: hidden;
+}
+
+.screen-reader-text:focus {
+	background-color: #f1f1f1;
+	border-radius: 3px;
+	box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.6);
+	clip: auto !important;
+	color: #21759b;
+	display: block;
+	font-size: 14px;
+	font-size: 0.875rem;
+	font-weight: bold;
+	height: auto;
+	left: 5px;
+	line-height: normal;
+	padding: 15px 23px 14px;
+	text-decoration: none;
+	top: 5px;
+	width: auto;
+	z-index: 100000; /* Above WP toolbar. */
+}
+
+/* Do not show the outline on the skip link target. */
+#content[tabindex="-1"]:focus {
+	outline: 0;
+}
+
+/*--------------------------------------------------------------
+# Alignments
+--------------------------------------------------------------*/
+.alignleft {
+	display: inline;
+	float: left;
+	margin-top: 0.5em;
+	margin-right: 1em;
+	margin-bottom: 2.5em;
+}
+
+.alignright {
+	display: inline;
+	float: right;
+	margin-left: 1.5em;
+}
+
+.aligncenter {
+	clear: both;
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+
+/*--------------------------------------------------------------
+# Clearings
+--------------------------------------------------------------*/
+.clear:before,
+.clear:after,
+.entry-content:before,
+.entry-content:after,
+.comment-content:before,
+.comment-content:after,
+.site-header:before,
+.site-header:after,
+.site-content:before,
+.site-content:after,
+.site-footer:before,
+.site-footer:after {
+	content: "";
+	display: table;
+	table-layout: fixed;
+}
+
+.clear:after,
+.entry-content:after,
+.comment-content:after,
+.site-header:after,
+.site-content:after,
+.site-footer:after {
+	clear: both;
+}
+
+
+
+/*--------------------------------------------------------------
+# Infinite scroll
+--------------------------------------------------------------*/
+/* Globally hidden elements when Infinite Scroll is supported and in use. */
+.infinite-scroll .posts-navigation, /* Older / Newer Posts Navigation (always hidden) */
+.infinite-scroll.neverending .site-footer { /* Theme Footer (when set to scrolling) */
+	display: none;
+}
+
+/* When Infinite Scroll has reached its end we need to re-display elements that were hidden (via .neverending) before. */
+.infinity-end.neverending .site-footer {
+	display: block;
+}
+
+/*--------------------------------------------------------------
+# Media
+--------------------------------------------------------------*/
+.page-content .wp-smiley,
+.entry-content .wp-smiley,
+.comment-content .wp-smiley {
+	border: none;
+	margin-bottom: 0;
+	margin-top: 0;
+	padding: 0;
+}
+
+/* Make sure embeds and iframes fit their containers. */
+embed,
+iframe,
+object {
+	max-width: 100%;
+}
+
+/*--------------------------------------------------------------
+## Captions
+--------------------------------------------------------------*/
+.wp-caption {
+	margin-bottom: 1.5em;
+	max-width: 100%;
+}
+
+.wp-caption img[class*="wp-image-"] {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.wp-caption .wp-caption-text {
+	margin: 0.8075em 0;
+}
+
+.wp-caption-text {
+	text-align: center;
+	font-size:87%;
+	font-style:italic;
+}
+
+.wp-caption .wp-caption-text {
+	margin: 0.8075em 0 0.5em 0;
+}
+
+/*--------------------------------------------------------------
+## Galleries
+--------------------------------------------------------------*/
+.gallery {
+	margin-bottom: 1.5em;
+}
+
+.gallery-item {
+	display: inline-block;
+	text-align: center;
+	vertical-align: top;
+	width: 100%;
+}
+
+.gallery-columns-2 .gallery-item {
+	max-width: 50%;
+}
+
+.gallery-columns-3 .gallery-item {
+	max-width: 33.33%;
+}
+
+.gallery-columns-4 .gallery-item {
+	max-width: 25%;
+}
+
+.gallery-columns-5 .gallery-item {
+	max-width: 20%;
+}
+
+.gallery-columns-6 .gallery-item {
+	max-width: 16.66%;
+}
+
+.gallery-columns-7 .gallery-item {
+	max-width: 14.28%;
+}
+
+.gallery-columns-8 .gallery-item {
+	max-width: 12.5%;
+}
+
+.gallery-columns-9 .gallery-item {
+	max-width: 11.11%;
+}
+
+.gallery-caption {
+	display: block;
+}
+
+
+/*--------------------------------------------------------------
+# SIDEBAR
+--------------------------------------------------------------*/
+.widget {
+	margin: 0 0 1.5em 0;
+}
+
+/* Make sure select elements fit in widgets. */
+.widget select {
+	max-width: 100%;
+}
+
+/* Search widget */
+.widget_search .search-submit {
+	display: none;
+}
+
+h1.widget-title,
+h2.widget-title {
+font-family: 'Roboto', sans-serif;
+font-size:110%;
+font-weight:normal;
+padding: 0.5em 0 0.5em 0;
+margin-bottom:0em;
+border-top: 3px solid #ffe681;
+background-color:#fff2be;
+text-align:center;
+}
+
+.textwidget {
+ background: none repeat scroll 0% 0% #FBFBFB;
+ border: #FBFBFB solid 0px;
+ border-bottom-left-radius:12px;
+ border-bottom-right-radius:12px;
+ padding:1px 0 0.5em 0;
+}
+
+.textwidget span.button {
+background-color:#3F4753;
+padding:0.9em 0.9em 0.8em 1.2em;
+color:#fff;
+width:100%;
+float:left;
+margin-bottom:2px;
+font-size:105%;
+}
+
+.textwidget p {
+padding:0 1em 0 1em;
+}
+
+.textwidget span.button:hover {
+background:#FFA500;
+cursor:pointer;
+}
+
+.textwidget ul {
+list-style: none;
+margin: 0em 0 0 0;
+
+}
+.textwidget li {
+    background: none repeat scroll 0% 0% #FBFBFB;
+    border-top: 1px solid #EEE;
+    padding: 0.5em 0.5em 0.5em 1em;
+	margin:0;
+    font-size: 90%;
+	list-style: none;
+}
+
+#secondary-full .widget {
+	margin: 0 1em 0 0em;
+	width:31%;
+	float:left;
+}
+
+
+#secondary .widget_display_topics ul {
+    list-style:none;
+	margin: 0px;
+}
+
+#secondary .widget_display_topics li {
+	background:#FBFBFB;
+	border-top: 1px solid #EEE;
+	padding:8px;
+	font-size:80%;
+}
+
+/*
+#secondary li .widget_display_topics a {
+font-size:100%;
+}*/
+
+
+/*--------------------------------------------------------------
+FOOTER
+--------------------------------------------------------------*/
+.site-footer
+{
+color:#fff;
+padding: 0.5em;
+margin-bottom:1em;
+border-bottom-left-radius:8px;
+border-bottom-right-radius:8px;
+background-color:#3F4753;
+font-size:90%;
+text-align:center;
+}
+
+
+/*--------------------------------------------------------------
+RESPONSIVE
+--------------------------------------------------------------*/
+
+/* Responsive Videos */
+.video-container {
+	position: relative;
+	padding-bottom: 56.25%;
+	padding-top: 0px;
+	height: 0;
+	overflow: hidden;
+	margin-bottom: 1em;
+}
+
+.video-container iframe,
+.video-container object,
+.video-container embed {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+
+@media screen and (max-width: 1200px) {
+
+body {
+	margin: 0 15px 0 15px;
+}
+
+.main-navigation li a {
+		font-size:90%;
+	}
+	
+.sub-navigation a {
+font-size:90%;
+}
+
+}
+
+@media screen and (max-width: 810px) {
+
+body {
+margin:0;
+}
+
+    p {
+	text-align:left;
+    }
+
+	
+	.menu-toggle,
+	.main-navigation.toggled .nav-menu,
+    .main-navigation.toggled .nav-menu ul {
+		display: block;
+	}
+	
+	.menu-toggle {
+	top:0px;
+	width: 100%;
+	background: #F0F0F0;
+	border:none;
+	border-radius:0px;
+	color: #000;
+	font-weight:normal;
+	text-decoration:none;
+	cursor: pointer; /* Improves usability and consistency of cursor style between image-type 'input' and others */
+	-webkit-appearance: button; /* Corrects inability to style clickable 'input' types in iOS */
+	font-size: 125%;
+	line-height: 1;
+	padding: 1em .5em 1em .5em;
+	position: relative;
+	}
+	
+	.menu-toggle:hover {
+	background:#FFCC00;
+	}
+	
+	
+	.main-navigation ul {
+		display:none;
+		padding:0;
+		float:none;
+	}
+	
+	.main-navigation li {
+		float:none;
+		border-top: 1px solid #ccc;
+		margin-right: 0px;
+	}
+	
+   
+    .main-navigation ul ul {
+        display:block;
+        width:100%;
+        float:none;
+        position: relative;
+        top:inherit;
+        box-shadow:none;
+        height:auto;
+        margin:0;
+ }
+ 
+ .main-navigation ul ul li {
+border-bottom:0px;
+}
+ 
+ 
+.main-navigation ul ul a {
+	width: 100%;
+}
+ 
+ .main-navigation ul li > ul {
+    left: auto;
+	display:block;
+}
+
+/* Content Navigation e.g. MyCred Karma Seite */
+
+.content-navigation  {
+    width:100%;
+		margin-bottom:2em;
+		clear:both;
+}
+
+.content-navigation ul {
+	list-style: none;
+	margin:0;
+	margin-bottom:2em;
+	width:100%;
+}
+.content-navigation ul li {
+float:none;
+width:100%;
+}
+
+.content-navigation ul li a {
+padding:12px 12px 12px 12px;
+font-weight:bold;
+border-top:1px #E6E6E6 solid;
+border-bottom:1px #E6E6E6 solid;
+font-size:110%;
+	width:100%;
+	display: block;
+}
+
+.content-navigation li.selected a {
+color:#4F4F4F;
+background:#E6E6E6;
+}
+
+.content-navigation ul li a {
+font-weight:400;
+}
+
+	#primary,
+	#secondary, 
+	#primary-home,
+	#secondary-home, 
+	#primary-bbpress,
+	#secondary-bbpress {
+		float:none;
+		width:100%;
+		padding:0;
+	}
+	
+.site-content {
+padding:22px 12px 12px 12px;
+border:0;
+border-radius:0;
+}
+	
+.site-footer
+{
+margin-bottom:0;
+border-radius:0;
+}
+	
+	
+}
+
+@media screen and (max-width: 500px) {
+
+body {
+font-size: 13px;
+-ms-text-size-adjust: none;
+-webkit-text-size-adjust: none;
+}
+
+    p {
+	text-align:left;
+    }
+
+.site-branding {
+		float:none;
+		width:100%;
+		padding-top:1em;
+}
+
+ 
+ .sub-navigation {
+float:none;
+width:100%;
+background: #F0F0F0;
+border: 1px solid #eeeeee;
+border-bottom-left-radius:0px;
+border-bottom-right-radius:0px;
+margin-bottom:1em;
+height:2.5em;
+
+}
+
+
+	#secondary-full .widget, #secondary-home .widget  {
+	float:none;
+	width:100%;
+	margin: 0 0 1em 0;
+	}
+	
+	
+}
+
+/*--------------------------------------------------------------
+PRINT
+--------------------------------------------------------------*/
+
+@media print {
+
+ #secondary, .site-branding, .sub-navigation, .main-navigation  {
+	display:none;
+}
+
+#primary {
+float:left;
+width:100%;
+}
+
+}
+
+/*
+Extra Style.css for Additional Change/ Override from Plugins
+Included - header.php and at the end - footer.php to make sure it's loaded last and override everything from the CSS of the installed plugins
+*/
+
+
+/*--------------------------------------------------------------
+EVENT CALENDAR PLUGIN
+--------------------------------------------------------------*/
+
+
+ol.tribe-list-widget {
+margin: 0 0 1em 0em;
+}
+
+.tribe-events-list-widget ol li {
+    list-style: none;
+	background: none repeat scroll 0% 0% #FBFBFB;
+border: 1px solid #EEE;
+border-left: 7px solid #EEE;
+margin: 5px 0 5px 0;
+padding: 1em 0.5em 1em 1em;
+list-style: outside none none;
+line-height: 1em;
+}
+
+.tribe-events-list-widget h4 {
+margin:0 0 1em 0;
+padding:0;
+}
+
+.tribe-events-list-widget ol li a {
+font-weight:bold;
+}
+
+
+/*--------------------------------------------------------------
+LEARN DASH CUSTOMIZE TEMPLATE
+--------------------------------------------------------------*/
+
+#course_navigation {
+padding:1em;
+}
+
+
+#course_navigation .widget_course_return {
+margin-top:1em;
+}
+
+#learndash_lessons a, #learndash_quizzes a, .expand_collapse a, .learndash_topic_dots a, .learndash_topic_dots a > span, #learndash_lesson_topics_list span a, #learndash_profile a, #learndash_profile a span {
+font-size:100%;
+color:#404040;
+}
+
+#learndash_lessons #lesson_heading, #learndash_profile .learndash_profile_heading, #learndash_quizzes #quiz_heading, #learndash_lesson_topics_list div > strong {
+background-color:#EFEFEF;
+}
+
+#learndash_lessons h4 > a:hover, #learndash_quizzes  h4 > a:hover, #learndash_lesson_topics_list ul > li > span.topic_item:hover {
+	background-color: #EFEFEF;
+}
+
+#learndash_lessons, #learndash_quizzes, #learndash_profile, #learndash_lesson_topics_list > div {
+border: 1px solid #C4C4C4;
+}
+
+
+#learndash_lessons > div > div, #learndash_quizzes > div > div {
+border-bottom: 1px solid #C4C4C4;
+padding: .8em;
+}
+
+#learndash_lessons .list-count, #learndash_quizzes .list-count {
+display:none;
+}
+
+#learndash_lessons #lesson_heading, #learndash_profile .learndash_profile_heading, #learndash_quizzes #quiz_heading, #learndash_lesson_topics_list div > strong {
+padding: .3em .3em .3em .6em;
+}
+
+#learndash_lesson_topics_list div > strong {
+margin-bottom:1em;
+}
+
+#learndash_lesson_topics_list ul {
+padding-top:2em;
+}
+
+.learndash_nevigation_lesson_topics_list {
+   padding:1em;
+}
+
+#learndash_next_prev_link {
+margin-top:20px;
+}
+#learndash_next_prev_link a {
+
+position: relative;
+top:-3px;
+	border-radius: 3px;
+	cursor: pointer; 
+	-webkit-box-shadow: 1px 4px 0px 0px rgba(255, 128, 0, 0.44);
+	-moz-box-shadow:    1px 4px 0px 0px rgba(159, 128, 0, 0.44);
+	box-shadow:         1px 4px 0px 0px rgba(159, 128, 0, 0.44);
+	line-height: 1;
+	    background: #FFA500 none repeat scroll 0% 0%;
+    border: 1px solid #FFA500;
+    color: #000;
+	font-size: 120%;
+    cursor: pointer;
+    outline: 0px none;
+	padding: .4em 0.5em .4em;
+    text-align: center;
+    text-decoration: none;
+	font-weight:normal;
+
+}
+
+
+#learndash_next_prev_link a:hover {
+	top:0px;
+	background: #FFA500;
+	-webkit-box-shadow: 1px 1px 0px 0px rgba(159, 128, 0, 0.44);
+	-moz-box-shadow:    1px 1px 0px 0px rgba(159, 128, 0, 0.44);
+	box-shadow:         1px 1px 0px 0px rgba(159, 128, 0, 0.44);
+   -webkit-transition: all 0.2s ease;
+  -moz-transition: all 0.3s  ease;
+  -ms-transition: all 0.3s  ease;
+  -o-transition: all 0.3s  ease;
+  transition: all 0.3s  ease;
+ 
+  }
+
+dd.course_progress div.course_progress_blue {
+  background-color:#FFA500;
+  }
+  
+dd.course_progress {
+  width:100% !important;
+}
+
+  
+#learndash_uploaded_assignments {
+margin-top:3em;
+}
+  
+#learndash_uploaded_assignments tr {
+background:#F0F0F0 url("./img/file_icon.png") no-repeat left;
+}
+
+#learndash_uploaded_assignments td {
+padding:1em 1em 1em 3em;
+}
+
+.sfwd-assignment .entry-content p {
+background:#F0F0F0 url("./img/file_icon.png") no-repeat left;
+padding:1em 1em 1em 3em;
+}
+  
+
+  
+.wpProQuiz_button, .wpProQuiz_button:hover {
+    margin: 0px !important;
+    padding: 5px 10px !important;
+    border-radius: 3px !important;
+    color: #fff!important;
+    font-weight: bold !important;
+    border: 0px !important;
+    text-shadow: 1px 1px 1px #969696 !important;
+    filter: none ;
+	background: none repeat scroll 0% 0% #FECC0A !important;
+	border-color: #0074A2;
+	box-shadow:         1px 4px 0px 0px rgba(159, 128, 0, 0.44);
+}
+
+.wpProQuiz_button, .wpProQuiz_button:hover {
+position: relative;
+top:-3px;
+	border-radius: 3px;
+	cursor: pointer; 
+	-webkit-box-shadow: 1px 4px 0px 0px rgba(255, 128, 0, 0.44);
+	-moz-box-shadow:    1px 4px 0px 0px rgba(159, 128, 0, 0.44);
+	box-shadow:         1px 4px 0px 0px rgba(159, 128, 0, 0.44);
+	line-height: 1;
+	    background: #FFA500 none repeat scroll 0% 0% !important;
+    border: 1px solid #FFA500;
+    color: #fff !important;
+	font-size: 120% !important;
+    cursor: pointer;
+    outline: 0px none;
+	padding: .4em 0.5em .4em;
+    text-align: center;
+    text-decoration: none;
+	font-weight:normal !important;
+
+}
+
+.wpProQuiz_button:hover {
+background: none repeat scroll 0% 0% #FFA500 !important;
+  }
+  
+  .wpProQuiz_question_text:hover, .wpProQuiz_listItem:hover; .textwidget li:hover {
+  background: none  !important;
+  }
+  
+
+  
+.btn-join:hover, .btn-join:focus, .btn-join:active, .btn-join.active, #btn-join:hover, #btn-join:focus, a#quiz_continue_link:hover, a#quiz_continue_link:focus {
+    color: #000 !important;
+    background-color: #FFA500;
+    border-color: #FFA500;
+}
+
+  .btn-join, #btn-join, a#quiz_continue_link {
+    background: #FFA500 none repeat scroll 0% 0%;
+    color: #000 !important;
+}
+
+  
+  #ld_course_list .btn-primary {
+  color:#4F4F4F !important;
+  background-color:#FFF !important;
+  border-color: #FECC0A !important;
+  margin-top:15px;
+  width:100%;
+  }
+ 
+  
+  #ld_course_list .btn-primary:hover,
+  #ld_course_list .btn-primary:focus,
+  #ld_course_list .btn-primary:active,
+  #ld_course_list .btn-primary.active,
+  #ld_course_list .open .dropdown-toggle.btn-primary {  
+  color:#fff !important; 
+  background-color:#FFA500 !important;
+  border-color:#FFA500 !important;
+ }
+ 
+   #ld_course_list .caption h3 {
+   min-height:3em;
+   text-align:center;
+   }
+   
+      #ld_course_list p {
+	  margin:0;
+	  }
+
+ 
+ .thumbnail.course .price{
+	display:none;
+	background: #FFA500;
+}
+
+.ribbon-enrolled {
+display:none;
+}
+
+
+.thumbnail.course .price.free{
+	background: #FFA500;
+}
+
+.thumbnail.course .price:before {
+	border: 4px solid transparent;
+	border-top: 4px solid #FFA500;
+	border-right: 4px solid #FFA500;
+}
+
+.thumbnail.course .price.free:before {
+	border-top: 4px solid #FFA500;
+	border-right: 4px solid #FFA500;
+}
+  
+  
+.profile_edit_profile {
+display:none;
+}
+
+.col-xs-1, .col-xs-2, .col-xs-3, .col-xs-4, .col-xs-5, .col-xs-6, .col-xs-7, .col-xs-8, .col-xs-9, .col-xs-10, .col-xs-11, .col-xs-12, .col-sm-1, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6, .col-sm-7, .col-sm-8, .col-sm-9, .col-sm-10, .col-sm-11, .col-sm-12, .col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6, .col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12, .col-lg-1, .col-lg-2, .col-lg-3, .col-lg-4, .col-lg-5, .col-lg-6, .col-lg-7, .col-lg-8, .col-lg-9, .col-lg-10, .col-lg-11, .col-lg-12 {
+    padding-left: 0px;
+    padding-right: 25px;
+}
+
+    
+/*--------------------------------------------------------------
+bbPRESS FORUM CUSTOMIZE TEMPLATE
+--------------------------------------------------------------*/
+
+
+
+#bbpress-forums, #bbpress-forums ul.bbp-lead-topic, #bbpress-forums ul.bbp-topics, #bbpress-forums ul.bbp-forums, #bbpress-forums ul.bbp-replies, #bbpress-forums ul.bbp-search-results {
+font-size:14px;
+}
+
+#bbpress-forums div.bbp-search-form {
+    margin-bottom: 1em;
+	}
+
+#bbpress-forums a {
+color: #4F4F4F;
+font-weight:normal;
+text-decoration:underline;
+}
+
+#bbpress-forums a:hover {
+font-weight:bold;
+}
+
+
+#bbpress-forums div.bbp-topic-content a, #bbpress-forums div.bbp-reply-content a {
+color: #F3A614;
+}
+
+#bbpress-forums div.bbp-topic-content a:hover, #bbpress-forums div.bbp-reply-content a:hover {
+font-weight:bold;
+}
+
+#bbpress-forums div.bbp-topic-content a.arrow-to-kurs, #bbpress-forums div.bbp-reply-content a.arrow-to-kurs {
+font-size: 110%;
+color:#000;
+padding:20px 20px 20px 60px;
+background: transparent url("./img/arrowcircle_left.png") no-repeat scroll left center;
+margin-top: 15px;
+margin-bottom: 15px;
+display: block;
+clear:both;
+}
+
+#bbpress-forums h3 {
+margin:30px 0 20px 0;
+font-size:140%;
+}
+
+#bbpress-forums li.bbp-forum-info a, li.bbp-topic-title a {
+color: #F3A614;
+font-size:105%;
+}
+
+#bbpress-forums #bbp-search-form #bbp_search, #bbp_search_submit {
+
+}
+
+#bbpress-forums li.bbp-header ul {
+    text-transform: uppercase;
+	font-weight:400;
+}
+
+#bbpress-forums fieldset.bbp-form legend {
+	font-size:120%;
+	text-transform: uppercase;
+	font-weight: normal;
+}
+
+li.bbp-forum-topic-count, li.bbp-topic-voice-count, li.bbp-forum-reply-count, li.bbp-topic-reply-count {
+    font-size:80%;
+	font-weight:normal;
+}
+
+li.bbp-forum-freshness,  li.bbp-topic-freshness {
+   font-size:80%;
+   }
+
+li.bbp-forum-freshness a, li.bbp-topic-freshness a  {
+   font-size:100%;
+	font-weight:normal;
+}
+
+
+#bbpress-forums .bbp-topic-freshness p.bbp-topic-meta {
+text-align:center;
+}
+
+#bbpress-forums .bbp-forum-freshness p.bbp-topic-meta {
+text-align:center;
+}
+
+
+#bbpress-forums p.bbp-topic-meta span {
+	text-align:center;
+	    margin-left:0em;
+}
+
+
+#bbpress-forums p.bbp-topic-meta span a {
+font-size:100%;
+	text-align:center;
+}
+
+#bbpress-forums p.bbp-topic-meta img.avatar {
+display:none;
+}
+
+
+div.bbp-template-notice.info {
+    border-top: 1px solid #FFA500;
+	border-bottom: 1px solid #FFA500;
+	border-left:0px;
+	border-right:0px;
+    background-color:#fff;
+	display:none;
+}
+
+div.bbp-template-notice, div.indicator-hint {
+    background-color: #fff8ec;
+    border-color: #FFA500;
+	}
+	
+	span#favorite-toggle a, span#subscription-toggle a {
+	padding:1px;
+	border: 1px solid #ccc;
+	border-radius:3px;
+	margin-left:3px;
+	}
+	
+	a.favorite-toggle {
+	padding:1px;
+	border: 1px solid #ccc;
+	border-radius:3px;
+	margin-left:3px;
+	}
+	
+	.bbp-pagination {
+	font-size:85%;
+}
+
+div.bbp-forum-header, div.bbp-topic-header, div.bbp-reply-header {
+    border-radius: 10px;
+	-webkit-border-radius: 10px;
+}
+
+
+/* Forum Profil */
+
+
+    #bbpress-forums div.bbp-forum-author, #bbpress-forums div.bbp-reply-author {
+	 float: none;
+    text-align: center;
+	margin: 0 2em 0em 3em;
+	  width:80%;
+	  min-height:120px;
+	  clear:both;
+	background: url("./img/dreieck_m.png") bottom left no-repeat;
+}
+	}
+	 #bbpress-forums div.reply div.bbp-reply-author, #bbpress-forums div.even div.bbp-reply-author {
+    float: none;
+    text-align: center;
+	margin: 0 2em 0em 3em;
+	  width:80%;
+	  min-height:120px;
+	  clear:both;
+	  	background: url("./img/dreieck_m.png") bottom left no-repeat;
+	}
+	
+	#bbpress-forums li.bbp-header div.bbp-reply-author, #bbpress-forums li.bbp-footer div.bbp-reply-author {
+	min-height:0;
+	 padding-left:0;
+	 background:0;
+	}
+	
+	#bbpress-forums a.bbp-author-avatar {
+	float:left;
+	
+	}
+	
+	#bbpress-forums div.bbp-forum-author img.avatar, #bbpress-forums div.bbp-topic-author img.avatar, #bbpress-forums div.bbp-reply-author img.avatar {
+    margin: 20px auto 0px;
+	margin-left:-2em;
+	max-width: 100px;
+}
+
+    #bbp-search-results div.bbp-topic-author img.avatar {
+	margin:1em 0 1em 1em;
+	}
+
+	#bbpress-forums div.bbp-topic-author a.bbp-author-name, #bbpress-forums div.bbp-reply-author a.bbp-author-name {
+    clear: left;
+    display: block;
+	line-height:1.2em;
+	margin-bottom:-1em;
+	padding-bottom:0;
+	}
+	
+	#bbpress-forums div.bbp-reply-ip {
+	display:none;
+	}
+	
+
+	
+	#bbpress-forums div.bbp-forum-content p {
+    margin-left: -40px;
+    padding: 17px 17px 8px 5px;
+    text-align: left;
+	}
+	
+	#bbpress-forums div.bbp-forum-author .bbp-author-role, #bbpress-forums div.bbp-topic-author .bbp-author-role, #bbpress-forums div.bbp-reply-author .bbp-author-role {
+	display:none;
+	}
+	
+   #bbpress-forums div.bbp-reply-author a.bbp-author-name {
+	float:left !important;
+	clear: none !important;
+	padding-top:30px;
+	padding-right:10px;
+	width:110px;
+	height:80px;
+	border-right:1px solid #ddd;
+	font-size: 12px;
+		font-weight:bold;
+	}
+	
+	
+	#bbpress-forums .mycred-my-rank {
+	float:left;
+	width:90px;
+	height:60px;
+	margin-top:-2em;
+	padding-top:1em;
+	padding-bottom:2em;
+	border:0px;
+	color:#4F4F4F;
+    }	
+	
+	#bbpress-forums .mycred-my-rank img {
+	max-width: 45px;
+	}
+	
+	#bbpress-forums .mycred-balance {
+	float:left;
+	width:80px;
+	height:20px;
+	padding-top:0.5em;
+		}
+
+	.mycred-my-rank, .mycred-balance {
+	font-size: 12px;
+	font-style: italic;
+	}
+	
+	
+	 #bbpress-forums div.reply div.bbp-reply-content, #bbpress-forums div.even div.bbp-reply-content, #bbpress-forums div.bbp-reply-content {
+    margin-left: 0em;
+    padding: 15px;
+    text-align: left;
+	float: none;
+	border:1px solid #ddd;
+	background:#fdfdfd;
+	-webkit-border-radius: 5px 5px 5px 5px;
+	border-radius: 5px 5px 5px 5px;
+	margin-bottom:2em;
+	}
+	
+	
+	#bbpress-forums li.bbp-header div.bbp-reply-content, #bbpress-forums li.bbp-footer div.bbp-reply-content {
+	background:0;
+	border:0;
+	margin-bottom:0;
+	}
+	
+
+	#bbpress-forums ul.bbp-replies {
+	border:0px;
+	}
+	
+
+	
+#bbpress-forums div.wp-editor-container {
+border: 1px solid #CCC;
+}
+
+p.form-allowed-tags {
+    display:none;
+}
+
+#bbpress-forums li.bbp-header, #bbpress-forums li.bbp-footer {
+border:none;
+}
+
+#bbpress-forums li.bbp-header {
+    background: none repeat scroll 0% 0% #EAEAEA;
+	border-bottom:3px solid #FFA500;
+}
+
+
+#bbpress-forums .status-closed, #bbpress-forums .status-closed a {
+    color: #4F4F4F;
+	}
+	
+	#bbpress-forums div.bbp-the-content-wrapper textarea.bbp-the-content {
+	padding:1em;
+    font-size: 14px;
+}
+
+
+
+div.bbp-submit-wrapper {
+    float: left;
+}
+
+#secondary-bbpress h1.widget-title {
+    margin-bottom: 0;
+}
+
+#secondary-bbpress ul {
+    list-style:none;
+	margin: 0px;
+}
+
+#secondary-bbpress li {
+	background:#FBFBFB;
+	border-top: 1px solid #EEE;
+	padding:8px;
+	font-size:80%;
+}
+
+#secondary-bbpress li a {
+font-size:120%;
+}
+
+
+.menu-menu-sidebar-forum-container {
+margin:0;
+ }
+ 
+.menu-menu-sidebar-forum-container ul {
+list-style:none;
+display:block;
+margin:0;
+padding-top:1em;
+padding-bottom:1em;
+overflow:hidden;
+}
+
+.menu-menu-sidebar-forum-container ul li {
+	border:0;
+	padding:0;
+	font-size:100%;
+}
+
+.menu-menu-sidebar-forum-container ul li a {
+list-style:none;
+background-color:#3F4753;
+padding:0.4em 0.9em 0.4em 1.2em;
+color:#fff;
+width:100%;
+float:left;
+margin-bottom:2px;
+font-size:105%;
+}
+
+.menu-menu-sidebar-forum-container ul li a:hover  {
+background:#FFA500;
+cursor:pointer;
+}
+
+
+.widget_display_stats dl 
+{
+    background: none repeat scroll 0% 0% #F0F0F0;
+    border-radius: 5px;
+    margin-top: 10px;
+	margin-bottom: 10px;
+	font-size:90%;
+}
+
+.widget_display_stats dt {
+   text-transform: uppercase;
+   font-weight:normal;
+   float:left;
+	border-bottom: 1px solid #E6E6E6;
+	padding:12px 12px 10px 12px;
+	
+}
+.widget_display_stats  dd {
+	font-weight:normal;
+	border-bottom: 1px solid #E6E6E6;
+ 	padding:12px 12px 10px 12px;
+	margin:0;
+	
+}
+
+.widget.buddypress div.avatar-block {
+	margin: 1em 0 0 1em;
+}
+
+/*--------------------------------------------------------------
+BUDDYPRESS
+--------------------------------------------------------------*/
+
+#buddypress span.activity {
+    display: none !important;
+}
+
+#buddypress div#item-header img.avatar {
+max-width:100px;
+margin:5px 25px 19px 0
+}
+
+#buddypress span.activity {
+    font-size: 12px;
+    font-style: italic;
+}
+
+#buddypress div#object-nav.item-list-tabs {
+    margin-top: 5px;
+	border:3px solid #F1F1F1;
+	font-size:110%;
+}
+
+#buddypress div#subnav.item-list-tabs {
+    margin-top: 10px;
+}
+
+#buddypress div#subnav.item-list-tabs {
+    margin: 20px 0px;
+	border-bottom:2px solid #F1F1F1;
+}
+
+#buddypress div#subnav.item-list-tabs ul li.selected a, #buddypress div#subnav.item-list-tabs ul li.current a, #buddypress div#subnav.item-list-tabs ul li a, #buddypress div#subnav.item-list-tabs ul li span  {
+	border: 2px solid #F1F1F1;
+	border-bottom:0px;
+		border-top-right-radius: 4px;
+		border-top-left-radius: 4px;
+		margin-right:5px;
+}
+	
+#buddypress div#subnav.item-list-tabs ul li.selected a, #buddypress div#subnav.item-list-tabs ul li.current a {
+    background-color: #F1F1F1;
+    color: #555;
+    opacity:1.0;
+    font-weight: normal;
+}
+
+#buddypress div#subnav.item-list-tabs ul li a, #buddypress div#subnav.item-list-tabs ul li span {
+	color: #555;
+	background-color: #fff;
+
+}
+
+#buddypress #item-header-content .mycred-my-rank {
+margin-top:0.5em;
+border:0px;
+color:#4F4F4F;
+text-align:left;
+font-weight:normal;
+}
+
+#buddypress #item-header-content .mycred-my-rank img {
+max-width:45px;
+}
+
+#item-body {
+padding: 0 1em 0 1em;
+}
+
+
+.bpnw-notification-list p {
+padding:5px;
+margin-bottom:0px;
+font-size:90%;
+}
+
+.bpnw-notification-list ul {
+list-style: none;
+margin:0px;
+}
+
+.bpnw-notification-list ul li {
+background: none repeat scroll 0% 0% #FBFBFB;
+border: 1px solid #EEE;
+border-left: 7px solid #EEE;
+margin-bottom:2px;
+padding: 0.5em 0.5em 0.5em 1em;
+list-style: outside none none;
+font-weight:bold;
+line-height:1em;
+}
+
+.bpnw-notification-list ul li:hover {
+border: 1px solid #FFA500;
+border-left: 7px solid #FFA500;
+}
+
+.widget.buddypress div.item-avatar img.avatar {
+    margin: 5px;
+}
+
+#buddypress a.disabled, #buddypress button.disabled, #buddypress button.pending, #buddypress div.pending a, #buddypress input.disabled[type="submit"], #buddypress input.pending[type="submit"], #buddypress input[type="submit"][disabled="disabled"], #buddypress input.disabled[type="button"], #buddypress input.pending[type="button"], #buddypress input.disabled[type="reset"], #buddypress input.pending[type="reset"] {
+    border-color: #FFA500;
+	background:#FFA500;
+    color: #000;
+    cursor: default;
+}
+
+#buddypress .comment-reply-link, #buddypress a.button, #buddypress button, #buddypress div.generic-button a, #buddypress input[type="button"], #buddypress input[type="reset"], #buddypress input[type="submit"], #buddypress ul.button-nav li a, a.bp-title-button {
+    background: #FFA500 none repeat scroll 0% 0%;
+    border: 1px solid #FFA500;
+    color: #000;
+    font-size: small;
+    cursor: pointer;
+    outline: 0px none;
+    padding: 4px 10px;
+    text-align: center;
+    text-decoration: none;
+}
+
+#bbpress-forums .bbp-attachments ol li.bbp-atthumb {
+    padding: 0px 1em 0px 0px;
+    height: auto;
+    float: left;
+    padding-right: 2.5em;
+}
+
+
+/*--------------------------------------------------------------
+ADMIN BAR BUDDYPRESS NOTIFICATION
+--------------------------------------------------------------*/
+
+#wpadminbar .quicklinks li#wp-admin-bar-bp-notifications #ab-pending-notifications.alert {
+    background-color: #FECC0A;
+}
+
+#wpadminbar .quicklinks li#wp-admin-bar-bp-notifications #ab-pending-notifications, #wpadminbar .quicklinks li#wp-admin-bar-my-account a span.count, #wpadminbar .quicklinks li#wp-admin-bar-my-account-with-avatar a span.count {
+ background-color: #FECC0A;
+}
+
+/*--------------------------------------------------------------
+MY CRED
+--------------------------------------------------------------*/
+.the-badge {}
+
+.mycred-my-balance-wrapper {float:none; font-weight:bold; color:#F3A614; border-radius:2px; border: 1px dotted  #F3A614; padding:1px; text-align:center; }
+.mycred-my-rank {float:none;font-weight:bold; color:#F3A614; border-radius:2px; border: 1px dotted  #F3A614; padding:1px;  text-align:center; }
+
+
+
+.mycred-rank-progress{}
+.mycred-rank-progress h3.rank-progress-label{}
+.mycred-rank-progress span.current-rank{}
+.mycred-rank-progress span.next-rank{}
+.mycred-rank-progress span.points-progress{}
+
+/* HTML 5 Progress Bar */
+progress[value]  {
+  /* Reset the default appearance */
+  -webkit-appearance: none; -moz-appearance: none; appearance: none;
+
+  /* Get rid of default border in Firefox. */
+  border: none;
+
+  /* Dimensions */
+  width: 100%; height: 2em;
+
+  /* For IE10 */
+  color: orange; 
+}
+
+/* HTML 5 Progress Bar Container */
+progress[value]::-webkit-progress-bar {
+  background-color: #eee;
+}
+
+/* HTML 5 Progress Bar Value */
+progress[value]::-webkit-progress-value {
+	background-color: orange;
+}
+
+progress::-moz-progress-bar { background: orange; }
+
+
+.myCRED-balance { text-align:center;margin-top:8px;}
+.myCRED-balance img {margin:5px;float:center; max-width:140px;}
+
+.mycred-rank-list {margin:0px;}
+.mycred-rank-list ul {	list-style: none; float:left; margin:0em 1.5em 2em 0em; }
+.mycred-rank-list img {width:70px;}
+.mycred-rank-list p { }
+.mycred-rank-list .req { line-height: 1.6em; font-size:85%;}
+
+
+
+ol.myCRED-leaderboard, ul.myCRED-leaderboard {
+  list-style: none;
+  margin:0;
+}
+
+ol.myCRED-leaderboard li {
+    border-bottom: 1px solid #CCC;
+    padding: 6px;
+}
+
+
+table.mycred-hook-table td {
+border-bottom:1px solid #ccc;
+padding:4px;
+}
+
+.mycred-history-wrapper td  {
+border-bottom:1px solid #ccc;
+padding:4px;
+}
+
+.mycred-history-wrapper { 
+
+}
+
+.mycred-history-wrapper ul { 
+list-style: none;
+margin: 0 1em 2em 0;
+}
+
+.mycred-history-wrapper ul.pagination {
+padding:0;
+margin:0em;
+}
+
+.mycred-history-wrapper li { 
+float:left;
+padding:4px;
+}
+
+.mycred-history-wrapper li.active {
+font-weight:bold;
+}
+
+
+.mycred-video-wrapper {
+margin-bottom:2em;
+border-right:0px;
+}
+
+/* Responsive Videos */
+.mycred-video-wrapper {
+	position: relative;
+		padding-bottom: 56.25%;
+	padding-top: 0px;
+	height: 0;
+	overflow: hidden;
+}
+
+.mycred-video-wrapper iframe,
+.mycred-video-wrapper object,
+.mycred-video-wrapper embed {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+
+
+.mycred-video-update-box {
+font-size:110%;
+color:#FFA500;
+font-weight:bold;
+padding:0.5em;
+}
+
+ol.myCRED-leaderboard img.avatar {
+    border-radius: 100px;
+    margin-right: 10px;
+    margin-bottom: -10px;
+}
+
+ol.myCRED-leaderboard li {
+    border-bottom: 1px solid #CCC;
+    margin-bottom: 10px;
+    margin-top: 10px;
+	padding-bottom:15px;
+}
+
+/*--------------------------------------------------------------
+Olevmedia Shortcodes
+--------------------------------------------------------------*/
+.omsc-toggle {
+    border: 0px;
+}
+
+.omsc-toggle-title  {
+
+    padding: 0.5em 0px;
+	 text-align: left;
+    font-size: 110%;
+	background-color: #FBFBFB;
+		margin-bottom:0.5em;
+		padding-left: 3em;
+}
+
+.omsc-toggle-inner {
+    display: none;
+    padding: 1em 1em 1em 1em;
+	 border: 1px solid #EEE;
+}
+
+
+.widget-area .omsc-toggle {
+    border: 0px;
+	margin-top:0;
+}
+
+.widget-area .omsc-toggle-title:hover, .widget-area .omsc-toggle.omsc-expanded .omsc-toggle-title {
+    font-family: "Roboto",sans-serif;
+    font-size: 110%;
+    font-weight: normal;
+    padding: 0.5em 0px;
+    margin-bottom: 0em;
+    border-top: 3px solid #EEE;
+    background-color: #FBFBFB;
+    text-align: center;
+}
+
+.widget-area  .omsc-toggle-title   {
+
+    padding: 0.5em 0px;
+	 text-align: center;
+	font-family: "Roboto",sans-serif;
+    font-size: 110%;
+	background-color: #FBFBFB;
+	    border-top: 3px solid #EEE;
+		border-bottom:1px solid #EEE;
+		margin-bottom:0.5em;
+}
+
+.widget-area  .omsc-toggle-inner  {
+    display: none;
+    padding: 1em 1em 1em 1em;
+	 border: 1px solid #EEE;
+}
+
+
+.widget-area .omsc-toggle-title:hover, .widget-area .omsc-toggle.omsc-expanded .omsc-toggle-title {
+    border-top: 3px solid #FFE681;
+    background-color: #FFF2BE;
+}
+
+.widget-area .omsc-toggle-title {
+	background-color: #FFF2BE;
+	border-top: 3px solid #FFE681;
+	border-bottom:0px;
+	margin-bottom: 0px;
+}
+
+.widget-area  .omsc-toggle-inner {
+	 border: 0px;
+	 }
+
+/*--------------------------------------------------------------
+Cookie Consent
+--------------------------------------------------------------*/
+.cookie-bar-bar .ctcc-inner {
+    min-height: 230px;
+}
+
+/*--------------------------------------------------------------
+Responsive
+--------------------------------------------------------------*/
+
+
+@media screen and (max-width: 500px) {
+
+
+.cookie-bar-bar .ctcc-inner {
+    min-height: 230px;
+}
+
+.col-xs-1, .col-xs-2, .col-xs-3, .col-xs-4, .col-xs-5, .col-xs-6, .col-xs-7, .col-xs-8, .col-xs-9, .col-xs-10, .col-xs-11, .col-xs-12, .col-sm-1, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6, .col-sm-7, .col-sm-8, .col-sm-9, .col-sm-10, .col-sm-11, .col-sm-12, .col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6, .col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12, .col-lg-1, .col-lg-2, .col-lg-3, .col-lg-4, .col-lg-5, .col-lg-6, .col-lg-7, .col-lg-8, .col-lg-9, .col-lg-10, .col-lg-11, .col-lg-12 {
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+
+	
+#bbpress-forums, #bbpress-forums ul.bbp-lead-topic, #bbpress-forums ul.bbp-topics, #bbpress-forums ul.bbp-forums, #bbpress-forums ul.bbp-replies, #bbpress-forums ul.bbp-search-results {
+font-size:12px;
+}
+
+#bbpress-forums p {
+font-size:12px;
+}
+
+#bbpress-forums h3 {
+margin-top:1.5em;
+}
+
+#bbpress-forums div.bbp-forum-author img.avatar, #bbpress-forums div.bbp-topic-author img.avatar, #bbpress-forums div.bbp-reply-author img.avatar {
+    border: medium none;
+    max-width: 60px;
+    padding: 0px;
+    margin: 20px auto 0px;
+    float: none;
+	display:block;
+}
+
+#bbpress-forums li.bbp-forum-info a, li.bbp-topic-title a {
+font-size:120%;
+}
+
+#bbpress-forums div.bbp-reply-author img.avatar {
+    position: relative;
+}
+
+#buddypress div#item-header {
+text-align:center;
+}
+
+#buddypress div#item-header img.avatar {
+max-width:100px;
+float: left;
+margin:0.6em 1em 1em 1em;
+}
+
+/* Forum Profil */
+
+	    #bbpress-forums div.bbp-forum-author, #bbpress-forums div.bbp-reply-author {
+    float: left;
+    text-align: center;
+	margin: 0 2em 0em 0em;
+	width:100%;
+	background: url("./img/dreieck_m.png") bottom center no-repeat;
+	padding-bottom:2em;
+	}
+	
+	 #bbpress-forums div.reply div.bbp-reply-author, #bbpress-forums div.even div.bbp-reply-author {
+    float: left;
+    text-align: center;
+	margin: 0 2em 0em 0em;
+	width:100%;
+	background: url("./img/dreieck_m.png") bottom center no-repeat;
+	padding-bottom:2em;
+	}
+	
+	 #bbp-search-results div.reply div.bbp-reply-author, div.even div.bbp-reply-author {
+	 margin-left:-4em;
+	 }
+	
+	#bbpress-forums a.bbp-author-avatar {
+	float:none;
+	}
+	
+	#bbpress-forums div.bbp-forum-author img.avatar, #bbpress-forums div.bbp-topic-author img.avatar, #bbpress-forums div.bbp-reply-author img.avatar {
+    margin: 20px auto 0px;
+	}
+
+   #bbpress-forums div.bbp-reply-author a.bbp-author-name {
+	float:none!important;
+	clear: left !important;
+	padding-top:10px;
+	width:100%;
+	height:30px;
+	border-right:0;
+	}
+	
+	#bbpress-forums .mycred-my-rank {
+	float:none;
+	width:100%;
+	height:100%;
+	margin-top:0;
+	padding-top:0.5em;
+	padding-bottom:0.5em;
+	font-size: 11px;
+	border:0;
+	color:#4F4F4F;
+    }	
+	
+	#bbpress-forums .mycred-my-rank img {
+	max-width: 35px;
+	background:#ddd;
+	}
+	
+	
+	#bbpress-forums .mycred-balance {
+	float:none;
+	width:100%;
+	height:100%;
+	padding-top:0;
+	font-size: 11px;
+	}
+			
+	#bbpress-forums div.reply div.bbp-reply-content, #bbpress-forums div.even div.bbp-reply-content{
+	float: left;
+	margin-top:0em;
+	text-align:center;
+	width:99%;
+	-webkit-border-radius:0;
+	border-radius:0;
+	margin-bottom:3em;
+	}
+
+
+.responsive-tabs-wrapper {
+    margin-top: -10px;
+}
+
+#buddypress div.item-list-tabs ul li {
+    float: none;
+	border-top:1px solid #F1F1F1;
+	
+}
+
+#buddypress div.activity-meta a {
+    margin:15px;
+	padding:3px;
+}
+
+#bbpress-forums div.bbp-reply-author .bbp-author-role {
+    font-size: 11px;
+    font-style: italic;
+}
+
+#bbpress-forums .bbp-attachments ol li.bbp-atthumb {
+    float: none;
+    padding-right: 0;
+}
+
+.mycred-my-rank img {
+	max-width: 40px;
+}
+
+
+#buddypress div#item-header div#item-actions {
+    float: left;
+    width: 100%;
+    text-align: left;
+	margin:0px;
+	margin-bottom:10px;
+	padding:3px;
+	border: 3px dotted #F1F1F1;
+}
+
+
+#buddypress div#item-header ul {
+    margin-bottom: 5px;
+    overflow: none;
+	float:left
+}
+
+.mycred-rank-list {
+    text-align: center;
+    margin-left: 2em;
+}
+
+}
+
+

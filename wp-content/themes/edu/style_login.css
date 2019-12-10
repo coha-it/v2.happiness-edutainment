@@ -1,0 +1,77 @@
+/*
+Extra Style Sheet to change Login-Form
+https://codex.wordpress.org/Customizing_the_Login_Form
+!important;
+*/
+
+.login form {
+    margin-top: 0px;
+    box-shadow: none;
+	border: 1px solid #EBE9E1;
+border-bottom-left-radius: 8px;
+border-bottom-right-radius: 8px;
+}
+
+.login .message {
+	margin-bottom: 20px;
+}
+
+
+.login h1 a {
+    background-image: url(img/chedu_logo_v2.png); 
+    background-size: 332px 59px;
+    height: 59px;
+    width: 332px;
+}
+
+.login a:hover {
+color: #FFA500 !important;
+}
+
+
+.wp-core-ui .button-primary {
+    background: #FFA500;
+    border:none;
+     box-shadow: none;
+    color: #fff;
+    text-decoration: none;
+    text-shadow: none;
+	font-weight:bold;
+	font-size:110%;
+	 margin-top: -3px;
+border-radius: 3px;
+box-shadow: 1px 4px 0px 0px rgba(159, 128, 0, 0.44);
+}
+
+.wp-core-ui .button, .wp-core-ui .button-secondary {
+    color: #fff;
+    border:none;
+	font-weight:bold;
+	font-size:110%;
+    background: #FFA500;
+      box-shadow: none;
+    vertical-align: top;
+	 text-shadow: none;
+	 margin-top: -3px;
+border-radius: 3px;
+box-shadow: 1px 4px 0px 0px rgba(159, 128, 0, 0.44);
+}
+
+.wp-core-ui .button:hover, .wp-core-ui .button-secondary:hover, .wp-core-ui .button-primary:hover {
+background: #FFA500;
+  box-shadow: none;
+  border:none;
+   margin-top: 0px;
+}
+
+
+
+input[type=text]:focus, input[type=search]:focus, input[type=radio]:focus, input[type=tel]:focus, input[type=time]:focus, input[type=url]:focus, input[type=week]:focus, input[type=password]:focus, input[type=checkbox]:focus, input[type=color]:focus, input[type=date]:focus, input[type=datetime]:focus, input[type=datetime-local]:focus, input[type=email]:focus, input[type=month]:focus, input[type=number]:focus, select:focus, textarea:focus {
+    border-color: #FFA500;
+    -webkit-box-shadow: 0 0 2px rgba(30,140,190,.8);
+    box-shadow: 0 0 2px rgba(30,140,190,.8);
+}
+
+.login #login_error, .login .message {
+    border-left: 4px solid #FFA500;
+}
