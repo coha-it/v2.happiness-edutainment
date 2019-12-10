@@ -183,12 +183,12 @@ if ( ( !class_exists( 'LD_REST_Courses_Groups_Controller_V1' ) ) && ( class_exis
 			
 			// Ensure a search string is set in case the orderby is set to 'relevance'.
 			if ( ! empty( $request['orderby'] ) && 'relevance' === $request['orderby'] && empty( $request['search'] ) ) {
-				return new WP_Error( 'rest_no_search_term_defined', __( 'You need to define a search term to order by relevance.' ), array( 'status' => 400 ) );
+				return new WP_Error( 'rest_no_search_term_defined', __( 'You need to define a search term to order by relevance.', 'learndash' ), array( 'status' => 400 ) );
 			}
 
 			// Ensure an include parameter is set in case the orderby is set to 'include'.
 			if ( ! empty( $request['orderby'] ) && 'include' === $request['orderby'] && empty( $request['include'] ) ) {
-				return new WP_Error( 'rest_orderby_include_missing_include', __( 'You need to define an include parameter to order by include.' ), array( 'status' => 400 ) );
+				return new WP_Error( 'rest_orderby_include_missing_include', __( 'You need to define an include parameter to order by include.', 'learndash' ), array( 'status' => 400 ) );
 			}
 
 			// Retrieve the list of registered collection query parameters.
@@ -302,7 +302,7 @@ if ( ( !class_exists( 'LD_REST_Courses_Groups_Controller_V1' ) ) && ( class_exis
 			$max_pages = ceil( $total_posts / (int) $posts_query->query_vars['posts_per_page'] );
 
 			if ( $page > $max_pages && $total_posts > 0 ) {
-				return new WP_Error( 'rest_post_invalid_page_number', __( 'The page number requested is larger than the number of pages available.' ), array( 'status' => 400 ) );
+				return new WP_Error( 'rest_post_invalid_page_number', __( 'The page number requested is larger than the number of pages available.', 'learndash' ), array( 'status' => 400 ) );
 			}
 
 			$response->header( 'X-WP-Total', (int) $total_posts );

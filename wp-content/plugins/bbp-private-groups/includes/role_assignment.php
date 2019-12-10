@@ -60,10 +60,10 @@ Function pg_role_assignment () { ?>
 			<tr valign="top">
 				<td colspan=2>
 				<p>
-					<?php _e('You can optionally select to assign roles on login for users <strong>who do not have a role assigned</strong>. This is useful where your membership plugin does not use Wordpress registration, so registration does not work! ', 'bbp-private-groups'); ?>
+					<?php _e('You can optionally select to assign a group on login for users <strong>who do not have a group assigned</strong>. This is useful where your membership plugin does not use Wordpress registration, so registration does not work! ', 'bbp-private-groups'); ?>
 				</p>
 				<p>
-					<?php _e('You can assign a <i> different </i> role to individual users manually, but if you change an individual user to have no groups, then the group for that role will be assigned on next login as the plugin sees this as blank!', 'bbp-private-groups'); ?>
+					<?php _e('You can assign a <i> different </i> group to individual users manually, but if you change an individual user to have no groups, then the group for that role will be assigned on next login as the plugin sees this as blank!', 'bbp-private-groups'); ?>
 				</p>
 				</td>
 			</tr>

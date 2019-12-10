@@ -43,7 +43,7 @@ if ( ( !class_exists( 'LD_REST_Lessons_Controller_V1' ) ) && ( class_exists( 'LD
 			);
 			if ( isset( $schema['properties']['password'] ) ) {
 				$get_item_args['password'] = array(
-					'description' => esc_html__( 'The password for the post if it is password protected.' ),
+					'description' => esc_html__( 'The password for the post if it is password protected.', 'learndash' ),
 					'type'        => 'string',
 				);
 			}
@@ -53,7 +53,7 @@ if ( ( !class_exists( 'LD_REST_Lessons_Controller_V1' ) ) && ( class_exists( 'LD
 				array(
 					'args' => array(
 						'id' => array(
-							'description' => esc_html__( 'Unique identifier for the object.' ),
+							'description' => esc_html__( 'Unique identifier for the object.', 'learndash' ),
 							'type'        => 'integer',
 						),
 					),
@@ -77,7 +77,7 @@ if ( ( !class_exists( 'LD_REST_Lessons_Controller_V1' ) ) && ( class_exists( 'LD
 							'force' => array(
 								'type'        => 'boolean',
 								'default'     => false,
-								'description' => esc_html__( 'Whether to bypass trash and force deletion.' ),
+								'description' => esc_html__( 'Whether to bypass trash and force deletion.', 'learndash' ),
 							),
 						),
 					),

@@ -40,6 +40,19 @@ final class Haet_Mail_Builder
         add_filter( 'mce_external_plugins', array( $this, 'tinymce_external_plugins' ) );
 
         add_filter( 'haet_mail_modify_styled_mail', array( $this, 'modify_styled_mail' ) );
+
+        // make post type translateabble if polylang is active
+        add_filter( 'pll_get_post_types', function( $post_types, $is_settings ) {
+            if ( $is_settings ) {
+                // hides from the list of custom post types in Polylang settings
+                unset( $post_types['wphtmlmail_mail'] );
+            } else {
+                // enables language and translation management
+                $post_types['wphtmlmail_mail'] = 'wphtmlmail_mail';
+            }
+            $post_types['wphtmlmail_mail'] = 'wphtmlmail_mail';
+            return $post_types;
+        }, 10, 2 );
     }
 
     public function register_post_type(){        
@@ -108,7 +121,7 @@ final class Haet_Mail_Builder
         ?>
         <div class="haet-mailbuilder-header clearfix">
             <h4 class="email-name">
-                WooCommerce <?php echo str_replace('_',' ', str_replace('WC_Email_', '', get_the_title( ) ) ); ?>
+                <?php echo str_replace('_',' ', str_replace('WC_Email_', '', get_the_title( ) ) ); ?>
             </h4>
             <div class="header-buttons">
                 <?php do_action( 'haet_mailbuilder_header_buttons', $post ); ?>
@@ -212,19 +225,34 @@ final class Haet_Mail_Builder
 
         wp_enqueue_script( 'code-editor' );
         wp_enqueue_style( 'code-editor' );
+
+        $header_hidden = get_post_meta( $post->ID, 'mailbuilder_header_hidden', true );
+        $footer_hidden = get_post_meta( $post->ID, 'mailbuilder_footer_hidden', true );
         ?>
         </style>
         <input type="hidden" name="mailbuilder_json" id="mailbuilder_json" value='<?php echo $value; ?>'>
+        <input type="hidden" name="mailbuilder_header_hidden" id="mailbuilder_header_hidden" value="<?php echo $header_hidden; ?>">
+        <input type="hidden" name="mailbuilder_footer_hidden" id="mailbuilder_footer_hidden" value="<?php echo $footer_hidden; ?>">
         <div id="mailbuilder-editor">
             <br>
             <div class="container">
-                <div id="mailbuilder-header">
+                <div id="mailbuilder-header" class="<?php echo ( $header_hidden ? 'mailbuilder-hidden' : '' ); ?>">
                     <?php $this->output_template_header_for_mailbuilder( $template ); ?>
+                    <a href="#" class="mailbuilder-hide-button" data-status-field="mailbuilder_header_hidden">
+                        <span class="dashicons dashicons-visibility"></span>
+                        <span class="dashicons dashicons-hidden"></span>
+                        <?php _e( 'show / hide header for this email', 'wp-html-mail' ); ?>
+                    </a>
                 </div>
                 <?php $this->output_template_content_for_mailbuilder( $template ); ?>
                 
-                <div id="mailbuilder-footer">
+                <div id="mailbuilder-footer" class="<?php echo ( $footer_hidden ? 'mailbuilder-hidden' : '' ); ?>">
                     <?php $this->output_template_footer_for_mailbuilder( $template ); ?>
+                    <a href="#" class="mailbuilder-hide-button" data-status-field="mailbuilder_footer_hidden">
+                        <span class="dashicons dashicons-visibility"></span>
+                        <span class="dashicons dashicons-hidden"></span>
+                        <?php _e( 'show / hide footer for this email', 'wp-html-mail' ); ?>
+                    </a>
                 </div>
             </div>
             <br><br><br>
@@ -315,6 +343,12 @@ final class Haet_Mail_Builder
 
         if( isset( $_POST['mailbuilder_css_mobile'] ) )
             update_post_meta( $post_id, 'mailbuilder_css_mobile', $_POST['mailbuilder_css_mobile'] );
+
+        if( isset( $_POST['mailbuilder_header_hidden'] ) )
+            update_post_meta( $post_id, 'mailbuilder_header_hidden', $_POST['mailbuilder_header_hidden'] );
+
+        if( isset( $_POST['mailbuilder_footer_hidden'] ) )
+            update_post_meta( $post_id, 'mailbuilder_footer_hidden', $_POST['mailbuilder_footer_hidden'] );
     }
 
 
@@ -331,7 +365,7 @@ final class Haet_Mail_Builder
             <?php
             global $post;
             $content_types = array();
-            $content_types = apply_filters( 'haet_mail_content_types', $content_types, $post->post_title );
+            $content_types = apply_filters( 'haet_mail_content_types', $content_types, $post->post_title, $post );
             ?>
 
             <ul class="mb-add-types">
@@ -360,9 +394,9 @@ final class Haet_Mail_Builder
             $post_type = get_post_type( $post->ID );
             if ( $post_type == 'wphtmlmail_mail' ){
                 wp_enqueue_style( 'wp-color-picker' );
-                wp_enqueue_script('haet_mailbuilder_js',  HAET_MAIL_URL.'/js/mailbuilder.js', array( 'wp-color-picker', 'jquery-ui-dialog', 'jquery-ui-sortable', 'jquery'),false, true);
-                wp_enqueue_style('haet_mailbuilder_css',  HAET_MAIL_URL.'/css/mailbuilder.css');
-                wp_enqueue_style('haet_mail_admin_style',  HAET_MAIL_URL.'/css/style.css');
+                wp_enqueue_script('haet_mailbuilder_js',  HAET_MAIL_URL.'/js/mailbuilder.js', array( 'wp-color-picker', 'jquery-ui-dialog', 'jquery-ui-sortable', 'jquery'),'2.9', true);
+                wp_enqueue_style('haet_mailbuilder_css',  HAET_MAIL_URL.'/css/mailbuilder.css', array(), '2.9');
+                wp_enqueue_style('haet_mail_admin_style',  HAET_MAIL_URL.'/css/style.css', array(), '2.9');
 
                 $enqueue_data = array(
                         'translations'  =>  array(),
@@ -389,11 +423,17 @@ final class Haet_Mail_Builder
         if( !isset($options['email_post_ids']) )
             $options['email_post_ids'] = array();
 
-        if( !isset( $options['email_post_ids'][$email_name] ) )
+        if( !isset( $options['email_post_ids'][$email_name] ) ||  !$options['email_post_ids'][$email_name] )
             $options['email_post_ids'][$email_name] = $this->create_email( $email_name );
 
-        if( !$options['email_post_ids'][$email_name] || !get_post( $options['email_post_ids'][$email_name] ) )
-            $options['email_post_ids'][$email_name] = $this->create_email( $email_name ); 
+        if( !get_post( $options['email_post_ids'][$email_name] ) ){
+            // just in case polylang is installed it may have returned no post because the email doesn't exist in current language
+            // so we check once again wheter it exists in other languages. 
+            // missing translations are created a few lines below
+            if( !function_exists('pll_get_post') || !pll_get_post( $options['email_post_ids'][$email_name] ) ) 
+                $options['email_post_ids'][$email_name] = $this->create_email( $email_name ); 
+        }
+            
 
         update_option('haet_mail_options', $options );
 
@@ -419,6 +459,23 @@ final class Haet_Mail_Builder
                 );
          
                 do_action( 'wpml_set_element_language_details', $set_language_args );
+            }
+
+            return $translated_email_post_id;
+        }elseif( $email_post_id && function_exists('pll_get_post') ){ // if POLYLANG is in use we have a look for translations
+            $translated_email_post_id = pll_get_post( $email_post_id );
+            if( !$translated_email_post_id ){
+                $translated_email_post_id = $this->create_email( $email_name );
+                // set language of the attachment
+                PLL()->model->post->set_language($translated_email_post_id, pll_current_language());
+                
+                $translations = PLL()->model->post->get_translations($email_post_id);
+		        if (!$translations && $lang = PLL()->model->post->get_language($email_post_id)) {
+			        $translations[$lang->slug] = $email_post_id;
+                }
+                $translations[pll_current_language()] = $tr_id;
+                PLL()->model->post->save_translations($tr_id, $translations);
+
             }
 
             return $translated_email_post_id;
@@ -483,9 +540,9 @@ final class Haet_Mail_Builder
     }
 
 
-    public function get_contenttype_object( $type, $email_name ){
+    public function get_contenttype_object( $type, $email_name, $email_post ){
         $content_types = array();
-        $content_types = apply_filters( 'haet_mail_content_types', $content_types, $email_name );
+        $content_types = apply_filters( 'haet_mail_content_types', $content_types, $email_name, $email_post );
 
         if ( array_key_exists( $type , $content_types ) ){
             $content_class = $content_types[$type]['elementclass'];
@@ -510,44 +567,51 @@ final class Haet_Mail_Builder
             $email_name = $matches[1][0];
             if( $email_name ){
                 $email_id = $this->get_email_post_id( $email_name );
-
+                
+                // email specific CSS
                 $custom_css_desktop = get_post_meta( $email_id, 'mailbuilder_css_desktop', true );
                 $custom_css_mobile = get_post_meta( $email_id, 'mailbuilder_css_mobile', true );
 
                 $mailbuilder_json = get_post_meta( $email_id, 'mailbuilder_json', true );
                 $mailbuilder_array = json_decode( $mailbuilder_json, true );
                 if ( $mailbuilder_array != null ):
-                    $desktop_styles = '';
-                    $mobile_styles = '';
+                    $element_styles_desktop = '';
+                    $element_styles_mobile = '';
                     foreach ( $mailbuilder_array as $element_content ):
                         if( isset( $element_content['settings'] ) && isset( $element_content['settings']['styles'] ) ){
                             foreach ( $element_content['settings']['styles']['desktop'] as $attribute => $value ) {
                                 if( $value ){
                                     if( stripos( $attribute, 'padding' ) !== false )
-                                        $desktop_styles .= ' #' . $element_content['id'] . ' .container-padding{ ' . $attribute . ': ' . $value . '; } ' . PHP_EOL;
+                                        $element_styles_desktop .= ' #' . $element_content['id'] . ' .container-padding{ ' . $attribute . ': ' . $value . '; } ' . PHP_EOL;
                                     else
-                                        $desktop_styles .= ' #' . $element_content['id'] . '{ ' . $attribute . ': ' . $value . '; } ' . PHP_EOL;
+                                        $element_styles_desktop .= ' #' . $element_content['id'] . '{ ' . $attribute . ': ' . $value . '; } ' . PHP_EOL;
                                 }
                             }
 
                             foreach ( $element_content['settings']['styles']['mobile'] as $attribute => $value ) {
                                 if( $value ){
                                     if( stripos( $attribute, 'padding' ) !== false )
-                                        $mobile_styles .= ' table#' . $element_content['id'] . '[id="' . $element_content['id'] . '"] td[class*="container-padding"]{ ' . $attribute . ': ' . $value . '; } ' . PHP_EOL;
+                                        $element_styles_mobile .= ' table#' . $element_content['id'] . '[id="' . $element_content['id'] . '"] td[class*="container-padding"]{ ' . $attribute . ': ' . $value . '; } ' . PHP_EOL;
                                     else
-                                        $mobile_styles .= ' table#' . $element_content['id'] . '[id="' . $element_content['id'] . '"] { ' . $attribute . ': ' . $value . '; } ' . PHP_EOL;
+                                        $element_styles_mobile .= ' table#' . $element_content['id'] . '[id="' . $element_content['id'] . '"] { ' . $attribute . ': ' . $value . '; } ' . PHP_EOL;
                                 }
                             }
                         }
                         
                     endforeach;
 
-                    $desktop_styles .= ' ' . $custom_css_desktop;
-                    $mobile_styles .= ' ' . $custom_css_mobile;
-                    
-                    $message = str_replace('/**** ADD CSS HERE ****/', $desktop_styles . '/**** ADD CSS HERE ****/', $message);
-                    $message = str_replace('/**** ADD MOBILE CSS HERE ****/', $mobile_styles . '/**** ADD MOBILE CSS HERE ****/', $message);
+                    $custom_css_desktop .= ' ' . $element_styles_desktop;
+                    $custom_css_mobile = ' @media screen and (max-width: 400px) { ' . PHP_EOL . $custom_css_mobile . ' ' . $element_styles_mobile . ' } ';
+                    $message = str_replace('/**** ADD CSS HERE ****/', $custom_css_desktop . '/**** ADD CSS HERE ****/', $message);
+                    $message = str_replace('/**** ADD MOBILE CSS HERE ****/', $custom_css_mobile . '/**** ADD MOBILE CSS HERE ****/', $message);
                 endif;
+
+                // optionally remove header and footer since 2.9
+                if( get_post_meta( $email_id, 'mailbuilder_header_hidden', true ) )
+                    $message = preg_replace('/(.*)<!--header-table-->.*<!--\/header-table-->(.*)/smU', '$1 $2', $message);
+                if( get_post_meta( $email_id, 'mailbuilder_footer_hidden', true ) )
+                    $message = preg_replace('/(.*)<!--footer-table-->.*<!--\/footer-table-->(.*)/smU', '$1 $2', $message);
+        
             }
         }
         return $message;
@@ -563,7 +627,7 @@ final class Haet_Mail_Builder
             echo '<!--mailbuilder[' . $email_name . ']-->';
             echo '<!--mailbuilder-content-start-->';
             foreach ( $mailbuilder_array as $element_content ):
-                $content_element = Haet_Mail_Builder()->get_contenttype_object( $element_content->type, $email_name );
+                $content_element = Haet_Mail_Builder()->get_contenttype_object( $element_content->type, $email_name, get_post( $email_id ) );
                 if( $content_element )
                     $content_element->print_content( $element_content, $settings );
             endforeach;

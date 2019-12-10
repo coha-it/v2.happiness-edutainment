@@ -2,10 +2,10 @@
 Contributors: intoxstudio, devinstitute, freemius
 Donate link: #
 Tags: custom sidebars, sidebar, hide sidebar, display widgets, widget, bbpress, buddypress, sidebar manager
-Requires at least: 4.5
+Requires at least: 4.7
 Requires PHP: 5.6
-Tested up to: 5.0
-Stable tag: 3.8
+Tested up to: 5.3
+Stable tag: 3.10.1
 License: GPLv3
 
 Display custom sidebars and widgets on any post, page, category etc. Supports bbPress, BuddyPress, WooCommerce, WPML, and more.
@@ -20,7 +20,7 @@ If your site or web app is big or in growth, Content Aware Sidebars is the ideal
 
 ####Add Unlimited Sidebars & Widget Areas
 
-Replace your theme sidebars on different conditions, or insert sidebars with shortcodes. With the All-in-one Sidebar Manager, you can easily activate and deactivate widget areas, and you can even schedule them for specific times. 
+Replace your theme sidebars on different conditions, or insert sidebars with shortcodes. With the All-in-one Sidebar Manager, you can easily activate and deactivate widget areas, and you can even schedule them for specific times.
 
 Sidebars - Quick Select&copy; lets you add or select widget areas directly when editing a post or page.
 
@@ -79,7 +79,7 @@ Content Aware Sidebars automatically supports Custom Post Types and Taxonomies c
 * **Widget Areas in Theme Hooks:** Intelligently insert new widget areas into your theme without coding
 * **Automatic Widgets Backup:** Easily restore any changed or deleted widgets
 * **Widget Cleaner:** Save memory and remove clutter by disabling and removing unused widgets
-* **Extended User Visibility:** Show or hide widget areas User Roles, BuddyPress Groups, and more
+* **Extended User Visibility:** Show or hide widget areas for User Roles, BuddyPress Groups, and more
 * **Time & Weekday Schedule**: Display widget areas only in select time ranges on given days
 * **Container Widget:** Turn widget areas into reusable blocks and show the same widgets in different places
 * **Duplicate Widget Areas:** A real time-saver when adding new similar widget areas
@@ -91,6 +91,7 @@ Content Aware Sidebars automatically supports Custom Post Types and Taxonomies c
 Display your widget areas on these additional conditions:
 
 * URLs + wildcards
+* Referrer URLs + wildcards
 * Content from any day, month, year
 * BuddyPress Groups
 
@@ -113,7 +114,7 @@ Upgrade at anytime instantly and securely from the Admin Dashboard, or [click he
 
 Of course not.
 
-Content Aware Sidebars is praised by users for its unparalleled sidebar and widget visibility options. It's the only plugin that allows you to display widget areas on literally any condition without any code. 
+Content Aware Sidebars is praised by users for its unparalleled sidebar and widget visibility options. It's the only plugin that allows you to display widget areas on literally any condition without any code.
 
 = Will this sidebar plugin work with my theme? =
 
@@ -157,39 +158,48 @@ Of course! Check out the links below:
 
 == Upgrade Notice ==
 
-= 3.5.1 = 
-
-* Content Aware Sidebars data in your database will be updated automatically. It is highly recommended to backup this data before updating the plugin.
-* Data from version 0.8 and below will not be updated during this process.
-
 == Changelog ==
 
-= 3.8 =
+[Follow development and see all changes on GitHub](https://github.com/intoxstudio/content-aware-sidebars)
 
-* Added: Overhauled and simplified UI
-* Added: quick-add conditions
-* Added: minimum wordpress version 4.5
-* Added: minimum php version 5.6
-* Updated: user visibility now has categories
-* Updated: introduction tour
-* Updated: singulars/archives condition setting replaced with page type setting
-* Updated: admin menu renamed to "content aware"
-* Updated: freemius sdk
+####Highlights
+
+= 3.10.1 =
+
+* Fixed: minor bug when using quick select with woocommerce
+
+= 3.10 =
+
+* Added: bulk actions for activation and deactivation
+* Added: filter to disable enhanced widget manager
+* Added: filter to disable sidebar quick select
+* Added: hide sidebar quick select from special pages
+* Added: wordpress 5.3 support
+* Added: minimum wordpress version 4.7
+* Updated: ui improvements
 * Updated: wp-content-aware-engine library
-* Updated: wp-db-updater library
-* Fixed: searching for attachments in conditions
-* Fixed: shop condition not working due to bug in woocommerce
-* Fixed: some conditions not displaying properly after save
-* Fixed: better compatibility with plugins loading unnecessary admin scripts
+* Removed: bundled spanish translations - now handled with automatic language pack
 
 **Pro Plan:**
 
-* Added: widget cleaner
-* Added: buddypress groups in user visibility
-* Added: "author of content" in user visibility
-* Updated: performance improvements for url condition
-* Updated: performance improvements for date condition
-* Fixed: no longer necessary to enable styling before using widget area designer
-* Fixed: time schedule now shows time format from settings (12/24h)
+* Added: sticky option in widget area designer
+* Added: duplication now includes widgets
+
+= 3.9 =
+
+* Added: 1-click activation in widget area list screen
+* Added: categories and search in dropdown for display condition types
+* Added: minimum wordpress version 4.6
+* Updated: ui improvements
+* Updated: wp-content-aware-engine library
+* Updated: wp-db-updater library
+* Updated: wp-pointer-tour library
+* Fixed: activation datepicker now shows time format from settings (12/24h)
+
+**Pro Plan:**
+
+* Added: display condition for referrer url
+* Added: predefined infuse locations for genesis framework, astra theme
+* Updated: predefined infuse locations for generatepress theme
 
 See changelog.txt for previous changes.

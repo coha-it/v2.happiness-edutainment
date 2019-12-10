@@ -12,8 +12,9 @@ function learndash_editor_scripts() {
 	wp_enqueue_script(
 		'ldlms-blocks-js',
 		plugins_url( $blockPath, __FILE__ ),
-		[ 'wp-i18n', 'wp-element', 'wp-blocks', 'wp-components' ],
-		filemtime( plugin_dir_path(__FILE__) . $blockPath )
+		[ 'wp-i18n', 'wp-element', 'wp-blocks', 'wp-components', 'wp-editor' ],
+		//filemtime( plugin_dir_path(__FILE__) . $blockPath )
+		LEARNDASH_SCRIPT_VERSION_TOKEN
 	);
 
 	/**
@@ -22,24 +23,35 @@ function learndash_editor_scripts() {
 	$ldlms = array(
 		'settings' => array(),
 	);
-	$ldlms_settings['settings']['custom_labels'] = get_option( 'learndash_settings_custom_labels' );
-	foreach ( $ldlms_settings['settings']['custom_labels'] as $key => $val ) {
-		if ( empty( $val ) ) {
-			$ldlms_settings['settings']['custom_labels'][ $key ] = LearnDash_Custom_Label::get_label( $key );
-			if ( substr( $key, 0, strlen( 'button') ) != 'button' ) {
-				$ldlms_settings['settings']['custom_labels'][ $key . '_lower' ] = LearnDash_Custom_Label::label_to_lower( $key );
-				$ldlms_settings['settings']['custom_labels'][ $key . '_slug' ] = LearnDash_Custom_Label::label_to_slug( $key );
+	//$ldlms_settings['settings']['custom_labels'] = get_option( 'learndash_settings_custom_labels' );
+	$ldlms_settings['settings']['custom_labels'] = LearnDash_Settings_Section_Custom_Labels::get_section_settings_all();
+	if ( ( is_array( $ldlms_settings['settings']['custom_labels'] ) ) && ( ! empty( $ldlms_settings['settings']['custom_labels'] ) ) ) {
+		foreach ( $ldlms_settings['settings']['custom_labels'] as $key => $val ) {
+			if ( empty( $val ) ) {
+				$ldlms_settings['settings']['custom_labels'][ $key ] = LearnDash_Custom_Label::get_label( $key );
+				if ( substr( $key, 0, strlen( 'button') ) != 'button' ) {
+					$ldlms_settings['settings']['custom_labels'][ $key . '_lower' ] = learndash_get_custom_label_lower( $key );
+					$ldlms_settings['settings']['custom_labels'][ $key . '_slug' ] = learndash_get_custom_label_slug( $key );
+				}
 			}
 		}
 	}
 
-	$ldlms_settings['settings']['per_page'] = get_option( 'learndash_settings_per_page' );
-	$ldlms_settings['settings']['courses_taxonomies'] = get_option( 'learndash_settings_courses_taxonomies' );
-	$ldlms_settings['settings']['lessons_taxonomies'] = get_option( 'learndash_settings_lessons_taxonomies' );
-	$ldlms_settings['settings']['topics_taxonomies'] = get_option( 'learndash_settings_topics_taxonomies' );
+	//$ldlms_settings['settings']['per_page'] = get_option( 'learndash_settings_per_page' );
+	$ldlms_settings['settings']['per_page'] =  LearnDash_Settings_Section_General_Per_Page::get_section_settings_all();
+
+	//$ldlms_settings['settings']['courses_taxonomies'] = get_option( 'learndash_settings_courses_taxonomies' );
+	$ldlms_settings['settings']['courses_taxonomies'] = LearnDash_Settings_Courses_Taxonomies::get_section_settings_all();
+
+	//$ldlms_settings['settings']['lessons_taxonomies'] = get_option( 'learndash_settings_lessons_taxonomies' );
+	$ldlms_settings['settings']['lessons_taxonomies'] = LearnDash_Settings_Lessons_Taxonomies::get_section_settings_all();
+	
+	//$ldlms_settings['settings']['topics_taxonomies'] = get_option( 'learndash_settings_topics_taxonomies' );
+	$ldlms_settings['settings']['topics_taxonomies'] = LearnDash_Settings_Topics_Taxonomies::get_section_settings_all();
 
 	//$ldlms_settings['settings']['quizzes_taxonomies'] = get_option( 'learndash_settings_quizzes_taxonomies' );
 
+	/*
 	$ldlms_settings['settings']['quizzes_taxonomies'] = array();
 	$object_taxonomies = get_object_taxonomies( 'sfwd-quiz' );
 
@@ -51,6 +63,8 @@ function learndash_editor_scripts() {
 			$ldlms_settings['settings']['quizzes_taxonomies']['wp_post_tag'] = 'yes';
 		}
 	}
+	*/
+	$ldlms_settings['settings']['quizzes_taxonomies'] = LearnDash_Settings_Quizzes_Taxonomies::get_section_settings_all();
 
 	$ldlms_settings['plugins']['learndash-course-grid'] = array();
 	$ldlms_settings['plugins']['learndash-course-grid']['enabled'] = learndash_enqueue_course_grid_scripts();
@@ -102,11 +116,9 @@ function learndash_editor_scripts() {
 		}
 	}
 
-	if ( function_exists( 'gutenberg_get_jed_locale_data' ) ) {
-		$locale = gutenberg_get_jed_locale_data( 'learndash' );
-		$ldlms_settings['locale'] = $locale;
-	}
-	
+	// Load the MO file translations into wp.i18n script hook.
+	learndash_load_inline_script_locale_data();
+
 	//error_log('ldlms_settings<pre>'. print_r($ldlms_settings, true) .'</pre>');
 	wp_localize_script( 'ldlms-blocks-js', 'ldlms_settings', $ldlms_settings );
 
@@ -114,9 +126,11 @@ function learndash_editor_scripts() {
 	wp_enqueue_style(
 		'ldlms-blocks-editor-css',
 		plugins_url( $editorStylePath, __FILE__ ),
-		[ 'wp-blocks' ],
-		filemtime( plugin_dir_path( __FILE__ ) . $editorStylePath )
+		[],
+		//filemtime( plugin_dir_path( __FILE__ ) . $editorStylePath )
+		LEARNDASH_SCRIPT_VERSION_TOKEN
 	);
+	wp_style_add_data( 'ldlms-blocks-editor-css', 'rtl', 'replace' );
 
 	// Call our function to load CSS/JS used by the shortcodes.
 	learndash_load_resources();
@@ -124,6 +138,7 @@ function learndash_editor_scripts() {
 	$filepath = SFWD_LMS::get_template( 'learndash_pager.css', null, null, true );
 	if ( ! empty( $filepath ) ) {
 		wp_enqueue_style( 'learndash_pager_css', learndash_template_url_from_path( $filepath ), array(), LEARNDASH_SCRIPT_VERSION_TOKEN );
+		wp_style_add_data( 'learndash_pager_css', 'rtl', 'replace' );
 		$learndash_assets_loaded['styles']['learndash_pager_css'] = __FUNCTION__;
 	} 
 
@@ -150,7 +165,8 @@ function learndash_scripts() {
 			'ldlms-blocks-frontend',
 			plugins_url( $blockPath, __FILE__ ),
 			[],
-			filemtime( plugin_dir_path(__FILE__) . $blockPath )
+			//filemtime( plugin_dir_path(__FILE__) . $blockPath )
+			LEARNDASH_SCRIPT_VERSION_TOKEN
 		);
 	}
 
@@ -158,9 +174,11 @@ function learndash_scripts() {
 	wp_enqueue_style(
 		'learndash-blocks',
 		plugins_url($stylePath, __FILE__),
-		[ 'wp-blocks' ],
-		filemtime(plugin_dir_path(__FILE__) . $stylePath )
+		[],
+		//filemtime(plugin_dir_path(__FILE__) . $stylePath )
+		LEARNDASH_SCRIPT_VERSION_TOKEN
 	);
+	wp_style_add_data( 'learndash-blocks', 'rtl', 'replace' );
 }
 
 // Hook scripts function into block editor hook.
@@ -183,8 +201,10 @@ function learndash_enqueue_course_grid_scripts() {
 		} else {
 			// Handle older versions of Course Grid. 1.4.1 and lower.
 			wp_enqueue_style( 'learndash_course_grid_css', plugins_url( 'style.css', LEARNDASH_COURSE_GRID_FILE ) );
+			wp_style_add_data( 'learndash_course_grid_css', 'rtl', 'replace' );
 			wp_enqueue_script( 'learndash_course_grid_js', plugins_url( 'script.js', LEARNDASH_COURSE_GRID_FILE ), array( 'jquery' ) );
 			wp_enqueue_style( 'ld-cga-bootstrap', plugins_url( 'bootstrap.min.css', LEARNDASH_COURSE_GRID_FILE ) );
+			wp_style_add_data( 'ld-cga-bootstrap', 'rtl', 'replace' );
 		}
 
 		return true;
@@ -192,3 +212,50 @@ function learndash_enqueue_course_grid_scripts() {
 
 	return false;
 }
+
+
+/**
+ * Register custom block category.
+ *
+ * @since 2.6.0
+ * @param array  $block_categories Array of current block categories.
+ * @param object $post WP_Post instance of post being edited.
+ * @return array $block_categories.
+ */
+function learndash_block_categories( $block_categories = array(), $post = false ) {
+
+	$ld_block_cat_found = false;
+
+	foreach( $block_categories as $block_cat ) {
+		if ( ( isset( $block_cat['slug'] ) ) && ( $block_cat['slug'] == 'learndash-blocks' ) ) {
+			$ld_block_cat_found = true;
+		}
+	}
+
+	if ( false === $ld_block_cat_found ) {
+		if ( ( $post ) && ( is_a( $post, 'WP_Post' ) ) ) {
+			if ( in_array( $post->post_type, LDLMS_Post_Types::get_post_types() ) ) {
+				$block_categories = array_merge(
+					array(
+						array(
+							'slug'  => 'learndash-blocks',
+							'title' => esc_html__( 'LearnDash LMS Blocks', 'learndash' ),
+							'icon'  => false,
+						),
+					),
+					$block_categories
+				);
+			} else {
+				$block_categories[] = array(
+					'slug'  => 'learndash-blocks',
+					'title' => esc_html__( 'LearnDash LMS Blocks', 'learndash' ),
+					'icon'  => false,
+				);
+			}
+		}
+	}
+
+	// Always return $default_block_categories.
+	return $block_categories;
+}
+add_filter( 'block_categories', 'learndash_block_categories', 30, 2 );

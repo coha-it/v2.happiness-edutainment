@@ -27,7 +27,7 @@
 			);
 			if ( isset( $schema['properties']['password'] ) ) {
 				$get_item_args['password'] = array(
-					'description' => __( 'The password for the post if it is password protected.' ),
+					'description' => __( 'The password for the post if it is password protected.', 'learndash' ),
 					'type'        => 'string',
 				);
 			}
@@ -35,7 +35,7 @@
 			register_rest_route( $namespace, '/' . $this->post_type . '/(?P<id>[\d]+)', array(
 				'args' => array(
 					'id' => array(
-						'description' => __( 'Unique identifier for the object.' ),
+						'description' => __( 'Unique identifier for the object.', 'learndash' ),
 						'type'        => 'integer',
 					),
 				),
@@ -59,7 +59,7 @@
 						'force' => array(
 							'type'        => 'boolean',
 							'default'     => false,
-							'description' => __( 'Whether to bypass trash and force deletion.' ),
+							'description' => __( 'Whether to bypass trash and force deletion.', 'learndash' ),
 						),
 					),
 				),

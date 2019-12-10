@@ -1,8 +1,20 @@
+#, fuzzy
+msgid ""
+msgstr ""
+"Plural - Forms: nplurals = INTEGER; plural = EXPRESSION;\n"
+"Project-Id-Version: gd-bbpress-attachments\n"
+"POT-Creation-Date: 09/02/2019 11:53:44 AM\n"
+"Language-Team: Milan Petrovic <support@dev4press.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: GD i18n 2.1\n"
+
 #: code/attachments/admin.php:106
 #: code/attachments/admin.php:106
 #: code/attachments/front.php:207
 #: code/admin.php:33
-#: forms/uploader.php:5
+#: forms/uploader.php:11
 msgid "Attachments"
 msgstr ""
 
@@ -88,35 +100,31 @@ msgstr ""
 msgid "Support Forum on WordPress.org"
 msgstr ""
 
-#: code/admin.php:79
-msgid "Support Forum on Dev4Press"
-msgstr ""
-
-#: code/admin.php:84
+#: code/admin.php:83
 msgid "On Dev4Press website you can find many useful plugins, themes and tutorials, all for WordPress. Please, take a few minutes to browse some of these resources, you might find some of them very useful."
 msgstr ""
 
-#: code/admin.php:85
+#: code/admin.php:84
 msgid "Plugins"
 msgstr ""
 
-#: code/admin.php:85
+#: code/admin.php:84
 msgid "We have more than 10 plugins available, some of them are commercial and some are available for free."
 msgstr ""
 
-#: code/admin.php:86
+#: code/admin.php:85
 msgid "Knowledge Base"
 msgstr ""
 
-#: code/admin.php:86
+#: code/admin.php:85
 msgid "Premium and free tutorials for our plugins themes, and many general and practical WordPress tutorials."
 msgstr ""
 
-#: code/admin.php:87
+#: code/admin.php:86
 msgid "Support Forums"
 msgstr ""
 
-#: code/admin.php:87
+#: code/admin.php:86
 msgid "Premium support forum for all with valid licenses to get help. Also, report bugs and leave suggestions."
 msgstr ""
 
@@ -519,29 +527,29 @@ msgstr ""
 msgid "File Type Icons"
 msgstr ""
 
-#: forms/tabs/d4p.php:3
-#: forms/tabs/d4p.php:7
-msgid "Plugin Home Website"
-msgstr ""
-
-#: forms/tabs/d4p.php:4
-#: forms/tabs/d4p.php:8
-msgid "Plugin Demo"
-msgstr ""
-
-#: forms/tabs/d4p.php:12
+#: forms/tabs/d4p.php:2
 msgid "Premium Plugins for bbPress"
 msgstr ""
 
-#: forms/tabs/d4p.php:19
-msgid "Other Premium Plugins"
-msgstr ""
-
-#: forms/tabs/d4p.php:31
+#: forms/tabs/d4p.php:11
 msgid "More Free Plugins for bbPress"
 msgstr ""
 
-#: forms/tabs/d4p.php:37
+#: forms/tabs/d4p.php:19
+#: forms/tabs/d4p.php:23
+msgid "Plugin Home Website"
+msgstr ""
+
+#: forms/tabs/d4p.php:20
+#: forms/tabs/d4p.php:24
+msgid "Plugin Demo"
+msgstr ""
+
+#: forms/tabs/d4p.php:28
+msgid "Other Premium Plugins"
+msgstr ""
+
+#: forms/tabs/d4p.php:40
 msgid "More Free Plugins"
 msgstr ""
 
@@ -609,11 +617,11 @@ msgstr ""
 msgid "About"
 msgstr ""
 
-#: forms/uploader.php:8
+#: forms/uploader.php:14
 msgid "Add another file"
 msgstr ""
 
-#: forms/uploader.php:1
-msgid "Maximum file size allowed is"
+#: forms/uploader.php:5
+msgid "Maximum file size allowed is %s."
 msgstr ""
 

@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * LearnDash Settings Page Add-ons.
  *
@@ -126,6 +126,13 @@ if ( ( class_exists( 'WP_Plugin_Install_List_Table' ) ) && ( ! class_exists( 'Le
 			}
 
 			$this->items = $api->plugins;
+			if ( ! empty( $this->items) ) {
+				foreach( $this->items as $idx => $item ){
+					if ( 'wplms-learndash-migration' === $item['slug'] ) {
+						unset( $this->items[ $idx ] );
+					}
+				}
+			}
 
 			if ( $this->orderby ) {
 				uasort( $this->items, array( $this, 'order_callback' ) );
@@ -218,25 +225,25 @@ if ( ( class_exists( 'WP_Plugin_Install_List_Table' ) ) && ( ! class_exists( 'Le
 							case 'install':
 								if ( $status['url'] ) {
 									/* translators: 1: Plugin name and version. */
-									$action_links[] = '<a class="install-now button" data-slug="' . esc_attr( $plugin['slug'] ) . '" href="' . esc_url( $status['url'] ) . '" aria-label="' . esc_attr( sprintf( __( 'Install %s now' ), $name ) ) . '" data-name="' . esc_attr( $name ) . '">' . __( 'Install Now' ) . '</a>';
+									$action_links[] = '<a class="install-now button" data-slug="' . esc_attr( $plugin['slug'] ) . '" href="' . esc_url( $status['url'] ) . '" aria-label="' . esc_attr( sprintf( __( 'Install %s now', 'default' ), $name ) ) . '" data-name="' . esc_attr( $name ) . '">' . __( 'Install Now', 'default' ) . '</a>';
 								}
 								break;
 
 							case 'update_available':
 								if ( $status['url'] ) {
 									/* translators: 1: Plugin name and version */
-									$action_links[] = '<a class="update-now button aria-button-if-js" data-plugin="' . esc_attr( $status['file'] ) . '" data-slug="' . esc_attr( $plugin['slug'] ) . '" href="' . esc_url( $status['url'] ) . '" aria-label="' . esc_attr( sprintf( __( 'Update %s now' ), $name ) ) . '" data-name="' . esc_attr( $name ) . '">' . __( 'Update Now' ) . '</a>';
+									$action_links[] = '<a class="update-now button aria-button-if-js" data-plugin="' . esc_attr( $status['file'] ) . '" data-slug="' . esc_attr( $plugin['slug'] ) . '" href="' . esc_url( $status['url'] ) . '" aria-label="' . esc_attr( sprintf( __( 'Update %s now', 'default' ), $name ) ) . '" data-name="' . esc_attr( $name ) . '">' . __( 'Update Now', 'default' ) . '</a>';
 								}
 								break;
 
 							case 'latest_installed':
 							case 'newer_installed':
 								if ( is_plugin_active( $status['file'] ) ) {
-									$action_links[] = '<button type="button" class="button button-disabled" disabled="disabled">' . _x( 'Active', 'plugin' ) . '</button>';
+									$action_links[] = '<button type="button" class="button button-disabled" disabled="disabled">' . _x( 'Active', 'plugin', 'default' ) . '</button>';
 								} elseif ( current_user_can( 'activate_plugin', $status['file'] ) ) {
-									$button_text  = __( 'Activate' );
+									$button_text  = __( 'Activate', 'default' );
 									/* translators: %s: Plugin name */
-									$button_label = _x( 'Activate %s', 'plugin' );
+									$button_label = _x( 'Activate %s', 'plugin', 'default' );
 									$activate_url = add_query_arg( array(
 										'_wpnonce'    => wp_create_nonce( 'activate-plugin_' . $status['file'] ),
 										'action'      => 'activate',
@@ -244,9 +251,9 @@ if ( ( class_exists( 'WP_Plugin_Install_List_Table' ) ) && ( ! class_exists( 'Le
 									), network_admin_url( 'plugins.php' ) );
 
 									if ( is_network_admin() ) {
-										$button_text  = __( 'Network Activate' );
+										$button_text  = __( 'Network Activate', 'default' );
 										/* translators: %s: Plugin name */
-										$button_label = _x( 'Network Activate %s', 'plugin' );
+										$button_label = _x( 'Network Activate %s', 'plugin', 'default' );
 										$activate_url = add_query_arg( array( 'networkwide' => 1 ), $activate_url );
 									}
 
@@ -257,7 +264,7 @@ if ( ( class_exists( 'WP_Plugin_Install_List_Table' ) ) && ( ! class_exists( 'Le
 										$button_text
 									);
 								} else {
-									$action_links[] = '<button type="button" class="button button-disabled" disabled="disabled">' . _x( 'Installed', 'plugin' ) . '</button>';
+									$action_links[] = '<button type="button" class="button button-disabled" disabled="disabled">' . _x( 'Installed', 'plugin', 'default' ) . '</button>';
 								}
 								break;
 						}
@@ -267,7 +274,7 @@ if ( ( class_exists( 'WP_Plugin_Install_List_Table' ) ) && ( ! class_exists( 'Le
 				$details_link   = self_admin_url( 'plugin-install.php?tab=plugin-information&amp;plugin=' . $plugin['slug'] . '&amp;TB_iframe=true&amp;width=600&amp;height=550' );
 
 				/* translators: 1: Plugin name and version. */
-				$action_links[] = '<a href="' . esc_url( $details_link ) . '" class="thickbox open-plugin-details-modal" aria-label="' . esc_attr( sprintf( __( 'More information about %s' ), $name ) ) . '" data-title="' . esc_attr( $name ) . '">' . __( 'More Details' ) . '</a>';
+				$action_links[] = '<a href="' . esc_url( $details_link ) . '" class="thickbox open-plugin-details-modal" aria-label="' . esc_attr( sprintf( __( 'More information about %s', 'default' ), $name ) ) . '" data-title="' . esc_attr( $name ) . '">' . __( 'More Details', 'default' ) . '</a>';
 
 				if ( ! empty( $plugin['icons']['svg'] ) ) {
 					$plugin_icon_url = $plugin['icons']['svg'];
@@ -281,6 +288,8 @@ if ( ( class_exists( 'WP_Plugin_Install_List_Table' ) ) && ( ! class_exists( 'Le
 
 				if ( ( ! empty( $plugin_icon_url ) ) && ( substr( $plugin_icon_url, 0, 2 ) != '//' ) ) {
 					$plugin_icon_url = LEARNDASH_LMS_PLUGIN_URL . $plugin_icon_url;
+				} else {
+					$plugin_icon_url = LEARNDASH_LMS_PLUGIN_URL . 'assets/images-add-ons/' . basename( $plugin_icon_url );
 				}
 
 				$last_updated_timestamp = strtotime( $plugin['last_updated'] );
@@ -316,7 +325,7 @@ if ( ( class_exists( 'WP_Plugin_Install_List_Table' ) ) && ( ! class_exists( 'Le
 				?>
 				<div class="plugin-card-bottom">
 					<div class="column-updated">
-						<strong><?php _e( 'Last Updated:' ); ?></strong> <?php 
+						<strong><?php _e( 'Last Updated:', 'default' ); ?></strong> <?php 
 						printf(
 							// translators: placeholder: Human relative date time.
 							esc_html_x( '%s ago', 'placeholder: human relative date time', 'learndash' ),
@@ -329,11 +338,11 @@ if ( ( class_exists( 'WP_Plugin_Install_List_Table' ) ) && ( ! class_exists( 'Le
 						$wp_version = get_bloginfo( 'version' );
 
 						if ( ! empty( $plugin['tested'] ) && version_compare( substr( $wp_version, 0, strlen( $plugin['tested'] ) ), $plugin['tested'], '>' ) ) {
-							echo '<span class="compatibility-untested">' . __( 'Untested with your version of WordPress' ) . '</span>';
+							echo '<span class="compatibility-untested">' . __( 'Untested with your version of WordPress', 'default' ) . '</span>';
 						} elseif ( ! empty( $plugin['requires'] ) && version_compare( substr( $wp_version, 0, strlen( $plugin['requires'] ) ), $plugin['requires'], '<' ) ) {
-							echo '<span class="compatibility-incompatible">' . __( '<strong>Incompatible</strong> with your version of WordPress' ) . '</span>';
+							echo '<span class="compatibility-incompatible">' . __( '<strong>Incompatible</strong> with your version of WordPress', 'default' ) . '</span>';
 						} else {
-							echo '<span class="compatibility-compatible">' . __( '<strong>Compatible</strong> with your version of WordPress' ) . '</span>';
+							echo '<span class="compatibility-compatible">' . __( '<strong>Compatible</strong> with your version of WordPress', 'default' ) . '</span>';
 						}
 						?>
 					</div>

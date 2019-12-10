@@ -32,6 +32,12 @@ if ( ( class_exists( 'LearnDash_Gutenberg_Block' ) ) && ( ! class_exists( 'Learn
 				'orderby' => array(
 					'type' => 'string',
 				),
+				'show_search' => array(
+					'type' => 'boolean',
+				),
+				'show_header' => array(
+					'type' => 'boolean',
+				),
 				'course_points_user' => array(
 					'type' => 'boolean',
 				),
@@ -49,6 +55,9 @@ if ( ( class_exists( 'LearnDash_Gutenberg_Block' ) ) && ( ! class_exists( 'Learn
 				),
 				'preview_user_id' => array(
 					'type' => 'string',
+				),
+				'example_show' => array(
+					'type' => 'boolean',
 				),
 			);
 			$this->self_closing = true;
@@ -71,6 +80,12 @@ if ( ( class_exists( 'LearnDash_Gutenberg_Block' ) ) && ( ! class_exists( 'Learn
 		public function render_block( $attributes = array() ) {
 
 			if ( is_user_logged_in() ) {
+
+				if ( ( isset( $attributes['example_show'] ) ) && ( ! empty( $attributes['example_show'] ) ) ) {
+					$attributes['preview_user_id'] = $this->get_example_user_id();
+					$attributes['preview_show'] = 1;
+					unset( $attributes['example_show'] );
+				}
 
 				$shortcode_params_str = '';
 				foreach ( $attributes as $key => $val ) {
@@ -147,6 +162,14 @@ if ( ( class_exists( 'LearnDash_Gutenberg_Block' ) ) && ( ! class_exists( 'Learn
 				if ( isset( $attributes['show_quizzes'] ) ) {
 					if ( false == $attributes['show_quizzes'] ) {
 						$attributes['show_quizzes'] = 'no';
+					}
+				}
+				
+				if ( isset( $attributes['show_search'] ) ) {
+					if ( false == $attributes['show_search'] ) {
+						$attributes['show_search'] = 'no';
+					} else if ( true == $attributes['show_search'] ) {
+						$attributes['show_quizzes'] = 'yes';
 					}
 				}
 			}

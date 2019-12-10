@@ -26,6 +26,9 @@ if ( ( class_exists( 'LearnDash_Gutenberg_Block' ) ) && ( ! class_exists( 'Learn
 				'user_id' => array(
 					'type' => 'string',
 				),
+				'autop' => array(
+					'type' => 'boolean',
+				),
 			);
 
 			$this->self_closing = false;

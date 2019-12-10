@@ -1,9 +1,9 @@
 === BuddyPress Notification Widget ===
-Contributors: anusharma,sbrajesh,buddydev
+Contributors: anusharma,sbrajesh,buddydev,raviousprime
 Tags: buddypress, notifications, widget
 Requires at least: 4.4
-Tested up to: 4.8.1
-Stable tag: 1.2.2
+Tested up to: 5.3.0
+Stable tag: 1.3.2
 License: GPLv2 
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -15,7 +15,7 @@ BuddyPress notification widget allow site admins to show BuddyPress user notific
 
 = How it works:- =
 
-Add BP Notification widget in widget area to show notifications for the currently logged in user.
+Add BuddyPress Notification widget in widget area to show notifications for the currently logged in user.
 
 = Help & Support =
 Please leave a comment on our blog [BuddyDev](https://buddydev.com/buddypress/buddypress-user-notifications-widget-plugin/) for any suggestions, support request.
@@ -44,6 +44,15 @@ No, It needs you to have BuddyPress Installed and activated
 1. This shows notifications in widget screenshot.png
 
 == Changelog ==
+= 1.3.2 =
+ * Add support for link in notification count text.
+
+= 1.3.1 =
+ * Remove unwanted directory.
+
+= 1.3.0 =
+ * Added support for shortcode['buddydev_bp_notification'] in the plugin
+
 = 1.2.2 =
  * Add new line before the Clear link
  * Change some labels.

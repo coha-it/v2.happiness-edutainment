@@ -3,7 +3,7 @@
  * Groups Template tags
  *
  * @since 3.0.0
- * @version 3.2.0
+ * @version 4.4.0
  */
 
 // Exit if accessed directly.
@@ -192,11 +192,17 @@ function bp_nouveau_group_invites_interface() {
  * Gets the displayed user group invites preferences
  *
  * @since 3.0.0
+ * @since 4.4.0
  *
- * @return int Returns 1 if user chose to restrict to friends, 0 otherwise.
+ * @param  int $user_id The user ID to check group invites preference for.
+ * @return int          Returns 1 if user chose to restrict to friends, 0 otherwise.
  */
-function bp_nouveau_groups_get_group_invites_setting() {
-	return (int) bp_get_user_meta( bp_displayed_user_id(), '_bp_nouveau_restrict_invites_to_friends' );
+function bp_nouveau_groups_get_group_invites_setting( $user_id = 0 ) {
+	if ( ! $user_id ) {
+		$user_id = bp_displayed_user_id();
+	}
+
+	return (int) bp_get_user_meta( $user_id, '_bp_nouveau_restrict_invites_to_friends' );
 }
 
 /**
@@ -334,6 +340,17 @@ function bp_nouveau_group_manage_screen() {
 		bp_get_template_part( $template );
 
 		if ( ! empty( $core_screen['hook'] ) ) {
+
+			// Group's "Manage > Details" page.
+			if ( 'group_details_admin' === $core_screen['hook'] ) {
+				/**
+				 * Fires after the group description admin details.
+				 *
+				 * @since 1.0.0
+				 */
+				do_action( 'groups_custom_group_fields_editable' );
+			}
+
 			/**
 			 * Fires before the display of group delete admin.
 			 *
@@ -945,7 +962,7 @@ function bp_nouveau_groups_manage_members_buttons( $args = array() ) {
 
 			remove_filter( 'bp_get_group_join_button', 'bp_nouveau_groups_catch_button_args', 100, 1 );
 
-			if ( ! empty( bp_nouveau()->groups->button_args ) ) {
+			if ( isset( bp_nouveau()->groups->button_args ) && bp_nouveau()->groups->button_args ) {
 				$button_args = bp_nouveau()->groups->button_args;
 
 				// If we pass through parent classes merge those into the existing ones
@@ -1388,3 +1405,19 @@ function bp_nouveau_group_type_checked( $type = null ) {
 		checked( bp_groups_has_group_type( bp_get_current_group_id(), $type->name ) );
 	}
 }
+
+/**
+ * Adds the "Notify group members of these changes" checkbox to the Manage > Details panel.
+ *
+ * See #7837 for background on why this technique is required.
+ *
+ * @since 4.0.0
+ */
+function bp_nouveau_add_notify_group_members_checkbox() {
+	printf( '<p class="bp-controls-wrap">
+		<label for="group-notify-members" class="bp-label-text">
+			<input type="checkbox" name="group-notify-members" id="group-notify-members" value="1" /> %s
+		</label>
+	</p>', esc_html__( 'Notify group members of these changes via email', 'buddypress' ) );
+}
+add_action( 'groups_custom_group_fields_editable', 'bp_nouveau_add_notify_group_members_checkbox', 20 );

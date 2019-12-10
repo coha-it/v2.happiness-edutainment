@@ -195,7 +195,7 @@ class Config {
 
 	/**
 	 * @param string $file_name File name must be prefixed with a \ (foreword slash)
-	 * @param mixed $file (false || __FILE__ )
+	 * @param mixed  $file      (false || __FILE__ )
 	 *
 	 * @return string
 	 */
@@ -204,15 +204,51 @@ class Config {
 		if ( false === $file ) {
 			$file = __FILE__;
 		}
+		$template_path = apply_filters( 'uncanny_toolkit_template_path', 'uncanny-toolkit' . DIRECTORY_SEPARATOR );
+		$asset_uri     = self::locate_template( $template_path . $file_name );
 
-		$asset_uri = dirname( $file ) . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . $file_name;
+		if ( empty( $asset_uri ) ) {
+			$asset_uri = dirname( $file ) . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . $file_name;
+		}
 
 		return $asset_uri;
 	}
 
 	/**
+	 * Retrieve the name of the highest priority template file that exists.
+	 *
+	 * Searches in the STYLESHEETPATH before TEMPLATEPATH and wp-includes/theme-compat
+	 * so that themes which inherit from a parent theme can just overload one file.
+	 *
+	 * @since 3.1
+	 *
+	 * @param string|array $template_names Template file(s) to search for, in order.
+	 *
+	 * @return string The template filename if one is located.
+	 */
+	public static function locate_template( $template_names ) {
+		$located = '';
+		foreach ( (array) $template_names as $template_name ) {
+			if ( !$template_name )
+				continue;
+			if ( file_exists( get_stylesheet_directory() . DIRECTORY_SEPARATOR . $template_name ) ) {
+				$located = get_stylesheet_directory() . DIRECTORY_SEPARATOR . $template_name;
+				break;
+			} elseif ( file_exists( get_template_directory() . DIRECTORY_SEPARATOR . $template_name ) ) {
+				$located = get_template_directory() . DIRECTORY_SEPARATOR . $template_name;
+				break;
+			} elseif ( file_exists( ABSPATH . WPINC . DIRECTORY_SEPARATOR . 'theme-compat' . DIRECTORY_SEPARATOR . $template_name ) ) {
+				$located = ABSPATH . WPINC . DIRECTORY_SEPARATOR . 'theme-compat' . DIRECTORY_SEPARATOR . $template_name;
+				break;
+			}
+		}
+
+		return $located;
+	}
+
+	/**
 	 * @param string $file_name File name must be prefixed with a \ (foreword slash)
-	 * @param mixed $file (false || __FILE__ )
+	 * @param mixed  $file      (false || __FILE__ )
 	 *
 	 * @return string
 	 */
@@ -327,7 +363,15 @@ class Config {
 
 		$modal_id = stripslashes( $class );
 		$modal_id = str_replace( __NAMESPACE__, '', $modal_id );
-
+		
+		add_filter( 'tiny_mce_before_init', function ( $init ) {
+			$init['extended_valid_elements'] = '*[*]';
+			$init['remove_linebreaks']       = FALSE;
+			$init['convert_newlines_to_brs'] = TRUE;
+			$init['remove_redundant_brs']    = FALSE;
+			
+			return $init;
+		} );
 		ob_start();
 
 		?>
@@ -373,6 +417,12 @@ class Config {
 										</div>
 										<div class="ult-modal-form-row__field">
 											<input type="text" placeholder="<?php echo $content['placeholder']; ?>" class="ult-modal-form-row__input <?php echo $content['class'] ?>" name="<?php echo $content['option_name']; ?>" data-type="text">
+
+											<?php if ( ! empty( $content['description'] ) ) { ?>
+												<div class="ult-modal-form-row__description">
+													<?php echo $content['description']; ?>
+												</div>
+											<?php } ?>
 										</div>
 									</div>
 
@@ -390,6 +440,12 @@ class Config {
 										</div>
 										<div class="ult-modal-form-row__field">
 											<input type="color" placeholder="<?php echo $content['placeholder']; ?>" class="ult-modal-form-row__color" name="<?php echo $content['option_name']; ?>" data-type="color">
+
+											<?php if ( ! empty( $content['description'] ) ) { ?>
+												<div class="ult-modal-form-row__description">
+													<?php echo $content['description']; ?>
+												</div>
+											<?php } ?>
 										</div>
 									</div>
 
@@ -427,8 +483,13 @@ class Config {
 														'media_buttons' => false,
 														'editor_height' => 275,
 													] );
-
 												?>
+
+												<?php if ( ! empty( $content['description'] ) ) { ?>
+													<div class="ult-modal-form-row__description">
+														<?php echo $content['description']; ?>
+													</div>
+												<?php } ?>
 											</div>
 										</div>
 
@@ -442,6 +503,12 @@ class Config {
 											</div>
 											<div class="ult-modal-form-row__field">
 												<textarea class="ult-modal-form-row__textarea <?php echo $content['class']; ?>" name="<?php echo $content['option_name']; ?>" placeholder="<?php echo $content['placeholder']; ?>" type="textarea"></textarea>
+
+												<?php if ( ! empty( $content['description'] ) ) { ?>
+													<div class="ult-modal-form-row__description">
+														<?php echo $content['description']; ?>
+													</div>
+												<?php } ?>
 											</div>
 										</div>
 
@@ -460,6 +527,12 @@ class Config {
 												<input type="checkbox" name="<?php echo $content['option_name']; ?>" class="ult-modal-form-row__checkbox" data-type="checkbox">
 												<?php echo $content['label']; ?>
 											</label>
+
+											<?php if ( ! empty( $content['description'] ) ) { ?>
+												<div class="ult-modal-form-row__description">
+													<?php echo $content['description']; ?>
+												</div>
+											<?php } ?>
 										</div>
 									</div>
 
@@ -485,12 +558,23 @@ class Config {
 											foreach ( $content['radios'] as $radio ) {
 												?>
 
-												<input type="radio" name="<?php echo $content['radio_name']; ?>" value="<?php echo $radio['value']; ?>" data-type="radio"> <?php echo $radio['text']; ?>
+												<label class="ult-modal-form-row__radio-label">
+													<input type="radio" name="<?php echo $content['radio_name']; ?>" value="<?php echo $radio['value']; ?>" data-type="radio">
+													<span>
+														<?php echo $radio['text']; ?>
+													</span>
+												</label>
 
 												<?php
 											}
 
 											?>
+
+											<?php if ( ! empty( $content['description'] ) ) { ?>
+												<div class="ult-modal-form-row__description">
+													<?php echo $content['description']; ?>
+												</div>
+											<?php } ?>
 										</div>
 									</div>
 
@@ -523,6 +607,11 @@ class Config {
 												?>
 											</select>
 
+											<?php if ( ! empty( $content['description'] ) ) { ?>
+												<div class="ult-modal-form-row__description">
+													<?php echo $content['description']; ?>
+												</div>
+											<?php } ?>
 										</div>
 									</div>
 
@@ -599,7 +688,18 @@ class Config {
 					$response      = ( $save_settings ) ? 'success' : 'notsaved';
 				}
 
-				//echo json_encode([$new_classes, $value, $_POST ]);
+				// If the uo dashboard module is being turned on then set the default template as 3_0
+				if ( 'uncanny_pro_toolkit\\learnDashMyCourses' === $value ) {
+					if ( 'active' === $_POST['active'] ) {
+						update_option( 'uncanny_pro_toolkitlearnDashMyCourses', [
+							[
+								'name'  => 'uo_dashboard_template',
+								'value' => '3_0'
+							]
+						], 'no' );
+					}
+				}
+
 				echo $response;
 				wp_die();
 			}
@@ -692,8 +792,8 @@ class Config {
 
 				$settings = get_option( $class, array() );
 
-				foreach($settings as &$setting ){
-					$setting['value'] = stripslashes($setting['value']);
+				foreach ( $settings as &$setting ) {
+					$setting['value'] = stripslashes( $setting['value'] );
 				}
 
 				$response = wp_json_encode( $settings );
@@ -729,12 +829,12 @@ class Config {
 		$options = get_option( $class, '' );
 
 		// set default settings if placeholder is to be used as default
-		if( '%placeholder%' === $default ){
+		if ( '%placeholder%' === $default ) {
 			// fallback
 			//$default = '';
-			foreach( $class_settings as $setting ){
-				if( isset($setting['option_name']) && $key === $setting['option_name']){
-					if( isset( $setting['placeholder'] )){
+			foreach ( $class_settings as $setting ) {
+				if ( isset( $setting['option_name'] ) && $key === $setting['option_name'] ) {
+					if ( isset( $setting['placeholder'] ) ) {
 						$default = $setting['placeholder'];
 					}
 				}
@@ -756,12 +856,12 @@ class Config {
 
 		return $default;
 	}
-/*
-	public static function removeslashes( $string ) {
-		$string = implode( "", explode( "\\", $string ) );
+	/*
+		public static function removeslashes( $string ) {
+			$string = implode( "", explode( "\\", $string ) );
 
-		return stripslashes( trim( $string ) );
-	}*/
+			return stripslashes( trim( $string ) );
+		}*/
 
 
 	/**

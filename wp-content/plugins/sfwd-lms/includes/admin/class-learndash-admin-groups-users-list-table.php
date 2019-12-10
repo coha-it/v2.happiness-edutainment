@@ -76,7 +76,7 @@ if ( !class_exists('Learndash_Admin_Groups_Users_List_Table') ) {
 			if ( current_user_can( 'edit_groups') ) {
 				$output .= '<strong><a href="'. get_edit_post_link( $item->ID ) .'">' . $item->post_title .'</a></strong>';
 			
-				$row_actions = array('edit' => '<a href="'. get_edit_post_link( $item->ID ) .'">' . esc_html__('edit') .'</a>' );
+				$row_actions = array('edit' => '<a href="'. get_edit_post_link( $item->ID ) .'">' . esc_html__('edit', 'learndash' ) .'</a>' );
 				$output .= $this->row_actions($row_actions);
 			
 			} else {
@@ -87,7 +87,7 @@ if ( !class_exists('Learndash_Admin_Groups_Users_List_Table') ) {
 		}
 		
 		function column_group_actions( $item ) {
-			$element = Learndash_Admin_Settings_Data_Upgrades::get_instance();
+			$element = Learndash_Admin_Data_Upgrades::get_instance();
 			$data_settings_courses = $element->get_data_settings('user-meta-courses');
 			$data_settings_quizzes = $element->get_data_settings('user-meta-quizzes');
 			
@@ -146,7 +146,7 @@ if ( !class_exists('Learndash_Admin_Groups_Users_List_Table') ) {
 			if ( current_user_can( 'edit_users' ) ) {
 				$output .= '<strong><a href="'. get_edit_user_link( $item->ID ) .'">' . $item->display_name .'</a></strong>';
 				
-				$row_actions = array('edit' => '<a href="'. get_edit_user_link( $item->ID ) .'">' . esc_html__('edit') .'</a>' );
+				$row_actions = array('edit' => '<a href="'. get_edit_user_link( $item->ID ) .'">' . esc_html__('edit', 'learndash' ) .'</a>' );
 				$output .= $this->row_actions($row_actions);
 				
 			} else {

@@ -1,19 +1,18 @@
 <?php
 /**
- * Plugin Name: myCRED Videos
- * Plugin URI: http://mycred.me/add-ons/videos/
- * Description: Overrides the default "Points for viewing videos" hook in <strong>my</strong>CRED and allows you to embed videos into mobile devices and award / deduct points for Vimeo videos as well as YouTube videos.
- * Version: 1.1
- * Author: Gabriel Sebastian Merovingi
- * Author URI: http://www.merovingi.com
- * Author Email: info@merovingi.com
- * Requires at least: WP 3.8
- * Tested up to: WP 4.3.1
+ * Plugin Name: myCRED Video Add-on
+ * Description: Replaced the built-in myCRED video hook with a premium version that suppots YouTube and Vimeo videos.
+ * Version: 1.2.2
+ * Author: myCRED
+ * Author URI: http://mycred.me
+ * Author Email: support@mycred.me
+ * Requires at least: WP 4.8
+ * Tested up to: WP 5.0.2
  * Text Domain: mycred_video
  * Domain Path: /lang
  * License: Copyrighted
  *
- * Copyright © 2013-2015 Gabriel S Merovingi
+ * Copyright © 2013 - 2017 myCRED
  * 
  * Permission is hereby granted, to the licensed domain to install and run this
  * software and associated documentation files (the "Software") for an unlimited
@@ -42,55 +41,120 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-define( 'MYCRED_VIDEO_VERSION',      '1.1' );
-define( 'MYCRED_VIDEO_JS_VERSION',   MYCRED_VIDEO_VERSION . '.5' );
-define( 'MYCRED_VIDEO_CSS_VERSION',  MYCRED_VIDEO_VERSION . '.5' );
+if ( ! class_exists( 'myCRED_Video_Plus_Core' ) ) :
+	final class myCRED_Video_Plus_Core {
 
-define( 'MYCRED_VIDEO_SLUG',         'mycred-videos' );
-define( 'MYCRED_VIDEO',              __FILE__ );
-define( 'MYCRED_VIDEO_ROOT_DIR',     plugin_dir_path( MYCRED_VIDEO ) );
-define( 'MYCRED_VIDEO_ASSETS_DIR',   MYCRED_VIDEO_ROOT_DIR . 'assets/' );
-define( 'MYCRED_VIDEO_INCLUDES_DIR', MYCRED_VIDEO_ROOT_DIR . 'includes/' );
+		// Plugin Version
+		public $version             = '1.2.2';
 
-require_once MYCRED_VIDEO_INCLUDES_DIR . 'mycred-shortcodes.php';
+		public $id                  = 540;
 
-/**
- * myCRED_Video_Plugin class
- * @since 1.0
- * @version 1.1
- */
-if ( ! class_exists( 'myCRED_Video_Plugin' ) ) :
-	class myCRED_Video_Plugin {
+		public $slug                = '';
+		public $domain              = '';
+		public $plugin              = NULL;
+		public $plugin_name         = '';
+		protected $update_url       = 'http://mycred.me/api/plugins/';
+
+		// Instnace
+		protected static $_instance = NULL;
+
+		// Current session
+		public $session             = NULL;
+
+		/**
+		 * Setup Instance
+		 * @since 1.0.4
+		 * @version 1.0
+		 */
+		public static function instance() {
+			if ( is_null( self::$_instance ) ) {
+				self::$_instance = new self();
+			}
+			return self::$_instance;
+		}
+
+		/**
+		 * Not allowed
+		 * @since 1.0.4
+		 * @version 1.0
+		 */
+		public function __clone() { _doing_it_wrong( __FUNCTION__, 'Cheatin&#8217; huh?', '1.1.1' ); }
+
+		/**
+		 * Not allowed
+		 * @since 1.0.4
+		 * @version 1.0
+		 */
+		public function __wakeup() { _doing_it_wrong( __FUNCTION__, 'Cheatin&#8217; huh?', '1.1.1' ); }
+
+		/**
+		 * Define
+		 * @since 1.0.4
+		 * @version 1.0
+		 */
+		private function define( $name, $value ) {
+			if ( ! defined( $name ) )
+				define( $name, $value );
+		}
+
+		/**
+		 * Require File
+		 * @since 1.0.4
+		 * @version 1.0
+		 */
+		public function file( $required_file ) {
+			if ( file_exists( $required_file ) )
+				require_once $required_file;
+		}
 
 		/**
 		 * Construct
+		 * @since 1.0.4
+		 * @version 1.0
 		 */
-		function __construct() {
+		public function __construct() {
 
-			register_activation_hook( MYCRED_VIDEO,              array( $this, 'activate_mycred_video' ) );
+			$this->slug        = 'mycred-videos';
+			$this->plugin      = plugin_basename( __FILE__ );
+			$this->domain      = 'mycred_video';
+			$this->plugin_name = 'myCRED Video Add-on';
 
-			add_action( 'mycred_pre_init',                       array( $this, 'mycred_pre_init' ) );
-			add_filter( 'mycred_setup_hooks',                    array( $this, 'setup_hooks' ), 50 );
+			$this->define_constants();
+			$this->includes();
 
-			add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'check_for_plugin_update' ), 14 );
-			add_filter( 'plugins_api',                           array( $this, 'plugin_api_call' ), 14, 3 );
+			add_action( 'mycred_init',                           array( $this, 'load_textdomain' ) );
+			add_filter( 'mycred_setup_hooks',                    array( $this, 'setup_hook' ) );
+			add_action( 'mycred_load_hooks',                     array( $this, 'load_hook' ) );
+		}
+
+		/**
+		 * Define Constants
+		 * @since 1.1.1
+		 * @version 1.0
+		 */
+		private function define_constants() {
+
+			$this->define( 'MYCRED_VIDEO_VERSION',      $this->version );
+			$this->define( 'MYCRED_VIDEO_SLUG',         $this->slug );
+
+			$this->define( 'MYCRED_DEFAULT_TYPE_KEY',   'mycred_default' );
+
+			$this->define( 'MYCRED_VIDEO',              __FILE__ );
+			$this->define( 'MYCRED_VIDEO_ROOT_DIR',     plugin_dir_path( MYCRED_VIDEO ) );
+			$this->define( 'MYCRED_VIDEO_ASSETS_DIR',   MYCRED_VIDEO_ROOT_DIR . 'assets/' );
+			$this->define( 'MYCRED_VIDEO_INCLUDES_DIR', MYCRED_VIDEO_ROOT_DIR . 'includes/' );
 
 		}
 
 		/**
-		 * Load Translation
-		 * @since 1.1
+		 * Include Plugin Files
+		 * @since 1.1.1
 		 * @version 1.0
 		 */
-		function mycred_pre_init() {
+		public function includes() {
 
-			// Load required files
-			require_once MYCRED_VIDEO_INCLUDES_DIR . 'mycred-video-pro-hook.php';
-
-			// Load Translation
-			$locale = apply_filters( 'plugin_locale', get_locale(), 'mycred_video' );
-			load_textdomain( 'mycred_video', WP_LANG_DIR . "/mycred-videos/mycred_video-$locale.mo" );
-			load_plugin_textdomain( 'mycred_video', false, dirname( plugin_basename( __FILE__ ) ) . '/lang/' );
+		    $this->file( MYCRED_VIDEO_ROOT_DIR . 'license/license.php' );
+			$this->file( MYCRED_VIDEO_INCLUDES_DIR . 'mycred-shortcodes.php' );
 
 		}
 
@@ -99,9 +163,9 @@ if ( ! class_exists( 'myCRED_Video_Plugin' ) ) :
 		 * @since 1.1
 		 * @version 1.0
 		 */
-		function setup_hooks( $installed ) {
+		function setup_hook( $installed ) {
 
-			if ( isset( $installed['video_view'] ) )
+			if ( array_key_exists( 'video_view', $installed ) )
 				unset( $installed['video_view'] );
 
 			$installed['video_view'] = array(
@@ -115,125 +179,35 @@ if ( ! class_exists( 'myCRED_Video_Plugin' ) ) :
 		}
 
 		/**
-		 * Activate
-		 * @since 1.0
-		 * @version 1.0.1
-		 */
-		function activate_mycred_video() {
-
-			global $wpdb;
-
-			$message = array();
-			// WordPress check
-			$wp_version = $GLOBALS['wp_version'];
-			if ( version_compare( $wp_version, '3.8', '<' ) )
-				$message[] = __( 'This myCRED Add-on requires WordPress 3.8 or higher. Version detected:', 'mycred_video' ) . ' ' . $wp_version;
-
-			// PHP check
-			$php_version = phpversion();
-			if ( version_compare( $php_version, '5.3', '<' ) )
-				$message[] = __( 'This myCRED Add-on requires PHP 5.3 or higher. Version detected: ', 'mycred_video' ) . ' ' . $php_version;
-
-			// SQL check
-			$sql_version = $wpdb->db_version();
-			if ( version_compare( $sql_version, '5.0', '<' ) )
-				$message[] = __( 'This myCRED Add-on requires SQL 5.0 or higher. Version detected: ', 'mycred_video' ) . ' ' . $sql_version;
-
-			// Not empty $message means there are issues
-			if ( !empty( $message ) ) {
-				$error_message = implode( "\n", $message );
-				die( __( 'Sorry but your WordPress installation does not reach the minimum requirements for running this add-on. The following errors were given:', 'mycred_video' ) . "\n" . $error_message );
-			}
-
-		}
-		
-		/**
-		 * Plugin Update Check
-		 * @since 1.0
+		 * Load Hook
+		 * @since 1.1.1
 		 * @version 1.0
 		 */
-		function check_for_plugin_update( $checked_data ) {
+		public function load_hook() {
 
-			global $wp_version;
-
-			if ( empty( $checked_data->checked ) )
-				return $checked_data;
-
-			$args = array(
-				'slug'    => MYCRED_VIDEO_SLUG,
-				'version' => $checked_data->checked[ MYCRED_VIDEO_SLUG . '/' . MYCRED_VIDEO_SLUG . '.php' ],
-				'site'    => site_url()
-			);
-			$request_string = array(
-				'body'       => array(
-					'action'     => 'basic_check', 
-					'request'    => serialize( $args ),
-					'api-key'    => md5( get_bloginfo( 'url' ) )
-				),
-				'user-agent' => 'WordPress/' . $wp_version . '; ' . get_bloginfo( 'url' )
-			);
-
-			// Start checking for an update
-			$raw_response = wp_remote_post( 'http://mycred.me/api/plugins/', $request_string );
-
-			$response = '';
-			if ( ! is_wp_error( $raw_response ) && ( $raw_response['response']['code'] == 200 ) )
-				$response = maybe_unserialize( $raw_response['body'] );
-
-			if ( is_object( $response ) && ! empty( $response ) )
-				$checked_data->response[ MYCRED_VIDEO_SLUG . '/' . MYCRED_VIDEO_SLUG . '.php' ] = $response;
-
-			return $checked_data;
+			$this->file( MYCRED_VIDEO_INCLUDES_DIR . 'mycred-video-pro-hook.php' );
 
 		}
 
 		/**
-		 * Plugin New Version Update
+		 * Load Textdomain
 		 * @since 1.0
 		 * @version 1.0
 		 */
-		function plugin_api_call( $def, $action, $args ) {
+		public function load_textdomain() {
 
-			global $wp_version;
+			// Load Translation
+			$locale = apply_filters( 'plugin_locale', get_locale(), $this->domain );
 
-			if ( ! isset( $args->slug ) || ( $args->slug != MYCRED_VIDEO_SLUG ) )
-				return false;
-
-			// Get the current version
-			$plugin_info = get_site_transient( 'update_plugins' );
-			$args = array(
-				'slug'    => MYCRED_VIDEO_SLUG,
-				'version' => $plugin_info->checked[ MYCRED_VIDEO_SLUG . '/' . MYCRED_VIDEO_SLUG . '.php' ],
-				'site'    => site_url()
-			);
-			$request_string = array(
-				'body'       => array(
-					'action'     => 'basic_check', 
-					'request'    => serialize( $args ),
-					'api-key'    => md5( get_bloginfo( 'url' ) )
-				),
-				'user-agent' => 'WordPress/' . $wp_version . '; ' . get_bloginfo( 'url' )
-			);
-
-			$request = wp_remote_post( 'http://mycred.me/api/plugins/', $request_string );
-
-			if ( is_wp_error( $request ) ) {
-				$res = new WP_Error( 'plugins_api_failed', 'An Unexpected HTTP Error occurred during the API request.</p> <p><a href="?" onclick="document.location.reload(); return false;">Try again</a>', $request->get_error_message() );
-			}
-			else {
-				$res = maybe_unserialize( $request['body'] );
-				if ( $res === false )
-					$res = new WP_Error( 'plugins_api_failed', 'An unknown error occurred', $request['body'] );
-			}
-
-			return $res;
+			load_textdomain( $this->domain, WP_LANG_DIR . '/' . $this->slug . '/' . $this->domain . '-' . $locale . '.mo' );
+			load_plugin_textdomain( $this->domain, false, dirname( $this->plugin ) . '/lang/' );
 
 		}
 
 	}
-
-	new myCRED_Video_Plugin();
-
 endif;
 
-?>
+function mycred_video_plus_core() {
+	return myCRED_Video_Plus_Core::instance();
+}
+mycred_video_plus_core();

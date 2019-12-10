@@ -44,8 +44,7 @@ window.$f=e}();
 	 * function has been called.
 	 */
 	function vimeo_ready( player_id ) {
-		console.log( 'Ready!' );
-		
+
 		// Keep a reference to Froogaloop for this player
 		var container = document.getElementById(player_id).parentNode.parentNode,
 			froogaloop = $f(player_id),

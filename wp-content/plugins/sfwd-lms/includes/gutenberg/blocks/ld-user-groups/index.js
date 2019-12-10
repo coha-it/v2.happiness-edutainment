@@ -1,6 +1,6 @@
 /**
  * LearnDash Block ld-user-groups
- * 
+ *
  * @since 2.5.9
  * @package LearnDash
  */
@@ -9,14 +9,14 @@
  * Internal block libraries
  */
 const { __, _x, sprintf } = wp.i18n;
-const { 
-	registerBlockType, 
+const {
+	registerBlockType,
 } = wp.blocks;
- 
+
 const {
     InspectorControls,
 } = wp.editor;
- 
+
  const {
     ServerSideRender,
     Tooltip,
@@ -32,10 +32,18 @@ const {
 registerBlockType(
     'learndash/ld-user-groups',
     {
-        title: __( 'User Groups', 'learndash' ),
+        title: __( 'LearnDash User Groups', 'learndash' ),
         description: __( 'This block displays the list of groups users are assigned to as users or leaders.', 'learndash' ),
-        icon: 'desktop',
-        category: 'widgets',
+        icon: 'groups',
+        category: 'learndash-blocks',
+        example: {
+            attributes: {
+                example_show: 1,
+            },
+        },
+        supports: {
+            customClassName: false,
+        },
         attributes: {
             user_id: {
                 type: 'string',
@@ -53,7 +61,7 @@ registerBlockType(
         edit: function (props) {
             const { attributes: { user_id, preview_user_id, preview_show },
                 setAttributes } = props;
-			
+
             const inspectorControls = (
                 <InspectorControls>
                     <PanelBody
@@ -102,7 +110,7 @@ registerBlockType(
                 do_serverside_render(props.attributes)
             ];
         },
-		
+
         save: props => {
             // Delete preview_user_id from props to prevent it being saved.
             delete (props.attributes.preview_user_id);

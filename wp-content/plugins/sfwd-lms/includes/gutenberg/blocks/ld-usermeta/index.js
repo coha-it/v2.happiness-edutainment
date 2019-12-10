@@ -1,6 +1,6 @@
 /**
  * LearnDash Block ld-usermeta
- * 
+ *
  * @since 2.5.9
  * @package LearnDash
  */
@@ -34,8 +34,16 @@ registerBlockType(
 	{
 		title: __('LearnDash User meta', 'learndash'),
 		description: __('This block displays User meta field', 'learndash'),
-		icon: 'desktop',
-		category: 'widgets',
+		icon: 'id',
+		category: 'learndash-blocks',
+		example: {
+			attributes: {
+				example_show: 1,
+			},
+		},
+		supports: {
+			customClassName: false,
+		},
 		attributes: {
 			field: {
 				type: 'string',

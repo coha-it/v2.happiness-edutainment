@@ -2,18 +2,20 @@
 /**
  * @package nmbs
  */
-$col = empty($shortcode_atts["col"])? 3:intval($shortcode_atts["col"]);
-$smcol = $col/1.5;
-$col = empty($col)? 1:($col >= 12)? 12:$col;
-$smcol = empty($smcol)? 1:($smcol >= 12)? 12:$smcol;
-$col = intVal(12/$col);
-$smcol = intVal(12/$smcol);
+$col   = empty( $shortcode_atts['col'] ) ? LEARNDASH_COURSE_GRID_COLUMNS :intval( $shortcode_atts['col'] );
+$col   = $col > 6 ? 6 : $col;
+$smcol = $col == 1 ? 1 : $col / 2;
+$col   = 12 / $col;
+$smcol = intval( ceil( 12 / $smcol ) );
+$col   = is_float( $col ) ? number_format( $col, 1 ) : $col;
+$col   = str_replace( '.', '-', $col );
 
 global $post; $post_id = $post->ID;
 
 $course_id = $post_id;
 $user_id   = get_current_user_id();
 
+$cg_short_description = get_post_meta( $post->ID, '_learndash_course_grid_short_description', true );
 $enable_video = get_post_meta( $post->ID, '_learndash_course_grid_enable_video_preview', true );
 $embed_code   = get_post_meta( $post->ID, '_learndash_course_grid_video_embed_code', true );
 $button_text  = get_post_meta( $post->ID, '_learndash_course_grid_custom_button_text', true );
@@ -62,7 +64,11 @@ $currency = apply_filters( 'learndash_course_grid_currency', $currency, $course_
 $course_options = get_post_meta($post_id, "_sfwd-courses", true);
 $price = $course_options && isset($course_options['sfwd-courses_course_price']) ? $course_options['sfwd-courses_course_price'] : __( 'Free', 'learndash-course-grid' );
 $price_type = $course_options && isset( $course_options['sfwd-courses_course_price_type'] ) ? $course_options['sfwd-courses_course_price_type'] : '';
-$short_description = @$course_options['sfwd-courses_course_short_description'];
+if ( ! empty( $cg_short_description ) ) {
+	$short_description = $cg_short_description;
+} else {
+	$short_description = $course_options['sfwd-courses_course_short_description'];
+}
 
 /**
  * Filter: individual grid class
@@ -149,8 +155,10 @@ if ( '' == $ribbon_text ) {
  */
 $class = apply_filters( 'learndash_course_grid_ribbon_class', $class, $course_id, $course_options );
 
+$thumb_size = isset( $shortcode_atts['thumb_size'] ) && ! empty( $shortcode_atts['thumb_size'] ) ? $shortcode_atts['thumb_size'] : 'course-thumb';
+
 ?>
-<div class="ld_course_grid col-sm-<?php echo $smcol;?> col-md-<?php echo $col; ?> <?php echo esc_attr( $grid_class ); ?>">
+<div class="ld_course_grid col-sm-<?php echo $smcol; ?> col-md-<?php echo $col; ?> <?php echo esc_attr( $grid_class ); ?>">
 	<article id="post-<?php the_ID(); ?>" <?php post_class( 'thumbnail course' ); ?>>
 	
 		<?php if ( $shortcode_atts['show_thumbnail'] == 'true' ) : ?>		
@@ -167,7 +175,7 @@ $class = apply_filters( 'learndash_course_grid_ribbon_class', $class, $course_id
 			</div>
 			<?php elseif( has_post_thumbnail() ) :?>
 			<a href="<?php the_permalink(); ?>" rel="bookmark">
-				<?php the_post_thumbnail('course-thumb'); ?>
+				<?php the_post_thumbnail( $thumb_size ); ?>
 			</a>
 			<?php else :?>
 			<a href="<?php echo esc_url( $button_link ); ?>" rel="bookmark">

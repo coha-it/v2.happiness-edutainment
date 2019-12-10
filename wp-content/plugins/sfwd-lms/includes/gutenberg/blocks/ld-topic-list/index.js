@@ -1,6 +1,6 @@
 /**
  * LearnDash Block ld-topic-list
- * 
+ *
  * @since 2.5.9
  * @package LearnDash
  */
@@ -39,8 +39,16 @@ registerBlockType(
 	{
 		title: sprintf(_x('LearnDash %s List', 'placeholder: Topic', 'learndash'), ldlms_get_custom_label('topic')),
 		description: sprintf(_x('This block shows a list of %s.', 'placeholders: topics', 'learndash'), ldlms_get_custom_label('topics')),
-		icon: 'desktop',
-		category: 'widgets',
+		icon: 'list-view',
+		category: 'learndash-blocks',
+		example: {
+			attributes: {
+				example_show: 1,
+			},
+		},
+		supports: {
+			customClassName: false,
+		},
 		attributes: {
 			orderby: {
 				type: 'string',
@@ -75,8 +83,8 @@ registerBlockType(
 				default: ''
 			},
 			topic_categoryselector: {
-				type: 'string',
-				default: ''
+				type: 'boolean',
+				default: false
 			},
 			topic_tag: {
 				type: 'string',
@@ -95,8 +103,8 @@ registerBlockType(
 				default: ''
 			},
 			categoryselector: {
-				type: 'string',
-				default: ''
+				type: 'boolean',
+				default: false
 			},
 			tag: {
 				type: 'string',
@@ -117,9 +125,13 @@ registerBlockType(
 				type: 'boolean',
 				default: true
 			},
+			example_show: {
+				type: 'boolean',
+				default: 0
+			},
 		},
 		edit: function (props) {
-			const { attributes: { orderby, order, per_page, course_id, show_content, show_thumbnail, topic_category_name, topic_cat, topic_categoryselector, topic_tag, topic_tag_id, category_name, cat, categoryselector, tag, tag_id, course_grid, col, preview_show },
+			const { attributes: { orderby, order, per_page, course_id, show_content, show_thumbnail, topic_category_name, topic_cat, topic_categoryselector, topic_tag, topic_tag_id, category_name, cat, categoryselector, tag, tag_id, course_grid, col, preview_show, example_show },
 				setAttributes } = props;
 
 			let field_show_content = '';

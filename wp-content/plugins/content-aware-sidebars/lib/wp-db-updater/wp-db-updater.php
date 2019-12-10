@@ -7,16 +7,14 @@
  * @copyright 2018 by Joachim Jensen
  */
 
-if (!class_exists("WP_DB_Updater")) {
+if (!class_exists('WP_DB_Updater')) {
     class WP_DB_Updater
     {
 
         /**
          * Required capability to run updates
          */
-        const CAPABILITY  = "update_plugins";
-
-        const VERSION_DEFAULT = '0';
+        const CAPABILITY  = 'update_plugins';
 
         /**
          * Key where installed_version is stored
@@ -60,7 +58,7 @@ if (!class_exists("WP_DB_Updater")) {
             $this->version_key = $version_key;
             $this->plugin_version = $plugin_version;
             $this->skip_new = $skip_new;
-            
+
             if (is_admin()) {
                 add_action('wp_loaded', array($this,'run'));
             }
@@ -162,7 +160,7 @@ if (!class_exists("WP_DB_Updater")) {
          */
         protected function fetch_installed_version()
         {
-            return ($this->installed_version = get_option($this->version_key, self::VERSION_DEFAULT));
+            return ($this->installed_version = get_option($this->version_key, '0'));
         }
 
         /**
@@ -197,7 +195,7 @@ if (!class_exists("WP_DB_Updater")) {
          */
         protected function is_version_installed($version)
         {
-            return version_compare($this->get_installed_version(), $version, ">=");
+            return version_compare($this->get_installed_version(), $version, '>=');
         }
 
         /**
@@ -209,8 +207,7 @@ if (!class_exists("WP_DB_Updater")) {
          */
         protected function is_version_installable($version)
         {
-            return !$this->is_version_installed($version)
-                && version_compare($this->plugin_version, $version, ">=");
+            return !$this->is_version_installed($version) && version_compare($this->plugin_version, $version, '>=');
         }
 
         /**
@@ -221,7 +218,7 @@ if (!class_exists("WP_DB_Updater")) {
          */
         protected function is_new_install()
         {
-            return $this->get_installed_version() == self::VERSION_DEFAULT;
+            return $this->get_installed_version() == '0';
         }
 
         /**
@@ -235,5 +232,3 @@ if (!class_exists("WP_DB_Updater")) {
         }
     }
 }
-
-//

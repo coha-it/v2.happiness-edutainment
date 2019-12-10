@@ -14,11 +14,14 @@ use Sabberworm\CSS\RuleSet\AtRuleSet;
 use Sabberworm\CSS\CSSList\AtRuleBlockList;
 use Sabberworm\CSS\RuleSet\DeclarationBlock;
 use Sabberworm\CSS\Value\CSSFunction;
+use Sabberworm\CSS\Value\CalcFunction;
 use Sabberworm\CSS\Value\RuleValueList;
+use Sabberworm\CSS\Value\CalcRuleValueList;
 use Sabberworm\CSS\Value\Size;
 use Sabberworm\CSS\Value\Color;
 use Sabberworm\CSS\Value\URL;
 use Sabberworm\CSS\Value\CSSString;
+use Sabberworm\CSS\Value\LineName;
 use Sabberworm\CSS\Rule\Rule;
 use Sabberworm\CSS\Parsing\UnexpectedTokenException;
 use Sabberworm\CSS\Comment\Comment;
@@ -108,6 +111,7 @@ class Parser {
 				$oListItem->setComments($comments);
 				$oList->append($oListItem);
 			}
+			$this->consumeWhiteSpace();
 		}
 		if (!$bIsRoot) {
 			throw new SourceException("Unexpected end of document", $this->iLineNo);
@@ -130,7 +134,12 @@ class Parser {
 		} else if ($this->comes('}')) {
 			$this->consume('}');
 			if ($bIsRoot) {
-				throw new SourceException("Unopened {", $this->iLineNo);
+				if ($this->oParserSettings->bLenientParsing) {
+					while ($this->comes('}')) $this->consume('}');
+					return $this->parseSelector();
+				} else {
+					throw new SourceException("Unopened {", $this->iLineNo);
+				}
 			} else {
 				return null;
 			}
@@ -265,7 +274,7 @@ class Parser {
 			if (preg_match('/[0-9a-fA-F]/Su', $this->peek()) === 0) {
 				return $this->consume(1);
 			}
-			$sUnicode = $this->consumeExpression('/^[0-9a-fA-F]{1,6}/u');
+			$sUnicode = $this->consumeExpression('/^[0-9a-fA-F]{1,6}/u', 6);
 			if ($this->strlen($sUnicode) < 6) {
 				//Consume whitespace after incomplete unicode escape
 				if (preg_match('/\\s/isSu', $this->peek())) {
@@ -360,15 +369,18 @@ class Parser {
 				$this->consumeWhiteSpace();
 			}
 		}
+		$this->consumeWhiteSpace();
 		if ($this->comes('!')) {
 			$this->consume('!');
 			$this->consumeWhiteSpace();
 			$this->consume('important');
 			$oRule->setIsImportant(true);
 		}
+		$this->consumeWhiteSpace();
 		while ($this->comes(';')) {
 			$this->consume(';');
 		}
+		$this->consumeWhiteSpace();
 		return $oRule;
 	}
 
@@ -434,8 +446,14 @@ class Parser {
 			$oValue = $this->parseColorValue();
 		} else if ($this->comes('url', true)) {
 			$oValue = $this->parseURLValue();
+		} else if ($this->comes('calc', true) || $this->comes('-webkit-calc', true) || $this->comes('-moz-calc', true)) {
+			$oValue = $this->parseCalcValue();
 		} else if ($this->comes("'") || $this->comes('"')) {
 			$oValue = $this->parseStringValue();
+		} else if ($this->comes("progid:") && $this->oParserSettings->bLenientParsing) {
+			$oValue = $this->parseMicrosoftFilter();
+		} else if ($this->comes("[")) {
+			$oValue = $this->parseLineNameValue();
 		} else {
 			$oValue = $this->parseIdentifier(true, false);
 		}
@@ -469,6 +487,24 @@ class Parser {
 		return new Size(floatval($sSize), $sUnit, $bForColor, $this->iLineNo);
 	}
 
+	private function parseLineNameValue() {
+		$this->consume('[');
+		$this->consumeWhiteSpace();
+		$aNames = array();
+		do {
+			if($this->oParserSettings->bLenientParsing) {
+				try {
+					$aNames[] = $this->parseIdentifier(false, true);
+				} catch(UnexpectedTokenException $e) {}
+			} else {
+				$aNames[] = $this->parseIdentifier(false, true);
+			}
+			$this->consumeWhiteSpace();
+		} while (!$this->comes(']'));
+		$this->consume(']');
+		return new LineName($aNames, $this->iLineNo);
+	}
+
 	private function parseColorValue() {
 		$aColor = array();
 		if ($this->comes('#')) {
@@ -496,6 +532,12 @@ class Parser {
 		return new Color($aColor, $this->iLineNo);
 	}
 
+	private function parseMicrosoftFilter() {
+		$sFunction = $this->consumeUntil('(', false, true);
+		$aArguments = $this->parseValue(array(',', '='));
+		return new CSSFunction($sFunction, $aArguments, ',', $this->iLineNo);
+	}
+
 	private function parseURLValue() {
 		$bUseUrl = $this->comes('url', true);
 		if ($bUseUrl) {
@@ -510,6 +552,42 @@ class Parser {
 			$this->consume(')');
 		}
 		return $oResult;
+	}
+
+	private function parseCalcValue() {
+		$aOperators = array('+', '-', '*', '/', '(', ')');
+		$sFunction = trim($this->consumeUntil('(', false, true));
+		$oCalcList = new CalcRuleValueList($this->iLineNo);
+		$oList = new RuleValueList(',', $this->iLineNo);
+		$iNestingLevel = 0;
+		$iLastComponentType = NULL;
+		while(!$this->comes(')') || $iNestingLevel > 0) {
+			$this->consumeWhiteSpace();
+			if (in_array($this->peek(), $aOperators)) {
+				if (($this->comes('-') || $this->comes('+'))) {
+					if ($this->peek(1, -1) != ' ' || !($this->comes('- ') || $this->comes('+ '))) {
+						throw new UnexpectedTokenException(" {$this->peek()} ", $this->peek(1, -1) . $this->peek(2), 'literal', $this->iLineNo);
+					}
+				} else if ($this->comes('(')) {
+					$iNestingLevel++;
+				} else if ($this->comes(')')) {
+					$iNestingLevel--;
+				}
+				$oCalcList->addListComponent($this->consume(1));
+				$iLastComponentType = CalcFunction::T_OPERATOR;
+			} else {
+				$oVal = $this->parsePrimitiveValue();
+				if ($iLastComponentType == CalcFunction::T_OPERAND) {
+					throw new UnexpectedTokenException(sprintf('Next token was expected to be an operand of type %s. Instead "%s" was found.', implode(', ', $aOperators), $oVal), '', 'custom', $this->iLineNo);
+				}
+
+				$oCalcList->addListComponent($oVal);
+				$iLastComponentType = CalcFunction::T_OPERAND;
+			}
+		}
+		$oList->addListComponent($oCalcList);
+		$this->consume(')');
+		return new CalcFunction($sFunction, $oList, ',', $this->iLineNo);
 	}
 
 	/**
@@ -557,9 +635,10 @@ class Parser {
 		}
 	}
 
-	private function consumeExpression($mExpression) {
+	private function consumeExpression($mExpression, $iMaxLength = null) {
 		$aMatches = null;
-		if (preg_match($mExpression, $this->inputLeft(), $aMatches, PREG_OFFSET_CAPTURE) === 1) {
+		$sInput = $iMaxLength !== null ? $this->peek($iMaxLength) : $this->inputLeft();
+		if (preg_match($mExpression, $sInput, $aMatches, PREG_OFFSET_CAPTURE) === 1) {
 			return $this->consume($aMatches[0][0]);
 		}
 		throw new UnexpectedTokenException($mExpression, $this->peek(5), 'expression', $this->iLineNo);

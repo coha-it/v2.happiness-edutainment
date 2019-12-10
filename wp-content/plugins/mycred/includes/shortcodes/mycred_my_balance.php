@@ -19,7 +19,7 @@ if ( ! function_exists( 'mycred_render_shortcode_my_balance' ) ) :
 			'wrapper'    => 1,
 			'formatted'  => 1,
 			'type'       => MYCRED_DEFAULT_TYPE_KEY
-		), $atts ) );
+		), $atts, MYCRED_SLUG . '_my_balance' ) );
 
 		$output = '';
 
@@ -39,7 +39,7 @@ if ( ! function_exists( 'mycred_render_shortcode_my_balance' ) ) :
 		if ( $account === false ) return;
 
 		// Check for exclusion
-		if ( empty( $account->balance ) || ! array_key_exists( $type, $account->balance ) ) return;
+		if ( empty( $account->balance ) || ! array_key_exists( $type, $account->balance ) || $account->balance[ $type ] === false ) return;
 
 		$balance = $account->balance[ $type ];
 
@@ -62,9 +62,9 @@ if ( ! function_exists( 'mycred_render_shortcode_my_balance' ) ) :
 			$output .= '<' . $balance_el . '>';
 
 		if ( $formatted )
-			$output .= $balance->type->format( $balance->current );
+			$output .= $balance->point_type->format( $balance->current );
 		else
-			$output .= $balance->type->number( $balance->current );
+			$output .= $balance->point_type->number( $balance->current );
 
 		if ( ! empty( $balance_el ) )
 			$output .= '</' . $balance_el . '>';
@@ -76,4 +76,4 @@ if ( ! function_exists( 'mycred_render_shortcode_my_balance' ) ) :
 
 	}
 endif;
-add_shortcode( 'mycred_my_balance', 'mycred_render_shortcode_my_balance' );
+add_shortcode( MYCRED_SLUG . '_my_balance', 'mycred_render_shortcode_my_balance' );

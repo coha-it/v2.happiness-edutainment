@@ -607,10 +607,11 @@ if ( ! class_exists( 'Semper_Fi_Module' ) ) {
 
 		wp_enqueue_style( 
 			'sfwd-module-style', 
-			LEARNDASH_LMS_PLUGIN_URL . 'assets/css/sfwd_module'. ( ( defined( 'LEARNDASH_SCRIPT_DEBUG' ) && ( LEARNDASH_SCRIPT_DEBUG === true ) ) ? '' : '.min') .'.css',
+			LEARNDASH_LMS_PLUGIN_URL . 'assets/css/sfwd_module'. leardash_min_asset() .'.css',
 			array(), 
 			LEARNDASH_SCRIPT_VERSION_TOKEN 
 		);
+		wp_style_add_data( 'sfwd-module-style', 'rtl', 'replace' );
 		$learndash_assets_loaded['styles']['sfwd-module-style'] = __FUNCTION__;	
 	}
 
@@ -639,11 +640,15 @@ if ( ! class_exists( 'Semper_Fi_Module' ) ) {
 			}
 		}
 
-		$this->script_data['learndash_categories_lang']     = esc_html__( 'LearnDash Categories', 'learndash' );
-		$this->script_data['loading_lang']                  = esc_html__( 'Loading...', 'learndash' );
-		$this->script_data['select_a_lesson_lang']          = sprintf( esc_html_x( '-- Select a %s --', 'Select a Lesson Label', 'learndash' ), LearnDash_Custom_Label::get_label( 'lesson' ) );
-		$this->script_data['select_a_lesson_or_topic_lang'] = sprintf( esc_html_x( '-- Select a %s or %s --', 'Select a Lesson Topic Label', 'learndash' ), LearnDash_Custom_Label::get_label( 'lesson' ), LearnDash_Custom_Label::get_label( 'topic' ) );
-		$this->script_data['advanced_quiz_preview_link']    = admin_url( 'admin.php?page=ldAdvQuiz&module=preview&id=' );
+		$this->script_data['learndash_categories_lang']          = esc_html__( 'LearnDash Categories', 'learndash' );
+		$this->script_data['loading_lang']                       = esc_html__( 'Loading...', 'learndash' );
+		$this->script_data['select_a_lesson_lang']               = sprintf( esc_html_x( '-- Select a %s --', 'Select a Lesson Label', 'learndash' ), LearnDash_Custom_Label::get_label( 'lesson' ) );
+		$this->script_data['select_a_lesson_or_topic_lang']      = sprintf( esc_html_x( '-- Select a %s or %s --', 'Select a Lesson Topic Label', 'learndash' ), LearnDash_Custom_Label::get_label( 'lesson' ), LearnDash_Custom_Label::get_label( 'topic' ) );
+		$this->script_data['advanced_quiz_preview_link']         = admin_url( 'admin.php?page=ldAdvQuiz&module=preview&id=' );
+		$this->script_data['valid_recurring_paypal_day_range']   = esc_html__( 'Valid range is 1 to 90 when the Billing Cycle is set to days.', 'learndash' );
+		$this->script_data['valid_recurring_paypal_week_range']  = esc_html__( 'Valid range is 1 to 52 when the Billing Cycle is set to weeks.', 'learndash' );
+		$this->script_data['valid_recurring_paypal_month_range'] = esc_html__( 'Valid range is 1 to 24 when the Billing Cycle is set to months.', 'learndash' );
+		$this->script_data['valid_recurring_paypal_year_range']  = esc_html__( 'Valid range is 1 to 5 when the Billing Cycle is set to years.', 'learndash' );
 
 		global $post;
 		if (($post instanceof WP_Post) && ( $post->post_type == 'sfwd-quiz' )) {
@@ -652,7 +657,7 @@ if ( ! class_exists( 'Semper_Fi_Module' ) ) {
 
 		wp_enqueue_script( 
 			'sfwd-module-script', 
-			LEARNDASH_LMS_PLUGIN_URL . 'assets/js/sfwd_module'. ( ( defined( 'LEARNDASH_SCRIPT_DEBUG' ) && ( LEARNDASH_SCRIPT_DEBUG === true ) ) ? '' : '.min') .'.js', 
+			LEARNDASH_LMS_PLUGIN_URL . 'assets/js/sfwd_module'. leardash_min_asset() .'.js', 
 			array( 'jquery' ), 
 			LEARNDASH_SCRIPT_VERSION_TOKEN,
 			true 
@@ -806,7 +811,7 @@ if ( ! class_exists( 'Semper_Fi_Module' ) ) {
 				*/
 
 			} elseif ( $v['type'] === 'metabox' ) {
-				add_action( 'save_post', array( $this, 'save_post_data') );
+				add_action( 'save_post', array( $this, 'save_post_data'), 10, 3 );
 
 				if ( isset( $v['display'] ) && ! empty( $v['display'] ) ) {
 					foreach ( $v['display'] as $posttype ) {
@@ -814,11 +819,13 @@ if ( ! class_exists( 'Semper_Fi_Module' ) ) {
 						$v['posttype'] = $posttype;
 
 						if ( ! isset( $v['context'] ) ) {
-							$v['context'] = 'advanced';
+							//$v['context'] = 'advanced';
+							$v['context'] = 'normal';
 						}
 
 						if ( ! isset( $v['priority'] ) ) {
-							$v['priority'] = 'default';
+							//$v['priority'] = 'default';
+							$v['priority'] = 'high';
 						}
 
 						if ( $this->tabbed_metaboxes ) {
@@ -835,10 +842,13 @@ if ( ! class_exists( 'Semper_Fi_Module' ) ) {
 
 							add_filter( 'sfwd_add_post_metabox', array( $this, 'filter_return_metaboxes') );
 						} else {
-							$title = $v['name'];
-
-							if ( $title != $this->plugin_name ) {
-								$title = $this->plugin_name . ' - ' . $title;
+							if ( ( isset( $name ) ) && ( ! empty( $name ) ) ) {
+								$title = $name;
+							} else {
+								$title = $v['name'];
+								if ( $title != $this->plugin_name ) {
+									$title = $this->plugin_name . ' - ' . $title;
+								}
 							}
 
 							/**
@@ -851,8 +861,13 @@ if ( ! class_exists( 'Semper_Fi_Module' ) ) {
 							 * @param  string  $title
 							 * @param  string  $v['prefix'] . $k
 							 */
-							$title = apply_filters( 'semperfi_metabox_title', $title, $v['prefix'] . $k );
-							add_meta_box( $v['prefix'] . $k, $title, array( $this, 'display_metabox'), $posttype, $v['context'], $v['priority'], $v );
+							if ( ( 'sfwd-quiz' === $posttype ) && ( apply_filters( 'learndash_settings_metaboxes_legacy_quiz', LEARNDASH_SETTINGS_METABOXES_LEGACY_QUIZ, $posttype ) ) ) {
+								$title = apply_filters( 'semperfi_metabox_title', $title, $v['prefix'] . $k );
+								add_meta_box( $v['prefix'] . $k, $title, array( $this, 'display_metabox'), $posttype, $v['context'], $v['priority'], $v );
+							} else if ( apply_filters( 'learndash_settings_metaboxes_legacy', LEARNDASH_SETTINGS_METABOXES_LEGACY, $posttype ) ) {
+								$title = apply_filters( 'semperfi_metabox_title', $title, $v['prefix'] . $k );
+								add_meta_box( $v['prefix'] . $k, $title, array( $this, 'display_metabox'), $posttype, $v['context'], 'low', $v );
+							}
 						}
 
 
@@ -916,7 +931,7 @@ if ( ! class_exists( 'Semper_Fi_Module' ) ) {
 	 *
 	 * @param  int $post_id
 	 */
-	function save_post_data( $post_id) {
+	function save_post_data( $post_id = 0, $saved_post = null, $update = null ) {
 		if ( $this->locations !== null ) {
 
 			foreach ( $this->locations as $k => $v ) {
@@ -1035,15 +1050,80 @@ if ( ! class_exists( 'Semper_Fi_Module' ) ) {
 						// LEARNDASH-261: We need to reset the reference to the post meta ‘quiz_pro_id’ when the quiz is saved
 						// in case the ‘Associated Settings’ selector is updated. 
 						else if ( ( $k == 'sfwd-quiz' ) && ( isset( $options[$k.'_quiz_pro'] ) ) ) {
-							$quiz_pro_id = intval( $options['sfwd-quiz_quiz_pro'] );
-														
-							global $wpdb;
-							$sql_str = "DELETE FROM ". $wpdb->postmeta ." WHERE post_id=". $post_id ." AND meta_key like 'quiz_pro_id_%'";
-							$quiz_query_results = $wpdb->query( $sql_str );
+							//error_log('_POST<pre>'. print_r($_POST, true) .'</pre>');
+
+							$quiz_pro_id_new = absint( $options['sfwd-quiz_quiz_pro'] );
+							$quiz_pro_id_org = absint( get_post_meta( $post_id, 'quiz_pro_id', true ) ) ;
 							
-							update_post_meta( $post_id, 'quiz_pro_id', $quiz_pro_id );
-							if ( $quiz_pro_id )
-								update_post_meta( $post_id, 'quiz_pro_id_'. $quiz_pro_id, $quiz_pro_id );
+							if ( $quiz_pro_id_org !== $quiz_pro_id_new ) {
+								/**
+								 * If this quiz was the primary for all shared settings. We need to 
+								 * delete the primary marker then move the primary marker to another 
+								 * quiz using the same shared settngs. 
+								 */
+								$quiz_id_primary_org = absint( learndash_get_quiz_primary_shared( $quiz_pro_id_org, false ) );
+								if ( $quiz_id_primary_org === $post_id ) {
+									delete_post_meta( $post_id, 'quiz_pro_primary_'. $quiz_pro_id_org );
+									$quiz_post_ids = learndash_get_quiz_post_ids( $quiz_pro_id_org );
+									if ( ! empty( $quiz_post_ids ) ) {
+										foreach( $quiz_post_ids as $quiz_post_id ) {
+											if ( $quiz_post_id !== $post_id ) {
+												update_post_meta( $quiz_post_id, 'quiz_pro_primary_'. $quiz_pro_id_org, $quiz_pro_id_org );
+
+												/**
+												 * After we move the primary marker we also need to move the questions.
+												 */
+												$ld_quiz_questions_object = LDLMS_Factory_Post::quiz_questions( intval( $post_id ) );
+												if ( $ld_quiz_questions_object ) {
+													$questions = $ld_quiz_questions_object->get_questions( 'post_ids' );
+							
+													$questions = get_post_meta( $post_id, 'ld_quiz_questions', true );
+													update_post_meta( $quiz_post_id, 'ld_quiz_questions', $questions );
+												}
+												break;
+											}
+										}
+									}
+								}
+
+								$quiz_id_primary_new = absint( learndash_get_quiz_primary_shared( $quiz_pro_id_new, false ) );
+								if ( empty( $quiz_id_primary_new ) ) {
+									update_post_meta( $post_id, 'quiz_pro_primary_'. $quiz_pro_id_new, $quiz_pro_id_new );
+									// trigger to cause reloading of the questions.
+									delete_post_meta( $post_id, 'ld_quiz_questions' );
+								}
+
+								//$quiz_id_primary_new = absint( learndash_get_quiz_primary_shared( $quiz_pro_id_new, false ) );
+								//if ( empty( $quiz_id_primary_new ) ) {
+								//	//$quiz_post_ids = learndash_get_quiz_post_ids( $quiz_pro_id );	
+								//	$questions = get_post_meta( $quiz_id_primary_org, 'ld_quiz_questions', true );
+								//	update_post_meta( $post_id, 'ld_quiz_questions', $questions );
+								//}
+							
+								global $wpdb;
+								$sql_str = "DELETE FROM ". $wpdb->postmeta ." WHERE post_id=". $post_id ." AND meta_key like 'quiz_pro_id_%'";
+								$quiz_query_results = $wpdb->query( $sql_str );
+							
+								update_post_meta( $post_id, 'quiz_pro_id', $quiz_pro_id_new );
+								update_post_meta( $post_id, 'quiz_pro_id_'. $quiz_pro_id_new, $quiz_pro_id_new );
+							}
+						} else if ( $k == 'sfwd-question' ) {
+							if ( isset( $options[ $k . '_quiz' ] ) ) {
+								$quiz_id_new = absint( $options[ $k . '_quiz' ] );
+								$quiz_id_old = get_post_meta( $post_id, 'quiz_id', true );
+								$quiz_id_old = absint( $quiz_id_old );
+								if ( $quiz_id_old !== $quiz_id_new ) {
+									update_post_meta( $post_id, 'quiz_id', $quiz_id_new);
+
+									if ( ! empty( $quiz_id_old ) ) {
+										learndash_set_quiz_questions_dirty( $quiz_id_old );
+									}
+									
+									if ( ! empty( $quiz_id_new ) ) {
+										learndash_set_quiz_questions_dirty( $quiz_id_new );
+									}
+								}
+							}
 						}
 						
 						update_post_meta( $post_id, '_' . $this->get_prefix( $k ) . $k, $options );
@@ -1051,7 +1131,7 @@ if ( ! class_exists( 'Semper_Fi_Module' ) ) {
 						learndash_convert_settings_to_single( $post_id, $options, $k );
 						
 						// Purge the LD transients when we save any of our post types.
-						learndash_purge_transients();
+						LDLMS_Transients::purge_all();
 					}
 				}
 			}
@@ -1090,7 +1170,7 @@ if ( ! class_exists( 'Semper_Fi_Module' ) ) {
 				if ( ( isset( $args['options']['lazy_load_data'] ) ) && ( !empty( $args['options']['lazy_load_data'] ) ) ) {
 					
 					$args['options']['lazy_load_data']['value'] = $args['value'];
-					
+					//$lazy_load_data['nonce']      = $post_type_nonce;
 					$lazy_load_data = ' learndash_lazy_load_data="'. htmlspecialchars( json_encode( $args['options']['lazy_load_data'] ) ) .'" ';
 					
 					$lazy_load_spinner = '<br /><span style="display:none;" class="learndash_lazy_loading"><img class="learndash_lazy_load_spinner" alt="'. esc_html__('loading', 'learndash') .'" src="'. admin_url('/images/wpspin_light.gif') .'" /> '. esc_html__('loading', 'learndash') .'</span>';
@@ -1304,7 +1384,7 @@ if ( ! class_exists( 'Semper_Fi_Module' ) ) {
 				$hour_field = '<span class="screen-reader-text">' . esc_html__( 'Hour', 'learndash' ) . '</span><input type="number" min="0" max="23" placeholder="HH" class="ld_date_hh" name="'. $name .'[hh]" value="' . $value_hh . '" size="2" maxlength="2" autocomplete="off" />';
 				$minute_field = '<span class="screen-reader-text">' . esc_html__( 'Minute', 'learndash' ) . '</span><input type="number" min="0" max="59" placeholder="MM" class="ld_date_mn" name="'. $name .'[mn]" value="' . $value_mn . '" size="2" maxlength="2" autocomplete="off" />';
 
-				$buf .= '<div class="ld_date_selector">'. sprintf( esc_html__( '%1$s %2$s, %3$s @ %4$s:%5$s' ),
+				$buf .= '<div class="ld_date_selector">'. sprintf( esc_html__( '%1$s %2$s, %3$s @ %4$s:%5$s', 'default' ),
 					$month_field, $day_field, $year_field, $hour_field, $minute_field ) .'</div>';
 				
 
@@ -1372,6 +1452,8 @@ if ( ! class_exists( 'Semper_Fi_Module' ) ) {
 	 * @return string
 	 */
 	function get_option_row( $name, $opts, $args ) {
+		global $post_type;
+
 		$label_text = $input_attr = $help_text_2 = $id_attr = '';
 		if ( $opts['label'] == 'top' ) {
 			$align = 'left';
@@ -1419,6 +1501,8 @@ if ( ! class_exists( 'Semper_Fi_Module' ) ) {
 	 * @param  null|array $meta_args
 	 */
 	function display_options( $location = null, $meta_args = null ) {
+		global $sfwd_lms;
+
 		static $location_settings = array();
 		$defaults                 = null;
 		$prefix                   = $this->get_prefix( $location );
@@ -1480,11 +1564,13 @@ if ( ! class_exists( 'Semper_Fi_Module' ) ) {
 				}
 			}
 
-			$setting_keys = array_keys( $settings );
+			if ( ( is_array( $settings ) ) && ( ! empty( $settings ) ) ) {
+				$setting_keys = array_keys( $settings );
 
-			foreach ( $setting_keys as $s ) {
-				if ( ! empty( $arg_keys[ $s ] ) ) {
-					$args[ $s ] = $settings[ $s ];
+				foreach ( $setting_keys as $s ) {
+					if ( ! empty( $arg_keys[ $s ] ) ) {
+						$args[ $s ] = $settings[ $s ];
+					}
 				}
 			}
 		} else {

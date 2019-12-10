@@ -8,7 +8,7 @@ if ( ( class_exists( 'LearnDash_Shortcodes_Section' ) ) && ( !class_exists( 'Lea
 			$this->shortcodes_section_key 			= 	'learndash_course_progress';
 			$this->shortcodes_section_title 		= 	sprintf( esc_html_x( '%s Progress', 'placeholder: Course', 'learndash' ), LearnDash_Custom_Label::get_label( 'course' ) );
 			$this->shortcodes_section_type			=	1;
-			$this->shortcodes_section_description	=	sprintf( esc_html_x( 'This shortcode displays users progress bar for the %1$s in any %2$s/%3$s/%4$s pages.', 'placeholders: course, course, lesson, quiz', 'learndash' ), LearnDash_Custom_Label::label_to_lower( 'course' ), LearnDash_Custom_Label::label_to_lower( 'course' ), LearnDash_Custom_Label::label_to_lower( 'lesson' ), LearnDash_Custom_Label::label_to_lower( 'quiz' ) );
+			$this->shortcodes_section_description	=	sprintf( esc_html_x( 'This shortcode displays users progress bar for the %1$s in any %2$s/%3$s/%4$s pages.', 'placeholders: course, course, lesson, quiz', 'learndash' ), learndash_get_custom_label_lower( 'course' ), learndash_get_custom_label_lower( 'course' ), learndash_get_custom_label_lower( 'lesson' ), learndash_get_custom_label_lower( 'quiz' ) );
 						
 			parent::__construct(); 
 		}

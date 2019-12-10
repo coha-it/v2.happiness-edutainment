@@ -49,9 +49,22 @@
 		
 		//if not been set, then $group will be 'all'
 		if ($group=='all') $users= get_users () ;
-		
+				
 		//if set to nogroup, then only show those
-		if ($group == 'nogroup') $users = get_users( array( 'meta_key' => 'private_group','meta_compare' => 'NOT EXISTS'  )) ;
+		if ($group == 'nogroup') {
+			//take the opportunity to tidy the private group meta key
+				$users= get_users () ;
+				if ( $users ) {
+					foreach ( $users as $user ) {
+						$test = get_user_meta ($user->ID, 'private_group', true) ;
+						if (empty ($test)) {
+							delete_user_meta ($user->ID, 'private_group') ;
+						}
+					}
+				}
+			$users = get_users( array( 'meta_key' => 'private_group','meta_compare' => 'NOT EXISTS'  )) ;
+		}
+		
 		
 		//if set to all groups, then don't show any without a group set
 		if ($group == 'allgroups') {
@@ -94,6 +107,9 @@
 		<form name="UserManagement" method="post">
 
 			<?php wp_nonce_field( 'confirm-bulk-action', 'confirm-bulk-action-nonce' ) ?>
+			
+			<?php $number_of_users = count($users); 
+			echo ' <b>Users in this selection : '.$number_of_users.'</b>' ; ?>
 
 			<div class="tablenav top">
 				<select name="action">
@@ -153,6 +169,8 @@
 			?>
 				</select>
 				<input type="submit" value="<?php _e( 'Filter' , 'bbp-private-groups' ); ?>" class="button action doaction" name="" >
+				
+			
 				
 			<?php do_action( 'pg_user_management_filter' ); ?>
 			

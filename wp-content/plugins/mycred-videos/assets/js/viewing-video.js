@@ -3,15 +3,15 @@
  * @since 1.0
  * @version 1.1
  */
-var timer = 0;
+var timer    = 0;
 
-var actions = {};
-var seconds = {};
-var logic = {};
+var actions  = {};
+var seconds  = {};
+var logic    = {};
 var interval = {};
 var duration = {};
-	
-var done = {};
+
+var done     = {};
 
 /**
  * View Handler
@@ -20,10 +20,7 @@ var done = {};
  */
 function mycred_view_video( id, state, custom_logic, custom_interval, key, ctype ) {
 
-	console.log( 'Video fire' );
-
-	var videoid = id;
-
+	var videoid    = id;
 	var videostate = state;
 
 	if ( actions[ id ] === undefined )
@@ -116,15 +113,12 @@ function mycred_view_video( id, state, custom_logic, custom_interval, key, ctype
 			else {
 				// Stop Timer
 				clearInterval( timer );
-			}	
+			}
+
 		}
-		else {
-			console.log( 'Unknown logic request: ' + logic[ id ] );
-		}
+
 	}
-	else {
-		console.log( 'State: ' + videostate );
-	}
+
 }
 
 /**
@@ -133,12 +127,8 @@ function mycred_view_video( id, state, custom_logic, custom_interval, key, ctype
  * @version 1.1
  */
 function mycred_video_call( id, key, state, actions, seconds, pointtype ) {
-	
-	console.log( 'Incoming AJAX request point type: ' + pointtype );
-	
-	if ( done[ id ] === undefined ) {
 
-		console.log( 'Connecting' );
+	if ( done[ id ] === undefined ) {
 
 		if ( duration[ id ] === undefined )
 			duration[ id ] = 0;
@@ -159,9 +149,7 @@ function mycred_video_call( id, key, state, actions, seconds, pointtype ) {
 			url        : myCRED_Video.ajaxurl,
 			success    : function( data ) {
 
-				console.log( data );
-
-				// Add to done list
+				// console.log( data );
 				if ( data.status === 'added' ) {
 					var box = document.getElementById( 'mycred_vvideo_v' + id + '_box' );
 					box.innerHTML = '';
@@ -175,9 +163,6 @@ function mycred_video_call( id, key, state, actions, seconds, pointtype ) {
 			}
 		});
 
-	}
-	else {
-		console.log( 'Video marked as done!' );
 	}
 
 }

@@ -68,6 +68,9 @@ if ( ( class_exists( 'LearnDash_Gutenberg_Block' ) ) && ( ! class_exists( 'Learn
 				'preview_user_id' => array(
 					'type' => 'string',
 				),
+				'example_show' => array(
+					'type' => 'boolean',
+				),
 			);
 			$this->self_closing = true;
 
@@ -95,6 +98,12 @@ if ( ( class_exists( 'LearnDash_Gutenberg_Block' ) ) && ( ! class_exists( 'Learn
 			}
 
 			if ( is_user_logged_in() ) {
+
+				if ( ( isset( $attributes['example_show'] ) ) && ( ! empty( $attributes['example_show'] ) ) ) {
+					$attributes['preview_user_id'] = $this->get_example_user_id();
+					$attributes['preview_show'] = 1;
+					unset( $attributes['example_show'] );
+				}
 
 				$shortcode_params_str = '';
 				$types = array();

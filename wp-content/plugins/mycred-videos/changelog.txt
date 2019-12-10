@@ -1,0 +1,37 @@
+Version 1.2.2
+------------------------------------------------------------
+Fix - Hooks settings not appearing in some cases
+
+Version 1.2.1
+------------------------------------------------------------
+Improvement - Upgrading License System
+
+Version 1.2
+------------------------------------------------------------
+Added support for myCRED 1.8 with backward compatibility.
+Tested upto WordPress 5.0.2
+
+Version 1.1.1
+------------------------------------------------------------
+TWEAK - Vimeo videos should be loaded over HTTPS by default.
+TWEAK - Stopped using admin-ajax.php for ajax calls.
+UPDATE - Updated translation files.
+
+Version 1.1
+------------------------------------------------------------
+UPDATE - Updated to latest Vimeo video library.
+UPDATE - Re-structured plugin files.
+UPDATE - Added support for multiple point types.
+UPDATE - Adjusted plugin minimum requirements.
+
+Version 1.0.2
+------------------------------------------------------------
+FIX - Fixed YouTube Origin issue.
+
+Version 1.0.1
+------------------------------------------------------------
+UPDATE - myCRED 1.4 Ready
+
+ Version 1.0
+------------------------------------------------------------
+Initial release

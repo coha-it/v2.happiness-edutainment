@@ -3,8 +3,8 @@ Contributors: (Virgial)
 Tags: notification,notify,email,user,password,moderator,postauthor,admin,e-mail,switch
 Requires at least: 4.0.0
 Donate link:https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=TYG56SLWNG42N
-Tested up to: 5.0.0
-Stable tag: 1.4.1
+Tested up to: 5.2.3
+Stable tag: 1.5.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -14,7 +14,8 @@ Disable or enable the Wordpress notification e-mails (new user, changed password
 
 With this plugin you can switch the different Wordpress notification e-mails on and off, like options as the new user and password change notifications send by Wordpress to the administrator and user. Works perfectly in combination with a lot of other plugins!
 
-Watch this nice tut made by Robert Orzanna: https://www.youtube.com/watch?v=66UkQKgSFio
+Watch this nice tut made by Robert Orzanna: 
+[youtube https://www.youtube.com/watch?v=66UkQKgSFio]
 
 
 **The options you can manage are:**
@@ -60,6 +61,12 @@ Some other plugins also use their custom notifications which overwrite the core 
 If you're one of the early installers, than you'll be happy to see that de new user notification is now splitted in admin and user e-mail management.
 
 == Changelog ==
+
+= 1.5.0 =
+UPGRADED: Upgraded the pluggable functions file. Fixing the missing PassWordHash Class bug.
+
+= 1.4.2 =
+FIXED: Loading local language.
 
 = 1.4.1 =
 ADDED: Manage sending e-mail after a successful automatic Wordpress core update to administrators. E-mails about failed updates will always be sent to the administrators and will not be disabled.

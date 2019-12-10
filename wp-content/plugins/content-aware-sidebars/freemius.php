@@ -2,13 +2,11 @@
 
 /**
  * @package Content Aware Sidebars
- * @author Joachim Jensen <jv@intox.dk>
+ * @author Joachim Jensen <joachim@dev.institute>
  * @license GPLv3
- * @copyright 2018 by Joachim Jensen
+ * @copyright 2019 by Joachim Jensen
  */
-if ( !defined( 'ABSPATH' ) ) {
-    exit;
-}
+defined( 'ABSPATH' ) || exit;
 // Create a helper function for easy SDK access.
 function cas_fs()
 {
@@ -64,6 +62,11 @@ function cas_fs_connect_message_update(
     );
 }
 
+function cas_fs_get_plugin_icon()
+{
+    return dirname( __FILE__ ) . '/assets/img/icon.png';
+}
+
 $cas_fs->add_filter(
     'connect_message_on_update',
     'cas_fs_connect_message_update',
@@ -77,6 +80,7 @@ $cas_fs->add_filter(
     6
 );
 $cas_fs->add_filter( 'show_affiliate_program_notice', '__return_false' );
+$cas_fs->add_filter( 'plugin_icon', 'cas_fs_get_plugin_icon' );
 function cas_fs_upgrade()
 {
     global  $cas_fs ;
@@ -103,5 +107,3 @@ if ( $cas_fs->is_on() ) {
     //after_uninstall is only run for new users
     register_uninstall_hook( plugin_dir_path( __FILE__ ) . 'content-aware-sidebars.php', 'cas_fs_uninstall' );
 }
-
-//eol

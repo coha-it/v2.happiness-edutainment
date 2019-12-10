@@ -27,6 +27,9 @@ if ( ( class_exists( 'LearnDash_Gutenberg_Block' ) ) && ( ! class_exists( 'Learn
 				'preview_show' => array(
 					'type' => 'boolean',
 				),
+				'preview_course_id' => array(
+					'type' => 'string',
+				),
 				'meta' => array(
 					'type' => 'object',
 				),
@@ -58,6 +61,14 @@ if ( ( class_exists( 'LearnDash_Gutenberg_Block' ) ) && ( ! class_exists( 'Learn
 				$attributes_meta = $attributes['meta'];
 				unset( $attributes['meta'] );
 			}
+
+			if ( ( isset( $attributes['preview_show'] ) ) && ( ! empty( $attributes['preview_show'] ) ) ) {
+				if ( ( isset( $attributes['preview_course_id'] ) ) && ( ! empty( $attributes['preview_course_id'] ) ) ) {
+					$attributes['course_id'] = absint( $attributes['preview_course_id'] );
+					unset( $attributes['preview_course_id'] );
+				}
+			}
+
 			if ( ( ! isset( $attributes['course_id'] ) ) || ( empty( $attributes['course_id'] ) ) ) {
 				if ( ( ! isset( $attributes_meta['course_id'] ) ) || ( empty( $attributes_meta['course_id'] ) ) ) {
 					return $this->render_block_wrap( '<span class="learndash-block-error-message">' . sprintf(

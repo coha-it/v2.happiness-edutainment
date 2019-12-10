@@ -66,25 +66,18 @@ class gdbbPressAttachments {
     }
 
     public function load() {
-        add_action('init', array(&$this, 'load_translation'));
-        add_action('init', array(&$this, 'init_thumbnail_size'), 1);
-        add_action('init', array(&$this, 'delete_attachments'));
+        add_action('init', array($this, 'init_thumbnail_size'), 1);
+        add_action('init', array($this, 'delete_attachments'));
 
-        add_action('before_delete_post', array(&$this, 'delete_post'));
+        add_action('before_delete_post', array($this, 'delete_post'));
 
         if (is_admin()) {
             require_once(GDBBPRESSATTACHMENTS_PATH.'code/admin.php');
         } else {
             require_once(GDBBPRESSATTACHMENTS_PATH.'code/attachments/front.php');
         }
-    }
 
-    public function load_translation() {
-        $this->l = get_locale();
-
-        if (!empty($this->l)) {
-            load_plugin_textdomain('gd-bbpress-attachments', false, 'gd-bbpress-attachments/languages');
-        }
+	    load_plugin_textdomain('gd-bbpress-attachments', false, 'gd-bbpress-attachments/languages');
     }
 
     public function init_thumbnail_size() {

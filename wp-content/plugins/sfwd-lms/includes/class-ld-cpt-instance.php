@@ -155,7 +155,7 @@ if ( ! class_exists( 'SFWD_CPT_Instance' ) ) {
 				$this->post_options = wp_parse_args( $cpt_options, $this->post_options );
 			}
 
-			add_action( 'admin_menu', array( &$this, 'admin_menu' ) );
+			add_action( 'admin_menu', array( $this, 'admin_menu' ) );
 			add_shortcode( $this->post_type, array( $this, 'shortcode' ) );
 			add_action( 'init', array( $this, 'add_post_type' ), 5 );
 
@@ -228,6 +228,8 @@ if ( ! class_exists( 'SFWD_CPT_Instance' ) ) {
 			$post         = get_post( get_the_id() );
 			$current_user = wp_get_current_user();
 			$post_type    = '';
+			$user_wrapper = true;
+			$template_called = array();
 
 			if ( get_query_var( 'post_type' ) ) {
 				$post_type = get_query_var( 'post_type' );
@@ -235,6 +237,17 @@ if ( ! class_exists( 'SFWD_CPT_Instance' ) ) {
 
 			if ( ( ! is_singular() ) || ( $post_type !== $this->post_type ) || ( $post_type !== $post->post_type ) ) {
 				return $content;
+			}
+
+			// Remove our hook that got us here in case the 'the_content' filter needs to be called down deeper in the template logic.
+			/**
+			 * Remove the hook into the WP 'the_content' filter once we are in our handler. This
+			 * will allow other templates to call the 'the_content' filter without causing recusion.
+			 * @since 3.1
+			 * @var boolean true Default true to remove the filter. Return false to not remove.
+			 */
+			if ( apply_filters( 'learndash_remove_template_content_filter', false ) ) {
+				remove_filter( 'the_content', array( $this, 'template_content' ), 1000 );
 			}
 
 			if ( is_user_logged_in() ) {
@@ -266,6 +279,7 @@ if ( ! class_exists( 'SFWD_CPT_Instance' ) ) {
 				if ( ! isset( $course_meta['sfwd-courses_course_disable_content_table'] ) ) {
 					$course_meta['sfwd-courses_course_disable_content_table'] = false;
 				}
+				//learndash_transition_course_shared_steps( $course_id );
 			}
 
 			if ( $logged_in ) {
@@ -291,11 +305,11 @@ if ( ! class_exists( 'SFWD_CPT_Instance' ) ) {
 				// single.
 				if ( ( $logged_in ) && ( ! is_course_prerequities_completed( $course_id ) ) && ( ! $bypass_course_limits_admin_users ) ) {
 					if ( 'sfwd-courses' === $this->post_type ) {
-						$content_type = LearnDash_Custom_Label::label_to_lower( 'course' );
+						$content_type = learndash_get_custom_label_lower( 'course' );
 					} elseif ( 'sfwd-lessons' === $this->post_type ) {
-						$content_type = LearnDash_Custom_Label::label_to_lower( 'lesson' );
+						$content_type = learndash_get_custom_label_lower( 'lesson' );
 					} elseif ( 'sfwd-quiz' === $this->post_type ) {
-						$content_type = LearnDash_Custom_Label::label_to_lower( 'quiz' );
+						$content_type = learndash_get_custom_label_lower( 'quiz' );
 					} else {
 						$content_type = strtolower( $this->post_name );
 					}
@@ -324,30 +338,31 @@ if ( ! class_exists( 'SFWD_CPT_Instance' ) ) {
 				} elseif ( ( $logged_in ) && ( ! learndash_check_user_course_points_access( $course_id, $user_id ) ) && ( ! $bypass_course_limits_admin_users ) ) {
 
 					if ( 'sfwd-courses' === $this->post_type ) {
-						$content_type = LearnDash_Custom_Label::label_to_lower( 'course' );
+						$content_type = learndash_get_custom_label_lower( 'course' );
 					} elseif ( 'sfwd-lessons' === $this->post_type ) {
-						$content_type = LearnDash_Custom_Label::label_to_lower( 'lesson' );
+						$content_type = learndash_get_custom_label_lower( 'lesson' );
 					} elseif ( 'sfwd-quiz' === $this->post_type ) {
-						$content_type = LearnDash_Custom_Label::label_to_lower( 'quiz' );
+						$content_type = learndash_get_custom_label_lower( 'quiz' );
 					} else {
 						$content_type = strtolower( $this->post_name );
 					}
 
-									$course_access_points = learndash_get_course_points_access( $course_id );
-									$user_course_points   = learndash_get_user_course_points( $user_id );
+					$course_access_points = learndash_get_course_points_access( $course_id );
+					$user_course_points   = learndash_get_user_course_points( $user_id );
 
-									$level = ob_get_level();
-									ob_start();
-									SFWD_LMS::get_template(
-										'learndash_course_points_access_message',
-										array(
-											'current_post' => $post,
-											'content_type' => $content_type,
-											'course_access_points' => $course_access_points,
-											'user_course_points' => $user_course_points,
-											'course_settings' => $course_settings,
-										), true
-									);
+					$level = ob_get_level();
+					ob_start();
+					SFWD_LMS::get_template(
+						'learndash_course_points_access_message',
+						array(
+							'current_post' => $post,
+							'content_type' => $content_type,
+							'course_access_points' => $course_access_points,
+							'user_course_points' => $user_course_points,
+							'course_settings' => $course_settings,
+						),
+						true
+					);
 					$content = learndash_ob_get_clean( $level );
 
 				} else {
@@ -357,13 +372,21 @@ if ( ! class_exists( 'SFWD_CPT_Instance' ) ) {
 						$prefix_len     = strlen( $courses_prefix );
 
 						$materials = '';
-						if ( ! empty( $course_settings['course_materials'] ) ) {
-							$materials = wp_specialchars_decode( $course_settings['course_materials'], ENT_QUOTES );
-							if ( ! empty( $materials ) ) {
-								$materials = do_shortcode( $materials );
+						if ( ! isset( $course_settings['course_materials_enabled'] ) ) {
+							$course_settings['course_materials_enabled'] = '';
+							if ( ( isset( $course_settings['course_materials'] ) ) && ( ! empty( $course_settings['course_materials'] ) ) ) {
+								$course_settings['course_materials_enabled'] = 'on';
 							}
 						}
 
+						if ( ( 'on' === $course_settings['course_materials_enabled'] ) && ( ! empty( $course_settings['course_materials'] ) ) ) {
+							$materials = wp_specialchars_decode( $course_settings['course_materials'], ENT_QUOTES );
+							if ( ! empty( $materials ) ) {
+								$materials = do_shortcode( $materials );
+								$materials = wpautop( $materials );
+							}
+						}
+						
 						learndash_check_convert_settings_to_single( $post->ID, $this->post_type );
 
 						$lessons = learndash_get_course_lessons_list( $course_id );
@@ -383,95 +406,54 @@ if ( ! class_exists( 'SFWD_CPT_Instance' ) ) {
 								$lesson_topics[ $lesson['post']->ID ] = learndash_topic_dots( $lesson['post']->ID, false, 'array', null, $course_id );
 								if ( ! empty( $lesson_topics[ $lesson['post']->ID ] ) ) {
 									$has_topics = true;
+		
+									$topic_pager_args = array(
+										'course_id' => $course_id,
+										'lesson_id' => $lesson['post']->ID 
+									);
+									$lesson_topics[ $lesson['post']->ID ] = learndash_process_lesson_topics_pager( $lesson_topics[ $lesson['post']->ID ], $topic_pager_args );
 								}
 							}
 						}
 
-						include_once 'vendor/paypal/enhanced-paypal-shortcodes.php';
+						//include_once __DIR__ . '/vendor/paypal/enhanced-paypal-shortcodes.php';
+						require_once( LEARNDASH_LMS_LIBRARY_DIR . '/paypal/enhanced-paypal-shortcodes.php' );
+						
 						$level = ob_get_level();
 						ob_start();
-						include SFWD_LMS::get_template( 'course', null, null, true );
+						$template_file = SFWD_LMS::get_template( 'course', null, null, true );
+						if ( ! empty( $template_file ) ) {
+							include $template_file;
+						}
 						$content = learndash_ob_get_clean( $level );
 
 					} elseif ( 'sfwd-quiz' === $this->post_type ) {
 						learndash_check_convert_settings_to_single( $post->ID, $this->post_type );
 
-						$quiz_settings  = learndash_get_setting( $post );
-						$meta           = @$this->get_settings_values( 'sfwd-quiz' );
-						$show_content   = ! ( ! empty( $lesson_progression_enabled ) && ! is_quiz_accessable( null, $post ) );
-						$attempts_count = 0;
-						$repeats        = trim( @$quiz_settings['repeats'] );
-
-						if ( '' !== $repeats ) {
-							$user_id = get_current_user_id();
-
-							if ( $user_id ) {
-								$usermeta = get_user_meta( $user_id, '_sfwd-quizzes', true );
-								$usermeta = maybe_unserialize( $usermeta );
-
-								if ( ! is_array( $usermeta ) ) {
-									$usermeta = array();
-								}
-
-								if ( ! empty( $usermeta ) ) {
-									foreach ( $usermeta as $k => $v ) {
-										if ( ( intval( $v['quiz'] ) === $post->ID ) && ( ( isset( $v['course'] ) ) && ( isset( $course_id ) ) && ( intval( $v['course'] ) === intval( $course_id ) ) ) ) {
-											$attempts_count++;
-										}
-									}
+						$quiz_pro_id = get_post_meta( $post->ID, 'quiz_pro_id', true );
+						$quiz_pro_id = absint( $quiz_pro_id );
+						if ( empty( $quiz_pro_id ) ) {
+							if ( isset( $quiz_settings['quiz_pro'] ) ) {
+								$quiz_settings['quiz_pro'] = absint( $quiz_settings['quiz_pro'] );
+								if ( ! empty( $quiz_settings['quiz_pro'] ) ) {
+									$quiz_pro_id = $quiz_settings['quiz_pro'];
 								}
 							}
 						}
 
-						$attempts_left = ( '' === $repeats || $repeats >= $attempts_count );
-
-						if ( ! empty( $lesson_progression_enabled ) && ! is_quiz_accessable( null, $post ) ) {
-							add_filter( 'comments_array', 'learndash_remove_comments', 1, 2 );
-						}
-
-						/**
-						 * Filter for content access
-						 *
-						 * If not null, will display instead of quiz content
-						 *
-						 * @since 2.1.0
-						 *
-						 * @param  string
-						 */
-						$access_message = apply_filters( 'learndash_content_access', null, $post );
-
-						if ( ! is_null( $access_message ) ) {
-							$quiz_content = $access_message;
-						} else {
-
-							$materials = '';
-							if ( ! empty( $quiz_settings['quiz_materials'] ) ) {
-								$materials = wp_specialchars_decode( $quiz_settings['quiz_materials'], ENT_QUOTES );
-								if ( ! empty( $materials ) ) {
-									$materials = do_shortcode( $materials );
-								}
-							}
-
-							if ( ! empty( $quiz_settings['quiz_pro'] ) ) {
-								$quiz_content = wptexturize( do_shortcode( '[LDAdvQuiz ' . $quiz_settings['quiz_pro'] . ']' ) );
-							} else {
-								$quiz_content = '';
-							}
-
-							/**
-							 * Filter quiz content
-							 *
-							 * @since 2.1.0
-							 *
-							 * @param  string  $quiz_content
-							 */
-							$quiz_content = apply_filters( 'learndash_quiz_content', $quiz_content, $post );
-						}
-
-						$level = ob_get_level();
-						ob_start();
-						include SFWD_LMS::get_template( 'quiz', null, null, true );
-						$content = learndash_ob_get_clean( $level );
+						$content = wptexturize(
+							//do_shortcode( '[ld_quiz quiz_id="' . $post->ID . '" course_id="' . absint( $course_id ) . '" quiz_pro_id="' . absint( $quiz_pro_id ) . '"]' )
+							learndash_quiz_shortcode(
+								array(
+									'quiz_id'     => $post->ID,
+									'course_id'   => absint( $course_id ),
+									'quiz_pro_id' => absint( $quiz_pro_id ),
+								),
+								$content,
+								true
+							)
+						);
+						$user_wrapper = false;
 
 					} elseif ( 'sfwd-lessons' === $this->post_type ) {
 						learndash_check_convert_settings_to_single( $post->ID, $this->post_type );
@@ -507,6 +489,13 @@ if ( ! class_exists( 'SFWD_CPT_Instance' ) ) {
 						}
 
 						$topics = learndash_topic_dots( $post->ID, false, 'array', null, $course_id );
+						if ( ! empty( $topics ) ) {
+							$topic_pager_args = array(
+								'course_id' => $course_id,
+								'lesson_id' => $post->ID 
+							);
+							$topics = learndash_process_lesson_topics_pager( $topics, $topic_pager_args );
+						}
 
 						if ( ! empty( $quizids ) ) {
 							$all_quizzes_completed = ! learndash_is_quiz_notcomplete( null, $quizids, false, $course_id );
@@ -517,10 +506,18 @@ if ( ! class_exists( 'SFWD_CPT_Instance' ) ) {
 						if ( $show_content ) {
 
 							$materials = '';
-							if ( ! empty( $lesson_settings['lesson_materials'] ) ) {
+							if ( ! isset( $lesson_settings['lesson_materials_enabled'] ) ) {
+								$lesson_settings['lesson_materials_enabled'] = '';
+								if ( ( isset( $lesson_settings['lesson_materials'] ) ) && ( ! empty( $lesson_settings['lesson_materials'] ) ) ) {
+									$lesson_settings['lesson_materials_enabled'] = 'on';
+								}
+							}
+
+							if ( ( 'on' === $lesson_settings['lesson_materials_enabled'] ) && ( ! empty( $lesson_settings['lesson_materials'] ) ) ) {
 								$materials = wp_specialchars_decode( $lesson_settings['lesson_materials'], ENT_QUOTES );
 								if ( ! empty( $materials ) ) {
 									$materials = do_shortcode( $materials );
+									$materials = wpautop( $materials );
 								}
 							}
 
@@ -572,7 +569,10 @@ if ( ! class_exists( 'SFWD_CPT_Instance' ) ) {
 
 						$level = ob_get_level();
 						ob_start();
-						include SFWD_LMS::get_template( 'lesson', null, null, true );
+						$template_file = SFWD_LMS::get_template( 'lesson', null, null, true );
+						if ( ! empty( $template_file ) ) {
+							include $template_file;
+						}
 						$content = learndash_ob_get_clean( $level );
 
 					} elseif ( 'sfwd-topic' === $this->post_type ) {
@@ -624,12 +624,20 @@ if ( ! class_exists( 'SFWD_CPT_Instance' ) ) {
 						$topics = learndash_topic_dots( $lesson_id, false, 'array', null, $course_id );
 
 						if ( $show_content ) {
-							$materials      = '';
 							$topic_settings = learndash_get_setting( $post );
-							if ( ! empty( $topic_settings['topic_materials'] ) ) {
+							$materials = '';
+							if ( ! isset( $topic_settings['topic_materials_enabled'] ) ) {
+								$topic_settings['topic_materials_enabled'] = '';
+								if ( ( isset( $topic_settings['topic_materials'] ) ) && ( ! empty( $topic_settings['topic_materials'] ) ) ) {
+									$topic_settings['topic_materials_enabled'] = 'on';
+								}
+							}
+
+							if ( ( 'on' === $topic_settings['topic_materials_enabled'] ) && ( ! empty( $topic_settings['topic_materials'] ) ) ) {
 								$materials = wp_specialchars_decode( $topic_settings['topic_materials'], ENT_QUOTES );
 								if ( ! empty( $materials ) ) {
 									$materials = do_shortcode( $materials );
+									$materials = wpautop( $materials );
 								}
 							}
 
@@ -680,7 +688,10 @@ if ( ! class_exists( 'SFWD_CPT_Instance' ) ) {
 
 						$level = ob_get_level();
 						ob_start();
-						include SFWD_LMS::get_template( 'topic', null, null, true );
+						$template_file = SFWD_LMS::get_template( 'topic', null, null, true );
+						if ( ! empty( $template_file ) ) {
+							include $template_file;
+						}
 						$content = learndash_ob_get_clean( $level );
 
 					} else {
@@ -708,7 +719,13 @@ if ( ! class_exists( 'SFWD_CPT_Instance' ) ) {
 			 *
 			 * @param  string  $content
 			 */
-			return '<div class="learndash learndash_post_' . $this->post_type . ' ' . $user_has_access . '"  id="learndash_post_' . $post->ID . '">' . apply_filters( 'learndash_content', $content, $post ) . '</div>';
+			$content = apply_filters( 'learndash_content', $content, $post );
+			if ( true === $user_wrapper ) {
+				$content = '<div class="learndash learndash_post_' . $this->post_type . ' ' . $user_has_access . '"  id="learndash_post_' . $post->ID . '">' . $content . '</div>';
+			} 
+			
+			return $content;
+
 		} // end template_content()
 
 
@@ -758,8 +775,8 @@ if ( ! class_exists( 'SFWD_CPT_Instance' ) ) {
 					 * @link https://codex.wordpress.org/Function_Reference/do_robots
 					 */
 					do_action( 'do_robots' );
-				} elseif ( is_feed() ) {
-					do_feed();
+				//} elseif ( is_feed() ) {
+				//	do_feed();
 				} elseif ( is_trackback() ) {
 					include ABSPATH . 'wp-trackback.php';
 				} elseif ( ! empty( $wp->query_vars['name'] ) ) {
@@ -800,7 +817,7 @@ if ( ! class_exists( 'SFWD_CPT_Instance' ) ) {
 									/**
 									 * Include library to generate PDF
 									 */
-									require_once 'ld-convert-post-pdf.php';
+									require_once __DIR__ . '/ld-convert-post-pdf.php';
 									post2pdf_conv_post_to_pdf();
 									die();
 								}
@@ -885,14 +902,12 @@ if ( ! class_exists( 'SFWD_CPT_Instance' ) ) {
 						/**
 						 * Include library to generate PDF
 						 */
-						require_once 'ld-convert-post-pdf.php';
+						require_once __DIR__ . '/ld-convert-post-pdf.php';
 						post2pdf_conv_post_to_pdf();
 						die();
 					} else {
-						if ( ! current_user_can( 'level_8' ) ) {
-							esc_html_e( 'Access to certificate page is disallowed.', 'learndash' );
-							die();
-						}
+						esc_html_e( 'Access to certificate page is disallowed.', 'learndash' );
+						die();
 					}
 				}
 			}

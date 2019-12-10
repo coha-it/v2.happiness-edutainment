@@ -99,7 +99,7 @@ if ( !class_exists( 'LearnDash_Permalinks' ) ) {
 										
 					// Course > Lesson > Quiz
 					//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-					$courses_cpt->rewrite['slug'] .'/([^/]+)/'. $lessons_cpt->rewrite['slug'] .'/([^/]+)/'. $quizzes_cpt->rewrite['slug'] .'/([^/]+)/' . 'comment-page-([0-9]{1,})/?$' => 'index.php?'. $courses_cpt->name .'=$matches[1]&'. $lessons_cpt->name .'=$matches[2]&'. $quizzes_cpt->name .'=$matches[3]&cpage=$matches[]',
+					$courses_cpt->rewrite['slug'] .'/([^/]+)/'. $lessons_cpt->rewrite['slug'] .'/([^/]+)/'. $quizzes_cpt->rewrite['slug'] .'/([^/]+)/' . 'comment-page-([0-9]{1,})/?$' => 'index.php?'. $courses_cpt->name .'=$matches[1]&'. $lessons_cpt->name .'=$matches[2]&'. $quizzes_cpt->name .'=$matches[3]&cpage=$matches[4]',
 
 					$courses_cpt->rewrite['slug'] .'/([^/]+)/'. $lessons_cpt->rewrite['slug'] .'/([^/]+)/'. $quizzes_cpt->rewrite['slug'] .'/([^/]+)' . '(?:/([0-9]+))?/?$' => 'index.php?'. $courses_cpt->name .'=$matches[1]&'. $lessons_cpt->name .'=$matches[2]&'. $quizzes_cpt->name .'=$matches[3]&page=$matches[4]',
 					
@@ -143,8 +143,11 @@ if ( !class_exists( 'LearnDash_Permalinks' ) ) {
 		
 		// This second filter will correct calls to the WordPress get_permalink() function to use the new structure
 		function post_type_link( $post_link = '', $post = null, $leavename  = false, $sample = false ) {
-			global $pagenow;
+			global $pagenow, $wp_rewrite;
 			
+			$url_part_old = '';
+			$url_part_new = '';
+
 			if ( ( LearnDash_Settings_Section::get_section_setting('LearnDash_Settings_Section_Permalinks', 'nested_urls' ) == 'yes' ) && ( in_array( $post->post_type, array( 'sfwd-lessons', 'sfwd-topic', 'sfwd-quiz' ) ) ) ) {
 				
 				// If we are viewing one of the list tables we only effect the link if the course_id URL param is set
@@ -179,16 +182,34 @@ if ( !class_exists( 'LearnDash_Permalinks' ) ) {
 						if ( $course instanceof WP_Post ) {
 
 							if ( $sample === false ) {
-								$url_part_old = '/'. $lessons_cpt->rewrite['slug'] .'/'. $lesson->post_name;
+								if ( $wp_rewrite->using_permalinks() ) {
+									$url_part_old = '/'. $lessons_cpt->rewrite['slug'] .'/'. $lesson->post_name;
+								} else {
+									$url_part_old = add_query_arg( $lessons_cpt->name, $lesson->post_name, $url_part_old );
+								}
 							} else {
-								$url_part_old = '/'. $lessons_cpt->rewrite['slug'] .'/%pagename%';
+								if ( $wp_rewrite->using_permalinks() ) {
+									$url_part_old = '/'. $lessons_cpt->rewrite['slug'] .'/%pagename%';
+								} else {
+									$url_part_old = add_query_arg( $lessons_cpt->name, $lesson->post_name, $url_part_old );
+								}
 							}
+
 							if ( $sample === false ) {
-								$url_part_new = '/'. $courses_cpt->rewrite['slug'] .'/'. $course->post_name .'/'. $lessons_cpt->rewrite['slug'] .'/'. $lesson->post_name;
+								if ( $wp_rewrite->using_permalinks() ) {
+									$url_part_new = '/'. $courses_cpt->rewrite['slug'] .'/'. $course->post_name .'/'. $lessons_cpt->rewrite['slug'] .'/'. $lesson->post_name;
+								} else {
+									$url_part_new = add_query_arg( $courses_cpt->name, $course->post_name, $url_part_new );
+									$url_part_new = add_query_arg( $lessons_cpt->name, $lesson->post_name, $url_part_new );
+								}
 							} else {
-								$url_part_new = '/'. $courses_cpt->rewrite['slug'] .'/'. $course->post_name .'/'. $lessons_cpt->rewrite['slug'] .'/%pagename%';
+								if ( $wp_rewrite->using_permalinks() ) {
+									$url_part_new = '/'. $courses_cpt->rewrite['slug'] .'/'. $course->post_name .'/'. $lessons_cpt->rewrite['slug'] .'/%pagename%';
+								} else {
+									$url_part_new = add_query_arg( $courses_cpt->name, $course->post_name, $url_part_new );
+									$url_part_new = add_query_arg( $lessons_cpt->name, $lesson->post_name, $url_part_new );
+								}
 							}
-							$post_link = str_replace( $url_part_old, $url_part_new, $post_link);
 						}
 					}
 			    } else if ( $topics_cpt->name == $post->post_type  ) {
@@ -198,11 +219,12 @@ if ( !class_exists( 'LearnDash_Permalinks' ) ) {
 					//$course_id = learndash_get_course_id( $topic->ID );
 					$course_id = apply_filters( 'learndash_post_link_course_id', learndash_get_course_id( $topic->ID ), $post_link, $post );
 					if ( !empty( $course_id ) ) {
-						//if ( LearnDash_Settings_Section::get_section_setting('LearnDash_Settings_Courses_Builder', 'enabled' ) == 'yes' ) {
+						if ( LearnDash_Settings_Section::get_section_setting('LearnDash_Settings_Courses_Builder', 'shared_steps' ) == 'yes' ) {
 							$lesson_id = learndash_course_get_single_parent_step( $course_id, $topic->ID );
-						//} else {
-						//	learndash_get_lesson_id( $topic->ID );
-						//}
+						} else {
+							$lesson_id = learndash_get_lesson_id( $topic->ID );
+						}
+
 						if ( !empty( $lesson_id ) ) {
 							$course = get_post( $course_id );
 							$lesson = get_post( $lesson_id );
@@ -210,17 +232,36 @@ if ( !class_exists( 'LearnDash_Permalinks' ) ) {
 							if ( ( $course instanceof WP_Post ) && ( $lesson instanceof WP_Post ) ) {
 
 								if ( $sample === false ) {
-									$url_part_old = '/'. $topics_cpt->rewrite['slug'] .'/'. $topic->post_name;
+									if ( $wp_rewrite->using_permalinks() ) {
+										$url_part_old = '/'. $topics_cpt->rewrite['slug'] .'/'. $topic->post_name;
+									} else {
+										$url_part_old = add_query_arg( $topics_cpt->name, $topic->post_name, $url_part_old );
+									}
 								} else {
-									$url_part_old = '/'. $topics_cpt->rewrite['slug'] .'/%pagename%';
+									if ( $wp_rewrite->using_permalinks() ) {
+										$url_part_old = '/'. $topics_cpt->rewrite['slug'] .'/%pagename%';
+									} else {
+										$url_part_old = add_query_arg( $topics_cpt->name, $topic->post_name, $url_part_old );
+									}
 								}
 								
 								if ( $sample === false ) {
-									$url_part_new = '/'. $courses_cpt->rewrite['slug'] .'/'. $course->post_name .'/'. $lessons_cpt->rewrite['slug'] .'/'. $lesson->post_name .'/'. $topics_cpt->rewrite['slug'] .'/'. $topic->post_name;
+									if ( $wp_rewrite->using_permalinks() ) {
+										$url_part_new = '/'. $courses_cpt->rewrite['slug'] .'/'. $course->post_name .'/'. $lessons_cpt->rewrite['slug'] .'/'. $lesson->post_name .'/'. $topics_cpt->rewrite['slug'] .'/'. $topic->post_name;
+									} else {
+										$url_part_new = add_query_arg( $courses_cpt->name, $course->post_name, $url_part_new );
+										$url_part_new = add_query_arg( $lessons_cpt->name, $lesson->post_name, $url_part_new );
+										$url_part_new = add_query_arg( $topics_cpt->name, $topic->post_name, $url_part_new );
+									}
 								} else {
-									$url_part_new = '/'. $courses_cpt->rewrite['slug'] .'/'. $course->post_name .'/'. $lessons_cpt->rewrite['slug'] .'/'. $lesson->post_name .'/'. $topics_cpt->rewrite['slug'] .'/%pagename%';
+									if ( $wp_rewrite->using_permalinks() ) {
+										$url_part_new = '/'. $courses_cpt->rewrite['slug'] .'/'. $course->post_name .'/'. $lessons_cpt->rewrite['slug'] .'/'. $lesson->post_name .'/'. $topics_cpt->rewrite['slug'] .'/%pagename%';
+									} else {
+										$url_part_new = add_query_arg( $courses_cpt->name, $course->post_name, $url_part_new );
+										$url_part_new = add_query_arg( $lessons_cpt->name, $lesson->post_name, $url_part_new );
+										$url_part_new = add_query_arg( $topics_cpt->name, $topic->post_name, $url_part_new );
+									}
 								}
-								$post_link = str_replace( $url_part_old, $url_part_new, $post_link);
 							}
 						}
 					}
@@ -229,86 +270,167 @@ if ( !class_exists( 'LearnDash_Permalinks' ) ) {
 
 					//$course_id = learndash_get_course_id( $quiz->ID );
 					$course_id = apply_filters( 'learndash_post_link_course_id', learndash_get_course_id( $quiz->ID ), $post_link, $post );
-				
+
 					if ( !empty( $course_id ) ) {
 						if ( $sample === false ) {
-							$url_part_old = '/'. $quizzes_cpt->rewrite['slug'] .'/'. $quiz->post_name;
+							if ( $wp_rewrite->using_permalinks() ) {
+								$url_part_old = '/'. $quizzes_cpt->rewrite['slug'] . '/' . $quiz->post_name;
+							} else {
+								$url_part_old = add_query_arg( $quizzes_cpt->name, $quiz->post_name, $url_part_old );
+							}
 						} else {
-							$url_part_old = '/'. $quizzes_cpt->rewrite['slug'] .'/%pagename%';
+							if ( $wp_rewrite->using_permalinks() ) {
+								$url_part_old = '/'. $quizzes_cpt->rewrite['slug'] . '/%pagename%';
+							} else {
+								$url_part_old = add_query_arg( $quizzes_cpt->name, $quiz->post_name, $url_part_old );
+							}
 						}
-						$url_part_new = '';
 						
 						$course = get_post( $course_id );
 						if ( $course instanceof WP_Post ) {
 							$quiz_parents = array();
 							
-							$url_part_new = '/'. $courses_cpt->rewrite['slug'] .'/'. $course->post_name;
-//								if ( LearnDash_Settings_Section::get_section_setting('LearnDash_Settings_Courses_Builder', 'enabled' ) == 'yes' ) {
-								$quiz_parents = learndash_course_get_all_parent_step_ids( $course_id, $quiz->ID );
-//								} else {
-//									$lesson_id = learndash_get_lesson_id( $quiz->ID );
-//									$lessons_cpt = get_post_type_object( 'sfwd-lessons' );
-//									$topics_cpt = get_post_type_object( 'sfwd-topic' );
-//			
-//									if ( !empty( $lesson_id ) ) {
-//										if ( get_post_type( $lesson_id ) == $topics_cpt->name ) {
-//											$step_parents[] = $lesson_id;
-//						
-//											$lesson_id = learndash_get_lesson_id( $lesson_id );
-//											if ( !empty( $lesson_id ) ) {
-//												if ( get_post_type( $lesson_id ) == $lessons_cpt->name ) {
-//													$step_parents[] = $lesson_id;
-//												}
-//											}
-//										}
-//									}
-//								}
+							if ( $wp_rewrite->using_permalinks() ) {
+								$url_part_new = '/'. $courses_cpt->rewrite['slug'] .'/'. $course->post_name;
+							} else {
+								$url_part_new = add_query_arg( $courses_cpt->name, $course->post_name, $url_part_new );
+							}
+
+							if ( LearnDash_Settings_Section::get_section_setting('LearnDash_Settings_Courses_Builder', 'shared_steps' ) == 'yes' ) {
+							$quiz_parents = learndash_course_get_all_parent_step_ids( $course_id, $quiz->ID );
+							} else {
+								$lesson_id = learndash_get_lesson_id( $quiz->ID );
+								if ( !empty( $lesson_id ) ) {
+									if ( get_post_type( $lesson_id ) == $topics_cpt->name ) {
+										$topic_id = $lesson_id;
+										$lesson_id = learndash_get_lesson_id( $topic_id );
+										if ( !empty( $lesson_id ) ) {
+											if ( get_post_type( $lesson_id ) == $lessons_cpt->name ) {
+												$quiz_parents[] = $lesson_id;
+												$quiz_parents[] = $topic_id;
+											}
+										}
+									}
+								}
+							}
 
 							if ( !empty( $quiz_parents ) ) {
 								foreach( $quiz_parents as $quiz_parent_id ) {
 									$quiz_parent_post = get_post( $quiz_parent_id );
-									if ( $quiz_parent_post->post_type == $lessons_cpt->name ) 
-										$parent_slug = $lessons_cpt->rewrite['slug'];
-									else if ( $quiz_parent_post->post_type == $topics_cpt->name ) 
-										$parent_slug = $topics_cpt->rewrite['slug'];
-									$url_part_new .= '/'. $parent_slug .'/'. $quiz_parent_post->post_name;
+									if ( $quiz_parent_post->post_type == $lessons_cpt->name ) {
+										if ( $wp_rewrite->using_permalinks() ) {
+											$parent_slug = $lessons_cpt->rewrite['slug'];
+										} else {
+											$parent_slug = $lessons_cpt->name;
+										}
+									} else if ( $quiz_parent_post->post_type == $topics_cpt->name ) {
+										if ( $wp_rewrite->using_permalinks() ) {
+											$parent_slug = $topics_cpt->rewrite['slug'];
+										} else {
+											$parent_slug = $topics_cpt->name;
+										}
+									}
+
+									if ( $wp_rewrite->using_permalinks() ) {
+										$url_part_new .= '/'. $parent_slug .'/'. $quiz_parent_post->post_name;
+									} else {
+										$url_part_new = add_query_arg( $parent_slug, $quiz_parent_post->post_name, $url_part_new );
+									}
 								}
 							}
 
 							if ( $sample === false ) {
-								$url_part_new .= '/'. $quizzes_cpt->rewrite['slug'] .'/'. $quiz->post_name;
+								if ( $wp_rewrite->using_permalinks() ) {
+									$url_part_new .= '/'. $quizzes_cpt->rewrite['slug'] .'/'. $quiz->post_name;
+								} else {
+									$url_part_new = add_query_arg( $quizzes_cpt->name, $quiz->post_name, $url_part_new );
+								}
 							} else {
-								$url_part_new .= '/'. $quizzes_cpt->rewrite['slug'] .'/%pagename%';
-							}
-						}
-						
-						if ( ( isset( $url_part_new ) ) && ( !empty( $url_part_new ) ) ) {
-							if ( ( isset( $url_part_old ) ) && ( !empty( $url_part_old ) ) ) {
-								$post_link = str_replace( $url_part_old, $url_part_new, $post_link );
+								if ( $wp_rewrite->using_permalinks() ) {
+									$url_part_new .= '/'. $quizzes_cpt->rewrite['slug'] .'/%pagename%';
+								} else {
+									$url_part_new = add_query_arg( $quizzes_cpt->name, $quiz->post_name, $url_part_new );
+								}
 							}
 						}
 					} else if ( !empty( $course_id ) ) {
 						$course = get_post( $course_id );
 						if ( $course instanceof WP_Post ) {
 							if ( $sample === false ) {
-								$url_part_old = '/'. $quizzes_cpt->rewrite['slug'] .'/'. $quiz->post_name;
+								if ( $wp_rewrite->using_permalinks() ) {
+									$url_part_old = '/'. $quizzes_cpt->rewrite['slug'] .'/'. $quiz->post_name;
+								} else {
+									$url_part_old = add_query_arg( $quizzes_cpt->name, $quiz->post_name, $url_part_old );
+								}
 							} else {
-								$url_part_old = '/'. $quizzes_cpt->rewrite['slug'] .'/%pagename%';
+								if ( $wp_rewrite->using_permalinks() ) {
+									$url_part_old = '/'. $quizzes_cpt->rewrite['slug'] .'/%pagename%';
+								} else {
+									$url_part_old = add_query_arg( $quizzes_cpt->name, $quiz->post_name, $url_part_old );
+								}
 							}
 
 							if ( $sample === false ) {
-								$url_part_new = '/'. $courses_cpt->rewrite['slug'] .'/'. $course->post_name .'/'. $quizzes_cpt->rewrite['slug'] .'/'. $quiz->post_name;
+								if ( $wp_rewrite->using_permalinks() ) {
+									$url_part_new = '/'. $courses_cpt->rewrite['slug'] .'/'. $course->post_name .'/'. $quizzes_cpt->rewrite['slug'] .'/'. $quiz->post_name;
+								} else {
+									$url_part_new = add_query_arg( $courses_cpt->rewrite['slug'], $course->post_name, $url_part_new );
+									$url_part_new = add_query_arg( $quizzes_cpt->rewrite['slug'], $quiz->post_name, $url_part_new );
+								}
 							} else {
-								$url_part_new = '/'. $courses_cpt->rewrite['slug'] .'/'. $course->post_name .'/'. $quizzes_cpt->rewrite['slug'] .'/%pagename%';
+								if ( $wp_rewrite->using_permalinks() ) {
+									$url_part_new = '/'. $courses_cpt->rewrite['slug'] .'/'. $course->post_name .'/'. $quizzes_cpt->rewrite['slug'] .'/%pagename%';
+								} else {
+									$url_part_new = add_query_arg( $courses_cpt->rewrite['slug'], $course->post_name, $url_part_new );
+									$url_part_new = add_query_arg( $quizzes_cpt->rewrite['slug'], $quiz->post_name, $url_part_new );
+								}
 							}
-				
-							$post_link = str_replace( $url_part_old, $url_part_new, $post_link);
 						}
 					}
 			    }
 			}
 
-		    return $post_link;
+			if ( ( ! empty( $url_part_new ) ) && ( !empty( $url_part_old ) ) ) {
+				if ( ! $wp_rewrite->using_permalinks() ) {
+					$url_part_old = str_replace( '?', '', $url_part_old );
+					$url_part_new = str_replace( '?', '', $url_part_new );
+
+					/**
+					 * We could normally just append the new args to the end of the URL. But 
+					 * we want to control the ordering for readability. 
+					 */
+					$args = wp_parse_args( $url_part_new, array() );
+					if ( ! empty( $args ) ) {
+						foreach( $args as $arg_key => $arg_val ) {
+							$post_link = remove_query_arg( $arg_key, $post_link );
+						}
+
+						$post_link_parts_old = wp_parse_url( $post_link );
+						if ( ( isset( $post_link_parts_old['query'] ) ) && ( ! empty( $post_link_parts_old['query'] ) ) ) {
+							$post_link = str_replace( $post_link_parts_old['query'], '', $post_link );
+						}
+
+						$post_link = add_query_arg( $args, $post_link );
+						$post_link_parts_new = wp_parse_url( $post_link );
+
+						/**
+						 * Here we have removed the original LD post type elements and any non-LD elements from the 
+						 * original URL. Now we want to add the non-LD elements back.
+						 */
+						if ( ( isset( $post_link_parts_old['query'] ) ) && ( ! empty( $post_link_parts_old['query'] ) ) ) {	
+							if ( ( isset( $post_link_parts_old['query'] ) ) && ( ! empty( $post_link_parts_old['query'] ) ) ) {
+								$post_link .= '&' . $post_link_parts_old['query'];
+							} else {
+								$post_link .= '?' . $post_link_parts_old['query'];
+							}
+						}
+					}
+				} else {
+					$post_link = str_replace( $url_part_old, $url_part_new, $post_link );
+				}
+			}
+
+			return $post_link;
 		}
 		
 		function row_actions( $actions = array(), $post = '' ) {
@@ -340,18 +462,19 @@ if ( !class_exists( 'LearnDash_Permalinks' ) ) {
 				if ( ( !empty( $post_type_name ) ) && ( in_array( $post_type_name, array( 'sfwd-lessons', 'sfwd-topic', 'sfwd-quiz' ) ) ) ) {
 					if ( LearnDash_Settings_Section::get_section_setting('LearnDash_Settings_Courses_Builder', 'shared_steps' ) == 'yes' ) {
 
-						$course_id = 0;
-					
-						//if ( $post_type_name == 'sfwd-quiz') {
-						//	if ( ( isset( $_GET['course_id'] ) ) && ( !empty( $_GET['course_id'] ) ) ) {
-						//		$course_id = intval( $_GET['course_id'] );
-						//	}
-						//} else {
-							$course_id = learndash_get_course_id( $post_id );
-						//}
+						$course_id = 0;					
+						$course_id = learndash_get_course_id( $post_id );
 						if ( !empty( $course_id ) ) {
 							$link = add_query_arg( 'course_id', $course_id, $link );
 						}
+					}
+				}
+
+				if ( ( ! empty( $post_type_name ) ) && ( in_array( $post_type_name, LDLMS_Post_Types::get_post_types( 'quiz_questions' ) ) ) ) {
+					$quiz_id = 0;
+					$quiz_id = learndash_get_quiz_id( $post_id );
+					if ( ! empty( $quiz_id ) ) {
+						$link = add_query_arg( 'quiz_id', $quiz_id, $link );
 					}
 				}
 			}
@@ -446,4 +569,47 @@ function learndash_get_step_permalink( $step_id = 0, $step_course_id = null ) {
 		
 		return $step_permalink;
 	}
+}
+
+
+/**
+ * Used when editing Lesson, Topic, Quiz or Question post items. This filter is needed to add 
+ * the 'course_id' parameter back to the edit URL after the post is submitted (saved).
+ * 
+ * @since 2.5 
+ */
+function learndash_redirect_post_location( $location = '' ) {
+	if ( ( is_admin() ) && ( !empty( $location ) ) ) {
+		
+		global $typenow;
+		
+		if ( ( $typenow == 'sfwd-lessons' ) || ( $typenow == 'sfwd-topic' ) || ( $typenow == 'sfwd-quiz' ) ) {
+			if ( ( isset( $_POST['ld-course-switcher'] ) ) && ( !empty( $_POST['ld-course-switcher'] ) ) ) {
+				$post_args = wp_parse_args( $_POST['ld-course-switcher'], array() );
+				if ( ( isset( $post_args['course_id'] ) ) && ( !empty( $post_args['course_id'] ) ) ) {
+					$location = add_query_arg( 'course_id', intval( $post_args['course_id'] ), $location );
+				}
+			}
+		} elseif ( $typenow == 'sfwd-question' ) {
+			if ( ( isset( $_POST['ld-quiz-switcher'] ) ) && ( ! empty( $_POST['ld-quiz-switcher'] ) ) ) {
+				$post_args = wp_parse_args( $_POST['ld-quiz-switcher'], array() );
+				if ( ( isset( $post_args['quiz_id'] ) ) && ( ! empty( $post_args['quiz_id'] ) ) ) {
+					$location = add_query_arg( 'quiz_id', absint( $post_args['quiz_id'] ), $location );
+				}
+			}
+		}
+	}
+	
+	return $location;
+}
+add_filter('redirect_post_location', 'learndash_redirect_post_location', 10, 2 );
+
+
+/**
+ * Utility function to set the option to trigger flush of rewrite rules. 
+ * This is checked during the 'shutdown' action where the rewrites will
+ * then be flushed.
+ */ 
+function learndash_setup_rewrite_flush() {
+	update_option( 'sfwd_lms_rewrite_flush', true, false );
 }

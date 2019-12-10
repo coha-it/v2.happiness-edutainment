@@ -93,7 +93,7 @@ class FrontendLoginPlus extends Config implements RequiredFunctions {
 				add_action( 'wp', array( __CLASS__, 'set_cookies' ) );
 
 				add_action( 'wp', array( __CLASS__, 'maybe_set_cookies' ), 99 ); // Set cookies
-				add_action( 'shutdown', array(
+				add_action( 'init', array(
 					__CLASS__,
 					'maybe_set_cookies'
 				), 0 ); // Set cookies before shutdown and ob flushing
@@ -103,6 +103,7 @@ class FrontendLoginPlus extends Config implements RequiredFunctions {
 				add_shortcode( 'uo_login_ui', array( __CLASS__, 'uo_login_ui' ) );
 				// Redirect from wp-login.php to custom login page
 				add_action( 'init', array( __CLASS__, 'redirect_login_page' ) );
+				add_action( 'init', array( __CLASS__, 'validate_reset_password' ) );
 				// Redirect after lost password
 				add_filter( 'lostpassword_redirect', array( __CLASS__, 'redirect_lost_password' ) );
 				// Redirect to custom login page if login has failed
@@ -142,11 +143,16 @@ class FrontendLoginPlus extends Config implements RequiredFunctions {
 			/* Redirect Login Page */
 			// Create Login Only Shortcode that can be added anywhere
 			add_shortcode( 'uo_login', array( __CLASS__, 'uo_login_form' ) );
-
+			/* Override LD login modal. commenting it for next release.
+			$override_modal = self::get_settings_value( 'uo_frontendloginplus_override_ld_login_form', __CLASS__ );
+			if ( 'on' === $override_modal ) {
+				add_filter( 'learndash_template_filename', [ __CLASS__, 'uo_modal_login_form' ], 100, 5 );
+				add_filter( 'learndash_30_get_template_part', [ __CLASS__, 'uo_modal_login_form' ], 100, 4 );
+			} */
 		}
-
+		
 	}
-
+	
 	/**
 	 * Description of class in Admin View
 	 *
@@ -245,7 +251,13 @@ class FrontendLoginPlus extends Config implements RequiredFunctions {
 				'type'       => 'html',
 				'inner_html' => '<h2>' . __( 'General', 'uncanny-learndash-toolkit' ) . '</h2>',
 			),
-			array(
+            /* Override LD login modal. commenting it for next release.
+            , array(
+				'type'        => 'checkbox',
+				'label'       => esc_html__( 'Override LearnDash Login Form (Requires Learndash 3.0 Login & Registration enabled)', 'uncanny-learndash-toolkit' ),
+				'option_name' => 'uo_frontendloginplus_override_ld_login_form',
+			),*/
+            array(
 				'type'        => 'select',
 				'label'       => esc_html__( 'Select Template', 'uncanny-learndash-toolkit' ),
 				'select_name' => 'uo_frontend_login_template',
@@ -311,6 +323,11 @@ class FrontendLoginPlus extends Config implements RequiredFunctions {
 				'label'       => esc_html__( 'Password Field Label', 'uncanny-learndash-toolkit' ),
 				'placeholder' => esc_html__( 'Password', 'uncanny-learndash-toolkit' ),
 				'option_name' => 'uo_frontend_login_password_label',
+			),
+			array(
+				'type'        => 'checkbox',
+				'label'       => esc_html__( 'Disable Remember Me Checkbox', 'uncanny-learndash-toolkit' ),
+				'option_name' => 'uo_frontendloginplus_disable_rememberme',
 			),
 			array(
 				'type'        => 'text',
@@ -635,13 +652,13 @@ class FrontendLoginPlus extends Config implements RequiredFunctions {
 		?>
 
 		<table class="form-table">
-			<tr class="user-rich-editing-wrap">
+			<tr class="uo_is_verified-container">
 				<th scope="row">
 					<h2>Verify User</h2>
 				</th>
 				<td>
-					<label for="rich_editing">
-						<input type="checkbox" name="uo_is_verified"
+					<label for="uo_is_verified">
+						<input type="checkbox" id="uo_is_verified" name="uo_is_verified"
 							   value="1" <?php checked( $checked, $current, $echo ); ?>/>
 						Verify this user and allow them to log in
 					</label>
@@ -682,11 +699,11 @@ class FrontendLoginPlus extends Config implements RequiredFunctions {
 
 			$to = $user->user_email;
 
-			$subject = $blog_name . ' - Account Verified';
+			$subject = sprintf( __( '%s - Account Verified', 'uncanny-learndash-toolkit' ), $blog_name );
 			$subject = apply_filters( 'uo_verified_email_subject', $subject, $user );
 
-			$message = "Your account has been approved! \r\n\n";
-			$message .= "Please visit " . home_url() . " to login \r\n";
+			$message = __( 'Your account has been approved! ', 'uncanny-learndash-toolkit' )."\r\n\n";
+			$message .= sprintf( __( 'Please visit %s to login. ', 'uncanny-learndash-toolkit' ), home_url() ) . " \r\n";
 			$message = apply_filters( 'uo_verified_email_message', $message, $user );
 
 			$mailed = wp_mail( $to, $subject, $message, $headers );
@@ -698,12 +715,12 @@ class FrontendLoginPlus extends Config implements RequiredFunctions {
 			$headers   = apply_filters( 'uo_verified_email_headers', $headers, $user );
 
 			$to = $admin_email;
-
-			$subject = $blog_name . ' - Account Verified';
+			
+			$subject = sprintf( __( '%s - Account Verified', 'uncanny-learndash-toolkit' ), $blog_name );
 			$subject = apply_filters( 'uo_verified_email_subject', $subject, $user );
 
-			$message      = $user->user_email . " account has been approved! \r\n\n";
-			$message      .= "Visit  " . admin_url( 'user-edit.php?user_id=' . $user->id ) . " to view / edit user. \r\n";
+			$message      = sprintf( __( '%s account has been approved! ', 'uncanny-learndash-toolkit' ), $user->user_email ) . " \r\n\n";
+			$message      .= sprintf( __( ' Visit %s to view / edit user. ', 'uncanny-learndash-toolkit' ), admin_url( 'user-edit.php?user_id=' . $user->id ) ) . " \r\n";
 			$message      = apply_filters( 'uo_verified_email_message', $message, $user );
 			$admin_mailed = wp_mail( $to, $subject, $message, $headers );
 
@@ -862,6 +879,11 @@ class FrontendLoginPlus extends Config implements RequiredFunctions {
 			$password_label = '';
 		}
 
+		//Add an additional query variable for login redirect module. It'll override [uo_login redirect]
+		if ( ! empty( $redirect ) ) {
+			$redirect = strpos( $redirect, '?' ) ? $redirect . '&uo_redirect=1' : $redirect . '?uo_redirect';
+		}
+
 		$login_form_args = array(
 			'echo'           => false,
 			'redirect'       => $redirect,
@@ -1014,7 +1036,7 @@ class FrontendLoginPlus extends Config implements RequiredFunctions {
 				$validate_password_reset = true;
 			}
 		}
-
+		
 		$message_details = FrontendLoginPlus::fetch_warning_error_msgs( $login );
 		if ( ! empty( $message_details['warning'] ) ) {
 			$message_warning = $message_details['warning'];
@@ -1085,12 +1107,13 @@ class FrontendLoginPlus extends Config implements RequiredFunctions {
 	 * @return array
 	 */
 	public static function fetch_login_form_args() {
-
-		$label_username = self::get_settings_value( 'uo_login_username_label_login', __CLASS__, '%placeholder%', self::get_class_settings( '', true ) );
-		$label_password = self::get_settings_value( 'uo_frontend_login_password_label', __CLASS__, '%placeholder%', self::get_class_settings( '', true ) );
-		$label_remember = self::get_settings_value( 'uo_frontend_login_rememberme_label', __CLASS__, '%placeholder%', self::get_class_settings( '', true ) );
-		$label_log_in   = self::get_settings_value( 'uo_frontend_login_button_label', __CLASS__, '%placeholder%', self::get_class_settings( '', true ) );
-
+		
+		$label_username   = self::get_settings_value( 'uo_login_username_label_login', __CLASS__, '%placeholder%', self::get_class_settings( '', TRUE ) );
+		$label_password   = self::get_settings_value( 'uo_frontend_login_password_label', __CLASS__, '%placeholder%', self::get_class_settings( '', TRUE ) );
+		$disable_remember = self::get_settings_value( 'uo_frontendloginplus_disable_rememberme', __CLASS__ );
+		$label_remember   = self::get_settings_value( 'uo_frontend_login_rememberme_label', __CLASS__, '%placeholder%', self::get_class_settings( '', TRUE ) );
+		$label_log_in     = self::get_settings_value( 'uo_frontend_login_button_label', __CLASS__, '%placeholder%', self::get_class_settings( '', TRUE ) );
+		
 		return array(
 			'echo'           => true,
 			'redirect'       => home_url( '/wp-admin/' ),
@@ -1103,7 +1126,7 @@ class FrontendLoginPlus extends Config implements RequiredFunctions {
 			'id_password'    => 'user_pass',
 			'id_remember'    => 'rememberme',
 			'id_submit'      => 'wp-submit',
-			'remember'       => true,
+			'remember'       => $disable_remember === 'on' ? false : true,
 			'value_username' => null,
 			'value_remember' => true,
 		);
@@ -1257,6 +1280,19 @@ class FrontendLoginPlus extends Config implements RequiredFunctions {
 	 * Redirect to custom login page if login has failed
 	 */
 	public static function login_failed() {
+		// Check for REST requests.
+		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+			return;
+		}
+		// Redundant check for REST because in some cases REST_REQUEST constant does not work.
+		if ( strpos( $_SERVER[ 'REQUEST_URI' ], '/wp-json/' ) !== false ) {
+			return;
+		}
+		// Check for AJAX requests
+		if ( wp_doing_ajax() ) {
+			return;
+		}
+		
 		$login_page = get_permalink( self::get_login_redirect_page_id() );
 		wp_safe_redirect( add_query_arg( array( 'login' => 'failed' ), $login_page ) );
 		exit;
@@ -1285,6 +1321,7 @@ class FrontendLoginPlus extends Config implements RequiredFunctions {
 		}
 
 		$login_page = get_permalink( self::get_login_redirect_page_id() );
+		
 
 		if ( isset( $_GET['redirect_to'] ) && false !== strpos( $_GET['redirect_to'], 'wp-admin' ) ) {
 			wp_safe_redirect( $login_page );
@@ -1336,9 +1373,29 @@ class FrontendLoginPlus extends Config implements RequiredFunctions {
 
 		$recaptcha_key         = Config::get_settings_value( 'uo_frontend_login_recaptcha_key', 'FrontendLoginPlus' );
 		$recaptcha_secrete_key = Config::get_settings_value( 'uo_frontend_login_recaptcha_secret_key', 'FrontendLoginPlus' );
-
+		
+		// get referer page id and content for shortcode
+		$referer_id         = url_to_postid( wp_get_referer() );
+		$is_short_code_page = FALSE;
+		if ( ! empty( $referer_id ) ) {
+			$referer_page = get_post( $referer_id );
+			$block_is_on_page = false;
+			if ( function_exists( 'parse_blocks' ) ) {
+				$blocks = parse_blocks( $referer_page->post_content );
+				foreach ( $blocks as $block ) {
+					if ( 'uncanny-toolkit/frontend-login' === $block['blockName'] ) {
+						$block_is_on_page = TRUE;
+					}
+				}
+			}
+			
+			if ( has_shortcode( $referer_page->post_content, 'uo_login_ui' ) || has_shortcode( $referer_page->post_content, 'uo_login' ) || $block_is_on_page) {
+				$is_short_code_page = TRUE;
+			}
+			
+		}
 		// check if recaptcha is setup
-		if ( '' !== trim( $recaptcha_key ) && '' !== trim( $recaptcha_secrete_key ) ) {
+		if ( '' !== trim( $recaptcha_key ) && '' !== trim( $recaptcha_secrete_key ) && ( self::get_login_redirect_page_id() === $referer_id || $is_short_code_page ) ) {
 
 			if ( ! isset( $_POST['g-recaptcha-response'] ) ) {
 				wp_safe_redirect( add_query_arg( array( 'login' => 'recaptchafailed' ), $login_page ) );
@@ -1537,7 +1594,7 @@ class FrontendLoginPlus extends Config implements RequiredFunctions {
 	/*
 	 * Custom email message to retrieve password
 	 */
-	public static function custom_retrieve_password_message( $message, $key, $user_login, $user_data ) {
+	public static function custom_retrieve_password_message( $message, $key = '', $user_login = '', $user_data = null ) {
 
 		$login_page = get_permalink( self::get_login_redirect_page_id() );
 
@@ -1562,7 +1619,7 @@ class FrontendLoginPlus extends Config implements RequiredFunctions {
 	/*
 	 * Custom email message to retrieve password
 	 */
-	public static function custom_retrieve_password_title( $message, $user_login, $user_data ) {
+	public static function custom_retrieve_password_title( $message, $user_login = '', $user_data = null ) {
 
 		$custom_message = self::get_settings_value( 'uo_frontend_resetpassword_email_subject', __CLASS__, '%placeholder%', self::get_class_settings( '', true ) );
 
@@ -1692,4 +1749,93 @@ class FrontendLoginPlus extends Config implements RequiredFunctions {
 
 		return $current_theme;
 	}
+	
+	/**
+	 * Validate and reset user password.
+	 *
+	 * @since 3.1.2
+	 */
+	
+	public static function validate_reset_password() {
+		
+		$login_page     = FrontendLoginPlus::get_login_redirect_page_id();
+		$login_page_url = get_permalink( $login_page );
+		
+		if ( strpos( $login_page_url, '?' ) ) {
+			$login_page_url = $login_page_url . '&';
+		} else {
+			$login_page_url = $login_page_url . '?';
+		}
+		/* Validate Reset Password Information */
+		$validate_password_reset = FALSE;
+		if ( isset( $_GET['action'] ) ) {
+			if ( 'validatepasswordreset' === $_GET['action'] ) {
+				$validate_password_reset = TRUE;
+			}
+		}
+		
+		if ( $validate_password_reset ) {
+			if ( ! isset( $_GET['issue'] ) ) {
+				$rp_cookie = 'wp-resetpass-' . COOKIEHASH;
+				if ( isset( $_COOKIE[ $rp_cookie ] ) && 0 < strpos( $_COOKIE[ $rp_cookie ], ':' ) ) {
+					list( $rp_login, $rp_key ) = explode( ':', wp_unslash( $_COOKIE[ $rp_cookie ] ), 2 );
+					$user = check_password_reset_key( $rp_key, $rp_login );
+					//var_dump($user);
+					if ( isset( $_POST['pass1'] ) && ! hash_equals( $rp_key, $_POST['rp_key'] ) ) {
+						$user = FALSE;
+					}
+				} else {
+					$user = FALSE;
+				}
+				
+				if ( ! $user || is_wp_error( $user ) && ! isset( $_POST['pass1'] ) ) {
+					
+					//setcookie( $rp_cookie, ' ', time() - YEAR_IN_SECONDS, '/login', COOKIE_DOMAIN, is_ssl(), true );
+					if ( $user && $user->get_error_code() === 'expired_key' ) {
+						wp_safe_redirect( $login_page_url . 'action=validatepasswordreset&issue=expiredkey' );
+						die();
+					} else {
+						wp_safe_redirect( $login_page_url . 'action=validatepasswordreset&issue=invalidkey' );
+						die();
+					}
+				}
+				
+				$errors = new \WP_Error();
+				
+				if ( isset( $_POST['pass1'] ) && ! empty( $_POST['pass1'] ) && $_POST['pass1'] == $_POST['pass2'] ) {
+					reset_password( $user, $_POST['pass1'] );
+					wp_redirect( $login_page_url . 'action=reset&success=true' );
+					die();
+				}
+			}
+		}
+		
+	}
+	
+	/**
+     *
+     */
+    /* Override LD login modal. commenting it for next release.
+    public static function uo_modal_login_form( $filepath, $slug, $args, $echo, $return_file_path ) {
+        
+        if ( strpos( $filepath, 'modules/login-modal.php' ) !== FALSE ) {
+            $can_register = get_option( 'users_can_register' ); ?>
+    
+        <div class="ld-modal ld-login-modal <?php if ( $can_register ) {
+            echo 'ld-can-register';
+        } ?>">
+    
+            <span class="ld-modal-closer ld-icon ld-icon-delete"></span>
+            <div class="ld-login-modal-login">
+                <div class="ld-login-modal-wrapper">
+                    <?php
+                    echo do_shortcode( '[uo_login]' );
+                    ?> </div>
+            </div>
+            </div><?php
+        } else {
+            return $filepath;
+        }
+        
+    }*/
 }

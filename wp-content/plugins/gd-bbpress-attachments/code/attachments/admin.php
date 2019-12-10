@@ -8,16 +8,16 @@ class gdbbAtt_Admin {
     }
 
     public function load() {
-        add_action('admin_init', array(&$this, 'admin_init'));
-        add_action('admin_menu', array(&$this, 'admin_meta'));
-        add_action('admin_head', array(&$this, 'admin_head'));
-        add_action('save_post', array(&$this, 'save_edit_forum'));
+        add_action('admin_init', array($this, 'admin_init'));
+        add_action('admin_menu', array($this, 'admin_meta'));
+        add_action('admin_head', array($this, 'admin_head'));
+        add_action('save_post', array($this, 'save_edit_forum'));
 
-        add_action('manage_topic_posts_columns', array(&$this, 'admin_post_columns'), 1000);
-        add_action('manage_reply_posts_columns', array(&$this, 'admin_post_columns'), 1000);
+        add_action('manage_topic_posts_columns', array($this, 'admin_post_columns'), 1000);
+        add_action('manage_reply_posts_columns', array($this, 'admin_post_columns'), 1000);
 
-        add_action('manage_topic_posts_custom_column', array(&$this, 'admin_columns_data'), 1000, 2);
-        add_action('manage_reply_posts_custom_column', array(&$this, 'admin_columns_data'), 1000, 2);
+        add_action('manage_topic_posts_custom_column', array($this, 'admin_columns_data'), 1000, 2);
+        add_action('manage_reply_posts_custom_column', array($this, 'admin_columns_data'), 1000, 2);
     }
 
     public function admin_init() {
@@ -117,9 +117,9 @@ class gdbbAtt_Admin {
 
     public function admin_meta() {
         if (current_user_can(GDBBPRESSATTACHMENTS_CAP)) {
-            add_meta_box('gdbbattach-meta-forum', __("Attachments Settings", "gd-bbpress-attachments"), array(&$this, 'metabox_forum'), 'forum', 'side', 'high');
-            add_meta_box('gdbbattach-meta-files', __("Attachments List", "gd-bbpress-attachments"), array(&$this, 'metabox_files'), 'topic', 'side', 'high');
-            add_meta_box('gdbbattach-meta-files', __("Attachments List", "gd-bbpress-attachments"), array(&$this, 'metabox_files'), 'reply', 'side', 'high');
+            add_meta_box('gdbbattach-meta-forum', __("Attachments Settings", "gd-bbpress-attachments"), array($this, 'metabox_forum'), 'forum', 'side', 'high');
+            add_meta_box('gdbbattach-meta-files', __("Attachments List", "gd-bbpress-attachments"), array($this, 'metabox_files'), 'topic', 'side', 'high');
+            add_meta_box('gdbbattach-meta-files', __("Attachments List", "gd-bbpress-attachments"), array($this, 'metabox_files'), 'reply', 'side', 'high');
         }
     }
 

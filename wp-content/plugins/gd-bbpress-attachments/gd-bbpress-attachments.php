@@ -4,13 +4,13 @@
 Plugin Name: GD bbPress Attachments
 Plugin URI: https://plugins.dev4press.com/gd-bbpress-attachments/
 Description: Implements attachments upload to the topics and replies in bbPress plugin through media library and adds additional forum based controls.
-Version: 3.0.1
+Version: 3.2
 Author: Milan Petrovic
 Author URI: https://www.dev4press.com/
 Text Domain: gd-bbpress-attachments
 
 == Copyright ==
-Copyright 2008 - 2018 Milan Petrovic (email: support@dev4press.com)
+Copyright 2008 - 2019 Milan Petrovic (email: support@dev4press.com)
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

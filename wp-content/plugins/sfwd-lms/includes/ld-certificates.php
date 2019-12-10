@@ -38,7 +38,7 @@ function learndash_certificate_details( $post_id, $cert_user_id = null ) {
 		$meta = get_post_meta( $post_id, '_sfwd-quiz', true );		
 		if ( is_array( $meta ) && ! empty( $meta ) ) {
 
-			if ( ( isset( $meta['sfwd-quiz_threshold'] ) ) && ( ! empty( $meta['sfwd-quiz_threshold'] ) ) ) {
+			if ( ( isset( $meta['sfwd-quiz_threshold'] ) ) && ( '' !== $meta['sfwd-quiz_threshold'] ) ) {
 				$certificate_threshold = $meta['sfwd-quiz_threshold'];
 			} else {
 				$certificate_threshold = '0.8';
@@ -142,6 +142,15 @@ function learndash_get_course_certificate_link( $course_id, $cert_user_id = null
 	if ( empty( $certificate_id ) ) {
 		return '';
 	}
+
+	if ( ( learndash_get_post_type_slug( 'certificate' ) !== get_post_type( $certificate_id ) ) ) {
+		return '';
+	}
+
+	if ( ( learndash_get_post_type_slug( 'course' ) !== get_post_type( $course_id ) ) ) {
+		return '';
+	}
+
 
 	$course_status = learndash_course_status( $course_id, $cert_user_id );
 	if ( $course_status != esc_html__( 'Completed', 'learndash' ) ) {
@@ -380,3 +389,49 @@ function learndash_certificates_save_meta_box( $post_id ) {
 	update_post_meta( $post_id, 'learndash_certificate_options', $learndash_certificate_options );
 }
 add_action( 'save_post', 'learndash_certificates_save_meta_box' );
+
+
+/**
+ * Certificate published/updated notice to replace the default notice that contains a link to a non-existent resource.
+ * 
+ * @since 3.0
+ * @return array Array of published/updated notice messages.
+ */
+function learndash_certificates_post_updated_messages( $messages ) {
+
+	$post             = get_post();
+	$post_type        = get_post_type( $post );
+	$post_type_object = get_post_type_object( $post_type );
+
+	$published_message = wp_kses_post( __( 'Certificate published. <br /><br />
+	To view the certificate, you must assign it to a quiz or course. <br />
+	Once you complete the assigned milestone, you can generate the certificate. <br /><br />
+	Click here to read more about this topic: <a href="https://www.learndash.com/support/docs/core/certificates/create-certificate/#previewing_certificates" target="_blank">Previewing Certificates</a>.', 'learndash' ) );
+
+	$updated_message = wp_kses_post( __( 'Certificate updated. <br /><br />
+	To view the certificate, you must assign it to a quiz or course. <br />
+	Once you complete the assigned milestone, you can generate the certificate.<br /><br />	
+	Click here to read more about this topic: <a href="https://www.learndash.com/support/docs/core/certificates/create-certificate/#previewing_certificates" target="_blank">Previewing Certificates</a>.', 'learndash' ) );
+
+	$messages[ 'sfwd-certificates' ] = array(
+		0  => '', // Unused. Messages start at index 1.
+		1  => $updated_message,
+		2  => esc_html__( 'Custom field updated.', 'learndash' ),
+		3  => esc_html__( 'Custom field deleted.', 'learndash' ),
+		4  => $updated_message,
+		/* translators: %s: date and time of the revision */
+		5  => isset( $_GET['revision'] ) ? sprintf( esc_html__( 'Certificate restored to revision from %s', 'learndash' ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
+		6  => $published_message,
+		7  => esc_html__( 'Certificate saved.', 'learndash' ),
+		8  => esc_html__( 'Certificate submitted.', 'learndash' ),
+		9  => sprintf(
+			esc_html__( 'Certificate scheduled for: <strong>%1$s</strong>.', 'learndash' ),
+			// translators: Publish box date format, see http://php.net/date
+			date_i18n( __( 'M j, Y @ H:i', 'default' ), strtotime( $post->post_date ) )
+		),
+		10 => esc_html__( 'Certificate draft updated.', 'learndash' )
+	);
+	
+	return $messages;
+}
+add_filter( 'post_updated_messages', 'learndash_certificates_post_updated_messages' );

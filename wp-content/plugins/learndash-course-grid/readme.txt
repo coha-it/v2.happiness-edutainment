@@ -5,10 +5,10 @@ Plugin URI: https://learndash.com/add-on/course-grid/
 LD Requires at least: 2.5.0
 Slug: learndash-course-grid
 Tags: grid, view, display
-Requires at least: 4.9
-Tested up to: 4.9
+Requires at least: 5.0
+Tested up to: 5.2
 Requires PHP: 7.0
-Stable tag: 1.5.1
+Stable tag: 1.5.5
 
 Transform the course list created with shortcode [ld_course_list] to grid view.
 
@@ -40,16 +40,9 @@ Alternatively, you always have the option to update manually. Please note, a ful
 
 == Changelog ==
 
-= 1.5.1 =
-* Added preserve ratio JS script
-* Updated to use LearnDash_Custom_Label class for some translated strings
-* Updated prefix custom bootstrap styles to prevent conflicts
-* Updated POT file
-* Fixed missing admin script
-* Fixed post type permalink
-* Fixed video preview display
-* Fixed missing admin script
-* Fixed add missing text domain to some strings
-* Fixed issue where ribbon always display 'enrolled' on open course type
+= 1.5.5 =
+
+* Added HTML support for Short Description
+* Fixed legacy Short Description field not being transferred to the new Short Description field
 
 View the full changelog [here](https://www.learndash.com/add-on/course-grid/).

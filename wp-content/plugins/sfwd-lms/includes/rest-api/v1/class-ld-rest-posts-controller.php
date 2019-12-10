@@ -200,7 +200,31 @@ if ( !class_exists('LD_REST_Posts_Controller_V1' ) ) {
 			return $args;
 		}
 
-		function rest_prepare_response_filter( $response, $post, $request ) {
+		/**
+		 * Override the REST response links. This is needed when Course Shared Steps is enabled.
+		 *
+		 * @since 3.0
+		 * @param object $response WP_REST_Response instance.
+		 * @param object $post     WP_Post instance.
+		 * @param object $request  WP_REST_Request instance.
+		 */
+		function rest_prepare_response_filter( WP_REST_Response $response, WP_Post $post, WP_REST_Request $request ) {
+			if ( ( LearnDash_Settings_Section::get_section_setting('LearnDash_Settings_Section_Permalinks', 'nested_urls' ) == 'yes' ) && ( in_array( $post->post_type, learndash_get_post_types( 'course_steps' ) ) ) ) {
+				$request_params_json = $request->get_json_params();
+				if ( ( isset( $request_params_json['course_id'] ) ) && ( ! empty( $request_params_json['course_id'] ) ) ) {
+					$course_id = absint( $request_params_json['course_id'] );
+					if ( ! empty( $course_id ) ) {
+						$link = learndash_get_step_permalink( $post->ID, $course_id );
+						$response->data['link'] = $link;
+						$response->data['permalink_template'] =  str_replace( $post->post_name, '%pagename%', $link );
+
+						// These are not needed or used on the Gutenberg UI but change anyway.
+						$response->data['guid']['rendered'] = $link;
+						$response->data['guid']['raw'] = $link;
+					}
+				}
+			}
+
 			return $response;
 		}
 		

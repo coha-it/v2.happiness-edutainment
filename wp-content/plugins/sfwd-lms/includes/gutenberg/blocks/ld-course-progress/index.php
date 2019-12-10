@@ -30,8 +30,15 @@ if ( ( class_exists( 'LearnDash_Gutenberg_Block' ) ) && ( ! class_exists( 'Learn
 					'type' => 'boolean',
 				),
 				'preview_user_id' => array(
-					'type' => 'integer',
+					'type' => 'string',
 				),
+				'preview_course_id' => array(
+					'type' => 'string',
+				),
+				'example_show' => array(
+					'type' => 'boolean',
+				),
+
 				'meta' => array(
 					'type' => 'object',
 				),
@@ -62,6 +69,19 @@ if ( ( class_exists( 'LearnDash_Gutenberg_Block' ) ) && ( ! class_exists( 'Learn
 			}
 
 			if ( is_user_logged_in() ) {
+				error_log('attributes<pre>'. print_r($attributes, true) .'</pre>');
+
+				if ( ( isset( $attributes['example_show'] ) ) && ( ! empty( $attributes['example_show'] ) ) ) {
+					$attributes['preview_course_id'] = $this->get_example_post_id( learndash_get_post_type_slug( 'course' ) );
+					$attributes['preview_show'] = 1;
+					unset( $attributes['example_show'] );
+				}
+
+				if ( ( isset( $attributes['preview_show'] ) ) && ( ! empty( $attributes['preview_show'] ) ) ) {
+					if ( ( isset( $attributes['preview_course_id'] ) ) && ( ! empty( $attributes['preview_course_id'] ) ) ) {
+						$attributes['course_id'] = absint( $attributes['preview_course_id'] );
+					}
+				}
 
 				if ( ( ! isset( $attributes['course_id'] ) ) || ( empty( $attributes['course_id'] ) ) ) {
 					if ( ( ! isset( $attributes_meta['course_id'] ) ) || ( empty( $attributes_meta['course_id'] ) ) ) {
@@ -73,7 +93,7 @@ if ( ( class_exists( 'LearnDash_Gutenberg_Block' ) ) && ( ! class_exists( 'Learn
 						$attributes['course_id'] = (int) $attributes_meta['course_id'];
 					}
 				} else {
-					$course_post = get_post( (int) $attributes['course_id'] );
+					$course_post = get_post( absint( $attributes['course_id'] ) );
 					if ( ( ! is_a( $course_post, 'WP_Post' ) ) || ( 'sfwd-courses' !== $course_post->post_type ) ) {
 						return $this->render_block_wrap( '<span class="learndash-block-error-message">' . sprintf(
 							// translators: placeholder: Course.

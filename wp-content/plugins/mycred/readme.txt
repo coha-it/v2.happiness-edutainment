@@ -1,9 +1,10 @@
-=== myCred - Points, Rewards & Badges | Loyalty Plugin ===
-Contributors: mycred ,wpexpertsio
+=== myCRED - Points, Rewards & Badges | Loyalty Plugin ===
+Contributors: mycred,wpexpertsio
 Tags: point, credit, loyalty program, engagement, reward
-Requires at least: 4.5
-Tested up to: 4.9
-Stable tag: 1.7.9.7
+Requires at least: 4.8
+Tested up to: 5.3
+Stable tag: 1.8.6
+Requires PHP: 7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -13,8 +14,6 @@ An adaptive and powerful points management system for WordPress powered websites
 
 myCRED is an adaptive points management system that lets you build a broad range of point related applications for your WordPress powered website.
 Store reward systems, community leaderboards, online banking or monetizing your websites content, are a few examples of the ways myCRED is used.
-
-**[List your self as beta tester for 1.8 (upcoming version)](https://goo.gl/forms/CMjGFpOEByfse9j52)**
 
 = Points =
 
@@ -93,15 +92,41 @@ You can find a list of [frequently asked questions](https://mycred.me/about/faq/
 
 == Upgrade Notice ==
 
+= 1.8.0 =
+Major release(Make sure to take backup before updating)
 
-= 1.7.9.4 =
-Bug fixes.
+= 1.8.1 =
+Bug fixes release.
+
+= 1.8.2 =
+Bug fixes release.
+
+= 1.8.3 =
+Bug fixes release.
+
+= 1.8.4 =
+Bug fixes release.
+
+= 1.8.4.1 =
+Bug fixes release.
+
+= 1.8.4.2 =
+Bug fixes release.
+
+= 1.8.5 =
+Bug fixes release.
+
+= 1.8.5.1 =
+Bug fixes release.
+
+= 1.8.6 =
+Bug fixes release.
 
 
 == Other Notes ==
 
 = Requirements =
-* WordPress 4.5 or greater
+* WordPress 4.8 or greater
 * PHP version 5.6 or greater
 * PHP mcrypt library enabled
 * MySQL version 5.0 or greater
@@ -119,23 +144,116 @@ Bug fixes.
 
 == Changelog ==
 
-= 1.7.9.7 =
-FIX – Points for clicking on links
-FIX – Point for viewing videos
-FIX – Exchange points from one point type to another point type
+= 1.8.6 =
+NEW - Introduce a new shortcode [mycred_my_balance_converted].
+NEW - Introduce a new template tag %coupon_code%.
+TWEAK - Avoid duplicate database calls in get_log_table().
+TWEAK - Language support in [mycred_hook_table] shortcode.
+FIX - [mycred_buy] shortcode always get default point type settings.
+FIX - HTML format issue in [mycred_buy_form] shortcode.
+FIX - Remove badge related PHP warnings.
+FIX - %order_id% template tag does not render in myCRED email.
+FIX - %transfer_message% template tag does not render in myCRED email.
 
-= 1.7.9.6 =
-FIX - Version error
+= 1.8.5.1 =
+FIX - myCRED Statistics add-on related shortcodes.
+FIX - myCRED Leaderbard cache issue.
+TWEAK - Database optimization.
 
-= 1.7.9.5 =
-FIX - Notification error.
+= 1.8.5 =
+NEW - Added "to" attribute in Leaderboard shortcode.
+NEW - Added filter "mycred_show_custom_coupon_value" for coupon value.
+FIX - myCRED Leaderboard widget notices.
+FIX - Typo fix in BuddyPress hook.
+FIX - Coupon success message not showing in custom point types.
+FIX - Incorrect point type in coupon notification.
+FIX - Ranks not being assigned based on Total Balance.
+FIX - Set default point type in ctype attribute in [mycred_users_of_all_ranks] shortcode.
+FIX - [mycred_hook_table] this shortcode showing only 1 content hook at a time.
+FIX - Emails that are stored in draft are also being sent.
+FIX - Template tags are not being rendered in email Notices.
+FIX - Admin not able to select ranks "manual mode" from settings.
+FIX - Admin not able to assign ranks when "manual mode" is enabled.
+FIX - Errors in [mycred_email_subscriptions] shortcode.
+FIX - Transfer Message showing as "-" in log.
+FIX - myCRED Cache not deleting.
+FIX - When deleting a BuddyPress Activity adds a "Profile Comment Delete" log.
+FIX - Assign users badge from badge edit page.
+FIX - "Not in" operator not passing in query_log.
+FIX - Show main image in [mycred_my_badges] shortcode if level image is not set.
 
+= 1.8.4.2 =
+FIX - myCRED hooks not adding on other point types.
+FIX - option_id name not calling for other point types.
 
-= 1.7.9.4 =
-FIX - Compatible with php 7.2.
-FIX - Points Log pagination issue.
-FIX - Reset all to zero myCred default balance meta key .
-Tested with WordPress 4.9 beta3
+= 1.8.4.1 =
+FIX - myCRED hooks not saving.
+FIX - setCookie function error when adding new hook.
+
+= 1.8.4 =
+NEW - Introduce a new filter “mycred_option_id” for manipulating hooks.
+NEW - Add new action "mycred_pref_hooks" on mycred hooks page
+TWEAK - Limits are showing for Approved comments hook in [mycred_hook_table] shortcode.
+FIX - Sell content undefined offset in Backend Pages & Posts.
+FIX - mycred_buy shortcode Undefined variable: post.
+FIX - Bitpay 404 page redirect.
+FIX - BuyCred Gateway error message no gateway available.
+FIX - myCred Email accept only ARRAY value in "get_subject" function.
+FIX - Incorrect log table name in multisite when central logging is enabled.
+FIX - strpos depreciated behavior.
+FIX - Coupon expiration before date.
+FIX - "Total in Points" value show in both Cart & Checkout page when you select "Show in Cart and on Checkout Page" in WooCommerce myCRED Gateway.
+
+= 1.8.3 =
+FIX - Fixed Woocommerce checkout errors.
+FIX - Fixed get_users_balance function.
+FIX - Fixed typo error in bbPress hook.
+NEW - Added new feature to copy to clipboard referral link in BuddyPress profile page
+
+= 1.8.2 =
+FIX - [mycred_best_user] shortcode fixed.
+FIX - Post related template tags fixed.
+FIX - Sell content related issue fixed.
+IMPROVEMENT - Added check for existing logs getting disappeared.
+
+= 1.8.1 =
+FIX - [mycred_my_balance] shortcode fixed.
+FIX - [mycred_total_balance] shortcode fixed.
+FIX - rank related issues fixed.
+
+= 1.8 =
+NEW - Added new mycred_over_hook_limit filter for adjusting hook limit checks.
+NEW - Added new MYCRED_RANK_KEY constant which can be used to whitelabel ranks.
+NEW - Added new MYCRED_COUPON_KEY constant which can be used to whitelabel coupons.
+NEW - Added new MYCRED_BADGE_KEY constant which can be used to whitelabel badges.
+NEW - Added new MYCRED_EMAIL_KEY constant with can be used to whitelabel email notifications.
+NEW - Added new MYCRED_BUY_KEY constant with can be used to whitelabel pending buyCRED payments.
+NEW - Added new MYCRED_ENABLE_SHORTCODES constant in cases where myCRED shortcodes needs to be disabled.
+NEW - Updated the Email Notifications add-on to version 1.4 with support for custom instances, multiple point types / notice and introduced the new myCRED_Email object.
+NEW - Updated the buyCRED add-on which now has improved checkout process. 
+NEW - Added the option to set a custom gateway logo for all built-in payment gateways.
+NEW - Updated the mycred_load_coupon shortcode to show an error message when an invalid coupon is used.
+NEW - Added new Anniversary hook allowing you to reward users for each year they are a member on your website.
+NEW - Added new MYCRED_ENABLE_HOOKS constant to disable hooks completely.
+NEW - Added support for Multi Network setups.
+NEW - Added new mycred_add_post_meta(), mycred_get_post_meta(), mycred_update_post_meta() and mycred_delete_post_meta() functions in order to add support for the Master Template feature on multisites.
+NEW - Added support for multiple point types in leaderboards.
+NEW - The leaderboard shortcode can now be setup to render results based on multiple point types.
+NEW - Added caching of log and leaderboard queries.
+NEW - Added new filter to allow adjustments to the reference used for publishing and deleting content hooks.
+NEW - Added new mycred_give_run filter to control if the mycred_give shortcode should run or not.
+TWEAK - Moved hooks to /includes/hooks/ and third-party hooks to /includes/hooks/external/.
+TWEAK - Implemented the use of $mycred_log_table global throughout the plugin.
+TWEAK - Improved Multisite support.
+TWEAK - When a user jumps more than one badge level in a single instance, we want to make sure he gets rewarded for each level (if rewards is set).
+TWEAK - Corrected codex urls for functions and shortcodes throughout the plugin.
+TWEAK - Added support to whitelabel shortcodes.
+TWEAK - Added new MYCRED_SHOW_PREMIUM_ADDONS constant to hide all mentions of premium add-ons in myCRED.
+TWEAK - BuddyPress fixed issue related to points ignoring limit on adding to favorites
+TWEAK - Optimized search the search for log entries
+TWEAK - issue related to email not getting send on transfer in and out triggers in transfer addon
+TWEAK - Rank excerpt fix
+
 
 = Previous Versions =
 https://mycred.me/support/changelog/

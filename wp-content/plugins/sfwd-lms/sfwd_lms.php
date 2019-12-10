@@ -3,7 +3,7 @@
  * Plugin Name: LearnDash LMS
  * Plugin URI: http://www.learndash.com
  * Description: LearnDash LMS Plugin - Turn your WordPress site into a learning management system.
- * Version: 2.5.9
+ * Version: 3.1.1
  * Author: LearnDash
  * Author URI: http://www.learndash.com
  * Text Domain: learndash
@@ -17,15 +17,10 @@
 /**
  * LearnDash Version Constant
  */
-define( 'LEARNDASH_VERSION', '2.5.9' );
+define( 'LEARNDASH_VERSION', '3.1.1' );
 define( 'LEARNDASH_SETTINGS_DB_VERSION', '2.5' );
 define( 'LEARNDASH_SETTINGS_TRIGGER_UPGRADE_VERSION', '2.5' );
 define( 'LEARNDASH_LMS_TEXT_DOMAIN', 'learndash' );
-
-// legacy support for the original WPProQuiz text domain 'wp-pro-quiz'.
-if ( ! defined( 'LEARNDASH_WPPROQUIZ_TEXT_DOMAIN' ) ) {
-	define( 'LEARNDASH_WPPROQUIZ_TEXT_DOMAIN', LEARNDASH_LMS_TEXT_DOMAIN );
-}
 
 if ( ! defined( 'LEARNDASH_LMS_PLUGIN_DIR' ) ) {
 	define( 'LEARNDASH_LMS_PLUGIN_DIR', trailingslashit( str_replace( '\\', '/', WP_PLUGIN_DIR ) . '/' . basename( dirname( __FILE__ ) ) ) );
@@ -34,6 +29,14 @@ if ( ! defined( 'LEARNDASH_LMS_PLUGIN_URL' ) ) {
 	$url = trailingslashit( WP_PLUGIN_URL . '/' . basename( dirname( __FILE__ ) ) );
 	$url = str_replace( array( 'https://', 'http://' ), array( '//', '//' ), $url );
 	define( 'LEARNDASH_LMS_PLUGIN_URL', $url );
+}
+
+if ( ! defined( 'LEARNDASH_LMS_LIBRARY_DIR' ) ) {
+	define( 'LEARNDASH_LMS_LIBRARY_DIR', trailingslashit( LEARNDASH_LMS_PLUGIN_DIR ) . 'includes/lib' );
+}
+
+if ( ! defined( 'LEARNDASH_LMS_LIBRARY_URL' ) ) {
+	define( 'LEARNDASH_LMS_LIBRARY_URL', trailingslashit( LEARNDASH_LMS_PLUGIN_URL ) . 'includes/lib' );
 }
 
 if ( ! defined( 'LEARNDASH_LMS_PLUGIN_KEY' ) ) {
@@ -59,6 +62,11 @@ if ( ! defined( 'LEARNDASH_SCRIPT_DEBUG' ) ) {
 	}
 }
 
+if ( ! defined( 'LEARNDASH_BUILDER_DEBUG' ) ) {
+	define( 'LEARNDASH_BUILDER_DEBUG', false );
+}
+
+//define( 'LEARNDASH_SCRIPT_VERSION_TOKEN', 'debug' );
 if ( ! defined( 'LEARNDASH_SCRIPT_VERSION_TOKEN' ) ) {
 	if ( defined( 'LEARNDASH_SCRIPT_DEBUG' ) && ( LEARNDASH_SCRIPT_DEBUG === true ) ) {
 		define( 'LEARNDASH_SCRIPT_VERSION_TOKEN', LEARNDASH_VERSION . '-' . time() );
@@ -71,8 +79,8 @@ if ( ! defined( 'LEARNDASH_SCRIPT_VERSION_TOKEN' ) ) {
 // Added to support REST API.
 // @since 2.5.8.
 if ( ! defined( 'LEARNDASH_REST_API_ENABLED' ) ) {
-	define( 'LEARNDASH_REST_API_ENABLED', false );
-} 
+	define( 'LEARNDASH_REST_API_ENABLED', true );
+}
 
 // Added to support Lesson/Topic videos
 // @since 2.4.5.
@@ -86,10 +94,16 @@ if ( ! defined( 'LEARNDASH_COURSE_BUILDER' ) ) {
 	define( 'LEARNDASH_COURSE_BUILDER', true );
 }
 
+// Added to support Quiz Builder
+// @since 2.6.0.
+if ( ! defined( 'LEARNDASH_QUIZ_BUILDER' ) ) {
+	define( 'LEARNDASH_QUIZ_BUILDER', true );
+}
+
 // Added to support Gutenberg Editor
 // @since 2.5.8.
 if ( ! defined( 'LEARNDASH_GUTENBERG' ) ) {
-	define( 'LEARNDASH_GUTENBERG', false );
+	define( 'LEARNDASH_GUTENBERG', true );
 }
 
 // Added to support Translations via GlotPress
@@ -102,6 +116,14 @@ if ( ! defined( 'LEARNDASH_TRANSLATIONS' ) ) {
 // @since 2.5.5.
 if ( ! defined( 'LEARNDASH_ADDONS_UPDATER' ) ) {
 	define( 'LEARNDASH_ADDONS_UPDATER', true );
+}
+
+if ( ! defined( 'LEARNDASH_HTTP_REMOTE_GET_TIMEOUT' ) ) {
+	define( 'LEARNDASH_HTTP_REMOTE_GET_TIMEOUT', 15 );
+}
+
+if ( ! defined( 'LEARNDASH_HTTP_REMOTE_POST_TIMEOUT' ) ) {
+	define( 'LEARNDASH_HTTP_REMOTE_POST_TIMEOUT', 15 );
 }
 
 if ( ! defined( 'LEARNDASH_LMS_DEFAULT_QUESTION_POINTS' ) ) {
@@ -117,10 +139,15 @@ if ( ! defined( 'LEARNDASH_LMS_DEFAULT_LAZY_LOAD_PER_PAGE' ) ) {
 	define( 'LEARNDASH_LMS_DEFAULT_LAZY_LOAD_PER_PAGE', 5000 );
 }
 
+// Define the number of items for Data Upgrade batch.
+if ( ! defined( 'LEARNDASH_LMS_DEFAULT_DATA_UPGRADE_BATCH_SIZE' ) ) {
+	define( 'LEARNDASH_LMS_DEFAULT_DATA_UPGRADE_BATCH_SIZE', 1000 );
+}
+
 // Define the default number of items per page.
 if ( ! defined( 'LEARNDASH_LMS_DEFAULT_WIDGET_PER_PAGE' ) ) {
 	define( 'LEARNDASH_LMS_DEFAULT_WIDGET_PER_PAGE', 20 );
-} 
+}
 
 if ( ! defined( 'LEARNDASH_LMS_DEFAULT_CB_INSERT_CHUNK_SIZE' ) ) {
 	define( 'LEARNDASH_LMS_DEFAULT_CB_INSERT_CHUNK_SIZE', 10 );
@@ -134,6 +161,71 @@ if ( ! defined( 'LEARNDASH_ADMIN_CAPABILITY_CHECK' ) ) {
 if ( ! defined( 'LEARNDASH_GROUP_LEADER_CAPABILITY_CHECK' ) ) {
 	define( 'LEARNDASH_GROUP_LEADER_CAPABILITY_CHECK', 'group_leader' );
 }
+
+if ( ! defined( 'LEARNDASH_DEFAULT_THEME' ) ) {
+	define( 'LEARNDASH_DEFAULT_THEME', 'ld30' );
+}
+
+if ( ! defined( 'LEARNDASH_LEGACY_THEME' ) ) {
+	define( 'LEARNDASH_LEGACY_THEME', 'legacy' );
+}
+
+if ( ! defined( 'LEARNDASH_QUIZ_RESULT_MESSAGE_MAX' ) ) {
+	define( 'LEARNDASH_QUIZ_RESULT_MESSAGE_MAX', 15 );
+}
+
+if ( ! defined( 'LEARNDASH_ADMIN_POPUP_STYLE' ) ) {
+	define( 'LEARNDASH_ADMIN_POPUP_STYLE', 'jQuery-dialog' );
+}
+
+/**
+ * Load the select JS library.
+ */
+if ( ! defined( 'LEARNDASH_SELECT2_LIB' ) ) {
+	define( 'LEARNDASH_SELECT2_LIB', true );
+}
+
+/**
+ * Enable legacy Post Type Setttings Metaboxes
+ */
+if ( ! defined( 'LEARNDASH_SETTINGS_METABOXES_LEGACY' ) ) {
+	define( 'LEARNDASH_SETTINGS_METABOXES_LEGACY', true );
+}
+
+if ( ! defined( 'LEARNDASH_SETTINGS_METABOXES_LEGACY_QUIZ' ) ) {
+	define( 'LEARNDASH_SETTINGS_METABOXES_LEGACY_QUIZ', false );
+}
+
+/**
+ * Show new Settings Header Panel
+ * default is true.
+ */
+if ( ! defined( 'LEARNDASH_SETTINGS_HEADER_PANEL' ) ) {
+	define( 'LEARNDASH_SETTINGS_HEADER_PANEL', true );
+}
+
+/**
+ * LearnDash Database utility class.
+ */
+if ( ! defined( 'LEARNDASH_LMS_DATABASE_PREFIX_SUB' ) ) {
+	define( 'LEARNDASH_LMS_DATABASE_PREFIX_SUB', 'learndash_' );
+}
+if ( ! defined( 'LEARNDASH_PROQUIZ_DATABASE_PREFIX_SUB_DEFAULT' ) ) {
+	define( 'LEARNDASH_PROQUIZ_DATABASE_PREFIX_SUB_DEFAULT', 'wp_' );
+}
+
+require_once dirname( __FILE__ ) . '/includes/class-ldlms-db.php';
+
+/**
+ * LearnDash Post Types utility class.
+ */
+require_once dirname( __FILE__ ) . '/includes/class-ldlms-post-types.php';
+
+/**
+ * LearnDash Transients utility class.
+ */
+require_once dirname( __FILE__ ) . '/includes/class-ldlms-transients.php';
+
 
 /**
  * The module base class; handles settings, options, menus, metaboxes, etc.
@@ -189,6 +281,21 @@ require_once dirname( __FILE__ ) . '/includes/course/ld-course-list-shortcode.ph
  * Course info and navigation widgets
  */
 require_once dirname( __FILE__ ) . '/includes/course/ld-course-info-widget.php';
+
+/**
+ * Course metaboxes.
+ */
+require_once dirname( __FILE__ ) . '/includes/course/ld-course-metaboxes.php';
+
+/**
+ * Quiz metaboxes.
+ */
+require_once dirname( __FILE__ ) . '/includes/quiz/ld-quiz-metaboxes.php';
+
+/**
+ * Quiz and Question functions
+ */
+require_once dirname( __FILE__ ) . '/includes/quiz/ld-quiz-functions.php';
 
 /**
  * Implements WP Pro Quiz
@@ -251,6 +358,21 @@ require_once dirname( __FILE__ ) . '/includes/ld-misc-functions.php';
 require_once dirname( __FILE__ ) . '/includes/admin/ld-admin.php';
 
 /**
+ * Course Builder Helpers.
+ */
+require_once dirname( __FILE__ ) . '/includes/admin/ld-course-builder-helpers.php';
+
+/**
+ * Quiz Builder Helpers.
+ */
+require_once dirname( __FILE__ ) . '/includes/admin/ld-quiz-builder-helpers.php';
+
+/**
+ * Gutenberg Customization.
+ */
+require_once dirname( __FILE__ ) . '/includes/admin/ld-gutenberg.php';
+
+/**
  * LearnDash Settings Page Base
  */
 require_once dirname( __FILE__ ) . '/includes/settings/settings-loader.php';
@@ -268,7 +390,7 @@ require_once dirname( __FILE__ ) . '/includes/admin/class-learndash-admin-binary
 /**
  * Data/System Upgrades
  */
-require_once dirname( __FILE__ ) . '/includes/admin/class-learndash-admin-settings-data-upgrades.php';
+require_once dirname( __FILE__ ) . '/includes/admin/class-learndash-admin-data-upgrades.php';
 
 /**
  * Reports
@@ -309,7 +431,7 @@ if ( ( defined( 'LEARNDASH_TRANSLATIONS' ) ) && ( LEARNDASH_TRANSLATIONS === tru
 	require_once dirname( __FILE__ ) . '/includes/class-ld-translations.php';
 
 	if ( ! defined( 'LEARNDASH_TRANSLATIONS_URL_BASE' ) ) {
-		define( 'LEARNDASH_TRANSLATIONS_URL_BASE', 'http://translations.learndash.com' );
+		define( 'LEARNDASH_TRANSLATIONS_URL_BASE', 'https://translations.learndash.com' );
 	}
 	if ( ! defined( 'LEARNDASH_TRANSLATIONS_URL_CACHE' ) ) {
 		define( 'LEARNDASH_TRANSLATIONS_URL_CACHE', DAY_IN_SECONDS );
@@ -321,6 +443,14 @@ if ( ( defined( 'LEARNDASH_TRANSLATIONS' ) ) && ( LEARNDASH_TRANSLATIONS === tru
  */
 require_once dirname( __FILE__ ) . '/includes/settings/class-ld-shortcodes-tinymce.php';
 
+/**
+ * Add Support for Themes.
+ */
+require_once LEARNDASH_LMS_PLUGIN_DIR . '/themes/themes-loader.php';
+
+/**
+ * Add Support for the LD LMS Post Factory.
+ */
 require_once LEARNDASH_LMS_PLUGIN_DIR . '/includes/classes/class-ldlms-factory-post.php';
 
 /**
@@ -341,11 +471,9 @@ if ( ( defined( 'LEARNDASH_LESSON_VIDEO' ) ) && ( LEARNDASH_LESSON_VIDEO === tru
 }
 
 /**
- * Support for Course Builder Page
+ * Support for Course and/or Quiz Builder
  */
-if ( ( defined( 'LEARNDASH_COURSE_BUILDER' ) ) && ( LEARNDASH_COURSE_BUILDER === true ) ) {
-	require_once dirname( __FILE__ ) . '/includes/admin/metaboxes/class-learndash-admin-course-builder-metabox.php';
-}
+require_once dirname( __FILE__ ) . '/includes/admin/class-learndash-admin-builder.php';
 
 /**
  * Support for Gutenberg Editor
@@ -355,21 +483,15 @@ if ( ( defined( 'LEARNDASH_GUTENBERG' ) ) && ( LEARNDASH_GUTENBERG === true ) ) 
 }
 
 /**
+ * LearnDash Deprecated Functions/Classes
+ */
+require_once dirname( __FILE__ ) . '/includes/deprecated/deprecated-functions.php';
+
+
+/**
  * Globals that hold CPT's and Pages to be set up
  */
-global $learndash_post_types, $learndash_taxonomies, $learndash_db_tables, $learndash_pages;
-
-$learndash_post_types = array(
-	'sfwd-courses',
-	'sfwd-lessons',
-	'sfwd-topic',
-	'sfwd-quiz',
-	'sfwd-transactions',
-	'groups',
-	'sfwd-assignment',
-	'sfwd-essays',
-	'sfwd-certificates',
-);
+global $learndash_taxonomies, $learndash_pages, $learndash_question_types;
 
 $learndash_taxonomies = array(
 	'ld_course_category',
@@ -378,30 +500,15 @@ $learndash_taxonomies = array(
 	'ld_lesson_tag',
 	'ld_topic_category',
 	'ld_topic_tag',
+	'ld_quiz_category',
+	'ld_quiz_tag',
+	'ld_question_category',
+	'ld_question_tag',
 );
 
 $learndash_pages = array(
 	'group_admin_page',
-	'learndash-lms-certificate_shortcodes',
-	'learndash-lms-course_shortcodes',
 	'learndash-lms-reports',
-	'ldAdvQuiz',
-);
-
-// These are the base table names WITHOUT the $wpdb->prefix.
-$learndash_db_tables = array(
-	'learndash_user_activity',
-	'learndash_user_activity_meta',
-	'wp_pro_quiz_category',
-	'wp_pro_quiz_form',
-	'wp_pro_quiz_lock',
-	'wp_pro_quiz_master',
-	'wp_pro_quiz_prerequisite',
-	'wp_pro_quiz_question',
-	'wp_pro_quiz_statistic',
-	'wp_pro_quiz_statistic_ref',
-	'wp_pro_quiz_template',
-	'wp_pro_quiz_toplist',
 );
 
 $learndash_course_statuses = array(
@@ -410,10 +517,40 @@ $learndash_course_statuses = array(
 	'complete'    => esc_html__( 'Completed', 'learndash' ),
 );
 
+$learndash_question_types = array(
+	'single'             => esc_html__( 'Single choice', 'learndash' ),
+	'multiple'           => esc_html__( 'Multiple choice', 'learndash' ),
+	'free_answer'        => esc_html__( '"Free" choice', 'learndash' ),
+	'sort_answer'        => esc_html__( '"Sorting" choice', 'learndash' ),
+	'matrix_sort_answer' => esc_html__( '"Matrix Sorting" choice', 'learndash' ),
+	'cloze_answer'       => esc_html__( 'Fill in the blank', 'learndash' ),
+	'assessment_answer'  => esc_html__( 'Assessment', 'learndash' ),
+	'essay'              => esc_html__( 'Essay / Open Answer', 'learndash' ),
+);
+
 // This is a global variable which is set in any of the shortcode handler functions.
 // The purpose is to let the plugin know when and if the any of the shortcodes were used.
+global $learndash_shortcode_used;
 $learndash_shortcode_used = false;
 
+global $learndash_shortcode_atts;
+$learndash_shortcode_atts = array();
+
+/**
+ * Metaboxes registered for settings pages etc.
+ */
+global $learndash_metaboxes;
+$learndash_metaboxes = array();
+
+global $learndash_assets_loaded;
 $learndash_assets_loaded            = array();
 $learndash_assets_loaded['styles']  = array();
 $learndash_assets_loaded['scripts'] = array();
+
+// @TODO TEMP: Debug gutenberg vs. classic editor
+/*
+if ( isset( $_GET['classic'] ) && '1' === $_GET['classic'] ) {
+	add_filter( 'use_block_editor_for_post', '__return_false', 10 );
+	add_filter( 'use_block_editor_for_post_type', '__return_false', 10 );
+}
+*/

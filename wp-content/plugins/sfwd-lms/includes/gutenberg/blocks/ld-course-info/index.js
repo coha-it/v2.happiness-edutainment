@@ -1,6 +1,6 @@
 /**
  * LearnDash Block ld-course-info
- * 
+ *
  * @since 2.5.9
  * @package LearnDash
  */
@@ -17,14 +17,14 @@ import {
  * Internal block libraries
  */
 const { __, _x, sprintf } = wp.i18n;
-const { 
-	registerBlockType, 
+const {
+	registerBlockType,
 } = wp.blocks;
 
 const {
     InspectorControls,
 } = wp.editor;
- 
+
 const {
 	ServerSideRender,
 	PanelBody,
@@ -39,8 +39,16 @@ registerBlockType(
     {
 		title: sprintf(_x('LearnDash %s Info [ld_course_info]', 'placeholder: Course', 'learndash'), ldlms_get_custom_label('course')),
 		description: sprintf(_x('This block shows the %s and progress for the user.', 'placeholders: courses', 'learndash'), ldlms_get_custom_label('course') ),
-		icon: 'desktop',
-        category: 'widgets',
+		icon: 'analytics',
+		category: 'learndash-blocks',
+		example: {
+			attributes: {
+				example_show: 1,
+			},
+		},
+		supports: {
+			customClassName: false,
+		},
         attributes: {
 			user_id: {
 				type: 'string',
@@ -98,7 +106,6 @@ registerBlockType(
 				type: 'string',
 				default: 'DESC'
 			},
-
 			preview_show: {
 				type: 'boolean',
 				default: true
@@ -106,6 +113,10 @@ registerBlockType(
 			preview_user_id: {
 				type: 'string',
 				default: '',
+			},
+			example_show: {
+				type: 'boolean',
+				default: 0
 			},
 			meta: {
 				type: 'object',
@@ -207,7 +218,7 @@ registerBlockType(
 						/>
 					</PanelBody>
 				)
-			} 
+			}
 
 			var panelbody_progress = ('');
 			if (progress_show === true) {
@@ -277,7 +288,7 @@ registerBlockType(
 					>
 						<TextControl
 							label={__('per page', 'learndash')}
-							help={sprintf(_x('Leave empty for default (%d) or 0 to show all items.', 'placeholder: default per page', 'learndash'), ldlms_get_per_page('quiz_num') ) } 
+							help={sprintf(_x('Leave empty for default (%d) or 0 to show all items.', 'placeholder: default per page', 'learndash'), ldlms_get_per_page('quiz_num') ) }
 							value={quiz_num || ''}
 							min={0}
 							max={100}
@@ -373,7 +384,7 @@ registerBlockType(
 				do_serverside_render( props.attributes )
 			];
         },
-		
+
         save: props => {
 			// Delete meta from props to prevent it being saved.
 			delete (props.attributes.meta);

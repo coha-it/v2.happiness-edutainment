@@ -3,8 +3,8 @@ Contributors: Robin Wilson
 Tags: forum, bbpress, bbp, private, groups
 Requires at least: 3.0.1
 Donate link: http://www.rewweb.co.uk/donate
-Tested up to: 4.9
-Stable tag: 3.6.9
+Tested up to: 5.3
+Stable tag: 3.7.9
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -162,6 +162,25 @@ A shortcode to list users either across all groups or per group
 
 == Changelog ==
 
+3.7.8 Admin warning limited to display 10 times
+
+3.7.8 Admin warning added for bbpress 2.6 users
+
+3.7.7 filter added to private_groups_list_forums
+
+3.7.6 bug fix to 3.7.5 to ensure save when topic permissions not set
+
+3.7.5 prevent settings being lost on bulk forum update
+
+3.7.4 User managament changed to display the no.users in the selection
+
+3.7.3 minor change to private_groups_get_permitted_subforums to correctly pass $args
+
+3.7.2 minor change to prevent php version 5 errors
+
+3.7.1 minor change to ensure 'no group set' users show correctly in user management tab
+
+3.7.0 Updated fr. pot and files
 
 3.6.9 minor change to forum private groups metabox to correctly display if no groups set up
 

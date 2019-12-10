@@ -23,11 +23,12 @@ function learndash_quizinfo( $attr ) {
 	
 	$shortcode_atts = shortcode_atts(
 		array(
-			'show'    => '', //[score], [count], [pass], [rank], [timestamp], [pro_quizid], [points], [total_points], [percentage], [timespent]
-			'user_id' => '',
-			'quiz'    => '',
-			'time'    => '',
-			'format'  => 'F j, Y, g:i a',
+			'show'     => '', //[score], [count], [pass], [rank], [timestamp], [pro_quizid], [points], [total_points], [percentage], [timespent]
+			'user_id'  => '',
+			'quiz'     => '',
+			'time'     => '',
+			'field_id' => '',
+			'format'   => 'F j, Y, g:i a',
 		), 
 		$attr 
 	);
@@ -39,6 +40,7 @@ function learndash_quizinfo( $attr ) {
 	$quiz    = ( empty( $quiz ) && isset( $_REQUEST['quiz'] ) ) ? $_REQUEST['quiz'] : $quiz;
 	$user_id = ( empty( $user_id ) && isset( $_REQUEST['user_id'] ) ) ? $_REQUEST['user_id'] : $user_id;
 	$course_id = ( empty( $course_id ) && isset( $_REQUEST['course_id'] ) ) ? $_REQUEST['course_id'] : null;
+	$field_id = ( empty( $field_id ) && isset( $_REQUEST['field_id'] ) ) ? $_REQUEST['field_id'] : $field_id;
 
 	if ( empty( $user_id ) ) {
 		$user_id = get_current_user_id();
@@ -127,6 +129,36 @@ function learndash_quizinfo( $attr ) {
 			$selected_quizinfo['timespent'] = isset( $selected_quizinfo['timespent'] ) ? learndash_seconds_to_time( $selected_quizinfo['timespent'] ) : '';
 			break;
 
+
+		case 'field':
+			if ( ! empty( $field_id ) ) {
+				if ( ( isset( $selected_quizinfo['pro_quizid'] ) ) && ( ! empty( $selected_quizinfo['pro_quizid'] ) ) ) {
+					$formMapper = new WpProQuiz_Model_FormMapper();
+					$quiz_form_elements = $formMapper->fetch( $selected_quizinfo['pro_quizid'] );
+					if ( ! empty( $quiz_form_elements ) ) {
+						foreach( $quiz_form_elements as $quiz_form_element ) {
+							if ( absint( $field_id ) == absint( $quiz_form_element->getFormId() ) ) {
+								$selected_quizinfo[ $show ] = '';
+
+								if ( ( isset( $selected_quizinfo['statistic_ref_id'] ) ) && ( ! empty( $selected_quizinfo['statistic_ref_id'] ) ) ) {
+									$statisticRefMapper = new WpProQuiz_Model_StatisticRefMapper();
+									$statisticRefData = $statisticRefMapper->fetchAllByRef( $selected_quizinfo['statistic_ref_id'] );
+									if ( ( $statisticRefData ) && ( is_a( $statisticRefData, 'WpProQuiz_Model_StatisticRefModel' ) ) ) {
+										$form_data = $statisticRefData->getFormData();
+										//$selected_quizinfo[ $show ] = $form_data[ $field_id ];
+										if ( isset( $form_data[ $field_id ] ) ) {
+											$selected_quizinfo[ $show ] = $quiz_form_element->getValue( $form_data[ $field_id ] );
+										} 
+									}
+								}
+								break;
+							}
+						}
+					}
+				}
+			}
+			break;
+			
 	}
 
 	if ( isset( $selected_quizinfo[ $show ] ) ) {
@@ -322,7 +354,7 @@ function learndash_courseinfo( $attr ) {
 			break;
 
 		case 'course_points':
-			$course_points = learndash_get_course_points( $shortcode_atts['course_id'] );
+			$course_points = learndash_get_course_points( $shortcode_atts['course_id'], $shortcode_atts['decimals'] );
 			$course_points = number_format( $course_points, $shortcode_atts['decimals'] );
 			return apply_filters( 'learndash_courseinfo', $course_points, $shortcode_atts );
 

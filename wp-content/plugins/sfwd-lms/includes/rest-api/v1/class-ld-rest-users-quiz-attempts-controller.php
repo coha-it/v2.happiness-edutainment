@@ -96,13 +96,13 @@ if ( ( !class_exists( 'LD_REST_Users_Quiz_Attempts_Controller_V1' ) ) && ( class
 
 			if ( empty( $current_user_id ) ) {
 				if ( ! current_user_can( 'edit_user', $user_id ) ) {
-					return new WP_Error( 'rest_user_invalid_id', __( 'Invalid user ID.' ), array( 'status' => 404 ) );
+					return new WP_Error( 'rest_user_invalid_id', __( 'Invalid user ID.', 'learndash' ), array( 'status' => 404 ) );
 				}
 			}
 
 			if ( ( $user_id != $current_user_id ) && ( ! learndash_is_admin_user( $current_user_id ) ) ) {
 				if ( ! current_user_can( 'edit_user', $user_id ) ) {
-					return new WP_Error( 'rest_cannot_edit', __( 'Sorry, you are not allowed to edit this user.' ), array( 'status' => rest_authorization_required_code() ) );
+					return new WP_Error( 'rest_cannot_edit', __( 'Sorry, you are not allowed to edit this user.', 'learndash' ), array( 'status' => rest_authorization_required_code() ) );
 				}
 			}
 			

@@ -1,6 +1,6 @@
 /**
  * LearnDash Block ld-course-notstarted
- * 
+ *
  * @since 2.5.9
  * @package LearnDash
  */
@@ -19,18 +19,19 @@ import {
  * Internal block libraries
  */
 const { __, _x, sprintf } = wp.i18n;
-const { 
-	registerBlockType, 
+const {
+	registerBlockType,
 } = wp.blocks;
 
  const {
     InnerBlocks,
     InspectorControls,
  } = wp.editor;
- 
+
  const {
      PanelBody,
-	 TextControl
+     TextControl,
+     ToggleControl
  } = wp.components;
 
 registerBlockType(
@@ -38,8 +39,11 @@ registerBlockType(
     {
         title: sprintf(_x('LearnDash %s Not Started', 'placeholder: Course', 'learndash'), ldlms_get_custom_label('course') ),
         description: sprintf(_x('This block shows the content if the user is enrolled into the %s but not yet started.', 'placeholders: course', 'learndash'), ldlms_get_custom_label('course') ),
-        icon: 'desktop',
-        category: 'widgets',
+        icon: 'star-empty',
+        category: 'learndash-blocks',
+        supports: {
+            customClassName: false,
+        },
         attributes: {
             course_id: {
                 type: 'string',
@@ -49,9 +53,13 @@ registerBlockType(
                 type: 'string',
                 default: '',
             },
+            autop: {
+                type: 'boolean',
+                default: true
+            },
         },
         edit: props => {
-            const { attributes: { course_id, user_id }, className, setAttributes } = props;
+            const { attributes: { course_id, user_id, autop }, className, setAttributes } = props;
 
             const inspectorControls = (
                 <InspectorControls>
@@ -64,13 +72,18 @@ registerBlockType(
                             value={course_id || ''}
                             onChange={course_id => setAttributes({ course_id })}
                         />
-
                         <TextControl
                             label={__('User ID', 'learndash')}
                             help={__('Enter specific User ID. Leave blank for current User.', 'learndash')}
                             value={user_id || ''}
                             onChange={user_id => setAttributes({ user_id })}
                         />
+                        <ToggleControl
+                            label={__('Auto Paragraph', 'learndash')}
+                            checked={!!autop}
+                            onChange={autop => setAttributes({ autop })}
+                        />
+
                     </PanelBody>
                 </InspectorControls>
             );

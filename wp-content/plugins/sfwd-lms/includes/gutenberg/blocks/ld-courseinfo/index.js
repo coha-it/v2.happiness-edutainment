@@ -1,6 +1,6 @@
 /**
  * LearnDash Block ld-courseinfo
- * 
+ *
  * @since 2.5.9
  * @package LearnDash
  */
@@ -38,8 +38,11 @@ registerBlockType(
     {
 		title: sprintf( _x( 'LearnDash %s Info [courseinfo]', 'placeholder: Course', 'learndash' ), ldlms_get_custom_label( 'course' ) ),
 		description: sprintf(_x('This block displays %s related information', 'placeholder: Course', 'learndash'), ldlms_get_custom_label('course') ),
-		icon: 'desktop',
-        category: 'widgets',
+		icon: 'analytics',
+		category: 'learndash-blocks',
+		supports: {
+			customClassName: false,
+		},
         attributes: {
             show: {
                 type: 'string',
@@ -77,7 +80,7 @@ registerBlockType(
         edit: props => {
 			const { attributes: { course_id, show, user_id, format, decimals, preview_show, preview_user_id },
             	className, setAttributes } = props;
-			
+
 			const field_show = (
 				<SelectControl
 					key="show"
@@ -172,7 +175,7 @@ registerBlockType(
 					/>
 				);
 			}
-			
+
 			let field_decimals = '';
 			if ( (show == 'course_points') || (show == 'user_course_points') ) {
 				field_decimals = (
@@ -183,7 +186,7 @@ registerBlockType(
 						onChange={decimals => setAttributes({ decimals })}
 					/>
 				);
-			} 
+			}
 
 			const panel_preview = (
 				<PanelBody
@@ -210,8 +213,8 @@ registerBlockType(
 					<PanelBody
 						title={ __( 'Settings', 'learndash' ) }
 					>
-						{ field_course_id }	
-						{ field_user_id }	
+						{ field_course_id }
+						{ field_user_id }
 						{ field_show }
 						{ field_format }
 						{ field_decimals }
@@ -238,7 +241,7 @@ registerBlockType(
 				inspectorControls,
 				do_serverside_render(props.attributes)
 			];
-        },		
+        },
 		save: function (props) {
 			// Delete meta from props to prevent it being saved.
 			delete(props.attributes.meta);

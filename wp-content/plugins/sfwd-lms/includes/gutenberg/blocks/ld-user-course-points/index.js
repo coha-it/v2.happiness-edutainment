@@ -1,6 +1,6 @@
 /**
  * LearnDash Block ld-user-course-points
- * 
+ *
  * @since 2.5.9
  * @package LearnDash
  */
@@ -16,14 +16,14 @@ import {
  * Internal block libraries
  */
 const { __, _x, sprintf } = wp.i18n;
-const { 
-	registerBlockType, 
+const {
+	registerBlockType,
 } = wp.blocks;
- 
+
  const {
     InspectorControls,
  } = wp.editor;
- 
+
 const {
     ServerSideRender,
     PanelBody,
@@ -36,8 +36,16 @@ registerBlockType(
     {
         title: sprintf(_x('LearnDash User %s Points', 'LearnDash User Course Points', 'learndash'), ldlms_get_custom_label('course') ),
         description: sprintf(_x('This block shows the earned %s points for the user.', 'placeholders: course', 'learndash'), ldlms_get_custom_label('course') ),
-        icon: 'desktop',
-        category: 'widgets',
+        icon: 'chart-area',
+        category: 'learndash-blocks',
+        example: {
+            attributes: {
+                example_show: 1,
+            },
+        },
+        supports: {
+            customClassName: false,
+        },
         attributes: {
             user_id: {
                 type: 'string',
@@ -54,7 +62,7 @@ registerBlockType(
         edit: props => {
             const { attributes: { user_id, preview_show, preview_user_id },
             	setAttributes } = props;
-			
+
             const inspectorControls = (
                 <InspectorControls>
                     <PanelBody
@@ -103,7 +111,7 @@ registerBlockType(
                 do_serverside_render(props.attributes)
             ];
         },
-		
+
         save: props => {
             // Delete preview_user_id from props to prevent it being saved.
             delete (props.attributes.preview_user_id);

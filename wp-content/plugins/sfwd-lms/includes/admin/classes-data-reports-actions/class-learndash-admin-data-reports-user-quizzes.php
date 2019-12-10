@@ -86,7 +86,9 @@ if ( !class_exists( 'Learndash_Admin_Data_Reports_Quizzes' ) ) {
 			
 			$_DOING_INIT = false;
 			
-			require_once( LEARNDASH_LMS_PLUGIN_DIR . 'includes/vendor/parsecsv.lib.php' );
+			//require_once( LEARNDASH_LMS_PLUGIN_DIR . 'includes/vendor/parsecsv.lib.php' );
+			require_once( LEARNDASH_LMS_LIBRARY_DIR . '/parsecsv.lib.php' );
+
 			$this->csv_parse = new lmsParseCSV();
 			
 			if ( ( isset( $data['nonce'] ) ) && ( !empty( $data['nonce'] ) ) ) {
@@ -136,14 +138,12 @@ if ( !class_exists( 'Learndash_Admin_Data_Reports_Quizzes' ) ) {
 						$reports_fp = fopen( $this->report_filename, 'w' );
 						fclose($reports_fp);
 											
-						//set_transient( $this->transient_key, $this->transient_data, MINUTE_IN_SECONDS );
-						$this->set_transient( $this->transient_key, $this->transient_data );
-						
+						$this->set_option_cache( $this->transient_key, $this->transient_data );
 
 						$this->send_report_headers_to_csv();
 						
 					} else {
-						//$this->transient_data = learndash_get_valid_transient( $this->transient_key );
+						//$this->transient_data = LDLMS_Transients::get( $this->transient_key );
 						$this->transient_data = $this->get_transient( $this->transient_key );
 						
 						//$this->report_filename = ABSPATH . $this->transient_data['report_filename'];
@@ -169,7 +169,7 @@ if ( !class_exists( 'Learndash_Admin_Data_Reports_Quizzes' ) ) {
 							foreach( $this->transient_data['users_ids'] as $user_id_idx => $user_id ) {
 						
 								unset( $this->transient_data['users_ids'][$user_id_idx] );
-								$this->set_transient( $this->transient_key, $this->transient_data );
+								$this->set_option_cache( $this->transient_key, $this->transient_data );
 							
 								$report_user = get_user_by('id', $user_id);
 								if ( $report_user !== false ) {
@@ -280,29 +280,29 @@ if ( !class_exists( 'Learndash_Admin_Data_Reports_Quizzes' ) ) {
 		function set_report_headers() {
 			$this->data_headers								=	array();
 			$this->data_headers['user_id']  				= 	array( 
-																		'label'		=>	'user_id',
+																		'label'		=>	esc_html__( 'user_id', 'learndash' ),
 																		'default'	=>	'',
 																		'display'	=>	array( $this, 'report_column' )
 																	);
 			$this->data_headers['user_name'] 				= 	array( 
-																		'label'		=>	'name',
+																		'label'		=>	esc_html__( 'name', 'learndash' ),
 																		'default'	=>	'',
 																		'display'	=>	array( $this, 'report_column' )
 																	);
 
 			$this->data_headers['user_email'] 				=	array( 
-																		'label'		=>	'email',
+																		'label'		=>	esc_html__( 'email', 'learndash' ),
 																		'default'	=>	'',
 																		'display'	=>	array( $this, 'report_column' )
 																	);
 																	
 			$this->data_headers['quiz_id'] 					= 	array( 
-																		'label'		=>	'quiz_id',
+																		'label'		=>	esc_html__( 'quiz_id', 'learndash' ),
 																		'default'	=>	'',
 																		'display'	=>	array( $this, 'report_column' )
 																	);
 			$this->data_headers['quiz_title'] 				= 	array( 
-																		'label'		=>	'quiz_title',
+																		'label'		=>	esc_html__( 'quiz_title', 'learndash' ),
 																		'default'	=>	'',
 																		'display'	=>	array( $this, 'report_column' )
 																	);
@@ -316,61 +316,61 @@ if ( !class_exists( 'Learndash_Admin_Data_Reports_Quizzes' ) ) {
 			*/
 			
 			$this->data_headers['quiz_score'] 				= 	array( 
-																		'label'		=>	'score',
+																		'label'		=>	esc_html__( 'score', 'learndash' ),
 																		'default'	=>	'0',
 																		'display'	=>	array( $this, 'report_column' )
 																	);
 			$this->data_headers['quiz_total'] 				= 	array( 
-																		'label'		=>	'total',
+																		'label'		=>	esc_html__( 'total', 'learndash' ),
 																		'default'	=>	'0',
 																		'display'	=>	array( $this, 'report_column' )
 																	);
 			$this->data_headers['quiz_date']				=	array( 
-																		'label'		=>	'date',
+																		'label'		=>	esc_html__( 'date', 'learndash' ),
 																		'default'	=>	'',
 																		'display'	=>	array( $this, 'report_column' )
 																	);
 
 
 			$this->data_headers['quiz_points']				=	array( 
-																		'label'		=>	'points',
+																		'label'		=>	esc_html__( 'points', 'learndash' ),
 																		'default'	=>	'0',
 																		'display'	=>	array( $this, 'report_column' )
 																	);
 		
 			$this->data_headers['quiz_points_total']		=	array( 
-																		'label'		=>	'points_total',
+																		'label'		=>	esc_html__( 'points_total', 'learndash' ),
 																		'default'	=>	'0',
 																		'display'	=>	array( $this, 'report_column' )
 																	);
 
 			$this->data_headers['quiz_percentage']			=	array( 
-																		'label'		=>	'percentage',
+																		'label'		=>	esc_html__( 'percentage', 'learndash' ),
 																		'default'	=>	'0',
 																		'display'	=>	array( $this, 'report_column' )
 																	);
 																	
 			$this->data_headers['quiz_time_spent']			=	array( 
-																		'label'		=>	'time_spent',
+																		'label'		=>	esc_html__( 'time_spent', 'learndash' ),
 																		'default'	=>	'0',
 																		'display'	=>	array( $this, 'report_column' )
 																	);
 
 			$this->data_headers['quiz_passed']				=	array( 
-																		'label'		=>	'passed',
+																		'label'		=>	esc_html__( 'passed', 'learndash' ),
 																		'default'	=> esc_html_x('NO', 'Quiz Passed Report label: NO', 'learndash'),
 																		'display'	=>	array( $this, 'report_column' )
 																	);
 		
 																	
 			$this->data_headers['course_id'] 				= 	array( 
-																		'label'		=>	'course_id',
+																		'label'		=>	esc_html__( 'course_id', 'learndash' ),
 																		'default'	=>	'',
 																		'display'	=>	array( $this, 'report_column' )
 																	);
 																	
 			$this->data_headers['course_title'] 			= 	array( 
-																		'label'		=>	'course_title',
+																		'label'		=>	esc_html__( 'course_title', 'learndash' ),
 																		'default'	=>	'',
 																		'display'	=>	array( $this, 'report_column' )
 																	);

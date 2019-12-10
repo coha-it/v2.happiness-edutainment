@@ -130,7 +130,7 @@ if ( ! class_exists( 'LearnDash_Addon_Updater' ) ) {
 				$install_actions = array();
 
 				if ( ! empty( $plugin_file ) ) {
-					$install_actions['activate_plugin'] = '<a class="button button-primary" href="' . wp_nonce_url( 'plugins.php?action=activate&amp;plugin=' . urlencode( $plugin_file ), 'activate-plugin_' . $plugin_file ) . '" target="_parent">' . __( 'Activate Plugin' ) . '</a>';
+					$install_actions['activate_plugin'] = '<a class="button button-primary" href="' . wp_nonce_url( 'plugins.php?action=activate&amp;plugin=' . urlencode( $plugin_file ), 'activate-plugin_' . $plugin_file ) . '" target="_parent">' . __( 'Activate Plugin', 'learndash' ) . '</a>';
 				}
 				$install_actions['ld-addons-page'] = '<a href="' . $return_url . '" target="_parent">'  . esc_html__( 'Return to LearnDash Add-ons Page', 'learndash' ) . '</a>';
 			}
@@ -396,7 +396,9 @@ if ( ! class_exists( 'LearnDash_Addon_Updater' ) ) {
 
 			if ( is_null( $this->data ) ) {
 				$this->data = get_option( $this->options_key, array() );
-
+				if ( ! is_array( $this->data ) ) {
+					$this->data = array();
+				}
 				if ( empty( $this->data ) ) {
 					$this->data['last_check'] = 0;
 					$this->data['repositories'] = array();
@@ -480,8 +482,10 @@ if ( ! class_exists( 'LearnDash_Addon_Updater' ) ) {
 			if ( ( isset( $this->data['repositories'] ) ) && ( ! empty( $this->data['repositories'] ) ) && ( isset( $this->data['plugins'] ) ) && ( ! empty( $this->data['plugins'] ) ) ) {
 				$repos_updated_on = array();
 				foreach ( $this->data['repositories'] as $repo_slug => $repo ) {
-					$update_on_timestamp = strtotime( $repo->updated_on );
-					$repos_updated_on[ $update_on_timestamp . '-' . $repo_slug ] = $repo_slug;
+					if ( ( is_object( $repo ) ) && ( property_exists( $repo, 'updated_on' ) ) ) {
+						$update_on_timestamp = strtotime( $repo->updated_on );
+						$repos_updated_on[ $update_on_timestamp . '-' . $repo_slug ] = $repo_slug;
+					}
 				}
 				krsort( $repos_updated_on );
 

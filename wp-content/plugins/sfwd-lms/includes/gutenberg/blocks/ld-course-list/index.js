@@ -1,6 +1,6 @@
 /**
  * LearnDash Block ld-course-list
- * 
+ *
  * @since 2.5.9
  * @package LearnDash
  */
@@ -17,14 +17,14 @@ import {
  * Internal block libraries
  */
 const { __, _x, sprintf } = wp.i18n;
-const { 
-	registerBlockType, 
+const {
+	registerBlockType,
 } = wp.blocks;
 
 const {
     InspectorControls,
 } = wp.editor;
- 
+
 const {
 	ServerSideRender,
 	PanelBody,
@@ -39,8 +39,16 @@ registerBlockType(
     {
 		title: sprintf(_x('LearnDash %s List', 'placeholder: Course', 'learndash'), ldlms_get_custom_label('course')),
 		description: sprintf(_x('This block shows a list of %s.', 'placeholders: courses', 'learndash'), ldlms_get_custom_label('courses') ),
-		icon: 'desktop',
-        category: 'widgets',
+		icon: 'list-view',
+		category: 'learndash-blocks',
+		example: {
+			attributes: {
+				example_show: 1,
+			},
+		},
+		supports: {
+			customClassName: false,
+		},
         attributes: {
 			orderby: {
 				type: 'string',
@@ -75,8 +83,8 @@ registerBlockType(
 				default: ''
 			},
 			course_categoryselector: {
-				type: 'string',
-				default: ''
+				type: 'boolean',
+				default: false
 			},
 			course_tag: {
 				type: 'string',
@@ -89,14 +97,14 @@ registerBlockType(
 			category_name: {
 				type: 'string',
 				default: ''
-			}, 
+			},
 			cat: {
 				type: 'string',
 				default: ''
 			},
 			categoryselector: {
-				type: 'string',
-				default: ''
+				type: 'boolean',
+				default: false
 			},
 			tag: {
 				type: 'string',
@@ -121,9 +129,13 @@ registerBlockType(
 				type: 'boolean',
 				default: true
 			},
+			example_show: {
+				type: 'boolean',
+				default: 0
+			},
 		},
         edit: function( props ) {
-			const { attributes: { orderby, order, per_page, mycourses, show_content, show_thumbnail, course_category_name, course_cat, course_categoryselector, course_tag, course_tag_id, category_name, cat, categoryselector, tag, tag_id, course_grid, progress_bar, col, preview_user_id, preview_show },
+			const { attributes: { orderby, order, per_page, mycourses, show_content, show_thumbnail, course_category_name, course_cat, course_categoryselector, course_tag, course_tag_id, category_name, cat, categoryselector, tag, tag_id, course_grid, progress_bar, col, preview_user_id, preview_show, example_show },
             	setAttributes } = props;
 
 			let field_show_content = '';
@@ -131,11 +143,11 @@ registerBlockType(
 			let panel_course_grid_section = '';
 
 			let course_grid_default = true;
-			if (ldlms_settings['plugins']['learndash-course-grid']['enabled'] === true) {			
+			if (ldlms_settings['plugins']['learndash-course-grid']['enabled'] === true) {
 				if ((typeof course_grid !== 'undefined') && ((course_grid == true) || (course_grid == false)) ) {
 					course_grid_default = course_grid;
 				}
-				
+
 				let course_grid_section_open = false;
 				if ( course_grid_default == true ) {
 					course_grid_section_open = true;
@@ -165,8 +177,8 @@ registerBlockType(
 						/>
 					</PanelBody>
 				);
-			} 
-			
+			}
+
 			//if (course_grid !== true) {
 				field_show_content = (
 					<ToggleControl
@@ -434,7 +446,7 @@ registerBlockType(
 				do_serverside_render( props.attributes )
 			];
         },
-		
+
         save: props => {
 		}
 	},

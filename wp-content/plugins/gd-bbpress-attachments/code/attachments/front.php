@@ -27,22 +27,22 @@ class gdbbAtt_Front {
     }
 
     public function load() {
-        add_action('bbp_head', array(&$this, 'bbp_head'));
-        add_action('wp_enqueue_scripts', array(&$this, 'wp_enqueue_scripts'));
+        add_action('bbp_head', array($this, 'bbp_head'));
+        add_action('wp_enqueue_scripts', array($this, 'wp_enqueue_scripts'));
 
-        add_action('bbp_theme_before_reply_form_submit_wrapper', array(&$this, 'embed_form'));
-        add_action('bbp_theme_before_topic_form_submit_wrapper', array(&$this, 'embed_form'));
+        add_action('bbp_theme_before_reply_form_submit_wrapper', array($this, 'embed_form'));
+        add_action('bbp_theme_before_topic_form_submit_wrapper', array($this, 'embed_form'));
 
-        add_action('bbp_edit_reply', array(&$this, 'save_reply'), 10, 5);
-        add_action('bbp_edit_topic', array(&$this, 'save_topic'), 10, 4);
-        add_action('bbp_new_reply', array(&$this, 'save_reply'), 10, 5);
-        add_action('bbp_new_topic', array(&$this, 'save_topic'), 10, 4);
+        add_action('bbp_edit_reply', array($this, 'save_reply'), 10, 5);
+        add_action('bbp_edit_topic', array($this, 'save_topic'), 10, 4);
+        add_action('bbp_new_reply', array($this, 'save_reply'), 10, 5);
+        add_action('bbp_new_topic', array($this, 'save_topic'), 10, 4);
 
-        add_filter('bbp_get_reply_content', array(&$this, 'embed_attachments'), 100, 2);
-        add_filter('bbp_get_topic_content', array(&$this, 'embed_attachments'), 100, 2);
+        add_filter('bbp_get_reply_content', array($this, 'embed_attachments'), 100, 2);
+        add_filter('bbp_get_topic_content', array($this, 'embed_attachments'), 100, 2);
 
         if (d4p_bba_o('attachment_icon') == 1) {
-            add_action('bbp_theme_before_topic_title', array(&$this, 'show_attachments_icon'));
+            add_action('bbp_theme_before_topic_title', array($this, 'show_attachments_icon'));
         }
     }
 

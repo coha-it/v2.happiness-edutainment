@@ -31,7 +31,8 @@ class FAMNESettingsPage
         add_action( 'plugins_loaded', array($this, 'update_check') );
         add_action( 'admin_menu', array( $this, 'add_plugin_page' ) );
         add_action( 'admin_init', array( $this, 'page_init' ) );
-    
+        add_filter( 'plugin_action_links_' . FA_MNE_PLUGIN_BASENAME, array($this,'add_action_links') );
+        add_action( 'init', array( $this, 'famne_load_textdomain') );
     }
 
     /**
@@ -342,4 +343,22 @@ class FAMNESettingsPage
             update_site_option('fa_mne_version',FA_MNE_VERSION);
         }
     }
+
+    function add_action_links ( $links ) {
+        $mylinks = array(
+        '<a href="' . admin_url( 'options-general.php?page=famne-admin' ) . '">'.__('Settings').'</a>',
+        );
+        return array_merge( $links, $mylinks );
+    }
+
+    /**
+     * Translations.
+     *
+     * @since 1.4.2
+     */
+    function famne_load_textdomain() {
+        load_plugin_textdomain( 'manage-notification-emails', false, basename(FA_MNE_PLUGIN_DIR) . '/languages' );
+    }
+
+
 }

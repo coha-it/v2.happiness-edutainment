@@ -1,6 +1,6 @@
 /**
  * LearnDash Block ld-profile
- * 
+ *
  * @since 2.5.9
  * @package LearnDash
  */
@@ -17,14 +17,14 @@ import {
  * Internal block libraries
  */
 const { __, _x, sprintf } = wp.i18n;
-const { 
-	registerBlockType, 
+const {
+	registerBlockType,
 } = wp.blocks;
 
 const {
     InspectorControls,
 } = wp.editor;
- 
+
 const {
 	ServerSideRender,
 	PanelBody,
@@ -38,8 +38,16 @@ registerBlockType(
     {
         title: __( 'LearnDash Profile', 'learndash' ),
 		description: sprintf(_x("Displays user's enrolled %1$s, %2$s progress, %3$s scores, and achieved certificates.", 'placeholder: courses, course, quiz', 'learndash'), ldlms_get_custom_label('courses'), ldlms_get_custom_label('course'), ldlms_get_custom_label('quiz') ),
-		icon: 'desktop',
-        category: 'widgets',
+		icon: 'id-alt',
+		category: 'learndash-blocks',
+		example: {
+			attributes: {
+				example_show: 1,
+			},
+		},
+		supports: {
+			customClassName: false,
+		},
         attributes: {
             per_page: {
 				type: 'string',
@@ -65,6 +73,14 @@ registerBlockType(
 				type: 'boolean',
 				default: 1
 			},
+			show_header: {
+				type: 'boolean',
+				default: 1
+			},
+			show_search: {
+				type: 'boolean',
+				default: 1
+			},
 			show_quizzes: {
 				type: 'boolean',
 				default: 1
@@ -77,9 +93,13 @@ registerBlockType(
 				type: 'string',
 				default: '',
 			},
+			example_show: {
+				type: 'boolean',
+				default: 0
+			},
 		},
         edit: function( props ) {
-			const { attributes: { per_page, orderby, order, course_points_user, expand_all, profile_link, show_quizzes, preview_user_id, preview_show },
+			const { attributes: { per_page, orderby, order, course_points_user, expand_all, profile_link, show_header, show_search, show_quizzes, preview_user_id, preview_show, example_show },
             	setAttributes } = props;
 
 			const inspectorControls = (
@@ -117,7 +137,7 @@ registerBlockType(
 								}
 							] }
 							onChange={ orderby => setAttributes( { orderby } ) }
-						/>	
+						/>
 						<SelectControl
 							key="order"
 							label={ __( 'Order', 'learndash' ) }
@@ -133,16 +153,22 @@ registerBlockType(
 								},
 							] }
 							onChange={ order => setAttributes( { order } ) }
-						/>	
+						/>
+						<ToggleControl
+							label={__('Show Search', 'learndash')}
+							checked={!!show_search}
+							onChange={show_search => setAttributes({ show_search })}
+							help={__('LD30 template only', 'learndash')}
+						/>
+						<ToggleControl
+							label={__('Show Profile Header', 'learndash')}
+							checked={!!show_header}
+							onChange={show_header => setAttributes({ show_header })}
+						/>
 						<ToggleControl
 							label={sprintf(_x('Show Earned %s Points', 'placeholder: Course', 'learndash'), ldlms_get_custom_label('course') ) }
 							checked={ !!course_points_user }
 							onChange={ course_points_user => setAttributes( { course_points_user } ) }
-						/>
-						<ToggleControl
-							label={sprintf(_x('Expand All %s Sections', 'placeholder: Course', 'learndash'), ldlms_get_custom_label('course') ) }
-							checked={ !!expand_all }
-							onChange={ expand_all => setAttributes( { expand_all } ) }
 						/>
 						<ToggleControl
 							label={ __('Show Profile Link', 'learndash') }
@@ -153,6 +179,11 @@ registerBlockType(
 							label={sprintf(_x('Show User Quiz Attempts', 'placeholder: Quiz', 'learndash'), ldlms_get_custom_label('quiz') ) }
 							checked={ !!show_quizzes }
 							onChange={ show_quizzes => setAttributes( { show_quizzes } ) }
+						/>
+						<ToggleControl
+							label={sprintf(_x('Expand All %s Sections', 'placeholder: Course', 'learndash'), ldlms_get_custom_label('course'))}
+							checked={!!expand_all}
+							onChange={expand_all => setAttributes({ expand_all })}
 						/>
 					</PanelBody>
 					<PanelBody
@@ -191,7 +222,7 @@ registerBlockType(
 				do_serverside_render( props.attributes )
 			];
         },
-		
+
         save: props => {
 			// Delete preview_user_id from props to prevent it being saved.
 			delete (props.attributes.preview_user_id);

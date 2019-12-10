@@ -24,6 +24,8 @@ function private_groups_meta_box( $object, $box ) {
 	global $post ?>
 
 	<input type="hidden" name="private_groups_meta_nonce" value="<?php echo wp_create_nonce(plugin_basename(__FILE__)); ?>" />
+	<?php // Set a custom flag so that it only saves if we are in full edit, not bulk edit ?>
+	<input type="hidden" name="pg_hidden_flag" value="true" />
 	
 	<p>
 		<label for="groups"><?php _e('<strong>Groups:</strong> Restrict the content to these groups on the front end of the site.  If all boxes are left unchecked, everyone can view the content.', 'bbp-private-groups'); ?></label>
@@ -204,6 +206,7 @@ function private_groups_meta_box( $object, $box ) {
 		
 		
 		</table>
+		
 		</div>
 		
 		<?php }  // end of if $rpg_topic_permissions
@@ -237,6 +240,13 @@ function private_groups_save_meta( $post_id, $post ) {
 	/* Don't save if the post is only a revision. */
 	if ( 'revision' == $post->post_type )
 		return;
+	
+	// handle the case when the custom post is quick edited
+	// otherwise all custom meta fields are cleared out
+	// Only do this if our custom flag is present
+    if (!isset($_POST['pg_hidden_flag'])) 
+		return ;
+
 	
 	global $rpg_groups ;
 	/* Loop through each of the site's available groups. */

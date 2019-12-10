@@ -25,11 +25,11 @@ function learndash_delete_user_data( $user_id ) {
 	if ( ! empty( $user_id ) ) {
 		$user = get_user_by( 'id', $user_id );
 
-		$ref_ids = $wpdb->get_col( $wpdb->prepare( 'SELECT statistic_ref_id FROM ' . $wpdb->prefix . 'wp_pro_quiz_statistic_ref WHERE  user_id = %d ', $user->ID ) );
+		$ref_ids = $wpdb->get_col( $wpdb->prepare( 'SELECT statistic_ref_id FROM ' . LDLMS_DB::get_table_name( 'quiz_statistic_ref' ) . ' WHERE  user_id = %d ', $user->ID ) );
 
 		if ( ! empty( $ref_ids[0] ) ) {
-			$wpdb->delete( $wpdb->prefix . 'wp_pro_quiz_statistic_ref', array( 'user_id' => $user->ID ) );
-			$wpdb->query( 'DELETE FROM ' . $wpdb->prefix . 'wp_pro_quiz_statistic WHERE statistic_ref_id IN (' . implode( ',', $ref_ids ) . ')' );
+			$wpdb->delete( LDLMS_DB::get_table_name( 'quiz_statistic_ref' ), array( 'user_id' => $user->ID ) );
+			$wpdb->query( 'DELETE FROM ' . LDLMS_DB::get_table_name( 'quiz_statistic' ) . ' WHERE statistic_ref_id IN (' . implode( ',', $ref_ids ) . ')' );
 		}
 
 		$wpdb->delete(
@@ -50,12 +50,12 @@ function learndash_delete_user_data( $user_id ) {
 		$wpdb->query( 'DELETE FROM ' . $wpdb->usermeta . " WHERE meta_key LIKE 'learndash_course_expired_%' AND user_id = " . $user->ID );
 
 		// Added in v2.3.1 to remove the quiz locks for user.
-		$wpdb->query( 'DELETE FROM ' . $wpdb->prefix . 'wp_pro_quiz_lock WHERE user_id = ' . $user->ID );
+		$wpdb->query( 'DELETE FROM ' . LDLMS_DB::get_table_name( 'quiz_lock' ) . ' WHERE user_id = ' . $user->ID );
 
 		learndash_report_clear_user_activity_by_types( $user_id );
 
-		$wpdb->delete( $wpdb->prefix . 'wp_pro_quiz_lock', array( 'user_id' => $user->ID ) );
-		$wpdb->delete( $wpdb->prefix . 'wp_pro_quiz_toplist', array( 'user_id' => $user->ID ) );
+		$wpdb->delete( LDLMS_DB::get_table_name( 'quiz_lock' ), array( 'user_id' => $user->ID ) );
+		$wpdb->delete( LDLMS_DB::get_table_name( 'quiz_toplist' ), array( 'user_id' => $user->ID ) );
 
 		// Move user uploaded Assignements to Trash.
 		$user_assignements_query_args = array(
@@ -118,7 +118,7 @@ function learndash_user_get_enrolled_courses( $user_id = 0, $course_query_args =
 	$transient_key    = 'learndash_user_courses_' . $user_id;
 
 	if ( ! $bypass_transient ) {
-		$course_ids_transient = learndash_get_valid_transient( $transient_key );
+		$course_ids_transient = LDLMS_Transients::get( $transient_key );
 	} else {
 		$course_ids_transient = false;
 	}
@@ -157,9 +157,11 @@ function learndash_user_get_enrolled_courses( $user_id = 0, $course_query_args =
 				$course_ids = array_merge( $course_ids, $course_ids_paynow );
 			}
 
-			$course_ids_access = learndash_get_user_course_access_list( $user_id );
-			if ( ! empty( $course_ids_access ) ) {
-				$course_ids = array_merge( $course_ids, $course_ids_access );
+			if ( true === learndash_use_legacy_course_access_list() ) {
+				$course_ids_access = learndash_get_user_course_access_list( $user_id );
+				if ( ! empty( $course_ids_access ) ) {
+					$course_ids = array_merge( $course_ids, $course_ids_access );
+				}
 			}
 
 			$course_ids_meta = learndash_get_user_courses_from_meta( $user_id );
@@ -191,7 +193,7 @@ function learndash_user_get_enrolled_courses( $user_id = 0, $course_query_args =
 			}
 		}
 
-		set_transient( $transient_key, $course_ids, MINUTE_IN_SECONDS );
+		LDLMS_Transients::set( $transient_key, $course_ids, MINUTE_IN_SECONDS );
 
 	} else {
 		$course_ids = $course_ids_transient;
@@ -406,6 +408,8 @@ function learndash_save_user_course_complete( $user_id = 0 ) {
 											);
 
 											$_QUIZ_CHANGED = true;
+
+											do_action( 'learndash_quiz_completed', $quizdata, get_user_by( 'ID', $user_id ) );
 
 										}
 									} elseif ( $quiz_new_status !== true ) {
@@ -705,52 +709,56 @@ function learndash_get_user_course_access_list( $user_id = 0 ) {
 
 	$user_id = intval( $user_id );
 	if ( ! empty( $user_id ) ) {
-		$element = Learndash_Admin_Settings_Data_Upgrades::get_instance();
-		$data_settings_courses = $element->get_data_settings( 'course-access-lists' );
-		if ( version_compare( $data_settings_courses['version'], LEARNDASH_SETTINGS_TRIGGER_UPGRADE_VERSION, '>=') ) {
+		if ( true === learndash_use_legacy_course_access_list() ) {
+			$element = Learndash_Admin_Data_Upgrades::get_instance();
+			$data_settings_courses = $element->get_data_settings( 'course-access-lists' );
+			if ( version_compare( $data_settings_courses['version'], LEARNDASH_SETTINGS_TRIGGER_UPGRADE_VERSION, '>=') ) {
 
-			$is_like = " postmeta.meta_value = '". $user_id ."'
-				OR postmeta.meta_value REGEXP '^". $user_id .",' 
-				OR postmeta.meta_value REGEXP ',". $user_id .",' 
-				OR postmeta.meta_value REGEXP  ',". $user_id ."$'";
+				$is_like = " postmeta.meta_value = '". $user_id ."'
+					OR postmeta.meta_value REGEXP '^". $user_id .",' 
+					OR postmeta.meta_value REGEXP ',". $user_id .",' 
+					OR postmeta.meta_value REGEXP  ',". $user_id ."$'";
 
-			$sql_str = "SELECT post_id FROM ". $wpdb->prefix ."postmeta as postmeta INNER JOIN ". $wpdb->prefix ."posts as posts ON posts.ID = postmeta.post_id WHERE posts.post_status='publish' AND posts.post_type='sfwd-courses' AND postmeta.meta_key='course_access_list' AND (". $is_like .")";
+				$sql_str = "SELECT post_id FROM ". $wpdb->prefix ."postmeta as postmeta INNER JOIN ". $wpdb->prefix ."posts as posts ON posts.ID = postmeta.post_id WHERE posts.post_status='publish' AND posts.post_type='sfwd-courses' AND postmeta.meta_key='course_access_list' AND (". $is_like .")";
+			} else {
+				// OR the access list is not empty.
+				$not_like = " postmeta.meta_value NOT REGEXP '\"sfwd-courses_course_access_list\";s:0:\"\";' ";
+
+				// OR the user ID is found in the access list. Note this pattern is four options
+				// 1. The user ID is the only entry.
+				// 1a. The single entry could be an int
+				// 1b. Ot the single entry could be an string
+				// 2. The user ID is at the front of the list as in "sfwd-courses_course_access_list";*:"X,*";
+				// 3. The user ID is in middle "sfwd-courses_course_access_list";*:"*,X,*";
+				// 4. The user ID is at the end "sfwd-courses_course_access_list";*:"*,X";.
+				$is_like = " 
+					postmeta.meta_value REGEXP 's:31:\"sfwd-courses_course_access_list\";i:" . $user_id . ";s:34:\"sfwd-courses_course_lesson_orderby\"' 
+					OR postmeta.meta_value REGEXP 's:31:\"sfwd-courses_course_access_list\";i:" . $user_id . ";s:40:\"sfwd-courses_course_prerequisite_compare\"' 
+					OR postmeta.meta_value REGEXP 's:31:\"sfwd-courses_course_access_list\";i:" . $user_id . ";s:35:\"sfwd-courses_course_lesson_per_page\"' 
+				
+					OR postmeta.meta_value REGEXP 's:31:\"sfwd-courses_course_access_list\";s:(.*):\"" . $user_id . "\";s:34:\"sfwd-courses_course_lesson_orderby\"' 
+					OR postmeta.meta_value REGEXP 's:31:\"sfwd-courses_course_access_list\";s:(.*):\"" . $user_id . "\";s:40:\"sfwd-courses_course_prerequisite_compare\"' 
+					OR postmeta.meta_value REGEXP 's:31:\"sfwd-courses_course_access_list\";s:(.*):\"" . $user_id . "\";s:35:\"sfwd-courses_course_lesson_per_page\"' 
+
+					OR postmeta.meta_value REGEXP 's:31:\"sfwd-courses_course_access_list\";s:(.*):\"" . $user_id . ",(.*)\";s:34:\"sfwd-courses_course_lesson_orderby\"' 
+					OR postmeta.meta_value REGEXP 's:31:\"sfwd-courses_course_access_list\";s:(.*):\"" . $user_id . ",(.*)\";s:40:\"sfwd-courses_course_prerequisite_compare\"' 
+					OR postmeta.meta_value REGEXP 's:31:\"sfwd-courses_course_access_list\";s:(.*):\"" . $user_id . ",(.*)\";s:35:\"sfwd-courses_course_lesson_per_page\"' 
+
+					OR postmeta.meta_value REGEXP  's:31:\"sfwd-courses_course_access_list\";s:(.*):\"(.*)," . $user_id . ",(.*)\";s:34:\"sfwd-courses_course_lesson_orderby\"' 
+					OR postmeta.meta_value REGEXP  's:31:\"sfwd-courses_course_access_list\";s:(.*):\"(.*)," . $user_id . ",(.*)\";s:40:\"sfwd-courses_course_prerequisite_compare\"' 
+					OR postmeta.meta_value REGEXP  's:31:\"sfwd-courses_course_access_list\";s:(.*):\"(.*)," . $user_id . ",(.*)\";s:35:\"sfwd-courses_course_lesson_per_page\"' 
+
+					OR postmeta.meta_value REGEXP 's:31:\"sfwd-courses_course_access_list\";s:(.*):\"(.*)," . $user_id . "\";s:34:\"sfwd-courses_course_lesson_orderby\"'
+					OR postmeta.meta_value REGEXP 's:31:\"sfwd-courses_course_access_list\";s:(.*):\"(.*)," . $user_id . "\";s:40:\"sfwd-courses_course_prerequisite_compare\"'
+					OR postmeta.meta_value REGEXP 's:31:\"sfwd-courses_course_access_list\";s:(.*):\"(.*)," . $user_id . "\";s:35:\"sfwd-courses_course_lesson_per_page\"'
+					";
+
+				$sql_str = 'SELECT post_id FROM ' . $wpdb->postmeta . ' as postmeta INNER JOIN ' . $wpdb->posts . " as posts ON posts.ID = postmeta.post_id WHERE posts.post_status='publish' AND posts.post_type='sfwd-courses' AND postmeta.meta_key='_sfwd-courses' AND ( " . $not_like . ' AND (' . $is_like . '))';	
+			}
+			$user_course_ids = $wpdb->get_col( $sql_str );
 		} else {
-			// OR the access list is not empty.
-			$not_like = " postmeta.meta_value NOT REGEXP '\"sfwd-courses_course_access_list\";s:0:\"\";' ";
-
-			// OR the user ID is found in the access list. Note this pattern is four options
-			// 1. The user ID is the only entry.
-			// 1a. The single entry could be an int
-			// 1b. Ot the single entry could be an string
-			// 2. The user ID is at the front of the list as in "sfwd-courses_course_access_list";*:"X,*";
-			// 3. The user ID is in middle "sfwd-courses_course_access_list";*:"*,X,*";
-			// 4. The user ID is at the end "sfwd-courses_course_access_list";*:"*,X";.
-			$is_like = " 
-				postmeta.meta_value REGEXP 's:31:\"sfwd-courses_course_access_list\";i:" . $user_id . ";s:34:\"sfwd-courses_course_lesson_orderby\"' 
-				OR postmeta.meta_value REGEXP 's:31:\"sfwd-courses_course_access_list\";i:" . $user_id . ";s:40:\"sfwd-courses_course_prerequisite_compare\"' 
-				OR postmeta.meta_value REGEXP 's:31:\"sfwd-courses_course_access_list\";i:" . $user_id . ";s:35:\"sfwd-courses_course_lesson_per_page\"' 
-			
-				OR postmeta.meta_value REGEXP 's:31:\"sfwd-courses_course_access_list\";s:(.*):\"" . $user_id . "\";s:34:\"sfwd-courses_course_lesson_orderby\"' 
-				OR postmeta.meta_value REGEXP 's:31:\"sfwd-courses_course_access_list\";s:(.*):\"" . $user_id . "\";s:40:\"sfwd-courses_course_prerequisite_compare\"' 
-				OR postmeta.meta_value REGEXP 's:31:\"sfwd-courses_course_access_list\";s:(.*):\"" . $user_id . "\";s:35:\"sfwd-courses_course_lesson_per_page\"' 
-
-				OR postmeta.meta_value REGEXP 's:31:\"sfwd-courses_course_access_list\";s:(.*):\"" . $user_id . ",(.*)\";s:34:\"sfwd-courses_course_lesson_orderby\"' 
-				OR postmeta.meta_value REGEXP 's:31:\"sfwd-courses_course_access_list\";s:(.*):\"" . $user_id . ",(.*)\";s:40:\"sfwd-courses_course_prerequisite_compare\"' 
-				OR postmeta.meta_value REGEXP 's:31:\"sfwd-courses_course_access_list\";s:(.*):\"" . $user_id . ",(.*)\";s:35:\"sfwd-courses_course_lesson_per_page\"' 
-
-				OR postmeta.meta_value REGEXP  's:31:\"sfwd-courses_course_access_list\";s:(.*):\"(.*)," . $user_id . ",(.*)\";s:34:\"sfwd-courses_course_lesson_orderby\"' 
-				OR postmeta.meta_value REGEXP  's:31:\"sfwd-courses_course_access_list\";s:(.*):\"(.*)," . $user_id . ",(.*)\";s:40:\"sfwd-courses_course_prerequisite_compare\"' 
-				OR postmeta.meta_value REGEXP  's:31:\"sfwd-courses_course_access_list\";s:(.*):\"(.*)," . $user_id . ",(.*)\";s:35:\"sfwd-courses_course_lesson_per_page\"' 
-
-				OR postmeta.meta_value REGEXP 's:31:\"sfwd-courses_course_access_list\";s:(.*):\"(.*)," . $user_id . "\";s:34:\"sfwd-courses_course_lesson_orderby\"'
-				OR postmeta.meta_value REGEXP 's:31:\"sfwd-courses_course_access_list\";s:(.*):\"(.*)," . $user_id . "\";s:40:\"sfwd-courses_course_prerequisite_compare\"'
-				OR postmeta.meta_value REGEXP 's:31:\"sfwd-courses_course_access_list\";s:(.*):\"(.*)," . $user_id . "\";s:35:\"sfwd-courses_course_lesson_per_page\"'
-				";
-
-			$sql_str = 'SELECT post_id FROM ' . $wpdb->postmeta . ' as postmeta INNER JOIN ' . $wpdb->posts . " as posts ON posts.ID = postmeta.post_id WHERE posts.post_status='publish' AND posts.post_type='sfwd-courses' AND postmeta.meta_key='_sfwd-courses' AND ( " . $not_like . ' AND (' . $is_like . '))';	
+			$user_course_ids = learndash_user_get_enrolled_courses( $user_id );
 		}
-		$user_course_ids = $wpdb->get_col( $sql_str );
 	}	
 	return $user_course_ids;
 }
@@ -806,7 +814,7 @@ function learndash_wp_login( $user_login = '', $user = '' ) {
 		}
 	}
 }
-add_action( 'wp_login', 'learndash_wp_login', 99, 2 );
+add_action( 'wp_login', 'learndash_wp_login', 99, 1 );
 
 
 /**
@@ -822,7 +830,7 @@ function learndash_remove_user_quiz_locks( $user_id = 0, $quiz_id = 0 ) {
 	if ( ( ! empty( $user_id ) ) && ( ! empty( $quiz_id ) ) ) {
 		$pro_quiz_id = get_post_meta( $quiz_id, 'quiz_pro_id', true );
 		if ( ! empty( $pro_quiz_id ) ) {
-			$sql_str = $wpdb->prepare( 'DELETE FROM ' . $wpdb->prefix . 'wp_pro_quiz_lock WHERE quiz_id = %d AND user_id = %s', $pro_quiz_id, $user_id );
+			$sql_str = $wpdb->prepare( 'DELETE FROM ' . LDLMS_DB::get_table_name( 'quiz_lock' ) . ' WHERE quiz_id = %d AND user_id = %s', $pro_quiz_id, $user_id );
 			$wpdb->query( $sql_str );
 		}
 	}
@@ -862,7 +870,7 @@ function learndash_get_user_course_points( $user_id = 0 ) {
 	if ( ! empty( $user_id ) ) {
 
 		$sql_str = $wpdb->prepare(
-			'SELECT postmeta.post_id as post_id, postmeta.meta_value as points
+			'SELECT DISTINCT postmeta.post_id as post_id, postmeta.meta_value as points
 			FROM ' . $wpdb->postmeta . " as postmeta 
 			WHERE postmeta.post_id IN 
 			(
@@ -894,9 +902,21 @@ function learndash_get_user_course_points( $user_id = 0 ) {
 function learndash_get_quiz_statistics_ref_for_quiz_attempt( $user_id = 0, $quiz_attempt = array() ) {
 	global $wpdb;
 
+	if ( empty( $user_id ) ) {
+		return 0;
+	}
+	
+	if ( ( ! isset( $quiz_attempt['pro_quizid'] ) ) || ( empty( $quiz_attempt['pro_quizid'] ) ) ) {
+		return 0;
+	} 
+
+	if ( ( ! isset( $quiz_attempt['time'] ) ) || ( empty( $quiz_attempt['time'] ) ) ) {
+		return 0;
+	} 
+
 	$sql_str = $wpdb->prepare(
-		'SELECT statistic_ref_id FROM ' . $wpdb->prefix . 'wp_pro_quiz_statistic_ref as stat
-		INNER JOIN ' . $wpdb->prefix . 'wp_pro_quiz_master as master ON stat.quiz_id=master.id
+		'SELECT statistic_ref_id FROM ' . LDLMS_DB::get_table_name( 'quiz_statistic_ref' )  . ' as stat
+		INNER JOIN ' . LDLMS_DB::get_table_name( 'quiz_master' ) . ' as master ON stat.quiz_id=master.id
 		WHERE  user_id = %d AND quiz_id = %d AND create_time = %d AND master.statistics_on=1 LIMIT 1', $user_id, $quiz_attempt['pro_quizid'], $quiz_attempt['time']
 	);
 

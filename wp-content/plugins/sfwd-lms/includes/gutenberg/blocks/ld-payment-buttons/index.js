@@ -1,6 +1,6 @@
 /**
  * LearnDash Block ld-payment-buttons
- * 
+ *
  * @since 2.5.9
  * @package LearnDash
  */
@@ -18,14 +18,14 @@ import {
  * Internal block libraries
  */
 const { __, _x, sprintf } = wp.i18n;
-const { 
-	registerBlockType, 
+const {
+	registerBlockType,
 } = wp.blocks;
 
  const {
     InspectorControls,
  } = wp.editor;
- 
+
  const {
     ServerSideRender,
     PanelBody,
@@ -38,8 +38,11 @@ registerBlockType(
     {
         title: __( 'LearnDash Payment Buttons', 'learndash' ),
         description: sprintf(_x('This block the %s payment buttons', 'placeholder: Course', 'learndash'), ldlms_get_custom_label('course') ),
-        icon: 'desktop',
-        category: 'widgets',
+        icon: 'cart',
+        category: 'learndash-blocks',
+        supports: {
+            customClassName: false,
+        },
         attributes: {
             course_id: {
                 type: 'string',
@@ -48,14 +51,18 @@ registerBlockType(
                 type: 'boolean',
                 default: 1
             },
+            preview_course_id: {
+                type: 'string',
+                default: '',
+            },
             meta: {
                 type: 'object',
             }
         },
         edit: props => {
-			const { attributes: { course_id, preview_show },
+            const { attributes: { course_id, preview_show, preview_course_id },
             	className, setAttributes } = props;
-			
+
             const inspectorControls = (
                 <InspectorControls>
                     <PanelBody
@@ -76,6 +83,13 @@ registerBlockType(
                             label={__('Show Preview', 'learndash')}
                             checked={!!preview_show}
                             onChange={preview_show => setAttributes({ preview_show })}
+                        />
+                        <TextControl
+                            label={sprintf(_x('%s ID', 'placeholder: Course', 'learndash'), ldlms_get_custom_label('course'))}
+                            help={sprintf(_x('Enter a %s ID to test preview', 'placeholder: Course', 'learndash'), ldlms_get_custom_label('course'))}
+                            value={preview_course_id || ''}
+                            type={'number'}
+                            onChange={preview_course_id => setAttributes({ preview_course_id })}
                         />
                     </PanelBody>
                 </InspectorControls>
@@ -114,7 +128,7 @@ registerBlockType(
                             block="learndash/ld-payment-buttons"
                             attributes={attributes}
                         />
-                    }                    
+                    }
                 } else {
                     return __('[learndash_payment_buttons] shortcode output shown here', 'learndash');
                 }
@@ -125,7 +139,7 @@ registerBlockType(
                 do_serverside_render(props.attributes)
             ];
         },
-		
+
         save: props => {
             // Delete meta from props to prevent it being saved.
             delete (props.attributes.meta);

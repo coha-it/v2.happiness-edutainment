@@ -541,11 +541,6 @@ function pg_set_user_group ($user_id) {
 
 
 
-
-
-
-
-
 //function for style pack topic index query
 function pg_display_topic_index_query_filter ($args) {
 		//get forums this user is allowed to see
@@ -956,3 +951,49 @@ function rpg_filter_bbp_request( $array ) {
 	}
 	return $array ;
 }
+
+
+
+
+
+add_action( 'admin_notices', 'rpg_warning' );
+
+function rpg_warning(){
+
+// your logic goes here
+$test='yes' ;
+// bbpress version
+	if (function_exists('bbPress')) {
+		$bbp = bbpress();
+	} else {
+		global $bbp;
+	}
+	if (isset($bbp->version)) {
+		$bbpversion = $bbp->version;
+		$bbpversion = (substr($bbpversion, 0, 3)) ;
+	} else {
+		$bbpversion = '???';
+	}	
+
+	
+
+// this is a success message
+if($bbpversion =='2.6' ): 
+	$n = get_option ('rpg_warning', 0) ;
+	$n++ ;
+	if ($n<11) {
+
+?>
+<div class='notice notice-success is-dismissible'>
+<?php
+_e('WARNING : You have bbp-Private-Groups plugin working with bbPress 2.6. If you have forums that are set to \'hidden\' or \'private\' PLEASE CHECK that they display correctly - 2.6 has changed the way these forums are excluded.  If in doubt, set these forums to a group that is not being used to ensure they do not display by mistake. ', 'bbp-private-groups'); ?>
+</div>
+<?php 
+update_option ('rpg_warning' , $n) ;
+	}
+
+
+
+endif;
+}
+

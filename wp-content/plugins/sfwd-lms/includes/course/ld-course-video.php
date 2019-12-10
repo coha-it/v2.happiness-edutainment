@@ -67,10 +67,10 @@ if (!class_exists('Learndash_Course_Video' ) ) {
 							'name' => esc_html__( 'When to show video', 'learndash' ),
 							'type' => 'select',
 							'initial_options' => array(	
-								'AFTER'	=> esc_html__( 'After (default) - Video is shown after completing sub-steps', 'learndash' ),
-								'BEFORE' => esc_html__( 'Before - Video is shown before completing sub-steps', 'learndash' ),
+								'BEFORE' => esc_html__( 'Before  (default) - Video is shown before completing sub-steps', 'learndash' ),
+								'AFTER'	=> esc_html__( 'After - Video is shown after completing sub-steps', 'learndash' ),
 							),
-							'default' => '',
+							'default' => 'BEFORE',
 							'help_text' => esc_html__( 'Select when to show video in relation to sub-steps.', 'learndash' )
 						),
 						'lesson_video_auto_complete' => array( 
@@ -179,12 +179,13 @@ if (!class_exists('Learndash_Course_Video' ) ) {
 			
 			if ( ( isset( $settings['lesson_video_enabled'] ) ) && ( $settings['lesson_video_enabled'] == 'on' ) ) {
 				if ( ( isset( $settings['lesson_video_url'] ) ) && ( !empty( $settings['lesson_video_url'] ) ) ) {
-					
+					// Because some copy/paste can result in leading whitespace. LEARNDASH-3819
+					$settings['lesson_video_url'] = trim( $settings['lesson_video_url'] );
 					$settings['lesson_video_url'] = html_entity_decode( $settings['lesson_video_url'] );
 					
 					// Just to ensure the proper settings are available
 					if ( ( !isset( $settings['lesson_video_shown'] ) ) || ( empty( $settings['lesson_video_shown'] ) ) ) {
-						$settings['lesson_video_shown'] = 'AFTER';
+						$settings['lesson_video_shown'] = 'BEFORE';
 					}
 					
 					
@@ -345,6 +346,8 @@ if (!class_exists('Learndash_Course_Video' ) ) {
 							$this->video_data['videos_found_provider'] = 'wistia';
 						} else if ( strpos( $settings['lesson_video_url'], 'amazonaws.com' ) !== false ) {
 							$this->video_data['videos_found_provider'] = 'local';
+						} else if ( strpos( $settings['lesson_video_url'], 'vooplayer' ) !== false ) {
+							$this->video_data['videos_found_provider'] = 'vooplayer';
 						} else if ( strpos( $settings['lesson_video_url'], trailingslashit( get_home_url() ) ) !== false ) {
 							$this->video_data['videos_found_provider'] = 'local';
 						} else {
@@ -368,8 +371,16 @@ if (!class_exists('Learndash_Course_Video' ) ) {
 							$this->video_data['videos_found_type'] = 'embed_shortcode';
 						} else if ( substr( $settings['lesson_video_url'], 0, strlen('[video')  ) == '[video' ) {
 							$this->video_data['videos_found_type'] = 'video_shortcode';
-						} else if ( substr( $settings['lesson_video_url'], 0, strlen('<iframe')  ) == '<iframe' ) {
+						}  else if ( substr( $settings['lesson_video_url'], 0, strlen('<iframe')  ) == '<iframe' ) {
 							$this->video_data['videos_found_type'] = 'iframe';
+						} else {
+							if ( $this->video_data['videos_found_provider'] == 'vooplayer' ) {
+								if ( substr( $settings['lesson_video_url'], 0, strlen('[vooplayer')  ) == '[vooplayer' ) {
+									$this->video_data['videos_found_type'] = 'vooplayer_shortcode';
+								} else {
+									$this->video_data['videos_found_type'] = 'iframe';
+								}
+							}
 						}
 					
 						if ( ( $this->video_data['videos_found_provider'] !== false ) && ( $this->video_data['videos_found_type'] !== false ) ) {
@@ -403,6 +414,15 @@ if (!class_exists('Learndash_Course_Video' ) ) {
 								} else if ( $this->video_data['videos_found_type'] == 'video_shortcode' ) {
 									$this->video_content = do_shortcode( $settings['lesson_video_url'] );
 								} else if ( $this->video_data['videos_found_type'] == 'iframe' ) {
+									$this->video_content = $settings['lesson_video_url'];
+								}
+							} else if ( $this->video_data['videos_found_provider'] == 'vooplayer' ) {
+								if ( $this->video_data['videos_found_type'] == 'vooplayer_shortcode' ) {
+									$this->video_content = do_shortcode( $settings['lesson_video_url'] );
+								} else if ( $this->video_data['videos_found_type'] == 'iframe' ) {
+									//if ( strpos( $settings['lesson_video_url'], '</script>' ) === false ) {
+									//	$settings['lesson_video_url'] = '<script src="https://codehooligans.cdn.vooplayer.com/assets/vooplayer.js"></script>' . $settings['lesson_video_url'];
+									//}
 									$this->video_content = $settings['lesson_video_url'];
 								}
 							}
@@ -439,6 +459,7 @@ if (!class_exists('Learndash_Course_Video' ) ) {
 													'ld_video_params', 
 													array( 
 														'controls' => $this->video_data['videos_show_controls'],
+														'autoplay' => $this->video_data['videos_auto_start'],
 														'modestbranding' => 1,
 														'showinfo' => 0,
 														'rel' => 0
@@ -475,7 +496,7 @@ if (!class_exists('Learndash_Course_Video' ) ) {
 										}
 									}
 									
-									$this->video_content = '<div class="ld-video" data-video="'. $this->video_data['videos_found_provider'] .'">'. $this->video_content .'</div>';
+									$this->video_content = '<div class="ld-video" data-video-progression="true" data-video-provider="'. $this->video_data['videos_found_provider'] .'">'. $this->video_content .'</div>';
 									
 									if ( $this->video_data['videos_found_provider'] == 'local' ) {
 										if ( $this->video_data['videos_found_provider'] == 'local' ) {
@@ -516,6 +537,9 @@ if (!class_exists('Learndash_Course_Video' ) ) {
 									
 								} else {
 									$this->video_data['videos_found_provider'] = false;
+
+									$this->video_content = '<div class="ld-video" data-video-progression="false">'. $this->video_content .'</div>';
+
 								}
 							}
 						}
@@ -545,7 +569,7 @@ if (!class_exists('Learndash_Course_Video' ) ) {
 
 				wp_enqueue_script( 
 					'learndash_video_script_js', 
-					LEARNDASH_LMS_PLUGIN_URL . 'assets/js/learndash_video_script'. ( ( defined( 'LEARNDASH_SCRIPT_DEBUG' ) && ( LEARNDASH_SCRIPT_DEBUG === true ) ) ? '' : '.min') .'.js', 
+					LEARNDASH_LMS_PLUGIN_URL . 'assets/js/learndash_video_script'. leardash_min_asset() .'.js', 
 					array( 'jquery' ), 
 					LEARNDASH_SCRIPT_VERSION_TOKEN,
 					true 

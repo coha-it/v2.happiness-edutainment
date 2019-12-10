@@ -23,22 +23,22 @@ class gdbbA_Admin {
     }
 
     public function load() {
-        add_action('admin_init', array(&$this, 'admin_init'));
-        add_action('admin_menu', array(&$this, 'admin_menu'));
+        add_action('admin_init', array($this, 'admin_init'));
+        add_action('admin_menu', array($this, 'admin_menu'));
 
-        add_filter('plugin_action_links', array(&$this, 'plugin_actions'), 10, 2);
-        add_filter('plugin_row_meta', array(&$this, 'plugin_links'), 10, 2);
+        add_filter('plugin_action_links', array($this, 'plugin_actions'), 10, 2);
+        add_filter('plugin_row_meta', array($this, 'plugin_links'), 10, 2);
     }
 
     public function admin_menu() {
-        $this->page_ids[] = add_submenu_page('edit.php?post_type=forum', 'GD bbPress Attachments', __("Attachments", "gd-bbpress-attachments"), GDBBPRESSATTACHMENTS_CAP, 'gdbbpress_attachments', array(&$this, 'menu_attachments'));
+        $this->page_ids[] = add_submenu_page('edit.php?post_type=forum', 'GD bbPress Attachments', __("Attachments", "gd-bbpress-attachments"), GDBBPRESSATTACHMENTS_CAP, 'gdbbpress_attachments', array($this, 'menu_attachments'));
 
         $this->admin_load_hooks();
     }
 
     public function admin_load_hooks() {
         foreach ($this->page_ids as $id) {
-            add_action('load-'.$id, array(&$this, 'load_admin_page'));
+            add_action('load-'.$id, array($this, 'load_admin_page'));
         }
     }
 
@@ -76,8 +76,7 @@ class gdbbA_Admin {
                 <a href="https://wordpress.org/plugins/gd-bbpress-attachments/" target="_blank">'.__("Home Page on WordPress.org", "gd-bbpress-attachments").'</a></p> 
                 <h5>'.__("Getting Plugin Support", "gd-bbpress-attachments").'</h5>
                 <p><a href="https://support.dev4press.com/forums/forum/plugins-free/gd-bbpress-attachments/" target="_blank">'.__("Support Forum on Dev4Press.com", "gd-bbpress-attachments").'</a> | 
-                <a href="https://wordpress.org/support/plugin/gd-bbpress-attachments" target="_blank">'.__("Support Forum on WordPress.org", "gd-bbpress-attachments").'</a> | 
-                <a href="https://support.dev4press.com/forums/forum/plugins-free/gd-bbpress-attachments/" target="_blank">'.__("Support Forum on Dev4Press", "gd-bbpress-attachments").'</a></p>'));
+                <a href="https://wordpress.org/support/plugin/gd-bbpress-attachments" target="_blank">'.__("Support Forum on WordPress.org", "gd-bbpress-attachments").'</a> </p>'));
 
         $screen->add_help_tab(array(
             "id" => "gdpt-screenhelp-website",

@@ -22,9 +22,10 @@ if ( ! function_exists( 'mycred_render_shortcode_video' ) ) :
 			'logic'    => '',
 			'interval' => '',
 			'ctype'    => MYCRED_DEFAULT_TYPE_KEY
-		), $atts ) );
+		), $atts, MYCRED_SLUG . '_video' ) );
 
-		$hooks    = mycred_get_option( 'mycred_pref_hooks', false );
+		$prf_hook = apply_filters( 'mycred_option_id', 'mycred_pref_hooks' );
+		$hooks    = mycred_get_option( $prf_hook, false );
 		if ( $ctype != MYCRED_DEFAULT_TYPE_KEY )
 			$hooks = mycred_get_option( 'mycred_pref_hooks_' . sanitize_key( $ctype ), false );
 
@@ -44,14 +45,16 @@ if ( ! function_exists( 'mycred_render_shortcode_video' ) ) :
 		if ( $id === NULL || empty( $id ) ) return __( 'A video ID is required for this shortcode', 'mycred' );
 
 		// Interval
-		if ( strlen( $interval ) < 3 )
-			$interval = abs( $interval * 1000 );
+		if ( strlen( $interval ) < 3 ) {
+		   $interval = (float) $interval;
+           $interval = abs( $interval * 1000 );
+        }
 
 		// Video ID
 		$video_id = str_replace( '-', '__', $id );
 
 		// Create key
-		$key      = mycred_create_token( array( 'youtube', $video_id, $amount, $logic, $interval ) );
+		$key      = mycred_create_token( array( 'youtube', $video_id, $amount, $logic, $interval, $ctype ) );
 
 		if ( ! isset( $mycred_video_points ) || ! is_array( $mycred_video_points ) )
 			$mycred_video_points = array();
@@ -104,4 +107,4 @@ if ( ! function_exists( 'mycred_render_shortcode_video' ) ) :
 
 	}
 endif;
-add_shortcode( 'mycred_video', 'mycred_render_shortcode_video' );
+add_shortcode( MYCRED_SLUG . '_video', 'mycred_render_shortcode_video' );

@@ -1,5 +1,21 @@
 <div class="d4p-information">
     <fieldset>
+        <h3><?php _e("Premium Plugins for bbPress", "gd-bbpress-attachments"); ?></h3>
+        <a target="_blank" href="https://plugins.dev4press.com/gd-bbpress-toolbox/">GD bbPress Toolbox Pro</a><br/>
+        <a target="_blank" href="https://plugins.dev4press.com/gd-quantum-theme-for-bbpress/">GD Quantum Theme Pro</a><br/>
+        <a target="_blank" href="https://plugins.dev4press.com/gd-power-search-for-bbpress/">GD Power Search Pro</a><br/>
+        <a target="_blank" href="https://plugins.dev4press.com/gd-topic-prefix/">GD Topic Prefix Pro</a><br/>
+        <a target="_blank" href="https://plugins.dev4press.com/gd-topic-polls/">GD Topic Polls Pro</a><br/>
+    </fieldset>
+
+    <fieldset>
+        <h3><?php _e("More Free Plugins for bbPress", "gd-bbpress-attachments"); ?></h3>
+        <a target="_blank" href="https://wordpress.org/plugins/gd-bbpress-tools/">GD bbPress Tools</a><br/>
+        <a target="_blank" href="https://wordpress.org/plugins/gd-topic-polls/">GD Topic Polls</a><br/>
+        <a target="_blank" href="https://wordpress.org/plugins/gd-power-search-for-bbpress/">GD Power Search</a><br/>
+    </fieldset>
+
+    <fieldset>
         <h3>GD Knowledge Base Pro</h3>
         <a target="_blank" href="https://plugins.dev4press.com/gd-knowledge-base/"><?php _e("Plugin Home Website", "gd-bbpress-attachments"); ?></a><br/>
         <a target="_blank" href="https://xscape.info/gd-knowledge-base/"><?php _e("Plugin Demo", "gd-bbpress-attachments"); ?></a>
@@ -7,13 +23,6 @@
         <h3>GD Rating System Pro</h3>
         <a target="_blank" href="https://plugins.dev4press.com/gd-rating-system/"><?php _e("Plugin Home Website", "gd-bbpress-attachments"); ?></a><br/>
         <a target="_blank" href="https://xscape.info/gd-rating-system/"><?php _e("Plugin Demo", "gd-bbpress-attachments"); ?></a>
-    </fieldset>
-
-    <fieldset>
-        <h3><?php _e("Premium Plugins for bbPress", "gd-bbpress-attachments"); ?></h3>
-        <a target="_blank" href="https://plugins.dev4press.com/gd-bbpress-toolbox/">GD bbPress Toolbox Pro</a><br/>
-        <a target="_blank" href="https://plugins.dev4press.com/gd-topic-prefix/">GD Topic Prefix Pro</a><br/>
-        <a target="_blank" href="https://plugins.dev4press.com/gd-topic-polls/">GD Topic Polls Pro</a><br/>
     </fieldset>
 
     <fieldset>
@@ -26,12 +35,6 @@
         <a target="_blank" href="https://plugins.dev4press.com/gd-content-tools/">GD Content Tools Pro</a><br/>
         <a target="_blank" href="https://plugins.dev4press.com/gd-swift-navigator/">GD Swift Navigator Pro</a><br/>
         <a target="_blank" href="https://plugins.dev4press.com/gd-press-tools/">GD Press Tools Pro</a>
-    </fieldset>
-
-    <fieldset>
-    <h3><?php _e("More Free Plugins for bbPress", "gd-bbpress-attachments"); ?></h3>
-        <a target="_blank" href="https://wordpress.org/plugins/gd-bbpress-tools/">GD bbPress Tools</a><br/>
-        <a target="_blank" href="https://wordpress.org/plugins/gd-topic-polls/">GD Topic Polls</a><br/>
     </fieldset>
 
     <fieldset>

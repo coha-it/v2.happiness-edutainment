@@ -1296,6 +1296,30 @@ html.noscroll .ult-modal {
 							pointer-events: none; /* Prevent clicks */
 						}
 
+					.ult-modal-form-row__description {
+						color: rgba(0,0,0,.6);
+						margin-top: 7px;
+						font-size: 14px;
+						line-height: 1.4;
+					}
+
+					.ult-modal-form-row__radio-label {
+						width: 100%;
+						display: flex;
+						align-items: center;
+						padding: 4px 0;
+					}
+					
+						.ult-modal-form-row__radio-label input {
+							margin-top: 0;
+							margin-right: 0;
+						}
+
+						.ult-modal-form-row__radio-label span {
+							display: block;
+							padding-left: 8px;
+						}
+
 			.ult-modal-footer {
 				flex: 0 0 auto;
 				padding-top: 10px;

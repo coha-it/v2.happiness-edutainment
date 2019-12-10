@@ -2,9 +2,9 @@
 Contributors: uncannyowl
 Tags: LearnDash, eLearning, LMS, education, learning, courseware
 Requires at least: 4.6
-Tested up to: 5.0.2
+Tested up to: 5.1.1
 Requires PHP: 5.6
-Stable tag: 3.0.2
+Stable tag: 3.1.4
 License: This plugin is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or any later version.   LearnDash Groups in User Profiles is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.   You should have received a copy of the GNU General Public License along with LearnDash Groups in User Profiles. If not, see {URI to Plugin License}.
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
 
@@ -67,6 +67,39 @@ Follow Uncanny Owl for updates about our latest LearnDash enhancements on [Twitt
 1. Uncanny LearnDash Toolkit Dashboard
 
 == Changelog ==
+
+= 3.1.4 =
+* Added: Front End Login - Added redirect parameter to uo_login shortcode to allow form-specific redirects
+* Updated: Front End Login - Failed login redirect now ignored for REST and AJAX requests
+* Updated: Front End Login - Eliminated 500 error on password reset when other plugins alter email filters
+* Updated: Front End Login - Improved translation support for strings related to account verification
+* Updated: Certificate Widget/Show Certificates - Now displays the course/quiz name instead of the certificate name
+* Fixed: Send Course/Quiz Certificate by Email - Email content loses line breaks on reload
+* Fixed: Clicking the label of "Verify this user and allow them to log in" checkbox no longer toggles the "Rich Editing" checkbox
+
+= 3.1.3 =
+* Updated: Restored copyright and GPL license info to User Switching module (thanks @johnbillion!)
+
+= 3.1.2 =
+* Updated: Removed PHP_OS_FAMILY constant to avoid false-positives in PHP compatibility checks
+* Fixed: Not Enrolled Redirect - Course settings being reset on save
+* Fixed: Front End Login - Headers already sent error on reset password
+
+= 3.1.1 =
+* Added: Course Dashboard (Pro): Logic to select dashboard 3.0 theme when module is activated or LearnDash 3.0 theme is active
+* Updated: Improved radio button behavior in module settings dialogs
+* Fixed: Front End Login - Issue that caused "Headers already sent" warning on some sites
+* Fixed: Hide Admin Bar - Admin bar no longer appears in Elementor editing view
+
+= 3.1 =
+* Added: Automatic template overrides!  Override any file in the /src/templates folder by copying it into /uncanny-toolkit/ in your child theme
+* Added: Front End Login - Option to disable "Remember Me" checkbox
+* Updated: Front End Login - Improved compatibility with other login plugins when reCaptcha is enabled
+* Updated: Front End Login: Default template no longer displays email field after the reset password form is submitted
+* Updated: Log In/Log Out Links - Improved translation support
+* Updated: Hide Admin Bar - The admin bar is now always visible to all users with the "manage_options" capability
+* Updated: Resume Button - Removed next post prefetch meta tag on courses, lessons, topics and quizzes to prevent Firefox users from being sent to the wrong lesson/topic when resuming
+* Fixed: Required PHP version message now correctly states PHP 5.6 or higher is required
 
 = 3.0.2 =
 * Updated: Improved compatibility with Internet Explorer 11

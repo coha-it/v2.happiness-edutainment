@@ -64,7 +64,7 @@ if (!function_exists('d4p_sanitize_basic_array')) {
         $output = array();
 
         foreach ($input as $key => $value) {
-            $output[$key] = d4p_sanitize_basic($value);
+            $output[$key] = d4p_sanitize_basic($value, $strip_shortcodes);
         }
 
         return $output;

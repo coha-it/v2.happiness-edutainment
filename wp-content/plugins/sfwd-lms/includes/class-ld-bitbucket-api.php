@@ -13,10 +13,6 @@ if ( !class_exists( 'LearnDash_BitBucket_API' ) ) {
 
 		// Production
 		private $bb_OAuth = null;
-		//array(
-			//'consumer_key' => 'fUEfEERS8FdprEzNMX',
-			//'consumer_secret' => 'gnBPjny5yummKe6zGv5MMCa5w9tDGstT',
-			//);
 				
 		private $bb_OAuth_sets = array(
 			'fUEfEERS8FdprEzNMX' => 'gnBPjny5yummKe6zGv5MMCa5w9tDGstT',		// ld_updates
@@ -24,14 +20,16 @@ if ( !class_exists( 'LearnDash_BitBucket_API' ) ) {
 			'P2xXBphWPZP8Cbr8Rw' => 'qFvD9zrt9RVVpEJ6j2jEWjZJEgvhpzPZ', 	// ld_updates3
 			'8tvevj3YQQnyFJE5a2' => 'C5BuSGZBanNbmaEE7hjeQEnmPLwma3JE', 	// ld_updates4
 			'2LdbzTV4u5UhfTPS8t' => 'Y5eMpRVnFAWkvb3dmZuq64jTzNU9x93c', 	// ld_updates5
-			//'Ta3kaXc77MTdGqDLmU' => '8kg3SzDSCQuvTmCQLvGYmdtWYz3tAYaY'	// ld_code (test only)                      
+			'jYyJyBctJ6wkxVVk7h' => 'NeKUN87Npyu8tGwN4eLCh5ZFjjazdu4e',		// ld_updates6
+			'bn6Phmn3jVyQ2NfdPa' => 'Ct7MbLpuCyr56s8qvy6Eh7VteBEGshDp',		// ld_updates7
+			'bTtudTumX8jQ56aJxc' => 'czwT3Cr75sBDTkDzGzwExwDhHcH6wVbL',		// ld_updates8
+			'uAPE6cvgWjbHdEYpJg' => 'butXFuD3QNbX3uXrwf49J8vvDNMsPbpA',		// ld_updates9
+			'P6xDsLKNTxGdSfUpnC' => 'XFk6PVJCu5bHmcJB7WN3v5afzEsyqAxL',		// ld_updates10
 		);
 				
 		private $request_method = 'GET';
-		private $repo_url_base = "https://api.bitbucket.org/2.0/repositories/learndash";
-		private $download_url_base = "https://bitbucket.org/learndash";
-		//private $readme_url_base = 'https://s3.amazonaws.com/learndash-assets/add-on-images';
-		//private $readme_url_base = 'https://s3.us-east-2.amazonaws.com/learndash-addon-assets';
+		private $repo_url_base = 'https://api.bitbucket.org/2.0/repositories/learndash';
+		private $download_url_base = 'https://bitbucket.org/learndash';
 
 		function __construct() {
 		}
@@ -114,7 +112,7 @@ if ( !class_exists( 'LearnDash_BitBucket_API' ) ) {
 			
 			$request_url = $this->setup_url_params( $request_url );
 			if ( !empty( $request_url ) ) {
-				$options = array('timeout' => 10);
+				$options = array('timeout' => LEARNDASH_HTTP_REMOTE_GET_TIMEOUT);
 				$response = wp_remote_get( $request_url, $options );
 				if ( is_wp_error( $response ) ) {
 					return $response;
@@ -138,7 +136,7 @@ if ( !class_exists( 'LearnDash_BitBucket_API' ) ) {
 			$request_url = $this->repo_url_base;			
 			$request_url = $this->setup_url_params( $request_url );
 			if ( !empty( $request_url ) ) {
-				$options = array('timeout' => 10);
+				$options = array('timeout' => LEARNDASH_HTTP_REMOTE_GET_TIMEOUT);
 				$response = wp_remote_get( $request_url, $options );
 				if ( is_wp_error( $response ) ) {
 					return $response;
@@ -175,7 +173,7 @@ if ( !class_exists( 'LearnDash_BitBucket_API' ) ) {
 				if ( !empty( $request_url ) ) {
 					//$request_url = 'http://local.learndash.com/_readme.txt';
 
-					$options = array('timeout' => 10);
+					$options = array('timeout' => LEARNDASH_HTTP_REMOTE_GET_TIMEOUT);
 			
 					$response = wp_remote_get( $request_url, $options );
 					if ( is_wp_error( $response ) ) {
@@ -202,7 +200,7 @@ if ( !class_exists( 'LearnDash_BitBucket_API' ) ) {
 			if ( !empty( $plugin_key ) ) {
 				$request_url = $this->readme_url_base .'/'. $plugin_key ."_readme.txt";
 			
-				$options = array('timeout' => 10);
+				$options = array('timeout' => LEARNDASH_HTTP_REMOTE_GET_TIMEOUT);
 		
 				$response = wp_remote_get( $request_url, $options );
 				if ( is_wp_error( $response ) ) {
@@ -273,147 +271,155 @@ if ( !class_exists( 'LearnDashWPReadmeParser' ) ) {
 			}
 
 			function parse_readme_contents( $file_contents ) {
-				$file_contents = str_replace(array("\r\n", "\r"), "\n", $file_contents);
-				$file_contents = trim($file_contents);
-				if ( 0 === strpos( $file_contents, "\xEF\xBB\xBF" ) )
-					$file_contents = substr( $file_contents, 3 );
+				global $wpdb;
 
-				// Markdown transformations
-				$file_contents = preg_replace( "|^###([^#]+)#*?\s*?\n|im", '=$1='."\n",     $file_contents );
-				$file_contents = preg_replace( "|^##([^#]+)#*?\s*?\n|im",  '==$1=='."\n",   $file_contents );
-				$file_contents = preg_replace( "|^#([^#]+)#*?\s*?\n|im",   '===$1==='."\n", $file_contents );
-
-				
 				$readme_sections = array();
-				$file_contents_array = preg_split("/(\r\n|\n|\r)/", $file_contents );
-				if ( !empty( $file_contents_array ) ) {
-					$section_current = '';
-					$_is_short_description = false;
-					foreach( $file_contents_array as $line ) {
-						if ( substr( $line, 0, 3 ) == '===' ) {
-							$section_current = 'header';
-							if ( preg_match('|^===(.*)===|', $line, $_name) ) {
-								$readme_sections['name'] = $this->sanitize_text( trim( $_name[1] ) );
-							}
-							continue;
-							
-						} else if ( substr( $line, 0, 2 ) == '==' ) {
-							$section_current = '';
-							if ( preg_match('|^==(.*)==|', $line, $_name) ) {
-								$title = $this->sanitize_text( trim( $_name[1] ) );
-								$section_current = str_replace(' ', '_', strtolower( $title ) );
-								$readme_sections[$section_current] = array('title' => $title, 'content_raw' => '', 'content' => '');
+				
+				if ( ! empty( $file_contents ) ) {
+					$file_contents = $wpdb->strip_invalid_text_for_column( $wpdb->options, 'option_value', $file_contents );
+				}
+
+				if ( ! empty( $file_contents ) ) {
+					$file_contents = str_replace(array("\r\n", "\r"), "\n", $file_contents);
+					$file_contents = trim($file_contents);
+					if ( 0 === strpos( $file_contents, "\xEF\xBB\xBF" ) )
+						$file_contents = substr( $file_contents, 3 );
+
+					// Markdown transformations
+					$file_contents = preg_replace( "|^###([^#]+)#*?\s*?\n|im", '=$1='."\n",     $file_contents );
+					$file_contents = preg_replace( "|^##([^#]+)#*?\s*?\n|im",  '==$1=='."\n",   $file_contents );
+					$file_contents = preg_replace( "|^#([^#]+)#*?\s*?\n|im",   '===$1==='."\n", $file_contents );
+				
+
+					$file_contents_array = preg_split("/(\r\n|\n|\r)/", $file_contents );
+					if ( !empty( $file_contents_array ) ) {
+						$section_current = '';
+						$_is_short_description = false;
+						foreach( $file_contents_array as $line ) {
+							if ( substr( $line, 0, 3 ) == '===' ) {
+								$section_current = 'header';
+								if ( preg_match('|^===(.*)===|', $line, $_name) ) {
+									$readme_sections['name'] = $this->sanitize_text( trim( $_name[1] ) );
+								}
 								continue;
-							}
-						}
-						
-						if ( !empty( $section_current ) ) {
-							if ( $section_current == 'header' ) {
-								if ( !empty( $line ) ) {
-									if ( $_is_short_description == true ) {
-										$short_desc_filtered = $this->sanitize_text( $line );
-										$short_desc_length = strlen($short_desc_filtered);
-										$short_description = substr($short_desc_filtered, 0, 150);
-										$readme_sections['short_description'] = $short_description;
-											
-										if ( $short_desc_length > strlen($short_description) )
-											$truncated = true;
-										else
-											$truncated = false;
-										$readme_sections['is_truncated'] = $truncated;
-										
-									} else {
-										$line_parts = explode(':', $line, 2 );
-										if ( count( $line_parts ) > 1 ) {
-											$title = $this->sanitize_text( trim( $line_parts[0] ) );
-											$title = str_replace(' ', '_', strtolower($title));
-											$readme_sections[$title] = 	trim( $line_parts[1] );
-										}
-										
-									}
-								} else {
-									$_is_short_description = true;
-								}
-							} else if ( isset( $readme_sections[$section_current]['content_raw'] ) ) {
-								if ( ( empty( $line ) ) && ( empty( $readme_sections[$section_current]['content_raw'] ) ) )
-									continue;
-								else	
-									$readme_sections[$section_current]['content_raw'] .= $line ."\r\n"; 
-							}
-						}
-					}
-				}
-				
-				if ( ( isset( $readme_sections['tags'] ) ) && ( !empty( $readme_sections['tags'] ) ) ) {
-					$tags_str = $readme_sections['tags'];
-					$readme_sections['tags'] = array();
-					
-					$tags_array = preg_split('|,[\s]*?|', trim( $tags_str ) );
-					if ( count( $tags_array ) > 1 ) {
-						//foreach ( array_keys( $tags_array ) as $t ) {
-						//	$readme_sections['tags'][$t] = $this->sanitize_text( $tags_array[$t] );
-						//}
-						$readme_sections['tags'] = array_map( array( $this, 'sanitize_text'), $tags_array );
-						
-					} 
-				} else {
-					$readme_sections['tags'] = array();
-				}
-
-				/*
-				if ( ( isset( $readme_sections['contributors'] ) ) && ( !empty( $readme_sections['contributors'] ) ) ) {
-					$contributors_str = $readme_sections['contributors'];
-					$readme_sections['contributors'] = array();
-					
-					$contributors_array = preg_split('|,[\s]*?|', trim( $contributors_str ) );
-					if ( count( $contributors_array ) > 1 ) {
-						//foreach ( array_keys( $contributors_array ) as $t ) {
-						//	$readme_sections['contributors'][$t] = $this->user_sanitize( $contributors_array[$t] );
-						//}
-						$readme_sections['contributors'] = array_map( array( $this, 'user_sanitize'), $contributors_array );
-					} 
-				} else {
-				*/
-					$readme_sections['contributors'] = array();
-				//}
-				
-				foreach( array( 'changelog', 'upgrade_notice') as $section_key ) {
-					if ( ( isset( $readme_sections[$section_key]['content_raw'] ) ) && ( !empty( $readme_sections[$section_key]['content_raw'] ) ) ) {
-						$split = preg_split( '#=(.*?)=#', $readme_sections[$section_key]['content_raw'], -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY );
-						$readme_sections[$section_key]['content'] = array();
-						for ( $i = 0; $i < count( $split ); $i += 2 )
-							$readme_sections[$section_key]['content'][$this->sanitize_text( $split[$i] )] = substr( $this->sanitize_text( $split[$i + 1] ), 0, 300 );
-					}
-				}
-
-				foreach( array( 'icons', 'banners' ) as $section_key ) {
-					if ( ( isset( $readme_sections[$section_key]['content_raw'] ) ) && ( !empty( $readme_sections[$section_key]['content_raw'] ) ) ) {
-						$items = explode( PHP_EOL, $readme_sections[$section_key]['content_raw'] );
-						if ( !empty( $items ) ) {
-							$readme_sections[$section_key] = array();
-							foreach( $items as $item ) {
-								$item = trim( $item );
-								if ( !empty( $item ) ) {
-									$item_split = explode( ':', $item, 2 );
-									$readme_sections[$section_key][$item_split[0]] = $item_split[1];
-								}
-							}
-						}
-					}
-				}
-
-				
-				$readme_sections['sections'] = array();
 								
-				foreach( array( 'description', 'installation', 'frequently_asked_questions', 'changelog', 'arbitrary_section' ) as $section_key ) {
-					if ( ( isset( $readme_sections[$section_key]['content_raw'] ) ) && ( !empty( $readme_sections[$section_key]['content_raw'] ) ) ) {
-						$readme_sections[$section_key]['content'] = preg_replace('/^[\s]*=[\s]+(.+?)[\s]+=/m', '<h4>$1</h4>', $readme_sections[$section_key]['content_raw'] );
-						$readme_sections[$section_key]['content'] = $this->filter_text( $readme_sections[$section_key]['content'], true );
-						
-						$readme_sections['sections'][$section_key] = $readme_sections[$section_key]['content'];
+							} else if ( substr( $line, 0, 2 ) == '==' ) {
+								$section_current = '';
+								if ( preg_match('|^==(.*)==|', $line, $_name) ) {
+									$title = $this->sanitize_text( trim( $_name[1] ) );
+									$section_current = str_replace(' ', '_', strtolower( $title ) );
+									$readme_sections[$section_current] = array('title' => $title, 'content_raw' => '', 'content' => '');
+									continue;
+								}
+							}
+							
+							if ( !empty( $section_current ) ) {
+								if ( $section_current == 'header' ) {
+									if ( !empty( $line ) ) {
+										if ( $_is_short_description == true ) {
+											$short_desc_filtered = $this->sanitize_text( $line );
+											$short_desc_length = strlen($short_desc_filtered);
+											$short_description = substr($short_desc_filtered, 0, 150);
+											$readme_sections['short_description'] = $short_description;
+												
+											if ( $short_desc_length > strlen($short_description) )
+												$truncated = true;
+											else
+												$truncated = false;
+											$readme_sections['is_truncated'] = $truncated;
+											
+										} else {
+											$line_parts = explode(':', $line, 2 );
+											if ( count( $line_parts ) > 1 ) {
+												$title = $this->sanitize_text( trim( $line_parts[0] ) );
+												$title = str_replace(' ', '_', strtolower($title));
+												$readme_sections[$title] = 	trim( $line_parts[1] );
+											}
+											
+										}
+									} else {
+										$_is_short_description = true;
+									}
+								} else if ( isset( $readme_sections[$section_current]['content_raw'] ) ) {
+									if ( ( empty( $line ) ) && ( empty( $readme_sections[$section_current]['content_raw'] ) ) )
+										continue;
+									else	
+										$readme_sections[$section_current]['content_raw'] .= $line ."\r\n"; 
+								}
+							}
+						}
 					}
-				}
-				
+					
+					if ( ( isset( $readme_sections['tags'] ) ) && ( !empty( $readme_sections['tags'] ) ) ) {
+						$tags_str = $readme_sections['tags'];
+						$readme_sections['tags'] = array();
+						
+						$tags_array = preg_split('|,[\s]*?|', trim( $tags_str ) );
+						if ( count( $tags_array ) > 1 ) {
+							//foreach ( array_keys( $tags_array ) as $t ) {
+							//	$readme_sections['tags'][$t] = $this->sanitize_text( $tags_array[$t] );
+							//}
+							$readme_sections['tags'] = array_map( array( $this, 'sanitize_text'), $tags_array );
+							
+						} 
+					} else {
+						$readme_sections['tags'] = array();
+					}
+
+					/*
+					if ( ( isset( $readme_sections['contributors'] ) ) && ( !empty( $readme_sections['contributors'] ) ) ) {
+						$contributors_str = $readme_sections['contributors'];
+						$readme_sections['contributors'] = array();
+						
+						$contributors_array = preg_split('|,[\s]*?|', trim( $contributors_str ) );
+						if ( count( $contributors_array ) > 1 ) {
+							//foreach ( array_keys( $contributors_array ) as $t ) {
+							//	$readme_sections['contributors'][$t] = $this->user_sanitize( $contributors_array[$t] );
+							//}
+							$readme_sections['contributors'] = array_map( array( $this, 'user_sanitize'), $contributors_array );
+						} 
+					} else {
+					*/
+						$readme_sections['contributors'] = array();
+					//}
+					
+					foreach( array( 'changelog', 'upgrade_notice') as $section_key ) {
+						if ( ( isset( $readme_sections[$section_key]['content_raw'] ) ) && ( !empty( $readme_sections[$section_key]['content_raw'] ) ) ) {
+							$split = preg_split( '#=(.*?)=#', $readme_sections[$section_key]['content_raw'], -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY );
+							$readme_sections[$section_key]['content'] = array();
+							for ( $i = 0; $i < count( $split ); $i += 2 )
+								$readme_sections[$section_key]['content'][$this->sanitize_text( $split[$i] )] = substr( $this->sanitize_text( $split[$i + 1] ), 0, 300 );
+						}
+					}
+
+					foreach( array( 'icons', 'banners' ) as $section_key ) {
+						if ( ( isset( $readme_sections[$section_key]['content_raw'] ) ) && ( !empty( $readme_sections[$section_key]['content_raw'] ) ) ) {
+							$items = explode( PHP_EOL, $readme_sections[$section_key]['content_raw'] );
+							if ( !empty( $items ) ) {
+								$readme_sections[$section_key] = array();
+								foreach( $items as $item ) {
+									$item = trim( $item );
+									if ( !empty( $item ) ) {
+										$item_split = explode( ':', $item, 2 );
+										$readme_sections[$section_key][$item_split[0]] = $item_split[1];
+									}
+								}
+							}
+						}
+					}
+
+					
+					$readme_sections['sections'] = array();
+									
+					foreach( array( 'description', 'installation', 'frequently_asked_questions', 'changelog', 'arbitrary_section' ) as $section_key ) {
+						if ( ( isset( $readme_sections[$section_key]['content_raw'] ) ) && ( !empty( $readme_sections[$section_key]['content_raw'] ) ) ) {
+							$readme_sections[$section_key]['content'] = preg_replace('/^[\s]*=[\s]+(.+?)[\s]+=/m', '<h4>$1</h4>', $readme_sections[$section_key]['content_raw'] );
+							$readme_sections[$section_key]['content'] = $this->filter_text( $readme_sections[$section_key]['content'], true );
+							
+							$readme_sections['sections'][$section_key] = $readme_sections[$section_key]['content'];
+						}
+					}
+				}	
 				return $readme_sections;
 			}
 

@@ -45,14 +45,20 @@ if ( ! class_exists( 'SFWD_CPT' ) ) {
 					'not_found_in_trash'	=> sprintf( esc_html_x( 'No %s found in Trash', 'placeholder: Post Name', 'learndash' ), $this->post_name ),
 					'parent_item_colon'		=> sprintf( esc_html_x( 'Parent %s', 'placeholder: Post Name', 'learndash' ), $this->post_name ),
 					'menu_name'				=> $this->post_name,
+					'item_published'		=>	sprintf( esc_html_x( '%s Published', 'placeholder: Post Name', 'learndash' ), $this->post_name ),
+					'item_published_privately' => sprintf( esc_html_x( '%s Published Privately', 'placeholder: Post Name', 'learndash' ), $this->post_name ),
+					'item_reverted_to_draft' => sprintf( esc_html_x( '%s Reverted to Draft', 'placeholder: Post Name', 'learndash' ), $this->post_name ),
+					'item_scheduled'		=>	sprintf( esc_html_x( '%s Scheduled', 'placeholder: Post Name', 'learndash' ), $this->post_name ),
+					'item_updated'			=>	sprintf( esc_html_x( '%s Updated', 'placeholder: Post Name', 'learndash' ), $this->post_name ),
 				),
 				'public' => true,
 				'rewrite' => array( 
 					'slug' => $this->slug_name, 
 					'with_front' => false,
+					//'feeds' => false,
 				),
 				'show_ui' => true,
-				'has_archive' => true,
+				'has_archive' => false,
 				'show_in_nav_menus' => true,
 				'supports' => array(
 					'title',
@@ -151,7 +157,7 @@ if ( ! class_exists( 'SFWD_CPT' ) ) {
 				$rewrite_flushed = true;
 				
 				// We set a transient. This is checked during the 'shutdown' action where the rewrites will then be flushed. 
-				set_transient( 'sfwd_lms_rewrite_flush', true );
+				learndash_setup_rewrite_flush();
 			}
 		}
 
@@ -344,7 +350,7 @@ if ( ! class_exists( 'SFWD_CPT' ) ) {
 					if ( ! learndash_is_lesson_notcomplete( $user_id, array( $post->ID => 1 ), $course_id ) ) {
 						$status = 'completed';
 					} else {
-						$ld_lesson_access_from = ld_lesson_access_from( $post->ID, $user_id );
+						$ld_lesson_access_from = ld_lesson_access_from( $post->ID, $user_id, $course_id );
 
 						if ( empty( $ld_lesson_access_from ) ) {
 							$status = 'notcompleted';
@@ -369,10 +375,6 @@ if ( ! class_exists( 'SFWD_CPT' ) ) {
 						$sub_title .= learndash_topic_dots( $post->ID, false, $topic_list_type, $user_id, $course_id );
 					}
 
-				}
-
-				if ( isset( $_GET['test'] ) ) {
-					echo '<br>' . $post_type . ':' . $post->post_type . ':' . $post->ID . ':' . $status;
 				}
 
 				if ( $meta_key != 'course_id' ) {
@@ -451,12 +453,12 @@ if ( ! class_exists( 'SFWD_CPT' ) ) {
 		 */
 		static function show_content( $post ) {
 			if ( $post->post_type == 'sfwd-quiz' ) {
-				//if ( LearnDash_Settings_Section::get_section_setting('LearnDash_Settings_Courses_Builder', 'enabled' ) == 'yes' ) {
+				if ( LearnDash_Settings_Section::get_section_setting('LearnDash_Settings_Courses_Builder', 'shared_steps' ) == 'yes' ) {
 					$course_id = learndash_get_course_id( $post );
 					$lesson_id = learndash_course_get_single_parent_step( $course_id, $post->ID );
-					//} else {
-					//$lesson_id = learndash_get_setting( $post, 'lesson' );
-					//}
+				} else {
+					$lesson_id = learndash_get_setting( $post, 'lesson' );
+				}
 				return empty( $lesson_id );
 			} else {
 				return true;

@@ -254,7 +254,7 @@ global $rpg_settingsf ;
 	<?php //************************* Group name settings *************************// ?>
 			<?php if( $active_tab == 'group_name_settings' ) { ?>
 		<form method="post" action="options.php">
-			<?php global $rpg_disable_groups ?>
+			<?php global $rpg_disable_groups ;?>
 			<?php settings_fields( 'rpg_group_settings' ); ?>
 			
 			<table class="form-table">

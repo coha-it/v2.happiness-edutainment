@@ -17,68 +17,71 @@ if ( ( class_exists( 'LearnDash_Gutenberg_Block' ) ) && ( ! class_exists( 'Learn
 		 * Object constructor
 		 */
 		public function __construct() {
-			$this->shortcode_slug = 'ld_lesson_list';
-			$this->block_slug = 'ld-lesson-list';
+			$this->shortcode_slug   = 'ld_lesson_list';
+			$this->block_slug       = 'ld-lesson-list';
 			$this->block_attributes = array(
-				'orderby' => array(
+				'orderby'                 => array(
 					'type' => 'string',
 				),
-				'order' => array(
+				'order'                   => array(
 					'type' => 'string',
 				),
-				'per_page' => array(
+				'per_page'                => array(
 					'type' => 'string',
 				),
-				'course_id' => array(
+				'course_id'               => array(
 					'type' => 'string',
 				),
-				'show_content' => array(
+				'show_content'            => array(
 					'type' => 'boolean',
 				),
-				'show_thumbnail' => array(
+				'show_thumbnail'          => array(
 					'type' => 'boolean',
 				),
-				'lesson_category_name' => array(
+				'lesson_category_name'    => array(
 					'type' => 'string',
 				),
-				'lesson_cat' => array(
+				'lesson_cat'              => array(
 					'type' => 'string',
 				),
 				'lesson_categoryselector' => array(
-					'type' => 'string',
-				),
-				'lesson_tag' => array(
-					'type' => 'string',
-				),
-				'lesson_tag_id' => array(
-					'type' => 'string',
-				),
-				'category_name' => array(
-					'type' => 'string',
-				),
-				'cat' => array(
-					'type' => 'string',
-				),
-				'categoryselector' => array(
-					'type' => 'string',
-				),
-				'tag' => array(
-					'type' => 'string',
-				),
-				'tag_id' => array(
-					'type' => 'string',
-				),
-				'preview_show' => array(
 					'type' => 'boolean',
 				),
-				'course_grid' => array(
+				'lesson_tag'              => array(
+					'type' => 'string',
+				),
+				'lesson_tag_id'           => array(
+					'type' => 'string',
+				),
+				'category_name'           => array(
+					'type' => 'string',
+				),
+				'cat'                     => array(
+					'type' => 'string',
+				),
+				'categoryselector'        => array(
 					'type' => 'boolean',
 				),
-				'col' => array(
+				'tag'                     => array(
 					'type' => 'string',
+				),
+				'tag_id'                  => array(
+					'type' => 'string',
+				),
+				'preview_show'            => array(
+					'type' => 'boolean',
+				),
+				'course_grid'             => array(
+					'type' => 'boolean',
+				),
+				'col'                     => array(
+					'type' => 'string',
+				),
+				'example_show' => array(
+					'type' => 'boolean',
 				),
 			);
-			$this->self_closing = true;
+			$this->self_closing     = true;
 
 			$this->init();
 		}
@@ -99,64 +102,10 @@ if ( ( class_exists( 'LearnDash_Gutenberg_Block' ) ) && ( ! class_exists( 'Learn
 
 			if ( is_user_logged_in() ) {
 
-				$shortcode_params_str = '';
-				foreach( $attributes as $key => $val ) {
-					if ( ( empty( $key ) ) || ( is_null( $val ) ) ) {
-						continue;
-					}
-
-					if ( 'preview_show' === $key ) {
-						continue;
-					} else if ( 'preview_user_id' === $key ) {
-						if ( ( ! isset( $attributes['user_id'] ) ) && ( 'preview_user_id' === $key ) && ( '' !== $val ) ) {
-							if ( learndash_is_admin_user( get_current_user_id() ) ) {
-								// If admin user they can preview any user_id.
-							} else if ( learndash_is_group_leader_user( get_current_user_id() ) ) {
-								// If group leader user we ensure the preview user_id is within their group(s).
-								if ( ! learndash_is_group_leader_of_user( get_current_user_id(), $val ) ) {
-									continue;
-								}
-							} else {
-								// If neither admin or group leader then we don't see the user_id for the shortcode.
-								continue;
-							}
-							$key = str_replace( 'preview_', '', $key );
-							$val = intval( $val );
-						}
-					} else if ( 'per_page' === $key ) {
-						if ( '' === $val ) {
-							continue;
-						}
-						$key = 'num';
-						$val = (int) $val;
-
-					} else if ( ( 'show_content' === $key ) || ( 'show_thumbnail' === $key ) || ( 'course_grid' === $key ) || ( 'progress_bar' === $key ) ) {
-						if ( ( 1 === $val ) || ( true === $val ) ) {
-							$val = 'true';
-						} else {
-							$val = 'false';
-						}
-					} else if ( 'col' === $key ) {
-						if ( defined( 'LEARNDASH_COURSE_GRID_FILE' ) ) {
-							$val = intval( $val );
-							if ( $val < 1 ) {
-								$val = 3;
-							}
-						} else {
-							continue;
-						}
-					} else if ( empty( $val ) ) {
-						continue;
-					}
-
-					if ( ! empty( $shortcode_params_str ) ) {
-						$shortcode_params_str .= ' ';
-					}
-					$shortcode_params_str .= $key . '="' . esc_attr( $val ) . '"';
-				}
-
+				$attributes           = apply_filters( 'learndash_block_markers_shortcode_atts', $attributes, $this->shortcode_slug, $this->block_slug, '' );
+				$shortcode_params_str = $this->prepare_course_list_atts_to_param( $attributes );
 				$shortcode_params_str = '[' . $this->shortcode_slug . ' ' . $shortcode_params_str . ']';
-				$shortcode_out = do_shortcode( $shortcode_params_str );
+				$shortcode_out        = do_shortcode( $shortcode_params_str );
 
 				// This is mainly to protect against emty returns with the Gutenberg ServerSideRender function.
 				return $this->render_block_wrap( $shortcode_out );
@@ -193,15 +142,24 @@ if ( ( class_exists( 'LearnDash_Gutenberg_Block' ) ) && ( ! class_exists( 'Learn
 					}
 				}
 
-				if ( ( ! isset( $attributes['course_grid'] ) ) || ( true == $attributes['course_grid'] ) ) {
+				if ( ( ! isset( $attributes['course_grid'] ) ) || ( true === $attributes['course_grid'] ) ) {
 					$attributes['course_grid'] = 'true';
 				}
+
+				if ( ( isset( $attributes['lesson_categoryselector'] ) ) && ( true === $attributes['lesson_categoryselector'] ) ) {
+					$attributes['lesson_categoryselector'] = 'true';
+				}
+
+				if ( ( isset( $attributes['categoryselector'] ) ) && ( true === $attributes['categoryselector'] ) ) {
+					$attributes['categoryselector'] = 'true';
+				}
+
 
 				/**
 				 * Not the best place to make this call this but we need to load the
 				 * Course Grid resources.
 				 */
-				if ( 'true' == $attributes['course_grid'] ) {
+				if ( 'true' === $attributes['course_grid'] ) {
 					learndash_enqueue_course_grid_scripts();
 				}
 			}

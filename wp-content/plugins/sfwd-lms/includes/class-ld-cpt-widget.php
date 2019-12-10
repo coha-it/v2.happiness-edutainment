@@ -118,17 +118,21 @@ class Lesson_Widget extends WP_Widget {
 		$orderby               = ( empty( $course_lesson_orderby)) ? $lessons['orderby'] : $course_lesson_orderby;
 		$order                 = ( empty( $course_lesson_order)) ? $lessons['order'] : $course_lesson_order;
 		$post__in				= '';
+		$meta_key				= 'course_id';
+		$meta_value				= $course_id;
 		
 		if ( LearnDash_Settings_Section::get_section_setting('LearnDash_Settings_Courses_Builder', 'shared_steps' ) == 'yes' ) {
 			$course_lessons = learndash_course_get_steps_by_type( $course_id, 'sfwd-lessons' );
 			if ( !empty( $course_lessons ) ) {
-				$order = 'ASC';
+				$order = '';
 				$orderby ='post__in';
 				$post__in = implode(',', $course_lessons );
+				$meta_key = '';
+				$meta_value = '';
 			}
 		}
 		
-		$shortcode = '[sfwd-lessons meta_key="course_id" meta_value="'. $course_id .'" order="'. $order .'" orderby="'. $orderby .'" post__in="'. $post__in .'" posts_per_page="'. $lessons['posts_per_page'] .'" wrapper="li"]';
+		$shortcode = '[sfwd-lessons meta_key="' . $meta_key . '" meta_value="'. $meta_value .'" order="'. $order .'" orderby="'. $orderby .'" post__in="'. $post__in .'" posts_per_page="'. $lessons['posts_per_page'] .'" wrapper="li"]';
 		
 		$lessons               = wptexturize( do_shortcode(  $shortcode ) );
 		

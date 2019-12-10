@@ -101,7 +101,7 @@ if ( ( !class_exists( 'LD_REST_Courses_Controller_V1' ) ) && ( class_exists( 'LD
 			$this->sub_controllers['class-ld-rest-courses-groups-controller']->register_routes();
 		}
 
-		function rest_prepare_response_filter( $response, $post, $request ) {
+		function rest_prepare_response_filter( WP_REST_Response $response, WP_Post $post, WP_REST_Request $request ) {
 
 			$base = sprintf( '%s/%s', $this->namespace, $this->rest_base );
 

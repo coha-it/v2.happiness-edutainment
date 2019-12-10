@@ -8,7 +8,7 @@ if ( ( class_exists( 'LearnDash_Shortcodes_Section' ) ) && ( !class_exists( 'Lea
 			$this->shortcodes_section_key 			= 	'ld_course_info';
 			$this->shortcodes_section_title 		= 	sprintf( esc_html_x( 'LD %s Info', 'placeholder: Course', 'learndash' ), LearnDash_Custom_Label::get_label( 'course' ) );
 			$this->shortcodes_section_type			=	1;
-			$this->shortcodes_section_description	=	sprintf( esc_html_x( 'This shortcode shows the %s and progress for the user.', 'placeholders: courses', 'learndash' ), LearnDash_Custom_Label::label_to_lower( 'courses' ) );
+			$this->shortcodes_section_description	=	sprintf( esc_html_x( 'This shortcode shows the %s and progress for the user.', 'placeholders: courses', 'learndash' ), learndash_get_custom_label_lower( 'courses' ) );
 			
 			parent::__construct(); 
 		}
@@ -30,7 +30,7 @@ if ( ( class_exists( 'LearnDash_Shortcodes_Section' ) ) && ( !class_exists( 'Lea
 					'name'  		=> 	'registered_show_thumbnail', 
 					'type'  		=> 	'select',
 					'label' 		=> 	sprintf( esc_html_x('Show %s Thumbnail', 'placeholder: Course', 'learndash'), LearnDash_Custom_Label::get_label( 'course' ) ),
-					'help_text'		=>	sprintf( esc_html_x( 'shows a %s thumbnail.', 'placeholders: course', 'learndash' ), LearnDash_Custom_Label::label_to_lower( 'course' ) ),
+					'help_text'		=>	sprintf( esc_html_x( 'shows a %s thumbnail.', 'placeholders: course', 'learndash' ), learndash_get_custom_label_lower( 'course' ) ),
 					'value' 		=> 	'true',
 					'options'		=>	array(
 											'' 		=> esc_html__('Yes (default)', 'learndash'),
@@ -43,7 +43,7 @@ if ( ( class_exists( 'LearnDash_Shortcodes_Section' ) ) && ( !class_exists( 'Lea
 					'name'  		=> 	'registered_num', 
 					'type'  		=> 	'number',
 					'label' 		=> 	esc_html__( 'Registered per page', 'learndash' ), 
-					'help_text'		=>	sprintf( esc_html_x( 'Registered %1$s per page. Default is %2$d. Set to zero for all.', 'placeholders: courses, default per page', 'learndash' ), LearnDash_Custom_Label::label_to_lower( 'courses' ), LearnDash_Settings_Section::get_section_setting( 'LearnDash_Settings_Section_General_Per_Page', 'per_page' ) ),
+					'help_text'		=>	sprintf( esc_html_x( 'Registered %1$s per page. Default is %2$d. Set to zero for all.', 'placeholders: courses, default per page', 'learndash' ), learndash_get_custom_label_lower( 'courses' ), LearnDash_Settings_Section::get_section_setting( 'LearnDash_Settings_Section_General_Per_Page', 'per_page' ) ),
 					'value' 		=> 	'',
 					'class'			=>	'small-text',
 					'attrs'			=>	array(

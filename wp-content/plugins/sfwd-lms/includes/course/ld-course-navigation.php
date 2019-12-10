@@ -17,20 +17,22 @@
  * @param  boolean $url      return a url instead of HTML link
  * @return string            previous post link output
  */
-function learndash_previous_post_link( $prevlink='', $url = false ) {
-	global $post;
+function learndash_previous_post_link( $prevlink='', $url = false, $post = null ) {
+if ( empty( $post) ) {
+		global $post;
+	}
 
-	if ( ! is_singular() || empty( $post) ) {
+	if ( empty( $post) ) {
 		return $prevlink;
 	}
 
 	if ( $post->post_type == 'sfwd-lessons' ) {
-		$link_name = sprintf( esc_html_x( 'Previous %s', 'Previous Lesson Label', 'learndash' ), LearnDash_Custom_Label::get_label( 'lesson' ) );
+		$link_name = learndash_get_label_course_step_previous( learndash_get_post_type_slug ( 'lesson' ) );
 		$posts = learndash_get_lesson_list( null, array( 'num' => 0 ) );
 	} else if ( $post->post_type == 'sfwd-topic' ) {
-		$link_name = sprintf( esc_html_x( 'Previous %s', 'Previous Topic Label', 'learndash' ), LearnDash_Custom_Label::get_label( 'topic' ) );
+		$link_name = learndash_get_label_course_step_previous( learndash_get_post_type_slug ( 'topic' ) );
 		
-		if ( LearnDash_Settings_Section::get_section_setting('LearnDash_Settings_Courses_Builder', 'enabled' ) == 'yes' ) {
+		if ( LearnDash_Settings_Section::get_section_setting('LearnDash_Settings_Courses_Builder', 'shared_steps' ) == 'yes' ) {
 			$course_id = learndash_get_course_id( $post );
 			$lesson_id = learndash_course_get_single_parent_step( $course_id, $post->ID );
 		} else {
@@ -51,11 +53,12 @@ function learndash_previous_post_link( $prevlink='', $url = false ) {
 	}
 
 	if ( isset( $found_at) && ! empty( $posts[ $found_at -1] ) ) {
-		$permalink = get_permalink( $posts[ $found_at -1]->ID );
-
-		if ( $url ) {
-			return $permalink;
+		if ( 'id' === $url ) {
+			return $posts[ $found_at -1]->ID;
+		} else if ( $url ) {
+			return get_permalink( $posts[ $found_at -1]->ID );
 		} else {
+			$permalink = get_permalink( $posts[ $found_at -1 ]->ID );
 			if ( is_rtl() ) {
 				$link_name_with_arrow = $link_name;
 			} else {
@@ -64,7 +67,7 @@ function learndash_previous_post_link( $prevlink='', $url = false ) {
 
 			$link = '<a href="'.$permalink.'" class="prev-link" rel="prev">' . $link_name_with_arrow . '</a>';
 
-			 /**
+			/**
 			 * Filter previous post link output
 			 * 
 			 * @since 2.1.0
@@ -87,7 +90,8 @@ function learndash_previous_post_link( $prevlink='', $url = false ) {
  * @since 2.1.0
  * 
  * @param  string  $prevlink
- * @param  boolean $url      return a url instead of HTML link
+ * @param  boolean $url      return a url instead of HTML link.
+ *                           Added 3.1 'id' will return next step post ID.
  * @param  object  $post     WP_Post object
  * @return string            next post link output
  */
@@ -101,13 +105,13 @@ function learndash_next_post_link( $prevlink='', $url = false, $post = null ) {
 	}
 
 	if ( $post->post_type == 'sfwd-lessons' ) {
-		$link_name = sprintf( esc_html_x( 'Next %s', 'Next Lesson Label', 'learndash' ), LearnDash_Custom_Label::get_label( 'lesson' ) );
+		$link_name = learndash_get_label_course_step_next( learndash_get_post_type_slug( 'lesson' ) );
 		$course_id = learndash_get_course_id( $post );
 		$posts = learndash_get_lesson_list( $course_id, array( 'num' => 0 ) );
 	} else if ( $post->post_type == 'sfwd-topic' ) {
-		$link_name = sprintf( esc_html_x( 'Next %s', 'Next Topic Label', 'learndash' ), LearnDash_Custom_Label::get_label( 'topic' ) );
+		$link_name = learndash_get_label_course_step_next( learndash_get_post_type_slug( 'topic' ) );
 
-		if ( LearnDash_Settings_Section::get_section_setting('LearnDash_Settings_Courses_Builder', 'enabled' ) == 'yes' ) {
+		if ( LearnDash_Settings_Section::get_section_setting('LearnDash_Settings_Courses_Builder', 'shared_steps' ) == 'yes' ) {
 			$course_id = learndash_get_course_id( $post->ID );
 			$lesson_id = learndash_course_get_single_parent_step( $course_id, $post->ID );
 		} else {
@@ -129,11 +133,12 @@ function learndash_next_post_link( $prevlink='', $url = false, $post = null ) {
 	}
 
 	if ( isset( $found_at) && ! empty( $posts[ $found_at + 1] ) ) {
-		$permalink = get_permalink( $posts[ $found_at + 1]->ID );
-		if ( $url ) {
-			return $permalink;
+		if ( 'id' === $url ) {
+			return $posts[ $found_at + 1]->ID;
+		} else if ( $url ) {
+			return get_permalink( $posts[ $found_at + 1]->ID );
 		} else {
-
+			$permalink = get_permalink( $posts[ $found_at + 1]->ID );
 			if ( is_rtl() ) {
 				$link_name_with_arrow = $link_name ;
 			} else {
@@ -151,6 +156,13 @@ function learndash_next_post_link( $prevlink='', $url = false, $post = null ) {
 			 */
 			return apply_filters( 'learndash_next_post_link', $link, $permalink, $link_name, $post );
 		}
+//	} else if ( $post->post_type == 'sfwd-topic' ) {
+//		if ( ( isset( $lesson_id ) ) && ( ! empty( $lesson_id ) ) ) {
+//			$lesson_post = get_post( $lesson_id );
+//			if ( ( is_a( $lesson_post, 'WP_Post' ) ) && ( $lesson_post->post_type === learndash_get_post_type_slug( 'lesson' ) ) ) {
+//				return learndash_next_post_link( $prevlink, $url, $lesson_post );
+//			}
+//		}
 	} else {
 		return $prevlink;
 	}
@@ -193,7 +205,7 @@ function learndash_quiz_continue_link( $id ) {
 	global $status, $pageQuizzes;
 
 	$course_id = learndash_get_course_id( $id );
-	if ( ( !empty( $course_id ) ) && ( LearnDash_Settings_Section::get_section_setting('LearnDash_Settings_Courses_Builder', 'enabled' ) == 'yes' ) ) {	
+	if ( ( !empty( $course_id ) ) && ( LearnDash_Settings_Section::get_section_setting('LearnDash_Settings_Courses_Builder', 'shared_steps' ) == 'yes' ) ) {	
 		$lesson_id = learndash_course_get_single_parent_step( $course_id, $id );
 		if ( empty( $lesson_id ) ) {
 			$url = get_permalink( $course_id );
@@ -477,7 +489,7 @@ function learndash_get_lesson_list( $id = null, $atts = array() ) {
 	
 	$lessons_args = array_merge( $lessons_args, $atts );
 	
-	if ( LearnDash_Settings_Section::get_section_setting('LearnDash_Settings_Courses_Builder', 'shared_steps' ) == 'yes' ) {	
+	if ( LearnDash_Settings_Section::get_section_setting('LearnDash_Settings_Courses_Builder', 'shared_steps' ) == 'yes' ) {
 		$ld_course_steps_object = LDLMS_Factory_Post::course_steps( $course_id );
 		$ld_course_steps_object->load_steps();
 		$course_steps = $ld_course_steps_object->get_steps('t');
@@ -511,76 +523,68 @@ function learndash_get_lesson_list( $id = null, $atts = array() ) {
  * Get topics list for a lesson
  *
  * @since 2.1.0
- * 
- * @param  int 		$for_lesson_id 
- * @return array 	topics list
+ *
+ * @param  int   $for_lesson_id
+ * @return array topics list
  */
 function learndash_get_topic_list( $for_lesson_id = null, $course_id = null ) {
-	
-	if ( empty( $course_id ))
+	if ( empty( $course_id ) ) {
 		$course_id = learndash_get_course_id( $for_lesson_id );
-	
-	if ( ( !empty( $for_lesson_id ) ) && ( !empty( $course_id ) ) ) {
-		$transient_key = "learndash_lesson_topics_". $course_id .'_'. $for_lesson_id;
-	} else if ( !empty( $for_lesson_id ) ) {
-		$transient_key = "learndash_lesson_topics_". $for_lesson_id;
-	} else {
-		$transient_key = "learndash_lesson_topics_all";
 	}
-	
-	$topics_array = learndash_get_valid_transient( $transient_key );
 
-	if ( $topics_array === false ) {
+	if ( ( ! empty( $for_lesson_id ) ) && ( ! empty( $course_id ) ) ) {
+		$transient_key = 'learndash_lesson_topics_' . $course_id . '_' . $for_lesson_id;
+	} elseif ( ! empty( $for_lesson_id ) ) {
+		$transient_key = 'learndash_lesson_topics_' . $for_lesson_id;
+	} else {
+		$transient_key = 'learndash_lesson_topics_all';
+	}
 
-		if ( !empty( $for_lesson_id ) ) {
-	
+	$topics_array = LDLMS_Transients::get( $transient_key );
+
+	if ( false === $topics_array ) {
+
+		if ( ! empty( $for_lesson_id ) ) {
+
 			$lessons_options = sfwd_lms_get_post_options( 'sfwd-lessons' );
-			$orderby = $lessons_options['orderby'];
-			$order = $lessons_options['order'];
+			$orderby         = $lessons_options['orderby'];
+			$order           = $lessons_options['order'];
 
-			if ( !empty( $course_id ) ) {
-
-				//$course_options = get_post_meta( $course_id, '_sfwd-courses', true );
-				//$course_orderby = @$course_options['sfwd-courses_course_lesson_orderby'];
-				//$course_order = @$course_options['sfwd-courses_course_lesson_order'];
-
-				//$orderby = ( empty( $course_orderby ) ) ? $lessons_options['orderby'] : $course_orderby;
-				//$order = ( empty( $course_order ) ) ? $lessons_options['order'] : $course_order;
-
+			if ( ! empty( $course_id ) ) {
 				$course_lessons_args = learndash_get_course_lessons_order( $course_id );
-				$orderby = ( isset( $course_lessons_args[ 'orderby' ] ) ) ? $course_lessons_args[ 'orderby' ] : 'title';
-				$order = ( isset( $course_lessons_args[ 'order' ] ) ) ? $course_lessons_args[ 'order' ] : 'ASC';
+				$orderby             = isset( $course_lessons_args['orderby'] ) ? $course_lessons_args['orderby'] : 'title';
+				$order               = isset( $course_lessons_args['order'] ) ? $course_lessons_args['order'] : 'ASC';
 			}
 		} else {
 			$orderby = 'name';
-			$order = 'ASC';
-		}
-	
-		$topics_query_args = array( 
-			'post_type' => 'sfwd-topic', 
-			'numberposts' => -1, 
-			'orderby' => $orderby, 
-			'order' => $order,
-		); 
-		
-		if ( !empty( $for_lesson_id ) ) {
-			$topics_query_args['meta_key'] 		= 	'lesson_id';
-			$topics_query_args['meta_value'] 	= 	$for_lesson_id;
-			$topics_query_args['meta_compare'] 	= 	'=';
+			$order   = 'ASC';
 		}
 
-		if ( LearnDash_Settings_Section::get_section_setting('LearnDash_Settings_Courses_Builder', 'enabled' ) == 'yes' ) {	
-			if ( !empty( $course_id ) ) {
+		$topics_query_args = array(
+			'post_type'   => 'sfwd-topic',
+			'numberposts' => -1,
+			'orderby'     => $orderby,
+			'order'       => $order,
+		);
+
+		if ( ! empty( $for_lesson_id ) ) {
+			$topics_query_args['meta_key']     = 'lesson_id';
+			$topics_query_args['meta_value']   = $for_lesson_id;
+			$topics_query_args['meta_compare'] = '=';
+		}
+
+		if ( 'yes' === LearnDash_Settings_Section::get_section_setting( 'LearnDash_Settings_Courses_Builder', 'shared_steps' ) ) {
+			if ( ! empty( $course_id ) ) {
 
 				$ld_course_steps_object = LDLMS_Factory_Post::course_steps( $course_id );
 				$ld_course_steps_object->load_steps();
 				$steps = $ld_course_steps_object->get_steps();
-			
-				if ( ( isset( $steps['sfwd-lessons'][$for_lesson_id]['sfwd-topic'] ) ) && ( !empty( $steps['sfwd-lessons'][$for_lesson_id]['sfwd-topic'] ) ) ) {
-					$topic_ids = array_keys( $steps['sfwd-lessons'][$for_lesson_id]['sfwd-topic'] );
+
+				if ( ( isset( $steps['sfwd-lessons'][ $for_lesson_id ]['sfwd-topic'] ) ) && ( ! empty( $steps['sfwd-lessons'][ $for_lesson_id ]['sfwd-topic'] ) ) ) {
+					$topic_ids = array_keys( $steps['sfwd-lessons'][ $for_lesson_id ]['sfwd-topic'] );
 					$topics_query_args['include'] = $topic_ids;
 					$topics_query_args['orderby'] = 'post__in';
-				
+
 					unset( $topics_query_args['order'] );
 					unset( $topics_query_args['meta_key'] );
 					unset( $topics_query_args['meta_value'] );
@@ -591,33 +595,33 @@ function learndash_get_topic_list( $for_lesson_id = null, $course_id = null ) {
 			}
 		}
 
-
-
 		$topics = get_posts( $topics_query_args );
-		
-		if ( !empty( $topics) ) {
+
+		if ( ! empty( $topics ) ) {
 			if ( empty( $for_lesson_id ) ) {
 				$topics_array = array();
-			
+
 				foreach ( $topics as $topic ) {
-					if ( LearnDash_Settings_Section::get_section_setting('LearnDash_Settings_Courses_Builder', 'enabled' ) == 'yes' ) {
+					if ( 'yes' === LearnDash_Settings_Section::get_section_setting( 'LearnDash_Settings_Courses_Builder', 'shared_steps' ) ) {
 						$course_id = learndash_get_course_id( $topic->ID );
 						$lesson_id = learndash_course_get_single_parent_step( $course_id, $topic->ID );
 					} else {
 						$lesson_id = learndash_get_setting( $topic, 'lesson' );
 					}
-					
+
 					if ( ! empty( $lesson_id ) ) {
+						// Need to clear out the post_content before transient storage.
+						$topic->post_content = 'EMPTY';
 						$topics_array[ $lesson_id ][] = $topic;
 					}
 				}
-				set_transient( $transient_key, $topics_array, MINUTE_IN_SECONDS );
+				LDLMS_Transients::set( $transient_key, $topics_array, MINUTE_IN_SECONDS );
 				return $topics_array;
 			} else {
-				set_transient( $transient_key, $topics, MINUTE_IN_SECONDS );
+				LDLMS_Transients::set( $transient_key, $topics, MINUTE_IN_SECONDS );
 				return $topics;
 			}
-		} 
+		}
 	} else {
 		return $topics_array;
 	}
@@ -659,7 +663,7 @@ function learndash_get_global_quiz_list( $id = null ){
 			}
 		} else {
 			$transient_key = "learndash_quiz_course_". $course_id;
-			$quizzes_new = learndash_get_valid_transient( $transient_key );
+			$quizzes_new = LDLMS_Transients::get( $transient_key );
 			if ( $quizzes_new === false ) {
 
 				$course_settings = learndash_get_setting( $course_id );
@@ -686,7 +690,7 @@ function learndash_get_global_quiz_list( $id = null ){
 					}
 				}
 			
-				set_transient( $transient_key, $quizzes_new, MINUTE_IN_SECONDS );
+				LDLMS_Transients::set( $transient_key, $quizzes_new, MINUTE_IN_SECONDS );
 			} 
 			return $quizzes_new;
 		}
@@ -709,7 +713,7 @@ function learndash_get_global_quiz_list_OLD( $id = null ){
 	if (!empty($course_id)) {
 
 		$transient_key = "learndash_quiz_course_". $course_id;
-		$quizzes_new = learndash_get_valid_transient( $transient_key );
+		$quizzes_new = LDLMS_Transients::get( $transient_key );
 		if ( $quizzes_new === false ) {
 
 			$course_settings = learndash_get_setting( $course_id );
@@ -730,7 +734,7 @@ function learndash_get_global_quiz_list_OLD( $id = null ){
 			$quizzes_new = array();
 
 			foreach ( $quizzes as $k => $quiz ) {
-				if ( LearnDash_Settings_Section::get_section_setting('LearnDash_Settings_Courses_Builder', 'enabled' ) == 'yes' ) {
+				if ( LearnDash_Settings_Section::get_section_setting('LearnDash_Settings_Courses_Builder', 'shared_steps' ) == 'yes' ) {
 					$course_id = learndash_get_course_id( $quiz->ID );
 					$quiz_lesson = learndash_course_get_single_parent_step( $course_id, $quiz->ID );
 				} else {
@@ -742,7 +746,7 @@ function learndash_get_global_quiz_list_OLD( $id = null ){
 				}
 			}
 			
-			set_transient( $transient_key, $quizzes_new, MINUTE_IN_SECONDS );
+			LDLMS_Transients::set( $transient_key, $quizzes_new, MINUTE_IN_SECONDS );
 		} 
 		return $quizzes_new;
 	}
@@ -822,13 +826,14 @@ function learndash_get_course_lessons_list( $course = null, $user_id = null, $le
 		'posts_per_page' => $posts_per_page,
 		'paged' => $lesson_paged,
 		'pagination' => $lesson_query_pagination,
-		'prder_context' => 'course_lessons',
+		'pager_context' => 'course_lessons',
 		'return' => 'array',
-		'user_id' => $user_id
+		'user_id' => $user_id,
+		'course_id' => $course->ID,
 	);
 	$opt = wp_parse_args( $lessons_args, $opt );
 
-	if ( LearnDash_Settings_Section::get_section_setting('LearnDash_Settings_Courses_Builder', 'enabled' ) == 'yes' ) {	
+	if ( LearnDash_Settings_Section::get_section_setting('LearnDash_Settings_Courses_Builder', 'shared_steps' ) == 'yes' ) {	
 		$ld_course_steps_object = LDLMS_Factory_Post::course_steps( $course->ID );
 		
 		$lesson_ids = $ld_course_steps_object->get_children_steps( $course->ID, $opt['post_type'] );
@@ -891,7 +896,7 @@ function learndash_get_course_quiz_list( $course = null, $user_id = null ) {
 		'user_id' => $user_id
 	);
 
-	if ( LearnDash_Settings_Section::get_section_setting('LearnDash_Settings_Courses_Builder', 'enabled' ) == 'yes' ) {	
+	if ( LearnDash_Settings_Section::get_section_setting('LearnDash_Settings_Courses_Builder', 'shared_steps' ) == 'yes' ) {	
 		$ld_course_steps_object = LDLMS_Factory_Post::course_steps( $course->ID );
 		
 		$lesson_ids = $ld_course_steps_object->get_children_steps( $course->ID, $opt['post_type'] );
@@ -955,7 +960,7 @@ function learndash_get_lesson_quiz_list( $lesson, $user_id = null, $course_id = 
 	);
 
 
-	if ( LearnDash_Settings_Section::get_section_setting('LearnDash_Settings_Courses_Builder', 'enabled' ) == 'yes' ) {	
+	if ( LearnDash_Settings_Section::get_section_setting('LearnDash_Settings_Courses_Builder', 'shared_steps' ) == 'yes' ) {	
 		$ld_course_steps_object = LDLMS_Factory_Post::course_steps( $course_id );
 		if ( $ld_course_steps_object ) {
 			$quiz_ids = $ld_course_steps_object->get_children_steps( $lesson->ID, $opt['post_type'] );

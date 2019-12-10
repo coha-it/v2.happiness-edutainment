@@ -22,60 +22,6 @@ function learndash_add_theme_support() {
 
 add_action( 'after_setup_theme', 'learndash_add_theme_support' );
 
-
-
-/**
- * Get a Quiz Pro's quiz ID
- *
- * @todo   purpose of this function and how quiz pro id's relate to quizzes
- *
- * @since 2.1.0
- *
- * @param  int $quiz_id  quiz pro id
- * @return int           quiz id
- */
-
-function learndash_get_quiz_id_by_pro_quiz_id( $quiz_id ) {
-	global $wpdb;
-
-	//$sql_str = $wpdb->prepare( "SELECT post_id FROM ". $wpdb->postmeta . " WHERE meta_key=%s ", 'quiz_pro_id_' . intval( $quiz_id ) );
-	$sql_str = $wpdb->prepare("SELECT post_id FROM ". $wpdb->postmeta ." as postmeta INNER JOIN ". $wpdb->posts ." as posts ON posts.ID=postmeta.post_id
-		WHERE posts.post_type = %s AND posts.post_status = %s AND postmeta.meta_key = %s", 'sfwd-quiz', 'publish', 'quiz_pro_id_' . intval( $quiz_id ));
-	$quiz_post_id = $wpdb->get_var( $sql_str );
-	if ( $quiz_post_id != '' ) {
-		return intval($quiz_post_id);
-	}
-	
-	
-	//$sql_str = $wpdb->prepare( "SELECT post_id FROM ". $wpdb->postmeta . " WHERE meta_key=%s AND meta_value=%d", 'quiz_pro_id', intval( $quiz_id ) );
-	$sql_str = $wpdb->prepare("SELECT post_id FROM ". $wpdb->postmeta ." as postmeta INNER JOIN ". $wpdb->posts ." as posts ON posts.ID=postmeta.post_id
-		WHERE posts.post_type = %s AND posts.post_status = %s AND meta_key = %s AND meta_value = %d", 'sfwd-quiz', 'publish', 'quiz_pro_id', intval( $quiz_id ));
-	$quiz_post_id = $wpdb->get_var( $sql_str );
-	if ( $quiz_post_id != '' ) {
-		update_post_meta( intval($quiz_post_id), 'quiz_pro_id_' . intval($quiz_id), intval($quiz_id) );
-		return intval($quiz_post_id);
-	} 
-
-	// Because we seem to have a mix of int and string values when these are serialized the format to look for end up being somewhat kludge-y. 
-	$quiz_id_str = sprintf('%s', intval($quiz_id));
-	$quiz_id_len = strlen($quiz_id_str);
-
-	$like_i = 'sfwd-quiz_quiz_pro";i:'. intval($quiz_id) .';';
-	$like_s = '"sfwd-quiz_quiz_pro";s:'. $quiz_id_len .':"'. $quiz_id_str .'"';
-
-	//$sql_str = $wpdb->prepare( "SELECT post_id FROM ". $wpdb->postmeta . " WHERE meta_key=%s AND meta_value LIKE '". $like_i ."' OR meta_value LIKE '". $like_s ."'", '_sfwd-quiz' );
-	
-	// Using REGEX because it is slightly faster then OR on text fields pattern search
-	$sql_str = $wpdb->prepare( "SELECT post_id FROM ". $wpdb->postmeta . " as postmeta INNER JOIN ". $wpdb->posts ." as posts ON posts.ID=postmeta.post_id WHERE posts.post_type = %s AND posts.post_status = %s AND postmeta.meta_key=%s AND postmeta.meta_value REGEXP '". $like_i ."|". $like_s ."'", 'sfwd-quiz', 'publish', '_sfwd-quiz' );
-	$quiz_post_id = $wpdb->get_var( $sql_str );
-	if ( $quiz_post_id != '' ) {
-		update_post_meta( intval($quiz_post_id), 'quiz_pro_id_' . intval($quiz_id), intval($quiz_id) );
-		update_post_meta( intval($quiz_post_id), 'quiz_pro_id', intval($quiz_id) );
-		return $quiz_post_id;
-	} 
-}
-
-
 /**
  * Get LearnDash setting for a post
  * 
@@ -195,36 +141,107 @@ function learndash_update_setting( $post, $setting, $value ) {
 	// Were we sent a post ID?
 	if ( is_numeric( $post ) ) {
 		$post = get_post( $post );
-	} 
-	
-	// Ensure we have a post object or type WP_Post!
-	if ($post instanceof WP_Post) {  
-	
-		$meta = get_post_meta( $post->ID, '_'.$post->post_type, true );
-		if ( !is_array( $meta )) $meta = array( $meta );
-		$meta[ $post->post_type.'_'.$setting] = $value;
+	}
 
-		if ( $setting == 'course' ) {
+	// Ensure we have a post object or type WP_Post!
+	if ( is_a( $post, 'WP_Post' ) ) {
+		$meta = get_post_meta( $post->ID, '_' . $post->post_type, true );
+		if ( ! is_array( $meta ) ) {
+			$meta = array( $meta );
+		}
+		$meta[ $post->post_type . '_' . $setting ] = $value;
+
+		if ( 'course' === $setting ) {
 			$value = intval( $value );
 			$meta[ $post->post_type.'_'.$setting] = $value;
 			if ( !empty( $value ) ) 
 				update_post_meta( $post->ID, 'course_id', $value );
 			else
 				delete_post_meta( $post->ID, 'course_id' );
-		} else if ( $setting == 'lesson' ) {
-			$value = intval( $value );
-			$meta[ $post->post_type.'_'.$setting] = $value;
-			if ( !empty( $value ) ) 
-				update_post_meta( $post->ID, 'lesson_id', $value );
-			else
-				delete_post_meta( $post->ID, 'lesson_id' );
-		} else if ( $setting == 'course_access_list' ) {
+
+		} elseif ( 'course_access_list' === $setting ) {
+			$value = learndash_convert_course_access_list( $value );
 			update_post_meta( $post->ID, 'course_access_list', $value );
+			$meta[ $post->post_type . '_' . $setting ] = $value;
+
+		} elseif ( 'course_points' === $setting ) {
+			$course_points = learndash_format_course_points( $value );
+			if ( ! empty( $course_points ) ) {
+				update_post_meta( $post->ID, 'course_points', $course_points );
+			} else {
+				delete_post_meta( $post->ID, 'course_points' );
+			}
+		} elseif ( 'lesson' === $setting ) {
+			$value = intval( $value );
+			$meta[ $post->post_type . '_' . $setting ] = $value;
+			if ( ! empty( $value ) ) {
+				update_post_meta( $post->ID, 'lesson_id', $value );
+			} else {
+				delete_post_meta( $post->ID, 'lesson_id' );
+			}
+		} elseif ( 'quiz' === $setting ) {
+			update_post_meta( $post->ID, 'quiz_id', absint( $value ) );
+		} elseif ( 'quiz_pro' === $setting ) {
+			$value = absint( $value );
+
+			// Moved from includes/class-ld-semper-fi-module.php line1052
+			$quiz_pro_id_new = $value;
+			$quiz_pro_id_org = absint( get_post_meta( $post->ID, 'quiz_pro_id', true ) );
+
+			if ( ( ! empty( $quiz_pro_id_new ) ) && ( $quiz_pro_id_org !== $quiz_pro_id_new ) ) {
+				/**
+				 * If this quiz was the primary for all shared settings. We need to
+				 * delete the primary marker then move the primary marker to another
+				 * quiz using the same shared settngs.
+				 */
+				$quiz_id_primary_org = absint( learndash_get_quiz_primary_shared( $quiz_pro_id_org, false ) );
+				if ( $quiz_id_primary_org === $post->ID ) {
+					delete_post_meta( $post->ID, 'quiz_pro_primary_' . $quiz_pro_id_org );
+					$quiz_post_ids = learndash_get_quiz_post_ids( $quiz_pro_id_org );
+					if ( ! empty( $quiz_post_ids ) ) {
+						foreach ( $quiz_post_ids as $quiz_post_id ) {
+							if ( $quiz_post_id !== $post->ID ) {
+								update_post_meta( $quiz_post_id, 'quiz_pro_primary_' . $quiz_pro_id_org, $quiz_pro_id_org );
+
+								/**
+								 * After we move the primary marker we also need to move the questions.
+								 */
+								$ld_quiz_questions_object = LDLMS_Factory_Post::quiz_questions( intval( $post->ID ) );
+								if ( $ld_quiz_questions_object ) {
+									$questions = $ld_quiz_questions_object->get_questions( 'post_ids' );
+
+									$questions = get_post_meta( $post->ID, 'ld_quiz_questions', true );
+									update_post_meta( $quiz_post_id, 'ld_quiz_questions', $questions );
+								}
+								break;
+							}
+						}
+					}
+				}
+
+				$quiz_id_primary_new = absint( learndash_get_quiz_primary_shared( $quiz_pro_id_new, false ) );
+				if ( empty( $quiz_id_primary_new ) ) {
+					update_post_meta( $post->ID, 'quiz_pro_primary_' . $quiz_pro_id_new, $quiz_pro_id_new );
+					// trigger to cause reloading of the questions.
+					delete_post_meta( $post->ID, 'ld_quiz_questions' );
+				}
+
+				global $wpdb;
+				$sql_str = "DELETE FROM " . $wpdb->postmeta . " WHERE post_id=" . $post->ID . " AND meta_key like 'quiz_pro_id_%'";
+				$quiz_query_results = $wpdb->query( $sql_str );
+
+				update_post_meta( $post->ID, 'quiz_pro_id', $quiz_pro_id_new );
+				update_post_meta( $post->ID, 'quiz_pro_id_' . $quiz_pro_id_new, $quiz_pro_id_new );
+			}
+		} elseif ( 'viewProfileStatistics' === $setting ) {
+			update_post_meta( $post->ID, '_viewProfileStatistics', $value );
+		} elseif ( 'timeLimitCookie' === $setting ) {
+			update_post_meta( $post->ID, '_timeLimitCookie', absint( $value ) );
 		}
 
-		$return = update_post_meta( $post->ID, '_'.$post->post_type, $meta );
+		$return = update_post_meta( $post->ID, '_' . $post->post_type, $meta );
 	}
-	
+
 	return $return;
 }
 
@@ -313,6 +330,7 @@ function learndash_payment_buttons( $course ) {
 	$course_no_of_cycles = @$meta['sfwd-courses_course_no_of_cycles'];
 	$course_price = @$meta['sfwd-courses_course_price'];
 	$custom_button_url = @$meta['sfwd-courses_custom_button_url'];
+	$custom_button_label = @$meta['sfwd-courses_custom_button_label'];
 
 	// format the Course price to be proper XXX.YY no leading dollar signs or other values. 
 	if (( $course_price_type == 'paynow' ) || ( $course_price_type == 'subscribe' )) {
@@ -337,18 +355,25 @@ function learndash_payment_buttons( $course ) {
 		return '';
 	}
 
-	$button_text = LearnDash_Custom_Label::get_label( 'button_take_this_course' );
+	if ( empty( $custom_button_label ) ) {
+		$button_text = LearnDash_Custom_Label::get_label( 'button_take_this_course' );
+	} else {
+		$button_text = esc_attr( $custom_button_label );
+	}
 
 	if ( ! empty( $course_price_type ) && $course_price_type == 'closed' ) {
 
-		if ( empty( $custom_button_url) ) {
+		if ( empty( $custom_button_url ) ) {
 			$custom_button = '';
 		} else {
-			if ( ! strpos( $custom_button_url, '://' ) ) {
-				$custom_button_url = 'http://'.$custom_button_url;
+			$custom_button_url = trim( $custom_button_url );
+			/**
+			 * If the value does NOT start with [http://, https://, /] we prepend the home URL.
+			 */
+			if ( ( stripos( $custom_button_url, 'http://', 0 ) !== 0 ) && ( stripos( $custom_button_url, 'https://', 0 ) !== 0 ) && ( strpos( $custom_button_url, '/', 0 ) !== 0 ) ) {
+				$custom_button_url = get_home_url( null, $custom_button_url );
 			}
-
-			$custom_button = '<a class="btn-join" href="'.$custom_button_url.'" id="btn-join">'. $button_text .'</a>';
+			$custom_button = '<a class="btn-join" href="' . esc_url( $custom_button_url ) . '" id="btn-join">' . $button_text . '</a>';
 		}
 
 		$payment_params = array(
@@ -366,7 +391,8 @@ function learndash_payment_buttons( $course ) {
 		return 	apply_filters( 'learndash_payment_closed_button', $custom_button, $payment_params );
 
 	} else if ( ! empty( $course_price ) ) {
-		include_once( 'vendor/paypal/enhanced-paypal-shortcodes.php' );
+		//include_once( 'vendor/paypal/enhanced-paypal-shortcodes.php' );
+		include_once( LEARNDASH_LMS_LIBRARY_DIR . '/paypal/enhanced-paypal-shortcodes.php' );
 
 		$paypal_button = '';
 
@@ -529,34 +555,36 @@ function learndash_is_sample( $post ) {
 		return false;
 	}
 
-	if ( $post->post_type == 'sfwd-lessons' ) {
+	if ( $post->post_type == learndash_get_post_type_slug( 'lesson' ) ) {
+		$is_sample = false;
 		if ( learndash_get_setting( $post->ID, 'sample_lesson' ) ) {
-			return true;
+			$is_sample = true;
 		}
+		return apply_filters( 'learndash_lesson_is_sample', $is_sample, $post );
 	}
 
-	if ( $post->post_type == 'sfwd-topic' ) {
-		//if ( LearnDash_Settings_Section::get_section_setting('LearnDash_Settings_Courses_Builder', 'enabled' ) == 'yes' ) {
+	if ( $post->post_type == learndash_get_post_type_slug( 'topic' ) ) {
+		if ( LearnDash_Settings_Section::get_section_setting('LearnDash_Settings_Courses_Builder', 'shared_steps' ) == 'yes' ) {
 			$course_id = learndash_get_course_id( $post );
 			$lesson_id = learndash_course_get_single_parent_step( $course_id, $post->ID );
-			
-		//} else {
-		//	$lesson_id = learndash_get_setting( $post->ID, 'lesson' );
-		//}
-		
-		if ( learndash_get_setting( $lesson_id, 'sample_lesson' ) ) {
-			return true;
-		}
-	}
-
-	if ( $post->post_type == 'sfwd-quiz' ) {
-		//if ( LearnDash_Settings_Section::get_section_setting('LearnDash_Settings_Courses_Builder', 'enabled' ) == 'yes' ) {
-			$course_id = learndash_get_course_id( $post );
-			$lesson_id = learndash_course_get_single_parent_step( $course_id, $post->ID );
-		//} else {
+		} else {
 			$lesson_id = learndash_get_setting( $post->ID, 'lesson' );
-		//}
-		return learndash_is_sample( $lesson_id );
+		}
+		if ( ( isset( $lesson_id ) ) && ( ! empty( $lesson_id ) ) ) {
+			return learndash_is_sample( $lesson_id );
+		}
+	}
+
+	if ( $post->post_type == learndash_get_post_type_slug( 'quiz' ) ) {
+		if ( LearnDash_Settings_Section::get_section_setting('LearnDash_Settings_Courses_Builder', 'shared_steps' ) == 'yes' ) {
+			$course_id = learndash_get_course_id( $post );
+			$lesson_id = learndash_course_get_single_parent_step( $course_id, $post->ID );
+		} else {
+			$lesson_id = learndash_get_setting( $post->ID, 'lesson' );
+		}
+		if ( ( isset( $lesson_id ) ) && ( ! empty( $lesson_id ) ) ) {
+			return learndash_is_sample( $lesson_id );
+		}
 	}
 
 	return false;
@@ -598,18 +626,66 @@ function learndash_ob_get_clean( $level = 0 ) {
  */
 function ld_remove_lessons_and_quizzes_page( $wp ) {
 
-	if ( is_archive() && ! is_admin() )  {
+	if ( ( is_archive() ) && ( ! is_admin() ) ) {
 		$post_type = get_post_type();
-		if ( ( is_post_type_archive( $post_type ) ) && ( in_array( $post_type, array('sfwd-lessons', 'sfwd-topic', 'sfwd-quiz' ) ) ) ) {
-			wp_redirect( home_url() );
-			exit;
+		if ( ( is_post_type_archive( $post_type ) ) && ( in_array( $post_type, learndash_get_post_types() ) ) ) {
+			$has_archive = learndash_post_type_has_archive( $post_type );
+			if ( true !== $has_archive ) {
+				wp_redirect( home_url() );
+				exit;
+			}
 		}
 	}
-
 }
 
 add_action( 'wp', 'ld_remove_lessons_and_quizzes_page' );
 
+/**
+ * Utility function to check if a LEarnDash post type supports Archive.
+ *
+ * @since 3.0
+ * @param string $post_type LearnDash Post Type.
+ * @return boolean true/false.
+ */
+function learndash_post_type_has_archive( $post_type = '' ) {
+	$has_archive = false;
+
+	switch( $post_type ) {
+		case learndash_get_post_type_slug( 'course' ):
+			if ( 'yes' === LearnDash_Settings_Section::get_section_setting( 'LearnDash_Settings_Courses_CPT', 'has_archive' ) ) {
+				$has_archive = true;
+			}
+			break;
+
+		case learndash_get_post_type_slug( 'lesson' ):
+			if ( 'yes' === LearnDash_Settings_Section::get_section_setting( 'LearnDash_Settings_Lessons_CPT', 'has_archive' ) ) {
+				$has_archive = true;
+			}
+			break;
+
+		case learndash_get_post_type_slug( 'topic' ):
+			if ( 'yes' === LearnDash_Settings_Section::get_section_setting( 'LearnDash_Settings_Topics_CPT', 'has_archive' ) ) {
+				$has_archive = true;
+			}
+			break;
+
+		case learndash_get_post_type_slug( 'quiz' ):
+			if ( 'yes' === LearnDash_Settings_Section::get_section_setting( 'LearnDash_Settings_Quizzes_CPT', 'has_archive' ) ) {
+				$has_archive = true;
+			}
+			break;
+
+		default:
+			break;
+	}
+
+	/**
+	 * Allow filtering override.
+	 *
+	 * @since 3.0
+	 */
+	return apply_filters( 'learndash_post_type_has_archive', $has_archive, $post_type );
+}
 
 
 /**
@@ -618,13 +694,86 @@ add_action( 'wp', 'ld_remove_lessons_and_quizzes_page' );
  *
  * @since 2.1.0
  * 
- * @param  array $comments
- * @param  array $array
+ * @param  array $comments Array of comments for post_id.
+ * @param  array $post_id Post ID showing.
  * @return array empty array
  */
-function learndash_remove_comments( $comments, $array ) {
-	return array();
+function learndash_remove_comments( $comments = array(), $post_id = 0 ) {
+	if ( ! empty( $post_id ) ) {
+		$post_type = get_post_type( $post_id );
+		if ( ( ! empty( $post_type ) ) && ( in_array( $post_type, learndash_get_post_types( 'course' ) ) ) ) {
+			$post_type_object = get_post_type_object( $post_type );
+			if ( ( $post_type_object ) && ( is_a( $post_type_object, 'WP_Post_Type' ) ) ) {
+				if ( true !== learndash_post_type_supports_comments( $post_type ) ) {
+					$comments = array();
+				} else {
+					$_post = get_post( $post_id );
+					if ( ( $_post ) && ( is_a( $_post, 'WP_Post' ) ) && ( 'open' === $_post->comment_status ) ) {
+						if ( ( in_array( $_post->post_type, learndash_get_post_types( 'course_steps' ) ) ) && ( 'ld30' === LearnDash_Theme_Register::get_active_theme_key() ) && ( 'yes' === LearnDash_Settings_Section::get_section_setting( 'LearnDash_Settings_Theme_LD30', 'focus_mode_enabled' ) ) ) {
+							$focus_mode_comments = apply_filters( 'learndash_focus_mode_comments', 'closed', $_post );
+							if ( 'closed' === $focus_mode_comments ) {
+								$comments = array();
+							}
+						}
+					} else {
+						$comments = array();
+					}
+				}
+			}
+		}
+	}
+
+	return $comments;
 }
+
+/**
+ * Ensure comments are open for assignments
+ *
+ * @since 2.1.0
+ *
+ * @param bool          $open    Whether the current post is open for comments.
+ * @param int|obj       $post_id The post ID or WP_Post object.
+ * @return int|obj      $post_id The post ID or WP_Post object.
+ */
+function learndash_comments_open( $open, $post_id = 0 ) {
+	if ( ! empty( $post_id ) ) {
+		$post_type = get_post_type( $post_id );
+		if ( ( ! empty( $post_type ) ) && ( in_array( $post_type, learndash_get_post_types( 'course' ) ) ) ) {
+			$post_type_object = get_post_type_object( $post_type );
+			if ( ( $post_type_object ) && ( is_a( $post_type_object, 'WP_Post_Type' ) ) ) {
+				if ( true === learndash_post_type_supports_comments( $post_type ) ) {
+					$open = true;
+
+					$_post = get_post( $post_id );
+					if ( ( $_post ) && ( is_a( $_post, 'WP_Post' ) ) && ( 'open' === $_post->comment_status ) ) {
+						if ( ( in_array( $_post->post_type, learndash_get_post_types( 'course_steps' ) ) ) && ( 'ld30' === LearnDash_Theme_Register::get_active_theme_key() ) && ( 'yes' === LearnDash_Settings_Section::get_section_setting( 'LearnDash_Settings_Theme_LD30', 'focus_mode_enabled' ) ) ) {
+							if ( $open === true ) {
+								$focus_mode_comments = 'open';
+							} else {
+								$focus_mode_comments = 'closed';
+							}
+							$focus_mode_comments = apply_filters( 'learndash_focus_mode_comments', $focus_mode_comments, $_post );
+							if ( 'closed' === $focus_mode_comments ) {
+								$open = false;
+							}
+						} 
+					} else {
+						$open = false;
+					}
+				} else {
+					$open = false;
+				}
+			}
+		}
+	}
+
+	return $open;
+}
+add_action( 'wp', function() {
+	add_filter( 'comments_array', 'learndash_remove_comments', 1, 2 );
+	add_filter( 'comments_open', 'learndash_comments_open', 10, 2 );
+});
+
 
 if ( ! function_exists( 'ld_debug' ) ) {
 
@@ -797,69 +946,10 @@ function array_map_r( $func, $arr) {
     return $arr;
 }
 
-
-/**
- * Utility function to interface with the WordPress get_transient function
- * There have been resent issue where the transients loose the expire setting
- * So this function was created and replaces the direct calls to get_transient
- *
- * This function also allow checking disregard transients all together (see 
- * LEARNDASH_TRANSIENTS_DISABLED define). Or selectively disregard via filter	
- * 
- * @since 2.3.3
- * 
- * @param string $transient_key The transient key to retreive.
- *
- * @return mixed $transient_data the retreived transient data or false if expired. 
- */
-function learndash_get_valid_transient( $transient_key = '' ) {
-	
-	$transient_data = false;
-	
-	if ( !empty( $transient_key ) ) {
-		if ( !apply_filters( 'learndash_transients_disabled', LEARNDASH_TRANSIENTS_DISABLED, $transient_key ) ) { 
-			
-			$transient_data = get_transient( $transient_key );
-			/*
-			if ( $transient_data !== false ) {
-
-				// Added in v2.4 to check if the site is running object cache we don't validate
-				if ( !wp_using_ext_object_cache() ) {
-
-					// If the data return is NOT false we double check it has a valid expired data. 
-					$transient_expire_time = get_option( '_transient_timeout_' . $transient_key );
-			
-					// If the expired time is empty then something is not right in the system. So we 
-					// set the return data to false so it will be regenerated. And just to be sure
-					// we also delete the options for the transient and tranient expire. 
-					if ( ( empty( $transient_expire_time ) ) || ( $transient_expire_time < time() ) ) {
-						$transient_data = false;
-						delete_option('_transient_'. $transient_key );
-						delete_option( '_transient_timeout_' . $transient_key );
-					} 
-				}
-			}
-			*/
-		}
-	}
-	
-	return $transient_data;
-}
-
-function learndash_purge_transients() {
-	if ( !apply_filters( 'learndash_transients_disabled', LEARNDASH_TRANSIENTS_DISABLED, 'learndash_all_purge' ) ) { 
-		global $wpdb;
-		
-		$sql_str = "DELETE FROM ". $wpdb->options." WHERE option_name LIKE '_transient_learndash_%' OR option_name LIKE '_transient_timeout_learndash_%'";
-		//error_log('sql_str['. $sql_str .']');
-		$wpdb->query( $sql_str );
-	}
-}
-
-function learndash_format_course_points( $points ) {
+function learndash_format_course_points( $points, $decimals = 1 ) {
 
 	$points = preg_replace("/[^0-9.]/", '', $points );
-	$points = round( floatval( $points ), apply_filters( 'learndash_course_points_format_round', 1 ) );
+	$points = round( floatval( $points ), apply_filters( 'learndash_course_points_format_round', $decimals ) );
 
 	return floatval( $points );
 }
@@ -1049,4 +1139,631 @@ function learndash_validate_extensions( $exts = array() ) {
 		$exts = array_map( function( $ext ){ return str_replace('.', '', $ext ); }, $exts );
 	}
 	return $exts;
+}
+
+/**
+ * Utility function to check string for valid JSON.
+ */
+function learndash_is_valid_JSON( $string ) {
+	$json = json_decode( $string );
+	return (is_object($json) && json_last_error() == JSON_ERROR_NONE) ? true : false;
+}
+
+/**
+ * Controls the output of the Feeds (RSS2 etc) for the various custom post types
+ * used within LearnDash. By default the only feed should be for Courses (sfwd-courses).
+ * All other post types are disabled by default. 
+ * 
+ * @since 2.6.0
+ * @param object $query WP_Query instance.
+ */
+function learndash_pre_posts_feeds( $query ) {
+
+	if ( ( ! is_admin() ) && ( $query->is_main_query() ) && ( true === $query->is_feed ) ) {
+		$feed_post_type = get_query_var( 'post_type' );
+		if ( ! empty( $feed_post_type ) ) {
+			if ( true !== learndash_post_type_supports_feed( $feed_post_type ) ) {
+				$query->set( 'post__in', array(0) );
+			}
+		}	
+	}
+}
+add_action( 'pre_get_posts', 'learndash_pre_posts_feeds' );
+
+function learndash_post_type_supports_feed( $feed_post_type = '' ) {
+	if ( ( ! empty( $feed_post_type ) ) && ( in_array( $feed_post_type, LDLMS_Post_Types::get_post_types() ) ) ) {
+		$feed_post_type_object = get_post_type_object( $feed_post_type );
+		if ( ( $feed_post_type_object ) && ( is_a( $feed_post_type_object, 'WP_Post_Type' ) ) ) {
+			// Default for LD Post types is false;
+			$cpt_has_feed = false;
+
+			$class_key = array(
+				learndash_get_post_type_slug( 'course' ) => 'LearnDash_Settings_Courses_CPT',
+				learndash_get_post_type_slug( 'lesson' ) => 'LearnDash_Settings_Lessons_CPT',
+				learndash_get_post_type_slug( 'topic' ) => 'LearnDash_Settings_Topics_CPT',
+				learndash_get_post_type_slug( 'quiz' ) => 'LearnDash_Settings_Quizzes_CPT',
+			);
+
+			$has_archive = false;
+			$has_feed    = false;
+			if ( isset( $class_key[ $feed_post_type ] ) ) {
+				$has_archive = LearnDash_Settings_Section::get_section_setting( $class_key[ $feed_post_type ], 'has_archive' );
+				$has_feed = LearnDash_Settings_Section::get_section_setting( $class_key[ $feed_post_type ], 'has_feed' );
+				if ( ( 'yes' === $has_archive ) && ( 'yes' === $has_feed ) ) {
+					$cpt_has_feed = true;
+				}
+			} 
+
+			/**
+			 * Allow filtering if the site want to show feeds for the custom post type.
+			 * 
+			 * @siince 2.6.0
+			 * @param boolean false default value per post type has_archive setting.
+			 * @param string $feed_post_type Post Type slug.
+			 * @param object $feed_post_type_object WP_Post_Type instance.
+			 * @return true to show feed. False to not show feed.
+			 */
+			$cpt_has_feed = apply_filters( 'learndash_post_type_feed', $cpt_has_feed, $feed_post_type, $feed_post_type_object );
+		}
+	} else {
+		// For aNY non-LD post type is return true to let them pass thru.
+		$cpt_has_feed = true;
+	}
+
+	return $cpt_has_feed;
+}
+
+function learndash_post_type_supports_comments( $feed_post_type = '' ) {
+	if ( ( ! empty( $feed_post_type ) ) && ( in_array( $feed_post_type, learndash_get_post_types( 'course' ) ) ) ) {
+		$feed_post_type_object = get_post_type_object( $feed_post_type );
+		if ( ( $feed_post_type_object ) && ( is_a( $feed_post_type_object, 'WP_Post_Type' ) ) ) {
+			// Default for LD Post types is false;
+			$cpt_has_comments = false;
+
+			$class_key = array(
+				learndash_get_post_type_slug( 'course' ) => 'LearnDash_Settings_Courses_CPT',
+				learndash_get_post_type_slug( 'lesson' ) => 'LearnDash_Settings_Lessons_CPT',
+				learndash_get_post_type_slug( 'topic' ) => 'LearnDash_Settings_Topics_CPT',
+				learndash_get_post_type_slug( 'quiz' ) => 'LearnDash_Settings_Quizzes_CPT',
+			);
+
+			if ( isset( $class_key[ $feed_post_type ] ) ) {
+				$supports = LearnDash_Settings_Section::get_section_setting( $class_key[ $feed_post_type ], 'supports' );
+				if ( ( ! empty( $supports  ) ) && ( in_array( 'comments', $supports ) ) ) {
+					$cpt_has_comments = true;
+				}
+			} 
+
+			/**
+			 * Allow filtering if the site want to show feeds for the custom post type.
+			 * 
+			 * @siince 2.6.0
+			 * @param boolean false default value per post type has_archive setting.
+			 * @param string $feed_post_type Post Type slug.
+			 * @param object $feed_post_type_object WP_Post_Type instance.
+			 * @return true to show feed. False to not show feed.
+			 */
+			$cpt_has_comments = apply_filters( 'learndash_post_comments', $cpt_has_comments, $feed_post_type, $feed_post_type_object );
+
+			return $cpt_has_comments;
+		}
+	} 
+}
+
+/**
+ * Manage Post update message for legacy editor screen
+ * 
+ * @since 2.6.4
+ * @param array $pst_messaged Array of post messages by post_type.
+ * @return array $post_messages.
+ */
+function learndash_post_updated_messages( $post_messages = array() ) {
+	global $pagenow, $post_ID, $post_type, $post_type_object, $post;
+	
+	if ( ( $post_type ) && ( in_array( $post_type, LDLMS_Post_Types::get_post_types() ) ) && ( ! isset( $post_messages[ $post_type ] ) ) ) {
+		$preview_post_link_html = '';
+		$scheduled_post_link_html = '';
+		$view_post_link_html = '';
+		
+		$viewable = is_post_type_viewable( $post_type_object );
+		if ( $viewable ) {
+
+			$preview_url = get_preview_post_link( $post );
+			$permalink = learndash_get_step_permalink( $post_ID );
+
+			// Preview post link.
+			$preview_post_link_html = sprintf( ' <a target="_blank" href="%1$s">%2$s</a>',
+				esc_url( $preview_url ),
+				__( 'Preview' )
+			);
+
+			// Scheduled post preview link.
+			$scheduled_post_link_html = sprintf( ' <a target="_blank" href="%1$s">%2$s</a>',
+				esc_url( $permalink ),
+				__( 'Preview' )
+			);
+
+			// View post link.
+			$view_post_link_html = sprintf( ' <a href="%1$s">%2$s</a>',
+				esc_url( $permalink ),
+				__( 'View' )
+			);
+		}
+
+		/* translators: Publish box date format, see https://secure.php.net/date */
+		$scheduled_date = date_i18n( __( 'M j, Y @ H:i', 'default' ), strtotime( $post->post_date ) );
+
+		$post_messages[ $post_type ] = array(
+			0 => '', // Unused. Messages start at index 1.
+			1 => sprintf( _x( '%s updated.', 'placeholder: Post Type Singlular Label', 'learndash' ), $post_type_object->labels->singular_name ) . $view_post_link_html,
+			2 => __( 'Custom field updated.', 'learndash' ),
+			3 => __( 'Custom field deleted.', 'learndash' ),
+			4 => sprintf( _x( '%s updated.', 'placeholder: Post Type Singlular Label', 'learndash' ), $post_type_object->labels->singular_name ),
+			/* translators: %s: date and time of the revision */
+			5 => isset($_GET['revision']) ? sprintf( _x( '%1$s restored to revision from %2$s.', 'placeholder: Post Type Singular Label, Revision Title', 'learndash' ), $post_type_object->labels->singular_name, wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
+			6 => sprintf( _x( '%s published.', 'placeholder: Post Type Singlular Label', 'learndash' ), $post_type_object->labels->singular_name ) . $view_post_link_html,
+			7 => sprintf( _x( '%s saved.', 'placeholder: Post Type Singlular Label', 'learndash' ), $post_type_object->labels->singular_name ),
+			8 => sprintf( _x( '%s submitted.', 'placeholder: Post Type Singlular Label', 'learndash' ), $post_type_object->labels->singular_name ) . $preview_post_link_html,
+			9 => sprintf( _x( '%1$s scheduled for: %2$s.', 'placeholder: Post Type Singlular Label, scheduled date', 'learndash' ), $post_type_object->labels->singular_name, '<strong>' . $scheduled_date . '</strong>' ) . $scheduled_post_link_html,
+			10 => sprintf( _x( '%s draft updated.', 'placeholder: Post Type Singlular Label', 'learndash' ), $post_type_object->labels->singular_name ) . $preview_post_link_html,
+		);
+	}
+
+	// Always return $post_messages;
+	return $post_messages;
+}
+add_filter( 'post_updated_messages', 'learndash_post_updated_messages' );
+
+/**
+ * Retreive the number of posts by post_type.
+ *
+ * @ince 3.0
+ * @param string $post_type Post Typ slug to count.
+ * @return int Number of posts by type.
+ */
+function learndash_get_total_post_count( $post_type = '' ) {
+	$count_total = 0;
+
+	if ( ( $post_type ) && ( in_array( $post_type, LDLMS_Post_Types::get_post_types() ) ) ) {
+		$post_counts = wp_count_posts( $post_type );
+		
+		// Convert to array.
+		$post_counts = json_decode( json_encode( $post_counts ), true );
+
+		/**
+		 * We only count the post status shown in the admin
+		 * @since 3.0.4
+		*/
+		$show_in_admin_post_stati = get_post_stati( array( 'show_in_admin_status_list' => true ) );
+		$show_in_admin_post_stati = apply_filters( 'learndash_admin_post_stati', $show_in_admin_post_stati, $post_type, $post_counts );
+		if ( ! empty( $show_in_admin_post_stati ) ) {
+			foreach( $show_in_admin_post_stati as $post_status ) {
+				if ( isset( $post_counts[ $post_status ] ) ) {
+					$count_total += absint( $post_counts[ $post_status ] );	
+				}
+			}
+ 		}
+	}
+
+	return $count_total;
+}
+
+/**
+ * Check the post_type is not empty
+ *
+ * @param array $query_args WP_Query query args array.
+ */
+function learndash_check_query_post_type( $query_args = array() ) {
+	$total_post_count = 0;
+	if ( ( isset( $query_args['post_type'] ) ) && ( ! empty( $query_args['post_type'] ) ) ) {
+		if ( is_string( $query_args['post_type'] ) ) {
+			$total_post_count += learndash_get_total_post_count( $query_args['post_type'] );
+		} elseif ( is_array( $query_args['post_type'] ) ) {
+			foreach( $query_args['post_type'] as $post_type ) {
+				$total_post_count += learndash_get_total_post_count( $query_args['post_type'] );
+			}
+		}
+	}
+
+	return $total_post_count;
+}
+/**
+ * convert the stored lesson timer value from the postmeta settings into number of total seconds.
+ */
+function learndash_convert_lesson_time_time( $timer_time = 0 ) {
+	if ( ! empty( $timer_time ) ) {
+		$time_sections = explode( ' ', $timer_time );
+		$h             = $m = $s = 0;
+
+		foreach ( $time_sections as $k => $v ) {
+			$value = trim( $v );
+
+			if ( strpos( $value, 'h' ) ) {
+				$h = intVal( $value );
+			} elseif ( strpos( $value, 'm' ) ) {
+				$m = intVal( $value );
+			} elseif ( strpos( $value, 's' ) ) {
+				$s = intVal( $value );
+			}
+		}
+
+		$time = ( $h * 60 * 60 ) + ( $m * 60 ) + $s;
+
+		if ( $time != 0 ) {
+			$timer_time = absint( $time );
+		}
+	}
+
+	return $timer_time;
+}
+
+/**
+ * Utility function to get the previous installed version of LD.
+ */
+function learndash_get_prior_installed_version() {
+	$element = Learndash_Admin_Data_Upgrades::get_instance();
+	if ( ( $element ) && ( is_a( $element, 'Learndash_Admin_Data_Upgrades' ) ) ) {
+		return $element->get_data_settings( 'prior_version' );
+	}
+}
+
+/**
+ * Utility function to update the comment_status foeld for all posts of <post_type.
+ *
+ * @since 3.0
+ * @param string $post_type Post Type to change.
+ * @param string $comment_status New comment status. Allowed values 'open' or 'closed'.
+ */
+function learndash_update_posts_comment_status( $post_type = '', $comment_status = false ) {
+	global $learndash_question_types;
+	
+	if ( ! empty( $post_type ) ) {	
+		$ld_post_types = learndash_get_post_types();
+		if ( in_array( $post_type, $ld_post_types ) ) {
+			if ( in_array( $comment_status, array( 'open', 'closed' ) ) ) {
+				if ( apply_filters( 'learndash_update_posts_comment_status', true, $post_type, $comment_status ) ) {
+					global $wpdb;
+					$wpdb->query(
+						$wpdb->prepare( 
+							'UPDATE wp_posts SET comment_status = %s WHERE post_type = %s', $comment_status, $post_type
+						)
+					); 
+				}
+			}
+		}
+	}
+}
+
+/**
+ * Utility function to load minified version of CSS/JS assets.
+ *
+ * @since 3.0.3
+ */
+function leardash_min_asset() {
+		return ( ( defined( 'LEARNDASH_SCRIPT_DEBUG' ) && ( LEARNDASH_SCRIPT_DEBUG === true ) ) ? '' : '.min' );
+}
+
+/**
+ * Utility function to load minified version of CSS/JS builder assets.
+ *
+ * @since 3.0.3
+ */
+function leardash_min_builder_asset() {
+		return ( ( defined( 'LEARNDASH_BUILDER_DEBUG' ) && ( LEARNDASH_BUILDER_DEBUG === true ) ) ? '' : '.min' );
+}
+
+/**
+ * Builds a recursive listing of files from a given base path name.
+ *
+ * @since 3.0.3
+ * @param string $base Top-level directory of tree to scan.
+ * @return array Array of files found.
+ */
+function learndash_scandir_recursive( $base = '' ) {
+	if ( ( ! $base ) || ( ! strlen( $base ) ) ) {
+		return array();
+	}
+		
+	if ( ! file_exists( $base ) ) {
+		return array();
+	}
+	
+	$data = array_diff( scandir( $base ), array( '.', '..' ) );
+
+	$subs = array();
+	foreach ( $data as $key => $value ) {
+		if ( is_dir($base . '/' . $value) ) {
+			unset($data[$key]);
+			$subs[] = learndash_scandir_recursive($base . '/' . $value);
+		} elseif ( is_file($base . '/' . $value) ) {
+			$data[$key] = $base . '/' . $value;
+		}
+	}
+
+	if ( count( $subs ) ) {
+		foreach ( $subs as $sub ) {
+			$data = array_merge($data, $sub);
+		}
+	}
+	
+	return $data;
+}
+
+/**
+ * Filter to prevent Custom Fields metabox from showing/saving LD keys.
+ *
+ * @since 3.0.4
+ * @param boolean $protected Boolean default to false.
+ * @param string  $meta_key Meta Key to check.
+ * @param string  $meta_type Will be 'post' for post meta.
+ * @return boolean true if protected, false if not.
+ */
+function learndash_is_protected_meta( $protected = false, $meta_key = '', $meta_type = '' ) {
+	if ( ( 'post' === $meta_type ) && ( ! empty( $meta_key ) ) && ( '_' !== $meta_key[0] ) ) {
+		
+		// Try and determine the post type used. 
+		global $typenow;
+		$post_type = $typenow;
+		if ( empty( $post_type ) ) {
+			if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+				if ( ( isset( $_POST['action'] ) ) && ( 'add-meta' === $_POST['action'] ) ) {
+					if ( ( isset( $_POST['post_id'] ) ) && ( ! empty( $_POST['post_id'] ) ) ) {
+						$post_id = absint( $_POST['post_id'] );
+						$post_type = get_post_type( $post_id );
+					}
+				}
+			}
+		} 
+
+		// If post type is not empty and onf othe LD types.
+		if ( ( ! empty( $post_type ) ) && ( in_array( $post_type, learndash_get_post_types() ) ) ) {
+			$protected_meta_keys = array( 'course_id', 'lesson_id', 'course_price_billing_p3', 'course_price_billing_t3', 'course_sections', 'ld_course_steps', 'course_access_list', 'quiz_pro_id', 'ld_course_steps_dirty', 'ld_auto_enroll_group_courses', 'question_pro_id', 'course_points', 'ld_quiz_questions', 'ld_quiz_questions_dirty', 'learndash_certificate_options', 'question_id', 'ld_essay_grading_response', 'question_points', 'question_type', 'question_pro_id', 'question_pro_category' );
+
+			if ( ( in_array( $meta_key, $protected_meta_keys ) ) ) {
+				$protected = true;
+			} else if ( 'ld_course_' === substr( $meta_key, 0, strlen( 'ld_course_' ) ) ) {
+				$protected = true;
+			} else if ( 'quiz_pro_id_' === substr( $meta_key, 0, strlen( 'quiz_pro_id_' ) ) ) {
+				$protected = true;
+			} else if ( 'quiz_pro_primary_' === substr( $meta_key, 0, strlen( 'quiz_pro_primary_' ) ) ) {
+				$protected = true;
+			} else if ( 'learndash_group_enrolled_' === substr( $meta_key, 0, strlen( 'learndash_group_enrolled_' ) ) ) {
+				$protected = true;
+			} else if ( 'learndash_group_users_' === substr( $meta_key, 0, strlen( 'learndash_group_users_' ) ) ) {
+				$protected = true;
+			}
+		}
+	}
+	return $protected;
+}
+add_filter( 'is_protected_meta', 'learndash_is_protected_meta', 30, 3 );
+
+
+/**
+ * Filter the menus being displayed to show the login/logout.
+ * Look for items where the 'url' is '#login'.
+ * @since 3.0.7
+ * @param array $menu_items From WP Menu items to be displayed.
+ * @param array $menu_args From WP Menu args related to the menu set to be displayed.
+ * @return array $menu_items
+ */
+function learndash_login_menu_items( $menu_items, $menu_args = array() ) {
+
+	foreach ( $menu_items as $menu_key => &$menu_item ) {
+		/**
+		 * Check the properties we need exist and not empty. We shouldn't need to do this 
+		 * since the array of menu items comes from WP. See LEARNDASH-3812.
+		 */
+		if ( ( ! isset( $menu_item->url ) ) || ( empty( $menu_item->url ) ) || ( ! isset( $menu_item->classes ) ) || ( ! is_array( $menu_item->classes ) ) || ( empty( $menu_item->classes ) ) ) {
+			continue;
+		}
+
+		if ( ( strpos( $menu_item->url, '#login' ) !== false ) && ( in_array( 'ld-button', $menu_item->classes ) ) ) {
+			/**
+			 * Allow externals to override processing of menu_item.
+			 *
+			 * @since 3.0.7
+			 * @var boolean Process this menu item. True.
+			 * @var object  $menu_item WP_Post object for menu item.
+			 * @var array   $menu_args Args array related to menu being processed / displayed.
+			 * @return boolean. If true is not returned the menu item will not be processed for LD login modal.
+			 */
+			if ( apply_filters( 'learndash_login_menu_item_process', true, $menu_item, $menu_args ) ) {
+				if ( ( empty( $menu_item->post_content ) ) || ( strpos( $menu_item->post_content, '[learndash_login' ) === false ) ) {
+					$shortcode = '[learndash_login return="atts"]';
+				} else {
+					$shortcode = str_replace( '[learndash_login',  '[learndash_login return="atts" ', $menu_item->post_content );
+				}
+
+				$menu_item->post_content = '';
+				$menu_item->description = '';
+
+				$active_template_key = LearnDash_Theme_Register::get_active_theme_key();
+				$login_mode_enabled = LearnDash_Settings_Section::get_section_setting( 'LearnDash_Settings_Theme_LD30', 'login_mode_enabled' );
+				if ( ( 'ld30' === $active_template_key ) && ( 'yes' === $login_mode_enabled ) ) {
+					$shortcode_return = do_shortcode( $shortcode );
+					$shortcode_atts = maybe_unserialize( $shortcode_return );
+
+					learndash_load_login_modal_html();
+				} else {
+					// If here we are not using the LD30 templates. So the handling of the menu item is simple link to WP login/logout.
+					$shortcode = str_replace( array( '[learndash_login', ']'), '', $shortcode);
+					$atts = shortcode_parse_atts( $shortcode );
+					$shortcode_atts = array();
+
+					if ( is_user_logged_in() ) {
+						if ( ( isset( $atts['logout_url'] ) ) && ( ! empty( $atts['logout_url'] ) ) ) {
+							$shortcode_atts['url'] = $atts['logout_url'];
+						} else {
+							$shortcode_atts['url'] = wp_logout_url( get_permalink() );
+						}
+
+						if ( ( isset( $atts['logout_label'] ) ) && ( ! empty( $atts['logout_label'] ) ) ) {
+							$shortcode_atts['title'] = $atts['logout_label'];
+						} else {
+							$shortcode_atts['title'] = __( 'Logout', 'learndash' );
+						}
+					} else {
+						if ( ( isset( $atts['login_url'] ) ) && ( ! empty( $atts['login_url'] ) ) ) {
+							$shortcode_atts['url'] = $atts['login_url'];
+						} else {
+							$shortcode_atts['url'] = wp_login_url( get_permalink() );
+						}
+
+						if ( ( isset( $atts['login_label'] ) ) && ( ! empty( $atts['login_label'] ) ) ) {
+								$shortcode_atts['title'] = $atts['login_label'];
+						} else {
+							$shortcode_atts['title'] = __( 'Login', 'learndash' );
+						}
+					}
+				}
+
+				/**
+				 * Allow externals to override menu_item attributes before they are applied.
+				 *
+				 * @since 2.0.7
+				 * @var array  $shortcode_atts Shortcode array containing url, label, etc. 
+				 * @var object $menu_item WP_Post object for menu item.
+				 * @var array  $menu_args Args array related to menu being processed / displayed.
+				 * @return object $menu_item.
+				 */
+				$shortcode_atts = apply_filters( 'learndash_login_menu_item_atts', $shortcode_atts, $menu_item, $menu_args );
+				if ( ( isset( $shortcode_atts['url'] ) ) && ( ! empty( $shortcode_atts['url'] ) ) ) {
+					$menu_item->url = $shortcode_atts['url'];
+				}
+				if ( ( isset( $shortcode_atts['label'] ) ) && ( ! empty( $shortcode_atts['label'] ) ) ) {
+					$menu_item->title = $shortcode_atts['label'];
+				}
+
+				/**
+				 * Allow externals to override final menu_item.
+				 *
+				 * @since 2.0.7
+				 * @var object $menu_item WP_Post object for menu item.
+				 * @var array  $menu_args Args array related to menu being processed / displayed.
+				 * @return object $menu_item.
+				 */
+				$menu_item = apply_filters( 'learndash_login_menu_item', $menu_item, $menu_args );
+			}
+		}
+	}
+	return $menu_items;
+}
+add_filter( 'wp_nav_menu_objects', 'learndash_login_menu_items', 30, 2 );
+
+global $learndash_login_model_html;
+$learndash_login_model_html = false;
+/**
+ * Wrapper function to include the modal login in the footer of the HTML.
+ */
+function learndash_load_login_modal_html() {
+	global $learndash_login_model_html;
+
+	// Check that we are running the LD30 theme and login mode enabled. 
+	$active_template_key = LearnDash_Theme_Register::get_active_theme_key();
+	$login_mode_enabled = LearnDash_Settings_Section::get_section_setting( 'LearnDash_Settings_Theme_LD30', 'login_mode_enabled' );
+	if ( ( 'ld30' === $active_template_key ) && ( 'yes' === $login_mode_enabled ) ) {
+		
+		// Don't need to load the HTML if the user is already logged in. 
+		if ( ( ! is_user_logged_in() ) && ( function_exists( 'learndash_get_template_part' ) ) ) {
+			if ( false === $learndash_login_model_html ) {
+				$learndash_login_model_html = learndash_get_template_part( 'modules/login-modal.php', array(), false );
+				if ( false !== $learndash_login_model_html ) {
+					add_action( 'wp_footer', function() {
+						global $learndash_login_model_html;
+						if ( ( isset( $learndash_login_model_html ) ) && ( ! empty( $learndash_login_model_html ) ) ) {
+							echo '<div class="learndash-wrapper learndash-wrapper-login-modal ld-modal-closed">' . $learndash_login_model_html . '</div>';
+						}
+					});
+				}
+			}
+		}
+	}
+}
+
+/**
+ * Add custom classes to body
+ * @since 3.1
+ * @param array $classes Array of current body classes.
+ * @return array $classes.
+ */
+function learndash_body_classes( $classes = array() ) {
+	
+	if ( in_array( get_post_type(), learndash_get_post_types(), true ) ) {
+		$custom_classes = array();
+		$custom_classes[] = 'learndash-cpt';
+		$custom_classes[] = 'learndash-cpt-' . get_post_type();
+
+		if ( true === apply_filters( 'learndash_responsive_video', true, get_post_type(), get_the_ID() ) ) {
+			$custom_classes[] = 'learndash-embed-responsive';
+		}
+
+		$custom_classes = apply_filters( 'learndash_body_classes', $custom_classes, get_post_type(), get_the_ID() );
+		if ( ( ! empty( $custom_classes ) ) && ( is_array( $custom_classes ) ) ) {
+			$classes = array_merge( $classes, $custom_classes );
+			$classes = array_unique( $classes );
+		}
+	}
+
+	return $classes;
+}
+add_filter( 'body_class', 'learndash_body_classes', 100, 1 );
+
+/**
+ * Utility function to recalcuate the length of string vars within serialized data. 
+ * taken from http://lea.verou.me/2011/02/convert-php-serialized-data-to-unicode/
+ * 
+ * @since 3.1
+ * @param string $serialized_text Serialized text. 
+ * @return striing serialized text.
+ */
+function learndash_recount_serialized_bytes( $serialized_text = '' ) {
+	if ( ! empty( $serialized_text ) ) {
+		mb_internal_encoding("UTF-8");
+		mb_regex_encoding("UTF-8");
+
+		mb_ereg_search_init($serialized_text, 's:[0-9]+:"');
+
+		$offset = 0;
+
+		while(preg_match('/s:([0-9]+):"/u', $serialized_text, $matches, PREG_OFFSET_CAPTURE, $offset) ||
+			preg_match('/s:([0-9]+):"/u', $serialized_text, $matches, PREG_OFFSET_CAPTURE, ++$offset)) {
+			$number = $matches[1][0];
+			$pos = $matches[1][1];
+
+			$digits = strlen("$number");
+			$pos_chars = mb_strlen(substr($serialized_text, 0, $pos)) + 2 + $digits;
+
+			$str = mb_substr($serialized_text, $pos_chars, $number);
+
+			$new_number = strlen($str);
+			$new_digits = strlen($new_number);
+
+			if($number != $new_number) {
+				// Change stored number
+				$serialized_text = substr_replace($serialized_text, $new_number, $pos, $digits);
+				$pos += $new_digits - $digits;
+			}
+
+			$offset = $pos + 2 + $new_number;
+		}
+	}
+
+	return $serialized_text;
+}
+
+function learndash_get_single_post( $post_type = '' ) {
+	if ( ( ! empty( $post_type ) ) && ( in_array( $post_type, learndash_get_post_types() ) ) ) {
+		$post_query_args = array(
+			'post_type'      => $post_type,
+			'posts_per_page' => 1,
+			'post_status'    => 'publish',
+			'fields'         => 'ids',
+		);
+
+		$post_query = new WP_Query( $post_query_args );
+		if ( ( is_a( $post_query, 'WP_Query' ) ) && ( property_exists( $post_query, 'posts' ) ) && ( ! empty( $post_query->posts ) ) ) {
+			return $post_query->posts[0];
+		}
+	}
 }

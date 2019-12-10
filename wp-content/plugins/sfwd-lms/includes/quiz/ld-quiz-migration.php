@@ -126,7 +126,7 @@ function learndash_migrate_content_from_pro_quiz_to_custom_post_type( $quiz, $po
 		$update_post['post_content'] = $quiz_post->post_content . '<br>' . $quiz_desc;
 		wp_update_post( $update_post );
 		global $wpdb;
-		$wpdb->query( $wpdb->prepare( 'UPDATE ' . $wpdb->prefix . "wp_pro_quiz_master SET text = 'AAZZAAZZ' WHERE id = '%d'", $quiz->getId() ) );
+		$wpdb->query( $wpdb->prepare( 'UPDATE ' . LDLMS_DB::get_table_name( 'quiz_master' ) . " SET text = 'AAZZAAZZ' WHERE id = '%d'", $quiz->getId() ) );
 	}
 }
 

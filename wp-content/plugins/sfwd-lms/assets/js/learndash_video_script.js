@@ -163,6 +163,24 @@ if ( typeof learndash_video_data !== 'undefined' ) {
 			LearnDash_disable_assets(true);
 			
 		}});
+	} else if (learndash_video_data.videos_found_provider == 'vooplayer') {
+		//console.log('in vooplayer');
+		if (typeof vooAPI !== 'undefined') {
+			LearnDash_disable_assets(true);
+
+			document.addEventListener('vooPlayerReady', LD_vooPlayerReady, false);
+			function LD_vooPlayerReady(event) {
+				//console.log('in LD_vooPlayerReady');
+				// See https://app.vooplayer.com/docs/api/#vooPlayerReady for event examples.
+				if ((typeof event.detail.video !== 'undefined') && (event.detail.video.length > 0 ) ) {
+					vooAPI(event.detail.video, 'onEnded', null, onVideoEnded);
+				}
+			}
+			
+			function onVideoEnded() {
+				LearnDash_disable_assets(false);
+			}
+		}		
 	} else if ( learndash_video_data.videos_found_provider == 'local' ) {
 		jQuery( document ).ready(function() {
 			//console.log('learndash_video_data[%o]', learndash_video_data.videos_found_provider);
@@ -199,11 +217,11 @@ if ( typeof learndash_video_data !== 'undefined' ) {
 }
 
 function LearnDash_disable_assets( status ) {
-	if ( jQuery('form#sfwd-mark-complete input#learndash_mark_complete_button').length ) {
+	if ( jQuery('form.sfwd-mark-complete input.learndash_mark_complete_button').length ) {
 		if ( learndash_video_data.videos_hide_complete_button == true ) {
-			jQuery('form#sfwd-mark-complete input#learndash_mark_complete_button').hide();
+			jQuery('form.sfwd-mark-complete input.learndash_mark_complete_button').hide();
 		} else {
-			jQuery('form#sfwd-mark-complete input#learndash_mark_complete_button').attr('disabled', status );
+			jQuery('form.sfwd-mark-complete input.learndash_mark_complete_button').attr('disabled', status );
 		}
 
 		// If we enabled the button 'status' is false and auto-complete is true then submit the form.
@@ -216,7 +234,7 @@ function LearnDash_disable_assets( status ) {
 				if ( auto_complete_delay > 0 ) {
 					
 					if ( learndash_video_data.videos_auto_complete_delay_message != '' ) {
-						var timer_html = jQuery( learndash_video_data.videos_auto_complete_delay_message ).insertAfter( 'form#sfwd-mark-complete input#learndash_mark_complete_button' );
+						var timer_html = jQuery( learndash_video_data.videos_auto_complete_delay_message ).insertAfter( 'form.sfwd-mark-complete input.learndash_mark_complete_button' );
 					} 
 
 					var counter = auto_complete_delay;
@@ -229,7 +247,7 @@ function LearnDash_disable_assets( status ) {
 							//if ( typeof timer_html !== 'undefined' ) {
 							//	jQuery('span', timer_html).html('XXX'); 
 							//}
-							jQuery('form#sfwd-mark-complete').submit(); 
+							jQuery('form.sfwd-mark-complete')[0].submit(); 
 							
 					    } else {
 							if ( typeof timer_html !== 'undefined' ) {
@@ -238,7 +256,7 @@ function LearnDash_disable_assets( status ) {
 					    }
 					}, 1000);			
 				} else {
-					jQuery('form#sfwd-mark-complete').submit(); 
+					jQuery('form.sfwd-mark-complete')[0].submit(); 
 				}
 			}
 		} 
@@ -254,5 +272,8 @@ function LearnDash_disable_assets( status ) {
 			jQuery('#learndash_quizzes').slideDown();
 		}
 	}
+	
+	jQuery(document).trigger( 'learndash_video_disable_assets', [ status ] );
+	
 }
 

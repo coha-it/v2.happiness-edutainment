@@ -124,12 +124,12 @@ if ( ( !class_exists( 'LD_REST_Users_Course_Progress_Controller_V1' ) ) && ( cla
 
 				// Ensure a search string is set in case the orderby is set to 'relevance'.
 				if ( ! empty( $request['orderby'] ) && 'relevance' === $request['orderby'] && empty( $request['search'] ) ) {
-					return new WP_Error( 'rest_no_search_term_defined', __( 'You need to define a search term to order by relevance.' ), array( 'status' => 400 ) );
+					return new WP_Error( 'rest_no_search_term_defined', __( 'You need to define a search term to order by relevance.', 'learndash' ), array( 'status' => 400 ) );
 				}
 
 				// Ensure an include parameter is set in case the orderby is set to 'include'.
 				if ( ! empty( $request['orderby'] ) && 'include' === $request['orderby'] && empty( $request['include'] ) ) {
-					return new WP_Error( 'rest_orderby_include_missing_include', __( 'You need to define an include parameter to order by include.' ), array( 'status' => 400 ) );
+					return new WP_Error( 'rest_orderby_include_missing_include', __( 'You need to define an include parameter to order by include.', 'learndash' ), array( 'status' => 400 ) );
 				}
 
 				// Retrieve the list of registered collection query parameters.
@@ -320,7 +320,7 @@ if ( ( !class_exists( 'LD_REST_Users_Course_Progress_Controller_V1' ) ) && ( cla
 				$max_pages = ceil( $total_posts / (int) $posts_query->query_vars['posts_per_page'] );
 
 				if ( $page > $max_pages && $total_posts > 0 ) {
-					return new WP_Error( 'rest_post_invalid_page_number', __( 'The page number requested is larger than the number of pages available.' ), array( 'status' => 400 ) );
+					return new WP_Error( 'rest_post_invalid_page_number', __( 'The page number requested is larger than the number of pages available.', 'learndash' ), array( 'status' => 400 ) );
 				}
 
 				$response = rest_ensure_response( $data );
@@ -389,11 +389,11 @@ if ( ( !class_exists( 'LD_REST_Users_Course_Progress_Controller_V1' ) ) && ( cla
 			$course_id = $request['course'];
 			$lesson_id = $request['id'];
 			if ( empty( $course_id ) ) {
-				return new WP_Error( 'rest_post_invalid_id_X', esc_html__( 'Invalid Course ID.' ), array( 'status' => 404 ) );
+				return new WP_Error( 'rest_post_invalid_id_X', esc_html__( 'Invalid Course ID.', 'learndash' ), array( 'status' => 404 ) );
 			}
 			
 			if ( empty( $lesson_id ) ) {
-				return new WP_Error( 'rest_post_invalid_id_Y', esc_html__( 'Invalid Lesson ID.' ), array( 'status' => 404 ) );
+				return new WP_Error( 'rest_post_invalid_id_Y', esc_html__( 'Invalid Lesson ID.', 'learndash' ), array( 'status' => 404 ) );
 			}
 
 			$current_user_id = get_current_user_id();
@@ -404,7 +404,7 @@ if ( ( !class_exists( 'LD_REST_Users_Course_Progress_Controller_V1' ) ) && ( cla
 
 			$has_access = sfwd_lms_has_access( $course->ID, $current_user->ID );
 			if ( ( ! $has_access ) && ( $course_price_type != 'open' ) ) {
-				return new WP_Error( 'rest_cannot_view', esc_html__( 'Sorry, you are not allowed view items.' ), array( 'status' => rest_authorization_required_code() ) );
+				return new WP_Error( 'rest_cannot_view', esc_html__( 'Sorry, you are not allowed view items.', 'learndash' ), array( 'status' => rest_authorization_required_code() ) );
 			}
 
 			$return = learndash_process_mark_complete( $current_user_id, $lesson_id );

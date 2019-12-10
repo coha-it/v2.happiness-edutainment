@@ -32,11 +32,20 @@ if ( ( class_exists( 'LearnDash_Gutenberg_Block' ) ) && ( ! class_exists( 'Learn
 				'label_after' => array(
 					'type' => 'string',
 				),
+				'autop' => array(
+					'type' => 'boolean',
+				),
 				'preview_show' => array(
 					'type' => 'boolean',
 				),
+				'preview_course_id' => array(
+					'type' => 'string',
+				),
 				'preview_user_id' => array(
 					'type' => 'string',
+				),
+				'example_show' => array(
+					'type' => 'boolean',
 				),
 				'meta' => array(
 					'type' => 'object',
@@ -81,6 +90,23 @@ if ( ( class_exists( 'LearnDash_Gutenberg_Block' ) ) && ( ! class_exists( 'Learn
 			}
 
 			if ( is_user_logged_in() ) {
+				if ( ( isset( $attributes['example_show'] ) ) && ( ! empty( $attributes['example_show'] ) ) ) {
+					$attributes['preview_course_id'] = $this->get_example_post_id( learndash_get_post_type_slug( 'course' ) );
+					$attributes['preview_user_id'] = $this->get_example_user_id();
+					$attributes['preview_show'] = 1;
+					unset( $attributes['example_show'] );
+				}
+
+				if ( ( isset( $attributes['preview_show'] ) ) && ( ! empty( $attributes['preview_show'] ) ) ) {
+					if ( ( isset( $attributes['preview_course_id'] ) ) && ( ! empty( $attributes['preview_course_id'] ) ) ) {
+						$attributes['course_id'] = absint( $attributes['preview_course_id'] );
+						unset( $attributes['preview_course_id'] );
+					}
+					if ( ( isset( $attributes['preview_user_id'] ) ) && ( ! empty( $attributes['preview_user_id'] ) ) ) {
+						$attributes['user_id'] = absint( $attributes['preview_user_id'] );
+						unset( $attributes['preview_user_id'] );
+					}
+				}
 
 				if ( ( ! isset( $attributes['course_id'] ) ) || ( empty( $attributes['course_id'] ) ) ) {
 					if ( ( ! isset( $attributes_meta['course_id'] ) ) || ( empty( $attributes_meta['course_id'] ) ) ) {

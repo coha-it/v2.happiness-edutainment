@@ -1,7 +1,7 @@
 
 /**
  * LearnDash Block ld-visitor
- * 
+ *
  * @since 2.5.9
  * @package LearnDash
  */
@@ -19,18 +19,19 @@ import {
  * Internal block libraries
  */
 const { __, _x, sprintf } = wp.i18n;
-const { 
-	registerBlockType, 
+const {
+	registerBlockType,
 } = wp.blocks;
- 
+
  const {
     InnerBlocks,
     InspectorControls,
  } = wp.editor;
- 
+
  const {
     PanelBody,
-    TextControl
+    TextControl,
+    ToggleControl
 } = wp.components;
 
 registerBlockType(
@@ -38,16 +39,23 @@ registerBlockType(
     {
         title: __( 'LearnDash Visitor', 'learndash' ),
         description: sprintf(_x('This block shows the content if the user is not enrolled into the %s.', 'placeholders: course', 'learndash'), ldlms_get_custom_label('course') ),
-        icon: 'desktop',
-        category: 'widgets',
+        icon: 'visibility',
+        supports: {
+            customClassName: false,
+        },
+        category: 'learndash-blocks',
         attributes: {
             course_id: {
                 type: 'string',
                 default: '',
             },
+            autop: {
+                type: 'boolean',
+                default: true
+            },
         },
         edit: props => {
-            const { attributes: { course_id }, className, setAttributes } = props;
+            const { attributes: { course_id, autop }, className, setAttributes } = props;
 
             const inspectorControls = (
                 <InspectorControls>
@@ -59,6 +67,11 @@ registerBlockType(
                             help={sprintf(_x('Enter single %1$s ID. Leave blank if used within a %2$s.', 'placeholders: course, course', 'learndash'), ldlms_get_custom_label('course'), ldlms_get_custom_label('course') ) }
                             value={course_id || ''}
                             onChange={course_id => setAttributes({ course_id })}
+                        />
+                        <ToggleControl
+                            label={__('Auto Paragraph', 'learndash')}
+                            checked={!!autop}
+                            onChange={autop => setAttributes({ autop })}
                         />
                     </PanelBody>
                 </InspectorControls>
@@ -93,7 +106,7 @@ registerBlockType(
                 inspectorControls,
                 outputBlock
             ];
-        },		
+        },
         save: props => {
             return (
 				<InnerBlocks.Content />
