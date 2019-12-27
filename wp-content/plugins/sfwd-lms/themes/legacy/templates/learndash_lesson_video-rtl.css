@@ -1,7 +1,9 @@
 body.learndash-cpt.learndash-embed-responsive .ld-video {
 	position: relative;
 	padding-bottom: 56.25%;
-	padding-top: 30px; height: 0; overflow: hidden;
+    /* padding-top: 30px; */
+    height: 0; 
+    overflow: hidden;
 }
 
 body.learndash-cpt.learndash-embed-responsive .ld-video iframe,
@@ -9,11 +11,18 @@ body.learndash-cpt.learndash-embed-responsive .ld-video object,
 body.learndash-cpt.learndash-embed-responsive .ld-video embed,
 body.learndash-cpt.learndash-embed-responsive .ld-video video,
 body.learndash-cpt.learndash-embed-responsive .ld-video div.wp-video {
-	position: absolute;
-	top: 0;
+    top: 0;
 	right: 0;
 	width: 100% !important;
 	height: 100%;
+}
+
+body.learndash-cpt.learndash-embed-responsive .ld-video iframe {
+    position: absolute;
+}
+
+body.learndash-cpt.learndash-embed-responsive .ld-video[data-video-provider="vooplayer"] iframe {
+    position: unset;
 }
 
 body.learndash-cpt.learndash-embed-responsive .wp-video, 
@@ -44,9 +53,7 @@ body.learndash-cpt.learndash-embed-responsive .mejs-container.mejs-video .mejs-m
     bottom: 0;
     right: 0;
 }
-body.learndash-cpt.learndash-embed-responsive .mejs-container.mejs-video .mejs-controls {
-    display: none;
-}
+
 body.learndash-cpt.learndash-embed-responsive .mejs-container.mejs-video .mejs-overlay-play {
     top: 0;
     left: 0;

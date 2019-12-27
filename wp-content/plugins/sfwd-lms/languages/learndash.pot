@@ -2,14 +2,14 @@
 # This file is distributed under the same license as the LearnDash LMS plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: LearnDash LMS 3.1.1\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/learndash-core-3.1.1.master\n"
+"Project-Id-Version: LearnDash LMS 3.1.1.1\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/learndash-core-3.1.1.1.master\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2019-11-25T12:23:04+00:00\n"
+"POT-Creation-Date: 2019-12-10T15:13:39+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.2.0\n"
 "X-Domain: learndash\n"
@@ -3110,7 +3110,7 @@ msgstr ""
 #: includes/settings/shortcodes-sections/course_inprogress.php:60
 #: includes/settings/shortcodes-sections/course_notstarted.php:60
 #: includes/course/ld-course-info-widget.php:193
-#: themes/ld30/includes/helpers.php:1621
+#: themes/ld30/includes/helpers.php:1258
 msgid "Yes (default)"
 msgstr ""
 
@@ -3171,7 +3171,7 @@ msgstr ""
 #: includes/lib/wp-pro-quiz/lib/model/WpProQuiz_Model_Form.php:100
 #: includes/lib/wp-pro-quiz/lib/view/WpProQuiz_View_FrontQuiz.php:727
 #: includes/lib/wp-pro-quiz/lib/view/WpProQuiz_View_StatisticsAjax.php:704
-#: themes/ld30/includes/helpers.php:1622
+#: themes/ld30/includes/helpers.php:1259
 msgid "No"
 msgstr ""
 
@@ -3274,7 +3274,7 @@ msgstr ""
 #: includes/course/ld-course-info-widget.php:209
 #: includes/course/ld-course-info-widget.php:232
 #: includes/course/ld-course-info-widget.php:255
-#: themes/ld30/includes/helpers.php:1645
+#: themes/ld30/includes/helpers.php:1282
 #: includes/gutenberg/blocks/ld-course-list/index.js:218
 #: includes/gutenberg/blocks/ld-course-info/index.js:193
 #: includes/gutenberg/blocks/ld-course-info/index.js:252
@@ -3297,7 +3297,7 @@ msgstr ""
 #: includes/course/ld-course-info-widget.php:210
 #: includes/course/ld-course-info-widget.php:233
 #: includes/course/ld-course-info-widget.php:256
-#: themes/ld30/includes/helpers.php:1646
+#: themes/ld30/includes/helpers.php:1283
 #: includes/gutenberg/blocks/ld-course-list/index.js:222
 #: includes/gutenberg/blocks/ld-course-info/index.js:197
 #: includes/gutenberg/blocks/ld-course-info/index.js:256
@@ -3344,7 +3344,7 @@ msgstr ""
 #: includes/settings/shortcodes-sections/ld_topic_list.php:52
 #: includes/course/ld-course-info-widget.php:217
 #: includes/course/ld-course-info-widget.php:240
-#: themes/ld30/includes/helpers.php:1653
+#: themes/ld30/includes/helpers.php:1290
 msgid "DESC - highest to lowest values"
 msgstr ""
 
@@ -4295,7 +4295,7 @@ msgstr ""
 #: includes/settings/shortcodes-sections/ld_course_info.php:102
 #: includes/course/ld-course-info-widget.php:207
 #: includes/course/ld-course-info-widget.php:230
-#: themes/ld30/includes/helpers.php:1643
+#: themes/ld30/includes/helpers.php:1280
 msgid "Title (default) - Order by post title"
 msgstr ""
 
@@ -4305,7 +4305,7 @@ msgstr ""
 #: includes/course/ld-course-info-widget.php:208
 #: includes/course/ld-course-info-widget.php:231
 #: includes/course/ld-course-info-widget.php:254
-#: themes/ld30/includes/helpers.php:1644
+#: themes/ld30/includes/helpers.php:1281
 msgid "ID - Order by post id"
 msgstr ""
 
@@ -4323,7 +4323,7 @@ msgstr ""
 #: includes/settings/shortcodes-sections/ld_course_info.php:116
 #: includes/course/ld-course-info-widget.php:216
 #: includes/course/ld-course-info-widget.php:239
-#: themes/ld30/includes/helpers.php:1652
+#: themes/ld30/includes/helpers.php:1289
 msgid "ASC (default) - lowest to highest values"
 msgstr ""
 
@@ -4756,7 +4756,7 @@ msgstr ""
 #: includes/admin/class-learndash-admin-groups-users-list.php:176
 #: includes/lib/wp-pro-quiz/lib/view/WpProQuiz_View_QuizEdit.php:1188
 #: themes/legacy/templates/profile.php:66
-#: themes/ld30/templates/modules/login-modal.php:286
+#: themes/ld30/templates/modules/login-modal.php:290
 msgid "Email"
 msgstr ""
 
@@ -5109,7 +5109,7 @@ msgstr ""
 #: includes/lib/wp-pro-quiz/lib/view/WpProQuiz_View_GobalSettings.php:393
 #: includes/lib/wp-pro-quiz/lib/view/WpProQuiz_View_StatisticsAjax.php:26
 #: themes/legacy/templates/profile.php:65
-#: themes/ld30/templates/modules/login-modal.php:282
+#: themes/ld30/templates/modules/login-modal.php:286
 msgid "Username"
 msgstr ""
 
@@ -7258,17 +7258,17 @@ msgstr ""
 #: includes/class-ld-cpt-widget.php:443
 #: includes/class-ld-cpt-widget.php:573
 #: includes/class-ld-cpt-widget.php:704
-#: themes/ld30/includes/helpers.php:1613
+#: themes/ld30/includes/helpers.php:1250
 msgid "Title:"
 msgstr ""
 
 #: includes/course/ld-course-info-widget.php:191
-#: themes/ld30/includes/helpers.php:1619
+#: themes/ld30/includes/helpers.php:1256
 msgid "Registered show thumbnail:"
 msgstr ""
 
 #: includes/course/ld-course-info-widget.php:199
-#: themes/ld30/includes/helpers.php:1627
+#: themes/ld30/includes/helpers.php:1264
 msgid "Registered per page:"
 msgstr ""
 
@@ -7276,18 +7276,18 @@ msgstr ""
 #: includes/course/ld-course-info-widget.php:201
 #: includes/course/ld-course-info-widget.php:225
 #: includes/course/ld-course-info-widget.php:247
-#: themes/ld30/includes/helpers.php:1633
+#: themes/ld30/includes/helpers.php:1270
 msgctxt "placeholders: default per page"
 msgid "Default is %d. Set to zero for no pagination."
 msgstr ""
 
 #: includes/course/ld-course-info-widget.php:205
-#: themes/ld30/includes/helpers.php:1641
+#: themes/ld30/includes/helpers.php:1278
 msgid "Registered order by:"
 msgstr ""
 
 #: includes/course/ld-course-info-widget.php:214
-#: themes/ld30/includes/helpers.php:1650
+#: themes/ld30/includes/helpers.php:1287
 msgid "Registered order:"
 msgstr ""
 
@@ -15258,17 +15258,17 @@ msgid "%s draft updated."
 msgstr ""
 
 #: includes/ld-misc-functions.php:1604
-#: themes/ld30/includes/helpers.php:1212
-#: themes/ld30/includes/helpers.php:1259
+#: themes/ld30/includes/shortcodes.php:38
+#: themes/ld30/includes/shortcodes.php:85
 #: themes/ld30/templates/focus/masthead.php:159
 #: includes/gutenberg/blocks/ld-login/index.js:236
 msgid "Logout"
 msgstr ""
 
 #: includes/ld-misc-functions.php:1616
-#: themes/ld30/includes/helpers.php:1205
-#: themes/ld30/includes/helpers.php:1327
-#: themes/ld30/templates/modules/login-modal.php:27
+#: themes/ld30/includes/shortcodes.php:31
+#: themes/ld30/includes/shortcodes.php:152
+#: themes/ld30/templates/modules/login-modal.php:33
 #: themes/ld30/templates/modules/infobar/course.php:195
 #: includes/gutenberg/blocks/ld-login/index.js:232
 msgid "Login"
@@ -15667,87 +15667,111 @@ msgstr ""
 msgid "LearnDash 3.0"
 msgstr ""
 
-#: themes/ld30/includes/helpers.php:53
+#: themes/ld30/includes/login-register-functions.php:393
+msgid "Registration username exists."
+msgstr ""
+
+#: themes/ld30/includes/login-register-functions.php:394
+msgid "Registration email exists."
+msgstr ""
+
+#: themes/ld30/includes/login-register-functions.php:395
+msgid "Registration requires a username."
+msgstr ""
+
+#: themes/ld30/includes/login-register-functions.php:396
+msgid "Registration requires a valid email."
+msgstr ""
+
+#: themes/ld30/includes/login-register-functions.php:397
+msgid "Invalid username."
+msgstr ""
+
+#: themes/ld30/includes/login-register-functions.php:398
+msgid "Invalid email."
+msgstr ""
+
+#: themes/ld30/includes/helpers.php:54
 msgid "day"
 msgid_plural "days"
 msgstr[0] ""
 msgstr[1] ""
 
-#: themes/ld30/includes/helpers.php:56
+#: themes/ld30/includes/helpers.php:57
 msgid "month"
 msgid_plural "months"
 msgstr[0] ""
 msgstr[1] ""
 
-#: themes/ld30/includes/helpers.php:59
+#: themes/ld30/includes/helpers.php:60
 msgid "year"
 msgid_plural "years"
 msgstr[0] ""
 msgstr[1] ""
 
-#: themes/ld30/includes/helpers.php:621
+#: themes/ld30/includes/helpers.php:622
 msgid "Sample Lesson"
 msgstr ""
 
 #. translators: placeholders: Date when lesson will be available
-#: themes/ld30/includes/helpers.php:631
+#: themes/ld30/includes/helpers.php:632
 #: themes/ld30/templates/lesson/partials/not-available.php:2
 msgctxt "Available on date label"
 msgid "Available on %s"
 msgstr ""
 
-#: themes/ld30/includes/helpers.php:815
+#: themes/ld30/includes/helpers.php:816
 msgctxt "In Progress item status"
 msgid "In Progress"
 msgstr ""
 
-#: themes/ld30/includes/helpers.php:821
+#: themes/ld30/includes/helpers.php:822
 msgctxt "In Progress item status"
 msgid "Complete"
 msgstr ""
 
-#: themes/ld30/includes/helpers.php:825
+#: themes/ld30/includes/helpers.php:826
 msgctxt "In Progress item status"
 msgid "Graded"
 msgstr ""
 
-#: themes/ld30/includes/helpers.php:829
+#: themes/ld30/includes/helpers.php:830
 msgctxt "In Progress item status"
 msgid "Not Graded"
 msgstr ""
 
-#: themes/ld30/includes/helpers.php:1150
+#: themes/ld30/includes/helpers.php:1059
 msgid "You must watch the video before accessing this content"
 msgstr ""
 
 #. translators: placeholder: Courses
-#: themes/ld30/includes/helpers.php:1461
+#: themes/ld30/includes/helpers.php:1098
 msgctxt "placeholders: courses"
 msgid "LearnDash - Registered %s and progress information of users. Visible only to users logged in."
 msgstr ""
 
-#: themes/ld30/includes/helpers.php:1466
+#: themes/ld30/includes/helpers.php:1103
 msgid "User Status"
 msgstr ""
 
-#: themes/ld30/includes/helpers.php:1877
+#: themes/ld30/includes/helpers.php:1312
 msgid "LearnDash: Focus Mode Dropdown"
 msgstr ""
 
-#: themes/ld30/includes/helpers.php:2214
-#: themes/ld30/includes/helpers.php:2525
+#: themes/ld30/includes/helpers.php:1649
+#: themes/ld30/includes/helpers.php:1960
 msgid "No attributes passed in"
 msgstr ""
 
-#: themes/ld30/includes/helpers.php:2264
+#: themes/ld30/includes/helpers.php:1699
 msgid "No course ID supplied"
 msgstr ""
 
-#: themes/ld30/includes/helpers.php:2291
+#: themes/ld30/includes/helpers.php:1726
 msgid "No topics for this lesson"
 msgstr ""
 
-#: themes/ld30/includes/helpers.php:2620
+#: themes/ld30/includes/helpers.php:2055
 msgid "No Pagination Match"
 msgstr ""
 
@@ -16172,65 +16196,41 @@ msgid "%1$d of %2$d"
 msgstr ""
 
 #. translators: placeholder: course.
-#: themes/ld30/templates/modules/login-modal.php:42
+#: themes/ld30/templates/modules/login-modal.php:48
 msgctxt "placeholder: course"
 msgid "Accessing this %s requires a login, please enter your credentials below!"
 msgstr ""
 
-#: themes/ld30/templates/modules/login-modal.php:62
+#: themes/ld30/templates/modules/login-modal.php:68
 msgid "Incorrect username or password. Please try again"
 msgstr ""
 
-#: themes/ld30/templates/modules/login-modal.php:79
+#: themes/ld30/templates/modules/login-modal.php:85
 msgid "Please check your email for the password reset link."
 msgstr ""
 
-#: themes/ld30/templates/modules/login-modal.php:125
+#: themes/ld30/templates/modules/login-modal.php:133
 msgid "Lost Your Password?"
 msgstr ""
 
-#: themes/ld30/templates/modules/login-modal.php:151
-#: themes/ld30/templates/modules/login-modal.php:309
+#: themes/ld30/templates/modules/login-modal.php:161
+#: themes/ld30/templates/modules/login-modal.php:315
 msgid "Register"
 msgstr ""
 
-#: themes/ld30/templates/modules/login-modal.php:152
+#: themes/ld30/templates/modules/login-modal.php:162
 msgid "Don't have an account? Register one!"
 msgstr ""
 
-#: themes/ld30/templates/modules/login-modal.php:193
-msgid "Registration username exists."
-msgstr ""
-
-#: themes/ld30/templates/modules/login-modal.php:194
-msgid "Registration email exists."
-msgstr ""
-
-#: themes/ld30/templates/modules/login-modal.php:195
-msgid "Registration requires a username."
-msgstr ""
-
-#: themes/ld30/templates/modules/login-modal.php:196
-msgid "Registration requires a valid email."
-msgstr ""
-
-#: themes/ld30/templates/modules/login-modal.php:197
-msgid "Invalid username."
-msgstr ""
-
-#: themes/ld30/templates/modules/login-modal.php:198
-msgid "Invalid email."
-msgstr ""
-
-#: themes/ld30/templates/modules/login-modal.php:235
+#: themes/ld30/templates/modules/login-modal.php:238
 msgid "Registration successful, please check your email to set your password."
 msgstr ""
 
-#: themes/ld30/templates/modules/login-modal.php:254
+#: themes/ld30/templates/modules/login-modal.php:257
 msgid "Register an Account"
 msgstr ""
 
-#: themes/ld30/templates/modules/login-modal.php:306
+#: themes/ld30/templates/modules/login-modal.php:314
 msgid "Registration confirmation will be emailed to you."
 msgstr ""
 

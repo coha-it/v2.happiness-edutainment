@@ -2,9 +2,9 @@
 # This file is distributed under the GPLv2 or later (license.txt).
 msgid ""
 msgstr ""
-"Project-Id-Version: bbPress 2.6.2\n"
+"Project-Id-Version: bbPress 2.6.3\n"
 "Report-Msgid-Bugs-To: https://bbpress.trac.wordpress.org\n"
-"POT-Creation-Date: 2019-11-22 16:30:35+00:00\n"
+"POT-Creation-Date: 2019-12-10 20:28:53+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -714,7 +714,7 @@ msgstr ""
 
 #: includes/admin/forums.php:127
 msgid ""
-"<strong>Close</strong> will mark the selected forum as &#8217;closed&#8217 "
+"<strong>Close</strong> will mark the selected forum as &#8217;closed&#8217; "
 "and disable the ability to post new topics and replies in it."
 msgstr ""
 
@@ -2863,7 +2863,7 @@ msgid "No engagements to upgrade."
 msgstr ""
 
 #: includes/admin/tools/upgrade.php:249
-msgid "Complete! %d engagements upgraded."
+msgid "Complete! %d engagement upgraded."
 msgid_plural "Complete! %d engagements upgraded."
 msgstr[0] ""
 msgstr[1] ""
@@ -2931,7 +2931,7 @@ msgid "No favorites to remove."
 msgstr ""
 
 #: includes/admin/tools/upgrade.php:603
-msgid "Complete! %d favorites deleted."
+msgid "Complete! %d favorite deleted."
 msgid_plural "Complete! %d favorites deleted."
 msgstr[0] ""
 msgstr[1] ""
@@ -5257,7 +5257,7 @@ msgstr ""
 #: includes/users/engagements.php:616
 msgid ""
 "<strong>ERROR</strong>: You do not have permission to edit favorites for "
-"that user!."
+"that user."
 msgstr ""
 
 #: includes/users/engagements.php:657
@@ -6075,7 +6075,7 @@ msgid "Please login to subscribe."
 msgstr ""
 
 #: templates/default/bbpress-functions.php:321
-msgid "Subcription failed."
+msgid "Subscription failed."
 msgstr ""
 
 #: templates/default/extras/page-forum-statistics.php:22

@@ -37,7 +37,7 @@
 					</div>
 					
 					<div class="site-branding">
-						<a href="https://expert.happiness-edutainment.de/"><img src="https://expert.happiness-edutainment.de/wp-content/themes/edu/img/chedu_logo_v2.png" title="Happiness Edutainment Plattform" alt="Happiness Edutainment Plattform"/></a>
+						<a href="https://v2.happiness-edutainment.de/"><img src="https://v2.happiness-edutainment.de/wp-content/themes/edu/img/chedu_logo_v2.png" title="Happiness Edutainment Plattform" alt="Happiness Edutainment Plattform"/></a>
 					</div><!-- .site-branding -->
 
 					<nav id="site-navigation" class="main-navigation" role="navigation">
