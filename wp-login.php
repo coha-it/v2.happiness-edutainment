@@ -1400,6 +1400,9 @@ switch ( $action ) {
 				?>
 				<input type="hidden" name="testcookie" value="1" />
 			</p>
+
+			<p class="login-datenschutz-notiz">Mit der Nutzung der Plattform akzeptieren Sie die Nutzungsbedingungen und die Datenschutzrichtlinien der Corporate Happiness Lernplattform. <a class="ctcc-more-info-link" tabindex="0" target="_blank" href="https://v2.happiness-edutainment.de/nutzungsbedingungen-und-datenschutz">Nutzungsbedingungen und Datenschutzerklärung lesen.</a></p>
+
 		</form>
 
 		<?php
