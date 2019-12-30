@@ -715,7 +715,8 @@ text-decoration:underline;
 .main-navigation li {
 	float: left;
 	position: relative;
-		margin-right:2px;
+	margin-right:2px;
+	border-radius: 0;
 }
 
 .main-navigation ul a {
@@ -758,10 +759,7 @@ background-image:url(./img/icostatus1.png);
 background-image:url(./img/icoforum2.png);
 }
 
-.main-navigation ul .icohilfe1 a {
-background-image:url(./img/icohilfe1.png);
-border-top-right-radius:6px;
-}
+.main-navigation ul .icohilfe1 a {background-image:url(./img/icohilfe1.png);}
 
 .main-navigation ul .icosubmenuarrow a {
 background:url(./img/icosubmenuarrow.png) no-repeat 0.5em 0.5em #F0F0F0;
