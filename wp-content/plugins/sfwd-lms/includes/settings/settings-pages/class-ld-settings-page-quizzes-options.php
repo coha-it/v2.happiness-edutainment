@@ -2,19 +2,27 @@
 /**
  * LearnDash Settings Page Quizzes Options.
  *
- * @package LearnDash
- * @subpackage Settings
+ * @since 2.6.0
+ * @package LearnDash\Settings\Pages
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDash_Settings_Page_Quizzes_Options' ) ) ) {
 
 	/**
-	 * Class to create the settings page.
+	 * Class LearnDash Settings Page Quizzes Options.
+	 *
+	 * @since 2.6.0
 	 */
 	class LearnDash_Settings_Page_Quizzes_Options extends LearnDash_Settings_Page {
 
 		/**
 		 * Public constructor for class
+		 *
+		 * @since 2.6.0
 		 */
 		public function __construct() {
 
@@ -31,6 +39,8 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 
 		/**
 		 * Action hook to handle admin_tabs processing from LearnDash.
+		 *
+		 * @since 2.6.0
 		 *
 		 * @param string $admin_menu_section Current admin menu section.
 		 */

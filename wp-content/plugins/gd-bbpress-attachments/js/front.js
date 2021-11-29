@@ -1,29 +1,36 @@
 /*jslint regexp: true, confusion: true, undef: true, sloppy: true, eqeq: true, vars: true, white: true, plusplus: true, maxerr: 50, indent: 4 */
 /*global gdbbPressAttachmentsInit*/
 
-var gdbbPressAttachments = {
-    storage: {
-        files_counter: 1
-    },
-    init: function() {
-        jQuery("form#new-post").attr("enctype", "multipart/form-data");
-        jQuery("form#new-post").attr("encoding", "multipart/form-data");
+;(function($, window, document, undefined) {
+    window.wp = window.wp || {};
+    window.wp.gdatt = window.wp.gdatt || {};
 
-        jQuery(document).on("click", ".d4p-attachment-addfile", function(e){
-            e.preventDefault();
+    window.wp.gdatt.attachments = {
+        init: function() {
+            $("form#new-post").attr("enctype", "multipart/form-data");
 
-            if (gdbbPressAttachments.storage.files_counter < gdbbPressAttachmentsInit.max_files) {
-                jQuery(this).before('<input type="file" size="40" name="d4p_attachment[]"><br/>');
-                gdbbPressAttachments.storage.files_counter++;
-            }
+            $(document).on("click", ".d4p-bba-actions a", function(e){
+                return confirm(gdbbPressAttachmentsInit.are_you_sure);
+            });
 
-            if (gdbbPressAttachments.storage.files_counter == gdbbPressAttachmentsInit.max_files) {
-                jQuery(this).remove();
-            }
-        });
-    }
-};
+            $(document).on("click", ".d4p-attachment-addfile", function(e){
+                e.preventDefault();
 
-jQuery(document).ready(function() {
-    gdbbPressAttachments.init();
-});
+                var now = $(".bbp-attachments-form input[type=file]").length,
+                    max = parseInt(gdbbPressAttachmentsInit.max_files);
+
+                if (now < max) {
+                    $(this).before('<input type="file" size="40" name="d4p_attachment[]"><br/>');
+                }
+
+                if (now + 1 >= max) {
+                    $(this).remove();
+                }
+            });
+        }
+    };
+
+    $(document).ready(function() {
+        wp.gdatt.attachments.init();
+    });
+})(jQuery, window, document);

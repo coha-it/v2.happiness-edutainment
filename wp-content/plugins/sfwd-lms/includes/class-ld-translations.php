@@ -1,7 +1,4 @@
 <?php
-/*
-WordPress language functions
-*/
 /**
  * LearnDash Admin Translations handler.
  * This class connects to a remote GlotPress server to retreive needed translations for LearnDash core and related add-ons.
@@ -9,6 +6,10 @@ WordPress language functions
  * @package LearnDash
  * @subpackage Admin
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 if ( ! class_exists( 'LearnDash_Translations' ) ) {
 	/**
@@ -42,28 +43,28 @@ if ( ! class_exists( 'LearnDash_Translations' ) ) {
 		 *
 		 * @var array $project_slugs.
 		 */
-		static private $project_slugs = array();
+		private static $project_slugs = array();
 
 		/**
 		 * Translations Directory on server.
 		 *
 		 * @var string $translations_dir.
 		 */
-		static private $translations_dir = '';
+		private static $translations_dir = '';
 
 		/**
 		 * Options Key for storing translations data.
 		 *
 		 * @var string $options_key.
 		 */
-		static private $options_key = 'ld-translations';
+		private static $options_key = 'ld-translations';
 
 		/**
 		 * Debug capture variable.
 		 *
 		 * @var array $debug_log_array.
 		 */
-		static public $debug_log_array = array();
+		public static $debug_log_array = array();
 
 		/**
 		 * Public constructor for class.
@@ -83,9 +84,6 @@ if ( ! class_exists( 'LearnDash_Translations' ) ) {
 		 * @param string $project_language_dir Project Language Directory.
 		 */
 		public static function register_translation_slug( $project_slug = '', $project_language_dir = '' ) {
-			//self::log_debug_message( 'in :' . __FUNCTION__ );
-			//self::log_debug_message( 'project_slug :' . $project_slug );
-
 			if ( ( ! empty( $project_slug ) ) && ( ! isset( self::$project_slugs[ $project_slug ] ) ) ) {
 				self::$project_slugs[ $project_slug ] = trailingslashit( $project_language_dir );
 			}
@@ -118,6 +116,8 @@ if ( ! class_exists( 'LearnDash_Translations' ) ) {
 					return str_replace( $abspath_tmp, '/', trailingslashit( self::$project_slugs[ $project_slug ] ) );
 				}
 			}
+
+			return '';
 		}
 
 		/**
@@ -133,6 +133,8 @@ if ( ! class_exists( 'LearnDash_Translations' ) ) {
 					return true;
 				}
 			}
+
+			return false;
 		}
 
 		/**
@@ -146,6 +148,8 @@ if ( ! class_exists( 'LearnDash_Translations' ) ) {
 			if ( isset( $ld_translations['translation_sets'][ $project_slug ] ) ) {
 				return true;
 			}
+
+			return false;
 		}
 
 		/** Return available translations for project slug.
@@ -166,6 +170,8 @@ if ( ! class_exists( 'LearnDash_Translations' ) ) {
 				}
 				return $ld_translations['translation_sets'][ $project_slug ];
 			}
+
+			return [];
 		}
 
 		/**
@@ -187,6 +193,7 @@ if ( ! class_exists( 'LearnDash_Translations' ) ) {
 					$nonce_key .= '-' . $project;
 					$action_url = add_query_arg( array( 'project' => $project ), $action_url );
 				}
+
 				if ( ! empty( $locale ) ) {
 					$nonce_key .= '-' . $locale;
 					$action_url = add_query_arg( array( 'locale' => $locale ), $action_url );
@@ -197,6 +204,8 @@ if ( ! class_exists( 'LearnDash_Translations' ) ) {
 
 				return $action_url;
 			}
+
+			return '';
 		}
 
 		/**
@@ -215,7 +224,13 @@ if ( ! class_exists( 'LearnDash_Translations' ) ) {
 
 					if ( ( isset( $translation_set['links'] ) ) && ( ! empty( $translation_set['links'] ) ) ) {
 						foreach ( $translation_set['links'] as $link_key => $link_url ) {
-							$url_args = apply_filters( 'learndash_translations_url_args', array('timeout' => LEARNDASH_HTTP_REMOTE_GET_TIMEOUT) );
+
+							/**
+							 * Filters translation URL arguments.
+							 *
+							 * @param array $name An array of URL transaltion arguments.
+							 */
+							$url_args = apply_filters( 'learndash_translations_url_args', array( 'timeout' => LEARNDASH_HTTP_REMOTE_GET_TIMEOUT ) );
 
 							$dest_filename = self::get_language_directory( $project, false ) . $project . '-' . $locale . '.' . $link_key;
 							if ( file_exists( $dest_filename ) ) {
@@ -226,10 +241,10 @@ if ( ! class_exists( 'LearnDash_Translations' ) ) {
 							if ( ( is_array( $response ) ) && ( wp_remote_retrieve_response_code( $response ) == '200' ) ) {
 								$response_body = wp_remote_retrieve_body( $response );
 								if ( ! empty( $response_body ) ) {
-									$fp = fopen( $dest_filename, 'w+' );
+									$fp = fopen( $dest_filename, 'w+' ); //phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fopen
 									if ( false !== $fp ) {
-										fwrite( $fp, $response_body );
-										fclose( $fp );
+										fwrite( $fp, $response_body ); //phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fwrite
+										fclose( $fp ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fclose
 										$reply_data['status']  = true;
 										$reply_data['message'] = '<p>' . sprintf(
 											// translators: placeholders: Language Name, Language code.
@@ -250,6 +265,67 @@ if ( ! class_exists( 'LearnDash_Translations' ) ) {
 		}
 
 		/**
+		 * Download .pot file
+		 *
+		 * @param string $project_slug Translation project slug.
+		 */
+		public static function download_pot_file( $project_slug = '' ) {
+			$reply_data = array();
+
+			if ( ! empty( $project_slug ) ) {
+				$pot_filename = self::get_language_directory( $project_slug, false ) . '' . $project_slug . '.pot';
+				if ( file_exists( $pot_filename ) ) {
+					$pot_file_contents = file_get_contents( $pot_filename ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+
+					header( 'Content-type: text/x-gettext-translation' );
+					header( 'Content-Length: ' . strlen( $pot_file_contents ) );
+					header( 'Cache-Control: no-cache, must-revalidate' );
+					header( 'Pragma: no-cache' );
+					header( 'Expires: 0' );
+					header( 'Content-Disposition: attachment; filename="' . basename( $pot_filename ) . '"; modification-date="' . date( 'r' ) . '";' ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+					echo $pot_file_contents; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					die();
+				}
+
+				$action_url = remove_query_arg( array( 'action', 'project', 'locale', 'ld-translation-nonce' ) );
+				learndash_safe_redirect( $action_url );
+			}
+		}
+
+		/**
+		 * Download .po file
+		 *
+		 * @param string $project_slug Translation project slug.
+		 * @param string $locale_slug  Locale slug.
+		 */
+		public static function download_po_file( $project_slug = '', $locale_slug = '' ) {
+			$reply_data = array();
+
+			if ( ( ! empty( $project_slug ) ) && ( ! empty( $locale_slug ) ) ) {
+				$installed_translations = self::get_installed_translations( $project_slug );
+				if ( isset( $installed_translations[ $locale_slug ] ) ) {
+					$installed_set = $installed_translations[ $locale_slug ];
+					$po_filename   = self::get_language_directory( $project_slug, false ) . $installed_set['po'];
+					if ( file_exists( $po_filename ) ) {
+						$po_file_contents = file_get_contents( $po_filename ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+
+						header( 'Content-type: text/x-gettext-translation' );
+						header( 'Content-Length: ' . strlen( $po_file_contents ) );
+						header( 'Cache-Control: no-cache, must-revalidate' );
+						header( 'Pragma: no-cache' );
+						header( 'Expires: 0' );
+						header( 'Content-Disposition: attachment; filename="' . basename( $po_filename ) . '"; modification-date="' . date( 'r' ) . '";' ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+						echo $po_file_contents; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Need to output HTML.
+						die();
+					}
+
+					$action_url = remove_query_arg( array( 'action', 'project', 'locale', 'ld-translation-nonce' ) );
+					learndash_safe_redirect( $action_url );
+				}
+			}
+		}
+
+		/**
 		 * Update Translations for Project
 		 *
 		 * @param string $project Project Slug.
@@ -265,24 +341,23 @@ if ( ! class_exists( 'LearnDash_Translations' ) ) {
 
 					if ( ( isset( $translation_set['links'] ) ) && ( ! empty( $translation_set['links'] ) ) ) {
 						foreach ( $translation_set['links'] as $link_key => $link_url ) {
-							$url_args = apply_filters( 'learndash_translations_url_args', array('timeout' => LEARNDASH_HTTP_REMOTE_GET_TIMEOUT) );
+
+							/** This filter is documented in includes/class-ld-translations.php */
+							$url_args = apply_filters( 'learndash_translations_url_args', array( 'timeout' => LEARNDASH_HTTP_REMOTE_GET_TIMEOUT ) );
 
 							$dest_filename = self::get_language_directory( $project, false ) . $project . '-' . $locale . '.' . $link_key;
 							if ( file_exists( $dest_filename ) ) {
 								unlink( $dest_filename );
 							}
 
-							//self::log_debug_message( 'in ' . __FUNCTION__ );
-							//self::log_debug_message( 'link_url ' . $link_url );
-
 							$response = wp_remote_get( $link_url, $url_args );
 							if ( ( is_array( $response ) ) && ( wp_remote_retrieve_response_code( $response ) == '200' ) ) {
 								$response_body = wp_remote_retrieve_body( $response );
 								if ( ! empty( $response_body ) ) {
-									$fp = fopen( $dest_filename, 'w+' );
+									$fp = fopen( $dest_filename, 'w+' ); //phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fopen
 									if ( false !== $fp ) {
-										fwrite( $fp, $response_body );
-										fclose( $fp );
+										fwrite( $fp, $response_body ); //phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fwrite
+										fclose( $fp );  // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fclose
 										$reply_data['status']  = true;
 										$reply_data['message'] = '<p>' . sprintf(
 											// translators: placeholders: Language Name, Language code.
@@ -317,6 +392,7 @@ if ( ! class_exists( 'LearnDash_Translations' ) ) {
 
 					if ( ( isset( $translation_set['links'] ) ) && ( ! empty( $translation_set['links'] ) ) ) {
 						foreach ( $translation_set['links'] as $link_key => $link_url ) {
+							/** This filter is documented in includes/class-ld-translations.php */
 							$url_args = apply_filters( 'learndash_translations_url_args', array() );
 
 							$dest_filename = self::get_language_directory( $project, false ) . $project . '-' . $locale . '.' . $link_key;
@@ -353,10 +429,10 @@ if ( ! class_exists( 'LearnDash_Translations' ) ) {
 		 */
 		public function show_meta_box() {
 			if ( ! empty( $this->project_slug ) ) {
-				$this->installed_translations = $this->get_installed_translations();
+				$this->installed_translations = self::get_installed_translations( $this->project_slug );
 				$this->available_translations = self::get_available_translations( $this->project_slug );
 				?>
-				<div id="wrap-ld-translations-<?php echo $this->project_slug; ?>" class="wrap wrap-ld-translations">
+				<div id="wrap-ld-translations-<?php echo esc_attr( $this->project_slug ); ?>" class="wrap wrap-ld-translations">
 					<?php
 					if ( ( ! empty( $this->available_translations ) ) || ( ! empty( $this->installed_translations ) ) ) {
 						$this->show_installed_translations();
@@ -401,16 +477,13 @@ if ( ! class_exists( 'LearnDash_Translations' ) ) {
 							'action'          => 'translation_sets',
 							'project'         => $project_slugs,
 						),
-						LEARNDASH_TRANSLATIONS_URL_BASE
+						trailingslashit( LEARNDASH_TRANSLATIONS_URL_BASE )
 					);
 					$url_args = array( 'timeout' => 10 );
+					/** This filter is documented in includes/class-ld-translations.php */
 					$url_args = apply_filters( 'learndash_translations_url_args', $url_args );
 
-					//self::log_debug_message( 'in :' . __FUNCTION__ );
-					//self::log_debug_message( 'url :' . $url );
-
 					$response = wp_remote_get( $url, $url_args );
-					//self::log_debug_message( 'wp_remote_get response:<pre>' . print_r($response, true) .'</pre>' );
 					if ( ( is_array( $response ) ) && ( wp_remote_retrieve_response_code( $response ) == '200' ) ) {
 						$response_body = wp_remote_retrieve_body( $response );
 
@@ -439,23 +512,29 @@ if ( ! class_exists( 'LearnDash_Translations' ) ) {
 		 */
 		public function show_installed_translations() {
 
-			$pot_file = $this->get_language_directory( $this->project_slug, false ) . '' . $this->project_slug . '.pot';
+			$pot_file = self::get_language_directory( $this->project_slug, false ) . '' . $this->project_slug . '.pot';
 			if ( file_exists( $pot_file ) ) {
-				$pot_file = $this->get_language_directory( $this->project_slug ) . '' . $this->project_slug . '.pot';
 				?>
-				<p style="float:right"><?php esc_html_e( 'Download the original strings (POT) File.', 'learndash' ); ?> <a target="_blank" id="learndash-translations-pot-file-<?php echo $this->project_slug; ?>" class="button button-secondary learndash-translations-pot-file" href="<?php echo $pot_file; ?>" title="<?php esc_html_e( 'Download POT File from your server.', 'learndash' ); ?>"><span class="dashicons dashicons-download"></span><?php esc_html_e( 'POT', 'learndash' ); ?></a></p><div style="clear:both"></div>
+				<p style="float:right"><?php esc_html_e( 'Download the original strings (POT) File.', 'learndash' ); ?>
+
+				<a id="learndash-translations-pot-file-<?php echo esc_attr( $this->project_slug ); ?>" class="button button-secondary learndash-translations-pot-file" href="<?php echo esc_url( self::get_action_url( 'pot_download', esc_attr( $this->project_slug ) ) ); ?>" title="<?php esc_html_e( 'Download POT File from your server.', 'learndash' ); ?>"><span class="dashicons dashicons-download"></span><?php esc_html_e( 'POT', 'learndash' ); ?></a>
+
+				</p><div style="clear:both"></div>
 				<?php
 			}
 			?>
 
 			<h4><?php esc_html_e( 'Installed Translations', 'learndash' ); ?></h4>
 			<table class="ld-installed-translations wp-list-table widefat fixed striped posts">
+			<thead>
 				<tr>
 					<th class="column-locale"><?php esc_html_e( 'Locale', 'learndash' ); ?></th>
 					<th class="column-title"><?php esc_html_e( 'Name / Native', 'learndash' ); ?></th>
 					<th class="column-actions-local"><?php esc_html_e( 'Download', 'learndash' ); ?></th>
 					<th class="column-action-remote"><?php esc_html_e( 'Actions', 'learndash' ); ?></th>
 				</tr>
+			</thead>
+			<tbody>
 				<?php
 				if ( ( is_array( $this->available_translations ) ) && ( ! empty( $this->available_translations ) ) && ( is_array( $this->installed_translations ) ) && ( ! empty( $this->installed_translations ) ) ) {
 					foreach ( $this->available_translations as $idx => $translation_set ) {
@@ -488,13 +567,14 @@ if ( ! class_exists( 'LearnDash_Translations' ) ) {
 						<?php
 				}
 				?>
+			</tbody>
 			</table>
 			<p>
 			<?php
 			echo sprintf(
 				// translators: placeholder: Language directory.
 				esc_html_x( 'All translations are stored into the directory: %s', 'placeholder: Language directory', 'learndash' ),
-				'<code>' . esc_attr( '<site root>' ) . $this->get_language_directory( $this->project_slug, true ) . '</code>'
+				'<code>' . esc_attr( '<site root>' ) . esc_attr( self::get_language_directory( $this->project_slug, true ) ) . '</code>'
 			);
 			?>
 			<?php
@@ -519,39 +599,37 @@ if ( ! class_exists( 'LearnDash_Translations' ) ) {
 			if ( ! empty( $locale ) ) {
 				?>
 				<tr>
-					<td class="column-locale"><?php echo $locale; ?></td>
+					<td class="column-locale"><?php echo esc_attr( $locale ); ?></td>
 					<td class="column-title">
 					<?php
 					if ( ! is_null( $translation_set ) ) {
-						echo $translation_set['english_name'] . '/' . $translation_set['native_name'];
+						echo esc_html( $translation_set['english_name'] ) . '/' . esc_html( $translation_set['native_name'] );
 					} else {
 						esc_html_e( 'Not from LearnDash', 'learndash' );
 					}
-						?>
+					?>
 					</td>
 					<td class="column-actions-local">
 						<?php
 						if ( isset( $installed_set['po'] ) ) {
 							?>
-							<a id="learndash-translations-po-file-<?php echo $locale; ?>" target="_blank" class="button button-secondary learndash-translations-po-file" href="<?php echo $this->get_language_directory( $this->project_slug ) . '/' . $installed_set['po']; ?>" title="<?php esc_html_e( 'Download PO File from your server.', 'learndash' ); ?>"><span class="dashicons dashicons-download"></span><?php esc_html_e( 'PO', 'learndash' ); ?></a>
+							<a id="learndash-translations-po-file-<?php echo esc_attr( $locale ); ?>" class="button button-secondary learndash-translations-po-file" href="<?php echo esc_url( self::get_action_url( 'po_download', $this->project_slug, $locale ) ); ?>" title="<?php esc_html_e( 'Download PO File from your server.', 'learndash' ); ?>"><span class="dashicons dashicons-download"></span><?php esc_html_e( 'PO', 'learndash' ); ?></a>
 							<?php
 						}
 						?>
 					</td>
 					<td class="column-actions-remote">
-						<a id="learndash-translations-<?php echo $this->project_slug; ?>-<?php echo $locale; ?>-remove" class="button button-secondary learndash-translations-remove" href="<?php echo self::get_action_url( 'remove', $this->project_slug, $locale ); ?>" title="<?php esc_html_e( 'Remove translation from server', 'learndash' ); ?>"><span class="dashicons dashicons-trash"></span></a>
-																	<?php
+						<a id="learndash-translations-<?php echo esc_attr( $this->project_slug ); ?>-<?php echo esc_attr( $locale ); ?>-remove" class="button button-secondary learndash-translations-remove" href="<?php echo esc_url( self::get_action_url( 'remove', $this->project_slug, $locale ) ); ?>" title="<?php esc_html_e( 'Remove translation from server', 'learndash' ); ?>"><span class="dashicons dashicons-trash"></span></a>
+						<?php
 
-																	if ( ! is_null( $translation_set ) ) {
-																		$last_updated_time = learndash_get_timestamp_from_date_string( $translation_set['last_modified_gmt'] );
-																		if ( ( $installed_set['mo_mtime'] < $last_updated_time ) && ( $installed_set['po_mtime'] < $last_updated_time ) ) {
-																			//esc_html_e('Up to date', 'learndash');
-																		} else {
-																			?>
-																			<a href="<?php echo self::get_action_url( 'update', $this->project_slug, $locale ); ?>" class="button button-primary learndash-translations-update" title="<?php esc_html_e( 'Update translation from LearnDash', 'learndash' ); ?>"><?php esc_html_e( 'Update', 'learndash' ); ?></a>
-									<?php
-																		}
-																	}
+						if ( ! is_null( $translation_set ) ) {
+							if ( learndash_updates_enabled() ) {
+								$last_updated_time = learndash_get_timestamp_from_date_string( $translation_set['last_modified_gmt'] );
+								?>
+								<a href="<?php echo esc_url( self::get_action_url( 'update', $this->project_slug, $locale ) ); ?>" class="button button-primary learndash-translations-update" title="<?php esc_html_e( 'Update translation from LearnDash', 'learndash' ); ?>"><?php esc_html_e( 'Update', 'learndash' ); ?></a>
+								<?php
+							}
+						}
 						?>
 					</td>
 				</tr>
@@ -569,17 +647,17 @@ if ( ! class_exists( 'LearnDash_Translations' ) ) {
 				$wp_languages = array();
 			}
 
-			if ( ! in_array( 'en_US', $wp_languages ) ) {
+			if ( ! in_array( 'en_US', $wp_languages, true ) ) {
 				$wp_languages = array_merge( array( 'en_US' ), $wp_languages );
 			}
 
 			// Taken from options-general.php.
-			if ( ! is_multisite() && defined( 'WPLANG' ) && '' !== WPLANG && 'en_US' !== WPLANG && ! in_array( WPLANG, $languages ) ) {
+			if ( ! is_multisite() && defined( 'WPLANG' ) && '' !== WPLANG && 'en_US' !== WPLANG && ! in_array( WPLANG, $wp_languages, true ) ) {
 				$wp_languages[] = WPLANG;
 			}
 
 			$wp_locale = get_locale();
-			if ( ( ! empty( $wp_locale ) ) && ( ! in_array( $wp_locale, $wp_languages ) ) ) {
+			if ( ( ! empty( $wp_locale ) ) && ( ! in_array( $wp_locale, $wp_languages, true ) ) ) {
 				$wp_languages[] = $wp_locale;
 			}
 
@@ -592,7 +670,7 @@ if ( ! class_exists( 'LearnDash_Translations' ) ) {
 				// First we split into buckets based on languages installed to WP.
 				foreach ( $this->available_translations as $translation_set ) {
 					if ( ! isset( $this->installed_translations[ $translation_set['wp_locale'] ] ) ) {
-						if ( in_array( $translation_set['wp_locale'], $wp_languages ) === true ) {
+						if ( in_array( $translation_set['wp_locale'], $wp_languages, true ) === true ) {
 							$available_translations['recommended'][ $translation_set['wp_locale'] ] = $translation_set;
 						} else {
 							$available_translations['available'][ $translation_set['wp_locale'] ] = $translation_set;
@@ -601,76 +679,80 @@ if ( ! class_exists( 'LearnDash_Translations' ) ) {
 				}
 
 				if ( ( ! empty( $available_translations['recommended'] ) ) || ( ! empty( $available_translations['available'] ) ) ) {
-					?>
-					<div id="learndash-translations-available">
-						<h4><?php esc_html_e( 'Available Translations', 'learndash' ); ?></h4>
-						<select id="ld-translation-install-locale-<?php echo $this->project_slug; ?>" class="ld-translation-install-locale" data-project="<?php echo $this->project_slug; ?>">
-							<option value=""><?php esc_html_e( '-- Install Translation --', 'learndash' ); ?></option>
-							<?php
-							$show_opt_group = false;
-							if ( ( ! empty( $available_translations['recommended'] ) ) && ( ! empty( $available_translations['available'] ) ) ) {
-								$show_opt_group = true;
-							}
-							if ( ! empty( $available_translations['recommended'] ) ) {
-								if ( $show_opt_group ) {
-									?>
-									<optgroup label="<?php esc_html_e( 'Recommended', 'learndash' ); ?>">
-									<?php
-								}
-								foreach ( $available_translations['recommended'] as $translation_set ) {
-									?>
-									<option value="<?php echo self::get_action_url( 'install', $this->project_slug, $translation_set['wp_locale'] ); ?>"><?php echo $translation_set['english_name'] . ' / ' . $translation_set['native_name'] . ' (' . $translation_set['wp_locale'] . ')'; ?></option>
-									<?php
-								}
-								if ( $show_opt_group ) {
-									?>
-									</optgroup>
-									<?php
-								}
-							}
-
-							if ( ! empty( $available_translations['available'] ) ) {
-								if ( $show_opt_group ) {
-									?>
-									<optgroup label="<?php esc_html_e( 'Available', 'learndash' ); ?>">
-									<?php
-								}
-								foreach ( $available_translations['available'] as $translation_set ) {
-									?>
-									<option value="<?php echo self::get_action_url( 'install', $this->project_slug, $translation_set['wp_locale'] ); ?>"><?php echo $translation_set['english_name'] . ' / ' . $translation_set['native_name'] . ' (' . $translation_set['wp_locale'] . ')'; ?></option>
-									<?php
-								}
-								if ( $show_opt_group ) {
-									?>
-									</optgroup>
-									<?php
-								}
-							}
+					if ( learndash_updates_enabled() ) {
 						?>
-						</select> 
-						<a id="learndash-translation-install-<?php echo $this->project_slug; ?>" class="button button-primary learndash-translations-install" href="#"><?php esc_html_e( 'Install', 'learndash' ); ?></a>
-					</div>
-					<?php
+						<div id="learndash-translations-available">
+							<h4><?php esc_html_e( 'Available Translations', 'learndash' ); ?></h4>
+							<select id="ld-translation-install-locale-<?php echo esc_attr( $this->project_slug ); ?>" class="ld-translation-install-locale" data-project="<?php echo esc_attr( $this->project_slug ); ?>">
+								<option value=""><?php esc_html_e( '-- Install Translation --', 'learndash' ); ?></option>
+								<?php
+								$show_opt_group = false;
+								if ( ( ! empty( $available_translations['recommended'] ) ) && ( ! empty( $available_translations['available'] ) ) ) {
+									$show_opt_group = true;
+								}
+								if ( ! empty( $available_translations['recommended'] ) ) {
+									if ( $show_opt_group ) {
+										?>
+										<optgroup label="<?php esc_html_e( 'Recommended', 'learndash' ); ?>">
+										<?php
+									}
+									foreach ( $available_translations['recommended'] as $translation_set ) {
+										?>
+										<option value="<?php echo esc_url( self::get_action_url( 'install', $this->project_slug, $translation_set['wp_locale'] ) ); ?>"><?php echo esc_html( $translation_set['english_name'] ) . ' / ' . esc_html( $translation_set['native_name'] ) . ' (' . esc_html( $translation_set['wp_locale'] ) . ')'; ?></option>
+										<?php
+									}
+									if ( $show_opt_group ) {
+										?>
+										</optgroup>
+										<?php
+									}
+								}
+
+								if ( ! empty( $available_translations['available'] ) ) {
+									if ( $show_opt_group ) {
+										?>
+										<optgroup label="<?php esc_html_e( 'Available', 'learndash' ); ?>">
+										<?php
+									}
+									foreach ( $available_translations['available'] as $translation_set ) {
+										?>
+										<option value="<?php echo esc_url( self::get_action_url( 'install', $this->project_slug, $translation_set['wp_locale'] ) ); ?>"><?php echo esc_html( $translation_set['english_name'] ) . ' / ' . esc_html( $translation_set['native_name'] ) . ' (' . esc_html( $translation_set['wp_locale'] ) . ')'; ?></option>
+										<?php
+									}
+									if ( $show_opt_group ) {
+										?>
+										</optgroup>
+										<?php
+									}
+								}
+								?>
+							</select>
+							<a id="learndash-translation-install-<?php echo esc_attr( $this->project_slug ); ?>" class="button button-primary learndash-translations-install" href="#"><?php esc_html_e( 'Install', 'learndash' ); ?></a>
+						</div>
+						<?php
+					}
 				}
 			}
 		}
 
 		/**
 		 * Get installed trnalsations.
+		 *
+		 * @param string $project_slug Translation project slug.
 		 */
-		public function get_installed_translations() {
+		public static function get_installed_translations( $project_slug = '' ) {
 			$translation_files = array();
 
-			if ( ! empty( $this->project_slug ) ) {
+			if ( ! empty( $project_slug ) ) {
 
-				$languages_plugins_dir    = $translations_dir = self::get_language_directory( $this->project_slug, false );
-				$languages_plugins_dir_mo = $languages_plugins_dir . $this->project_slug . '-*.mo';
+				$languages_plugins_dir    = self::get_language_directory( $project_slug, false );
+				$languages_plugins_dir_mo = $languages_plugins_dir . $project_slug . '-*.mo';
 
 				$mo_files = glob( $languages_plugins_dir_mo );
 				if ( ! empty( $mo_files ) ) {
 					foreach ( $mo_files as $mo_file ) {
 						$mo_file       = basename( $mo_file );
-						$mo_file_local = str_replace( array( $this->project_slug . '-', '.mo' ), '', $mo_file );
+						$mo_file_local = str_replace( array( $project_slug . '-', '.mo' ), '', $mo_file );
 						if ( ! empty( $mo_file_local ) ) {
 
 							if ( ! isset( $translation_files[ $mo_file_local ] ) ) {
@@ -692,17 +774,25 @@ if ( ! class_exists( 'LearnDash_Translations' ) ) {
 			return $translation_files;
 		}
 
-		static function log_debug_message( $message = '' ) {
+		/**
+		 * Log debug message
+		 *
+		 * @param string $message Message.
+		 */
+		public static function log_debug_message( $message = '' ) {
 			self::$debug_log_array[] = $message;
 		}
 
-		static function show_debug_log_output() {
+		/**
+		 * Show debug log output
+		 */
+		public static function show_debug_log_output() {
 			if ( ! empty( self::$debug_log_array ) ) {
 				foreach ( self::$debug_log_array as $message ) {
-					echo '<br />' . $message;
+					echo '<br />' . esc_html( $message );
 				}
 			}
 		}
-		// End of functions
+		// End of functions.
 	}
 }

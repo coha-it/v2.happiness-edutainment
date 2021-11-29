@@ -1,13 +1,23 @@
 <?php
-
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+// phpcs:disable WordPress.NamingConventions.ValidVariableName,WordPress.NamingConventions.ValidFunctionName,WordPress.NamingConventions.ValidHookName,PSR2.Classes.PropertyDeclaration.Underscore
 class WpProQuiz_Controller_Question extends WpProQuiz_Controller_Controller {
 
 	private $_quizId;
 
+	/**
+	 * View instance
+	 * @var object $view.
+	 */
+	protected $view;
+
 	public function route() {
 
 		if ( ! isset( $_GET['quiz_id'] ) || empty( $_GET['quiz_id'] ) ) {
-			WpProQuiz_View_View::admin_notices( sprintf( esc_html_x( '%s not found', 'Quiz not found', 'learndash' ), LearnDash_Custom_Label::get_label( 'quiz' ) ), 'error' );
+			// translators: placeholder: Quiz.
+			WpProQuiz_View_View::admin_notices( sprintf( esc_html_x( '%s not found', 'placeholder: Quiz', 'learndash' ), LearnDash_Custom_Label::get_label( 'quiz' ) ), 'error' );
 
 			return;
 		}
@@ -18,32 +28,19 @@ class WpProQuiz_Controller_Question extends WpProQuiz_Controller_Controller {
 		$m = new WpProQuiz_Model_QuizMapper();
 
 		if ( $m->exists( $this->_quizId ) == 0 ) {
-			WpProQuiz_View_View::admin_notices( sprintf( esc_html_x( '%s not found', 'Quiz not found', 'learndash' ), LearnDash_Custom_Label::get_label( 'quiz' ) ),'error' );
+			// translators: placeholder: Quiz.
+			WpProQuiz_View_View::admin_notices( sprintf( esc_html_x( '%s not found', 'placeholder: Quiz', 'learndash' ), LearnDash_Custom_Label::get_label( 'quiz' ) ), 'error' );
 
 			return;
 		}
 
-// 		if(isset($this->_post['hidden_action'])) {
-// 			switch ($this->_post['hidden_action']) {
-// 				case 'edit':
-// 					$this->editPostAction($this->_post['questionId']);
-// 					break;
-// 			}
-// 		}
-
 		switch ( $action ) {
-// 			case 'add':
-// 				$this->createAction();
-// 				break;
 			case 'show':
 				$this->showAction();
 				break;
 			case 'addEdit':
 				$this->addEditQuestion( (int) $_GET['quiz_id'] );
 				break;
-// 			case 'edit':
-// 				$this->editAction($_GET['id']);
-// 				break;
 			case 'delete':
 				$this->deleteAction( $_GET['id'] );
 				break;
@@ -78,7 +75,14 @@ class WpProQuiz_Controller_Question extends WpProQuiz_Controller_Controller {
 		$templateMapper = new WpProQuiz_Model_TemplateMapper();
 
 		if ( $questionId && $questionMapper->existsAndWritable( $questionId ) == 0 ) {
-			WpProQuiz_View_View::admin_notices( esc_html__( 'Question not found', 'learndash' ), 'error' );
+			WpProQuiz_View_View::admin_notices(
+				sprintf(
+				// translators: placeholder: Question.
+					esc_html_x( '%s not found', 'placeholder: Question', 'learndash' ),
+					LearnDash_Custom_Label::get_label( 'question' )
+				),
+				'error'
+			);
 
 			return;
 		}
@@ -94,21 +98,17 @@ class WpProQuiz_Controller_Question extends WpProQuiz_Controller_Controller {
 
 			$data = $template->getData();
 
-			if ( $data !== null ) {
+			if ( null !== $data ) {
 				$question = $data['question'];
 				$question->setId( $questionId );
 				$question->setQuizId( $quizId );
 			}
-		} else if ( isset( $this->_post['submit'] ) ) {
-			$add_new_question_url = admin_url( "admin.php?page=ldAdvQuiz&module=question&action=addEdit&quiz_id=" . $quizId . "&post_id=" . @$_REQUEST["post_id"] );
-			$add_new_question     = "<a href='" . $add_new_question_url . "'>" . esc_html__( "Click here to add another question.", 'learndash' ) . "</a>";
-			//if ( $questionId ) {
-			//	WpProQuiz_View_View::admin_notices( esc_html__( 'Question edited', 'learndash' ) . ". " . $add_new_question, 'info' );
-			//} else {
-			//	WpProQuiz_View_View::admin_notices( esc_html__( 'Question added', 'learndash' ) . ". " . $add_new_question, 'info' );
-			//}
+		} elseif ( isset( $this->_post['submit'] ) ) {
+			$add_new_question_url = admin_url( 'admin.php?page=ldAdvQuiz&module=question&action=addEdit&quiz_id=' . $quizId . '&post_id=' . @$_REQUEST['post_id'] );
+			// translators: placeholder: question.
+			$add_new_question = "<a href='" . $add_new_question_url . "'>" . sprintf( esc_html_x( 'Click here to add another %s.', 'placeholder: question', 'learndash' ), LearnDash_Custom_Label::get_label( 'question' ) ) . '</a>';
 
-			$question   = $questionMapper->save( $this->getPostQuestionModel( $quizId, $questionId ), true );
+			$question = $questionMapper->save( $this->getPostQuestionModel( $quizId, $questionId ), true );
 
 			$questionId = $question->getId();
 		} else {
@@ -124,7 +124,8 @@ class WpProQuiz_Controller_Question extends WpProQuiz_Controller_Controller {
 		$this->view->question   = $question;
 		$this->view->data       = $this->setAnswerObject( $question );
 
-		$this->view->header = $questionId ? esc_html__( 'Edit question', 'learndash' ) : esc_html__( 'New question', 'learndash' );
+		// translators: placeholder: question.
+		$this->view->header = $questionId ? sprintf( esc_html_x( 'Edit %s', 'placeholder: question', 'learndash' ), learndash_get_custom_label( 'question' ) ) : sprintf( esc_html_x( 'New %s', 'placeholder: question', 'learndash' ), learndash_get_custom_label( 'question' ) );
 
 		if ( $this->view->question->isAnswerPointsActivated() ) {
 			$this->view->question->setPoints( 1 );
@@ -139,7 +140,7 @@ class WpProQuiz_Controller_Question extends WpProQuiz_Controller_Controller {
 		$templateMapper = new WpProQuiz_Model_TemplateMapper();
 		$template       = new WpProQuiz_Model_Template();
 
-		if ( $this->_post['templateSaveList'] == '0' ) {
+		if ( '0' == $this->_post['templateSaveList'] ) {
 			$template->setName( trim( $this->_post['templateName'] ) );
 		} else {
 			$template = $templateMapper->fetchById( $this->_post['templateSaveList'], false );
@@ -147,9 +148,11 @@ class WpProQuiz_Controller_Question extends WpProQuiz_Controller_Controller {
 
 		$template->setType( WpProQuiz_Model_Template::TEMPLATE_TYPE_QUESTION );
 
-		$template->setData( array(
-			'question' => $questionModel
-		) );
+		$template->setData(
+			array(
+				'question' => $questionModel,
+			)
+		);
 
 		return $templateMapper->save( $template );
 	}
@@ -162,7 +165,7 @@ class WpProQuiz_Controller_Question extends WpProQuiz_Controller_Controller {
 		$post['id']     = $questionId;
 		$post['quizId'] = $quizId;
 		$post['title']  = isset( $post['title'] ) ? trim( $post['title'] ) : '';
-		$post['sort']	= $questionMapper->getSort($questionId);
+		$post['sort']   = $questionMapper->getSort( $questionId );
 
 		$clearPost = $this->clearPost( $post );
 
@@ -170,14 +173,15 @@ class WpProQuiz_Controller_Question extends WpProQuiz_Controller_Controller {
 
 		if ( ( isset( $post['title'] ) ) && ( empty( $post['title'] ) ) ) {
 			$count = $questionMapper->count( $quizId );
-			$post['title'] = sprintf( esc_html_x( 'Question: %d', 'placeholder: question count' , 'learndash' ), $count + 1 );
+			// translators: placeholder: Question, question count.
+			$post['title'] = sprintf( esc_html_x( '%1$s: %2$d', 'placeholder: Question, question count', 'learndash' ), learndash_get_custom_label( 'question' ), $count + 1 );
 		}
 
-		if ( ( isset( $post['answerType'] ) ) && ( $post['answerType'] === 'assessment_answer' ) ) {
+		if ( ( isset( $post['answerType'] ) ) && ( 'assessment_answer' === $post['answerType'] ) ) {
 			$post['answerPointsActivated'] = 1;
 		}
 
-		if ( ( isset( $post['answerType'] ) ) && ( $post['answerType'] === 'essay' ) ) {
+		if ( ( isset( $post['answerType'] ) ) && ( 'essay' === $post['answerType'] ) ) {
 			$post['answerPointsActivated'] = 0;
 		}
 
@@ -215,15 +219,13 @@ class WpProQuiz_Controller_Question extends WpProQuiz_Controller_Controller {
 			$m->save( $question );
 		}
 
-		//WpProQuiz_View_View::admin_notices( esc_html__( 'questions copied', 'learndash' ), 'info' );
-
 		$this->showAction();
 	}
 
 	public function loadQuestion( $quizId ) {
 
 		if ( ! current_user_can( 'wpProQuiz_edit_quiz' ) ) {
-			echo json_encode( array() );
+			echo wp_json_encode( array() );
 			exit;
 		}
 
@@ -245,18 +247,18 @@ class WpProQuiz_Controller_Question extends WpProQuiz_Controller_Controller {
 			foreach ( $question as $qu ) {
 				$questionArray[] = array(
 					'name' => $qu->getTitle(),
-					'id'   => $qu->getId()
+					'id'   => $qu->getId(),
 				);
 			}
 
 			$data[] = array(
 				'name'     => $qz->getName(),
 				'id'       => $qz->getId(),
-				'question' => $questionArray
+				'question' => $questionArray,
 			);
 		}
 
-		echo json_encode( $data );
+		echo wp_json_encode( $data );
 
 		exit;
 	}
@@ -283,10 +285,12 @@ class WpProQuiz_Controller_Question extends WpProQuiz_Controller_Controller {
 			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'learndash' ) );
 		}
 
-		$mapper = new WpProQuiz_Model_QuestionMapper();
-		$mapper->setOnlineOff( $id );
+		if ( ( isset( $_GET['question-delete-nonce'] ) ) && ( ! empty( $_GET['question-delete-nonce'] ) ) && ( wp_verify_nonce( $_GET['question-delete-nonce'], 'question-delete-nonce-' . absint( $id ) ) ) ) {
+			$mapper = new WpProQuiz_Model_QuestionMapper();
+			$mapper->setOnlineOff( $id );
 
-		$this->showAction();
+			$this->showAction();
+		}
 	}
 
 	/**
@@ -308,7 +312,8 @@ class WpProQuiz_Controller_Question extends WpProQuiz_Controller_Controller {
 		$this->view->data       = $this->setAnswerObject( $this->view->question );
 		$this->view->categories = $cateoryMapper->fetchAll();
 
-		$this->view->header = esc_html__( 'Edit question', 'learndash' );
+		// translators: placeholder: question.
+		$this->view->header = sprintf( esc_html_x( 'Edit %s', 'placeholder: question', 'learndash' ), learndash_get_custom_label( 'question' ) );
 
 		if ( $this->view->question->isAnswerPointsActivated() ) {
 			$this->view->question->setPoints( 1 );
@@ -336,14 +341,15 @@ class WpProQuiz_Controller_Question extends WpProQuiz_Controller_Controller {
 			if ( empty( $post['title'] ) ) {
 				$question = $mapper->fetch( $id );
 
-				$post['title'] = sprintf( esc_html__( 'Question: %d', 'learndash' ), $question->getSort() + 1 );
+				// translators: placeholder: Quiz sequence.
+				$post['title'] = sprintf( esc_html_x( 'Question: %d', 'placeholder: Quiz sequence', 'learndash' ), $question->getSort() + 1 );
 			}
 
-			if ( $post['answerType'] === 'assessment_answer' ) {
+			if ( 'assessment_answer' === $post['answerType'] ) {
 				$post['answerPointsActivated'] = 1;
 			}
 
-			if ( $post['answerType'] === 'essay' ) {
+			if ( 'essay' === $post['answerType'] ) {
 				$post['answerPointsActivated'] = 0;
 			}
 
@@ -358,7 +364,6 @@ class WpProQuiz_Controller_Question extends WpProQuiz_Controller_Controller {
 			$post['categoryId'] = $post['category'] > 0 ? $post['category'] : 0;
 
 			$mapper->save( new WpProQuiz_Model_Question( $post ), true );
-			//WpProQuiz_View_View::admin_notices( esc_html__( 'Question edited', 'learndash' ), 'info' );
 		}
 	}
 
@@ -382,7 +387,8 @@ class WpProQuiz_Controller_Question extends WpProQuiz_Controller_Controller {
 		$this->view->data       = $this->setAnswerObject();
 		$this->view->templates  = $templateMapper->fetchAll( WpProQuiz_Model_Template::TEMPLATE_TYPE_QUESTION, false );
 
-		$this->view->header = esc_html__( 'New question', 'learndash' );
+		// translators: placeholder: question.
+		$this->view->header = sprintf( esc_html_x( 'New %s', 'placeholder: question', 'learndash' ), learndash_get_custom_label( 'question' ) );
 
 		if ( $this->view->question->isAnswerPointsActivated() ) {
 			$this->view->question->setPoints( 1 );
@@ -403,12 +409,12 @@ class WpProQuiz_Controller_Question extends WpProQuiz_Controller_Controller {
 			'essay'              => array( new WpProQuiz_Model_AnswerTypes() ),
 		);
 
-		if ( $question !== null ) {
+		if ( null !== $question ) {
 			$type       = $question->getAnswerType();
-			$type       = ( $type == 'single' || $type == 'multiple' ) ? 'classic_answer' : $type;
+			$type       = ( 'single' == $type || 'multiple' == $type ) ? 'classic_answer' : $type;
 			$answerData = $question->getAnswerData();
 
-			if ( ( isset( $data[ $type ] ) ) && ( $answerData !== null ) && ( !empty( $answerData ) ) )  {
+			if ( ( isset( $data[ $type ] ) ) && ( null !== $answerData ) && ( ! empty( $answerData ) ) ) {
 				$data[ $type ] = $question->getAnswerData();
 			}
 		}
@@ -418,47 +424,68 @@ class WpProQuiz_Controller_Question extends WpProQuiz_Controller_Controller {
 
 	public function clearPost( $post ) {
 
-		if ( ( isset( $post['answerType'] ) ) && ( $post['answerType'] == 'cloze_answer' ) && ( isset( $post['answerData']['cloze'] ) ) ) {
-			preg_match_all( '#\{(.*?)(?:\|(\d+))?(?:[\s]+)?\}#im', $post['answerData']['cloze']['answer'], $matches );
+		if ( ( isset( $post['answerType'] ) ) && ( 'cloze_answer' == $post['answerType'] ) && ( isset( $post['answerData']['cloze'] ) ) ) {
+			$question_cloze_data = learndash_question_cloze_fetch_data( $post['answerData']['cloze']['answer'] );
+
+			/**
+			 * Calculate points & maxPoints
+			 */
 
 			$points    = 0;
 			$maxPoints = 0;
 
-			foreach ( $matches[2] as $match ) {
-				if ( empty( $match ) ) {
-					$match = 1;
+			foreach ( $question_cloze_data['points'] as $points_set ) {
+				if ( ( is_array( $points_set ) ) && ( ! empty( $points_set ) ) ) {
+					$item_points = max( $points_set );
+				} else {
+					$item_points = 1;
 				}
 
-				$points += $match;
-				$maxPoints = max( $maxPoints, $match );
+				$points   += $item_points;
+				$maxPoints = max( $maxPoints, $item_points );
 			}
 
-			return array( 'points'     => $points,
-			              'maxPoints'  => $maxPoints,
-			              'answerData' => array( new WpProQuiz_Model_AnswerTypes( $post['answerData']['cloze'] ) )
+			return array(
+				'points'     => $points,
+				'maxPoints'  => $maxPoints,
+				'answerData' => array( new WpProQuiz_Model_AnswerTypes( $post['answerData']['cloze'] ) ),
 			);
 		}
 
-		if ( ( isset( $post['answerType'] ) ) && ( $post['answerType'] == 'assessment_answer' ) && ( isset( $post['answerData']['assessment'] ) ) ) {
-			preg_match_all( '#\{(.*?)\}#im', $post['answerData']['assessment']['answer'], $matches );
-
-			$points    = 0;
-			$maxPoints = 0;
-
-			foreach ( $matches[1] as $match ) {
-				preg_match_all( '#\[([^\|\]]+)(?:\|(\d+))?\]#im', $match, $ms );
-
-				$points += count( $ms[1] );
-				$maxPoints = max( $maxPoints, count( $ms[1] ) );
+		if ( ( isset( $post['answerType'] ) ) && ( 'assessment_answer' == $post['answerType'] ) && ( isset( $post['answerData']['assessment'] ) ) ) {
+			if ( isset( $post['sfwd-question_quiz'] ) ) {
+				$quiz_id = absint( $post['sfwd-question_quiz'] );
+			} else {
+				$quiz_id = 0;
 			}
 
-			return array( 'points'     => $points,
-			              'maxPoints'  => $maxPoints,
-			              'answerData' => array( new WpProQuiz_Model_AnswerTypes( $post['answerData']['assessment'] ) )
+			if ( isset( $post['post_ID'] ) ) {
+				$question_id = absint( $post['post_ID'] );
+			} else {
+				$question_id = 0;
+			}
+
+			$cloze_answer_data = learndash_question_assessment_fetch_data( $post['answerData']['assessment']['answer'], $quiz_id, $question_id );
+
+			if ( isset( $cloze_answer_data['points'] ) ) {
+				$points     = max( $cloze_answer_data['points'] );
+				$max_points = $points;
+			} elseif ( isset( $cloze_answer_data['correct'] ) ) {
+				$points     = count( $cloze_answer_data['correct'] );
+				$max_points = $points;
+			} else {
+				$points     = 0;
+				$max_points = 0;
+			}
+
+			return array(
+				'points'     => $points,
+				'maxPoints'  => $max_points,
+				'answerData' => array( new WpProQuiz_Model_AnswerTypes( $post['answerData']['assessment'] ) ),
 			);
 		}
 
-		if ( ( isset( $post['answerType'] ) ) && ( $post['answerType'] == 'essay' ) && ( isset( $post['answerData']['essay'] ) ) ) {
+		if ( ( isset( $post['answerType'] ) ) && ( 'essay' == $post['answerType'] ) && ( isset( $post['answerData']['essay'] ) ) ) {
 			$answerType = new WpProQuiz_Model_AnswerTypes( $post['answerData']['essay'] );
 			$answerType->setPoints( $post['points'] );
 			$answerType->setGraded( true );
@@ -466,10 +493,42 @@ class WpProQuiz_Controller_Question extends WpProQuiz_Controller_Controller {
 			$answerType->setGradingProgression( $post['answerData']['essay']['progression'] );
 			$points = $post['points'];
 
-			return array( 'points'     => $points,
-			              'maxPoints'  => $points,
-			              'answerData' => array( $answerType )
+			return array(
+				'points'     => $points,
+				'maxPoints'  => $points,
+				'answerData' => array( $answerType ),
 			);
+		}
+
+		if ( ( isset( $post['answerType'] ) ) && ( 'free_answer' == $post['answerType'] ) && ( isset( $post['answerData'] ) ) ) {
+			foreach ( $post['answerData'] as $k => $v ) {
+				$answerType  = new WpProQuiz_Model_AnswerTypes( $v );
+				$answer_data = learndash_question_free_get_answer_data( $answerType );
+
+				$points    = 0;
+				$maxPoints = 0;
+				if ( isset( $post['points'] ) ) {
+					$points    = absint( $post['points'] );
+					$maxPoints = $points;
+				}
+
+				if ( ( isset( $post['answerPointsActivated'] ) ) && ( isset( $answer_data['points'] ) ) ) {
+					if ( is_array( $answer_data['points'] ) ) {
+						$maxPoints = max( $answer_data['points'] );
+						$points    = $maxPoints;
+					} else {
+						$maxPoints = absint( $answer_data['points'] );
+						$points    = $maxPoints;
+					}
+				}
+
+				return array(
+					'points'     => $points,
+					'maxPoints'  => $maxPoints,
+					'answerData' => array( $answerType ),
+				);
+				break;
+			}
 		}
 
 		if ( isset( $post['answerData']['cloze'] ) ) {
@@ -490,22 +549,22 @@ class WpProQuiz_Controller_Question extends WpProQuiz_Controller_Controller {
 		if ( isset( $post['answerData'] ) ) {
 			foreach ( $post['answerData'] as $k => $v ) {
 				if ( ( isset( $v['answer'] ) ) && ( trim( $v['answer'] ) == '' ) ) {
-					if ( $post['answerType'] != 'matrix_sort_answer' ) {
+					if ( 'matrix_sort_answer' != $post['answerType'] ) {
 						continue;
 					} else {
-						if ( ( !isset( $v['sort_string'] ) ) || ( trim( $v['sort_string'] ) == '' ) ) {
+						if ( ( ! isset( $v['sort_string'] ) ) || ( trim( $v['sort_string'] ) == '' ) ) {
 							continue;
 						}
 					}
 				}
 
 				$answerType = new WpProQuiz_Model_AnswerTypes( $v );
-				
-				if ( ( $post['answerType'] == 'matrix_sort_answer' ) || ( $post['answerType'] == 'sort_answer' ) ) {
-					$points += $answerType->getPoints();
+
+				if ( ( 'matrix_sort_answer' == $post['answerType'] ) || ( 'sort_answer' == $post['answerType'] ) ) {
+					$points   += $answerType->getPoints();
 					$maxPoints = max( $maxPoints, $answerType->getPoints() );
-				} else if ( $answerType->isCorrect() ) {
-					$points += $answerType->getPoints();
+				} elseif ( $answerType->isCorrect() ) {
+					$points   += $answerType->getPoints();
 					$maxPoints = max( $maxPoints, $answerType->getPoints() );
 				}
 
@@ -513,7 +572,11 @@ class WpProQuiz_Controller_Question extends WpProQuiz_Controller_Controller {
 			}
 		}
 
-		return array( 'points' => $points, 'maxPoints' => $maxPoints, 'answerData' => $answerData );
+		return array(
+			'points'     => $points,
+			'maxPoints'  => $maxPoints,
+			'answerData' => $answerData,
+		);
 	}
 
 	public function clear( $a ) {
@@ -525,7 +588,7 @@ class WpProQuiz_Controller_Question extends WpProQuiz_Controller_Controller {
 			if ( is_string( $a[ $k ] ) ) {
 				$a[ $k ] = trim( $a[ $k ] );
 
-				if ( $a[ $k ] != '' ) {
+				if ( '' != $a[ $k ] ) {
 					continue;
 				}
 			}
@@ -546,16 +609,9 @@ class WpProQuiz_Controller_Question extends WpProQuiz_Controller_Controller {
 		$m  = new WpProQuiz_Model_QuizMapper();
 		$mm = new WpProQuiz_Model_QuestionMapper();
 
-		$this->view           = new WpProQuiz_View_QuestionOverall();
-		$this->view->quiz     = $m->fetch( $this->_quizId );
+		$this->view       = new WpProQuiz_View_QuestionOverall();
+		$this->view->quiz = $m->fetch( $this->_quizId );
 
-		//if ( isset( $_GET['post_id'] ) ) {
-		//	$quiz_post_id = absint( $_GET['post_id'] );
-		//	if ( $quiz_post_id !== absint( $this->view->quiz->getPostId() ) ) {
-		//		$this->view->quiz->setPostId( $quiz_post_id );
-		//	}
-		//}
-		//$this->view->question = $mm->fetchAll( $this->view->quiz );
 		$this->view->question = $mm->fetchAll( $this->_quizId );
 		$this->view->show();
 	}

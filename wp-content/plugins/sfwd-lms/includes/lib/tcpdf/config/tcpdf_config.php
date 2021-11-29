@@ -327,7 +327,7 @@ if ( ! defined( 'K_TCPDF_EXTERNAL_CONFIG' ) ) {
 	 * IMPORTANT: For security reason, disable this feature if you are printing user HTML content.
 	 */
 	if ( ! defined( 'K_TCPDF_CALLS_IN_HTML' ) ) {
-		define( 'K_TCPDF_CALLS_IN_HTML', true );
+		define( 'K_TCPDF_CALLS_IN_HTML', false );
 	}
 }
 

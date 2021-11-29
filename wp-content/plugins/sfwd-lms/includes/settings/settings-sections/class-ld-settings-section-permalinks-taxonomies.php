@@ -1,20 +1,30 @@
 <?php
 /**
- * LearnDash Settings Section for Permalink Taxonomies. These are shown are input fields on the WP Settings > Permalinks
+ * LearnDash Settings Section for Permalink Taxonomies.
+ *
+ * These are shown are input fields on the WP Settings > Permalinks
  * page to allow override of the default slugs
  *
- * @package LearnDash
- * @subpackage Settings
+ * @since 2.5.8
+ * @package LearnDash\Settings\Sections
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'LearnDash_Settings_Section_Permalinks_Taxonomies' ) ) ) {
 	/**
-	 * Class to create the settings section.
+	 * Class LearnDash Settings Section for Permalink Taxonomies.
+	 *
+	 * @since 2.5.8
 	 */
 	class LearnDash_Settings_Section_Permalinks_Taxonomies extends LearnDash_Settings_Section {
 
 		/**
 		 * Protected constructor for class
+		 *
+		 * @since 2.5.8
 		 */
 		protected function __construct() {
 			$this->settings_page_id = 'permalink';
@@ -45,13 +55,18 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 
 		/**
 		 * Function to hook into WP admin init action.
+		 *
+		 * @since 2.5.8
 		 */
 		public function admin_init() {
+			/** This filter is documented in includes/settings/class-ld-settings-pages.php */
 			do_action( 'learndash_settings_page_init', $this->settings_page_id );
 		}
 
 		/**
 		 * Function to handle metabox init.
+		 *
+		 * @since 2.5.8
 		 *
 		 * @param string $settings_screen_id Screen ID of current page.
 		 */
@@ -72,6 +87,8 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 
 		/**
 		 * Initialize the metabox settings values.
+		 *
+		 * @since 2.5.8
 		 */
 		public function load_settings_values() {
 			parent::load_settings_values();
@@ -91,12 +108,16 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 					'ld_topic_tag'       => 'topic-tag',
 					'ld_quiz_category'   => 'quiz-category',
 					'ld_quiz_tag'        => 'quiz-tag',
+					'ld_group_category'  => 'group-category',
+					'ld_group_tag'       => 'group-tag',
 				)
 			);
 		}
 
 		/**
 		 * Initialize the metabox settings fields.
+		 *
+		 * @since 2.5.8
 		 */
 		public function load_settings_fields() {
 			global $sfwd_lms;
@@ -223,6 +244,36 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 				);
 			}
 
+			// Group Taxonomies.
+			$groups_taxonomies = $sfwd_lms->get_post_args_section( 'groups', 'taxonomies' );
+			if ( ( isset( $groups_taxonomies['ld_group_category'] ) ) && ( true === $groups_taxonomies['ld_group_category']['public'] ) ) {
+				$this->setting_option_fields['ld_group_category'] = array(
+					'name'  => 'ld_group_category',
+					'type'  => 'text',
+					'label' => sprintf(
+						// translators: placeholder: Group.
+						_x( '%s Category base', 'placeholder: Group', 'learndash' ),
+						LearnDash_Custom_Label::get_label( 'group' )
+					),
+					'value' => $this->setting_option_values['ld_group_category'],
+					'class' => 'regular-text',
+				);
+			}
+
+			if ( ( isset( $groups_taxonomies['ld_group_tag'] ) ) && ( true === $groups_taxonomies['ld_group_tag']['public'] ) ) {
+				$this->setting_option_fields['ld_group_tag'] = array(
+					'name'  => 'ld_group_tag',
+					'type'  => 'text',
+					'label' => sprintf(
+						// translators: placeholder: Group.
+						_x( '%s Tag base', 'placeholder: Group', 'learndash' ),
+						LearnDash_Custom_Label::get_label( 'group' )
+					),
+					'value' => $this->setting_option_values['ld_group_tag'],
+					'class' => 'regular-text',
+				);
+			}
+
 			if ( ! empty( $this->setting_option_fields ) ) {
 				$this->setting_option_fields['nonce'] = array(
 					'name'  => 'nonce',
@@ -233,6 +284,7 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 				);
 			}
 
+			/** This filter is documented in includes/settings/settings-metaboxes/class-ld-settings-metabox-course-access-settings.php */
 			$this->setting_option_fields = apply_filters( 'learndash_settings_fields', $this->setting_option_fields, $this->settings_section_key );
 
 			parent::load_settings_fields();
@@ -240,6 +292,8 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 
 		/**
 		 * Save the metabox fields. This is needed due to special processing needs.
+		 *
+		 * @since 2.5.8
 		 */
 		public function save_settings_fields() {
 			if ( isset( $_POST[ $this->setting_field_prefix ] ) ) {
@@ -247,7 +301,7 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 
 					$post_fields = $_POST[ $this->setting_field_prefix ];
 
-					foreach ( array( 'course', 'lesson', 'topic', 'quiz' ) as $slug ) {
+					foreach ( array( 'course', 'lesson', 'topic', 'quiz', 'group' ) as $slug ) {
 
 						if ( ( isset( $post_fields[ 'ld_' . $slug . '_category' ] ) ) && ( ! empty( $post_fields[ 'ld_' . $slug . '_category' ] ) ) ) {
 							$this->setting_option_values[ 'ld_' . $slug . '_category' ] = $this->esc_url( $post_fields[ 'ld_' . $slug . '_category' ] );
@@ -270,6 +324,8 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 		/**
 		 * Class utility function to escape the URL
 		 *
+		 * @since 2.5.8
+		 *
 		 * @param string $value URL to Escape.
 		 *
 		 * @return string filtered URL.
@@ -280,6 +336,7 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 				$value = str_replace( 'http://', '', $value );
 				return untrailingslashit( $value );
 			}
+			return '';
 		}
 	}
 }

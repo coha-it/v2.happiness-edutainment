@@ -1,9 +1,9 @@
 <?php
 /**
- * @package WP Content Aware Engine
+ * @package wp-content-aware-engine
  * @author Joachim Jensen <joachim@dev.institute>
  * @license GPLv3
- * @copyright 2019 by Joachim Jensen
+ * @copyright 2021 by Joachim Jensen
  */
 
 defined('ABSPATH') || exit;
@@ -19,27 +19,29 @@ defined('ABSPATH') || exit;
  */
 class WPCAModule_wpml extends WPCAModule_Base
 {
-
     /**
      * @var string
      */
     protected $category = 'plugins';
 
-    /**
-     * Constructor
-     */
     public function __construct()
     {
         parent::__construct('language', __('Languages', WPCA_DOMAIN));
-
         $this->query_name = 'cl';
     }
 
     /**
-     * Determine if content is relevant
-     *
-     * @since  1.0
-     * @return boolean
+     * @inheritDoc
+     */
+    public function can_enable()
+    {
+        return defined('ICL_SITEPRESS_VERSION')
+            && defined('ICL_LANGUAGE_CODE')
+            && function_exists('icl_get_languages');
+    }
+
+    /**
+     * @inheritDoc
      */
     public function in_context()
     {
@@ -47,38 +49,27 @@ class WPCAModule_wpml extends WPCAModule_Base
     }
 
     /**
-     * Get data from context
-     *
-     * @since  1.0
-     * @return array
+     * @inheritDoc
      */
     public function get_context_data()
     {
-        $data = array($this->id);
-        if (defined('ICL_LANGUAGE_CODE')) {
-            $data[] = ICL_LANGUAGE_CODE;
-        }
+        $data = [$this->id];
+        $data[] = ICL_LANGUAGE_CODE;
         return $data;
     }
 
     /**
-     * Get languages
-     *
-     * @since  1.0
-     * @param  array $args
-     * @return array
+     * @inheritDoc
      */
-    protected function _get_content($args = array())
+    protected function _get_content($args = [])
     {
-        $langs = array();
+        $langs = [];
 
-        if (function_exists('icl_get_languages')) {
-            foreach (icl_get_languages('skip_missing=N') as $lng) {
-                $langs[$lng['language_code']] = $lng['native_name'];
-            }
+        foreach (icl_get_languages('skip_missing=N') as $lng) {
+            $langs[$lng['language_code']] = $lng['native_name'];
         }
 
-        if (isset($args['include'])) {
+        if ($args['include']) {
             $langs = array_intersect_key($langs, array_flip($args['include']));
         }
         return $langs;

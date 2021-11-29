@@ -235,7 +235,7 @@ function bbp_has_replies( $args = array() ) {
 
 		// Figure out total pages
 		if ( true === $r['hierarchical'] ) {
-			$walker      = new BBP_Walker_Reply;
+			$walker      = new BBP_Walker_Reply();
 			$total_pages = ceil( $walker->get_number_of_root_elements( $bbp->reply_query->posts ) / $bbp->reply_query->posts_per_page );
 		} else {
 
@@ -436,6 +436,7 @@ function bbp_reply_url( $reply_id = 0 ) {
 
 		// Set needed variables
 		$reply_id = bbp_get_reply_id( $reply_id );
+		$topic_id = 0;
 
 		// Juggle reply & topic IDs for unpretty URL formatting
 		if ( bbp_is_reply( $reply_id ) ) {
@@ -2311,8 +2312,8 @@ function bbp_get_replies_pagination_base( $topic_id = 0 ) {
 		} elseif ( bbp_is_single_user() ) {
 			$base = bbp_get_user_profile_url( bbp_get_displayed_user_id() );
 
-		// Page or single post
-		} elseif ( is_page() || is_single() ) {
+		// Any single post (for shortcodes)
+		} elseif ( is_singular() ) {
 			$base = get_permalink();
 
 		// Single topic
@@ -2373,7 +2374,7 @@ function bbp_topic_pagination_count() {
 
 		// We are threading replies
 		if ( bbp_thread_replies() ) {
-			$walker  = new BBP_Walker_Reply;
+			$walker  = new BBP_Walker_Reply();
 			$threads = absint( $walker->get_number_of_root_elements( $bbp->reply_query->posts ) - 1 );
 			$retstr  = sprintf( _n( 'Viewing %1$s reply thread', 'Viewing %1$s reply threads', $threads, 'bbpress' ), bbp_number_format( $threads ) );
 
@@ -2493,7 +2494,7 @@ function bbp_form_reply_to() {
 		$reply_to = 0;
 
 		// Get $_REQUEST data
-		if ( bbp_is_reply_form_post_request() && isset( $_REQUEST['bbp_reply_to'] ) ) {
+		if ( isset( $_REQUEST['bbp_reply_to'] ) ) {
 			$reply_to = bbp_validate_reply_to( $_REQUEST['bbp_reply_to'] );
 		}
 

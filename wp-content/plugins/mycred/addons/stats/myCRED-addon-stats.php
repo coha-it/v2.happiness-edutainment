@@ -35,13 +35,7 @@ if ( ! class_exists( 'myCRED_Stats_Module' ) ) :
 
 			parent::__construct( 'myCRED_Stats_Module', array(
 				'module_name' => 'stats',
-				'defaults'    => array(
-					'color_positive' => '',
-					'color_negative' => '',
-					'animate'        => 1,
-					'bezier'         => 1,
-					'caching'        => 'off'
-				),
+				'defaults'    => mycred_get_addon_defaults( 'stats' ),
 				'accordion'   => false,
 				'register'    => false,
 				'add_to_core' => false
@@ -126,7 +120,7 @@ if ( ! class_exists( 'myCRED_Stats_Module' ) ) :
 
 			}
 
-			add_action( 'mycred_after_core_prefs', array( $this, 'after_general_settings' ) );
+			add_action( 'mycred_type_prefs', array( $this, 'after_general_settings' ) );
 			add_filter( 'mycred_save_core_prefs',  array( $this, 'sanitize_extra_settings' ), 90, 3 );
 
 			if ( count( $this->point_types ) > 1 ) {
@@ -134,7 +128,7 @@ if ( ! class_exists( 'myCRED_Stats_Module' ) ) :
 				$priority = 10;
 				foreach ( $this->point_types as $type_id => $label ) {
 
-					add_action( 'mycred_after_core_prefs' . $type_id, array( $this, 'after_general_settings' ), $priority );
+					add_action( 'mycred_type_prefs' . $type_id, array( $this, 'after_general_settings' ), $priority );
 					add_filter( 'mycred_save_core_prefs' . $type_id,  array( $this, 'sanitize_extra_settings' ), $priority, 3 );
 
 					$priority += 10;

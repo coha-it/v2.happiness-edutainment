@@ -252,6 +252,12 @@
 	min-width: 320px;
 	max-width: 900px;
 }
+
+#side-sortables .sfwd_option_input {
+	min-width: 220px;
+	max-width: 220px;
+}
+
 .sfwd_top_label .sfwd_option_input,
 .sfwd_no_label .sfwd_option_input {
 	width: 100%;

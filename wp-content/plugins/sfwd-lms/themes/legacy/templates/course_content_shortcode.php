@@ -24,12 +24,13 @@
  *
  * @since 2.1.0
  *
- * @package LearnDash\Course
+ * @package LearnDash\Templates\Legacy\Course
  */
 
-?>
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
-<?php
 /**
  * Show Course Status
  */
@@ -38,8 +39,8 @@
 	<div id='learndash_course_content'>
 		<h4 id='learndash_course_content_title'>
 			<?php
-				// translators: Course Content Label.
-				printf( esc_html_x( '%s Content', 'Course Content Label', 'learndash' ), LearnDash_Custom_Label::get_label( 'course' ) );
+				// translators: placeholder: Course.
+				printf( esc_html_x( '%s Content', 'placeholder: Course', 'learndash' ), LearnDash_Custom_Label::get_label( 'course' ) );
 			?>
 		</h4>
 
@@ -61,10 +62,10 @@
 				<div id='lessons_list'>
 
 					<?php foreach ( $lessons as $lesson ) : ?>
-						<div id='post-<?php echo $lesson['post']->ID; ?>' class='<?php echo $lesson['sample']; ?>'>
-							<div class='list-count'><?php echo $lesson['sno']; ?></div>
+						<div id='post-<?php echo absint( $lesson['post']->ID ); ?>' class='<?php echo esc_attr( $lesson['sample'] ); ?>'>
+							<div class='list-count'><?php echo esc_attr( $lesson['sno'] ); ?></div>
 							<h4>
-								<a class='<?php echo $lesson['status']; ?>' href='<?php echo learndash_get_step_permalink( $lesson['post']->ID, $course_id ); ?>'><?php echo $lesson['post']->post_title; ?></a>
+								<a class='<?php echo esc_attr( $lesson['status'] ); ?>' href='<?php echo esc_url( learndash_get_step_permalink( $lesson['post']->ID, $course_id ) ); ?>'><?php echo apply_filters( 'the_title', $lesson['post']->post_title, $lesson['post']->ID ); ?></a>
 								<?php /* Not available message for drip feeding lessons */ ?>
 								<?php if ( ! empty( $lesson['lesson_access_from'] ) ) : ?>
 									<?php
@@ -77,7 +78,8 @@
 												'lesson_access_from_int' => $lesson['lesson_access_from'],
 												'lesson_access_from_date' => learndash_adjust_date_time_display( $lesson['lesson_access_from'] ),
 												'context' => 'course_content_shortcode',
-											), true
+											),
+											true
 										);
 									?>
 								<?php endif; ?>
@@ -89,12 +91,12 @@
 										<ul>
 											<?php $odd_class = ''; ?>
 											<?php foreach ( $topics as $key => $topic ) : ?>
-												<?php $odd_class       = empty( $odd_class ) ? 'nth-of-type-odd' : ''; ?>
+												<?php $odd_class = empty( $odd_class ) ? 'nth-of-type-odd' : ''; ?>
 												<?php $completed_class = empty( $topic->completed ) ? 'topic-notcompleted' : 'topic-completed'; ?>
 												<li class='<?php echo $odd_class; ?>'>
 													<span class='topic_item'>
-														<a class='<?php echo $completed_class; ?>' href='<?php echo learndash_get_step_permalink( $topic->ID, $course_id ); ?>' title='<?php echo $topic->post_title; ?>'>
-															<span><?php echo $topic->post_title; ?></span>
+														<a class='<?php echo esc_attr( $completed_class ); ?>' href='<?php echo esc_url( learndash_get_step_permalink( $topic->ID, $course_id ) ); ?>' title='<?php echo esc_html( apply_filters( 'the_title', $topic->post_title, $topic->ID ) ); ?>'>
+															<span><?php echo apply_filters( 'the_title', $topic->post_title, $topic->ID ); ?></span>
 														</a>
 													</span>
 												</li>
@@ -111,34 +113,35 @@
 			</div>
 			<?php
 				global $course_pager_results;
-				if ( isset( $course_pager_results['pager'] ) ) {
-					echo SFWD_LMS::get_template( 
-						'learndash_pager.php', 
-						array(
-						'pager_results' => $course_pager_results['pager'], 
-						'pager_context' => 'course_content'
-						) 
-					);
-				}
+			if ( isset( $course_pager_results['pager'] ) ) {
+				echo SFWD_LMS::get_template(
+					'learndash_pager.php',
+					array(
+						'pager_results' => $course_pager_results['pager'],
+						'pager_context' => 'course_content',
+					)
+				);
+			}
 			?>
 		<?php endif; ?>
 		<?php
-			if ( ( isset( $course_pager_results['pager'] ) ) && ( !empty( $course_pager_results['pager'] ) ) ) {
-				if ( $course_pager_results['pager']['paged'] == $course_pager_results['pager']['total_pages'] ) {
-					$show_course_quizzes = true;
-				} else {
-					$show_course_quizzes = false;
-				}
-			} else {
+		if ( ( isset( $course_pager_results['pager'] ) ) && ( ! empty( $course_pager_results['pager'] ) ) ) {
+			if ( $course_pager_results['pager']['paged'] == $course_pager_results['pager']['total_pages'] ) {
 				$show_course_quizzes = true;
+			} else {
+				$show_course_quizzes = false;
 			}
+		} else {
+			$show_course_quizzes = true;
+		}
 		?>
 
 
 		<?php /* Show Quiz List */ ?>	
-		<?php 
-			if ( $show_course_quizzes == true ) {
-			if ( ! empty( $quizzes ) ) : ?>
+		<?php
+		if ( $show_course_quizzes == true ) {
+			if ( ! empty( $quizzes ) ) :
+				?>
 				<div id='learndash_quizzes'>
 					<div id='quiz_heading'>
 						<span><?php echo LearnDash_Custom_Label::get_label( 'quizzes' ); ?></span><span class='right'><?php esc_html_e( 'Status', 'learndash' ); ?></span>
@@ -147,14 +150,16 @@
 						<?php foreach ( $quizzes as $quiz ) : ?>
 							<div id='post-<?php echo $quiz['post']->ID; ?>' class='<?php echo $quiz['sample']; ?>'>
 								<div class='list-count'><?php echo $quiz['sno']; ?></div>
-								<h4><a class='<?php echo $quiz['status']; ?>' href='<?php echo learndash_get_step_permalink( $quiz['post']->ID, $course_id ); ?>'><?php echo $quiz['post']->post_title; ?></a></h4>
+								<h4><a class='<?php echo esc_attr( $quiz['status'] ); ?>' href='<?php echo esc_url( learndash_get_step_permalink( $quiz['post']->ID, $course_id ) ); ?>'><?php echo apply_filters( 'the_title', $quiz['post']->post_title, $quiz['post']->ID ); ?></a></h4>
 							</div>
 						<?php endforeach; ?>
 					</div>
 				</div>
-			<?php endif; 
-			}
-		?>	
+				<?php
+			endif;
+		}
+		?>
+			
 
 	</div>
 <?php endif; ?>

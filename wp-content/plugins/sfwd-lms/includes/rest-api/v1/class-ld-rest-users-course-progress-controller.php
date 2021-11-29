@@ -1,41 +1,64 @@
 <?php
-if ( ( !class_exists( 'LD_REST_Users_Course_Progress_Controller_V1' ) ) && ( class_exists( 'LD_REST_Posts_Controller_V1' ) ) ) {
-	class LD_REST_Users_Course_Progress_Controller_V1 extends LD_REST_Posts_Controller_V1 {
+/**
+ * LearnDash REST API V1 Course Progress Controller.
+ *
+ * @since 2.5.8
+ * @package LearnDash\REST\V1
+ */
 
-		public function __construct( ) {
-			$this->post_type = 'sfwd-courses';
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+if ( ( ! class_exists( 'LD_REST_Users_Course_Progress_Controller_V1' ) ) && ( class_exists( 'LD_REST_Posts_Controller_V1' ) ) ) {
+
+	/**
+	 * Class LearnDash REST API V1 Course Progress Controller.
+	 *
+	 * @since 2.5.8
+	 */
+	class LD_REST_Users_Course_Progress_Controller_V1 extends LD_REST_Posts_Controller_V1 { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedClassFound
+
+		/**
+		 * Public constructor for class
+		 *
+		 * @since 2.5.8
+		 */
+		public function __construct() {
+			$this->post_type  = 'sfwd-courses';
 			$this->taxonomies = array();
-			
+
 			parent::__construct( $this->post_type );
-			$this->namespace = LEARNDASH_REST_API_NAMESPACE .'/'. $this->version;
-			$this->rest_base = LearnDash_Settings_Section::get_section_setting('LearnDash_Settings_Section_General_REST_API', 'users' );
+			$this->namespace = LEARNDASH_REST_API_NAMESPACE . '/' . $this->version;
+			$this->rest_base = LearnDash_Settings_Section::get_section_setting( 'LearnDash_Settings_Section_General_REST_API', 'users' );
 		}
-		
+
 		/**
 		 * Registers the routes for the objects of the controller.
 		 *
-		 * @since 4.7.0
+		 * @since 2.5.8
 		 *
-		 * @see register_rest_route()
+		 * @see register_rest_route() in WordPress core.
 		 */
 		public function register_routes() {
 
 			$collection_params = $this->get_collection_params();
-			$schema = $this->get_item_schema();
-			
+			$schema            = $this->get_item_schema();
+
 			$get_item_args = array(
-				'context'  => $this->get_context_param( array( 'default' => 'view' ) ),
+				'context' => $this->get_context_param( array( 'default' => 'view' ) ),
 			);
 
-			register_rest_route( 
-				$this->namespace, 
-				'/' . $this->rest_base . '/(?P<id>[\d]+)/course-progress/', 
+			register_rest_route(
+				$this->namespace,
+				'/' . $this->rest_base . '/(?P<id>[\d]+)/course-progress/',
 				array(
 					'args' => array(
 						'id' => array(
-							'description' => esc_html__( 'User ID to show course progress', 'learndash' ),
-    							'required' => true,
-							'type' => 'integer',
+							// translators: course.
+							'description' => sprintf( esc_html_x( 'User ID to show %s progress', 'placeholder: course', 'learndash' ), learndash_get_custom_label_lower( 'course' ) ),
+							'required'    => true,
+							'type'        => 'integer',
 						),
 					),
 					array(
@@ -44,83 +67,71 @@ if ( ( !class_exists( 'LD_REST_Users_Course_Progress_Controller_V1' ) ) && ( cla
 						'permission_callback' => array( $this, 'get_users_progress_permissions_check' ),
 						'args'                => $this->get_collection_params(),
 					),
-				) 
+				)
 			);
-			/*
-			register_rest_route( 
-				$this->namespace, 
-				'/' . $this->rest_base . '/(?P<id>[\d]+)/course-progress/(?P<course_id>[\d]+)', 
-				array(
-					'args' => array(
-						'id' => array(
-							'description' => esc_html__( 'User ID to enroll user into.', 'learndash' ),
-    							'required' => true,
-							'type' => 'integer',
-						),
-						'course_id' => array(
-							'description' => esc_html__( 'Course ID to enroll.', 'learndash' ),
-    							'required' => false,
-								'items'             => array(
-									'type'          => 'integer',
-								),
-						),
-					),
-					array(
-						'methods'             => 'POST',
-						'callback'            => array( $this, 'set_items' ),
-					),
-				) 
-			);
-			*/
 		}
 
-		function get_users_progress_permissions_check( $request ) {
+		/**
+		 * Check User Progress Read Permissions.
+		 *
+		 * @since 2.5.8
+		 *
+		 * @param object $request WP_REST_Request instance.
+		 */
+		public function get_users_progress_permissions_check( $request ) {
 			$user_id = $request['id'];
-			
+
 			if ( learndash_is_admin_user() ) {
 				return true;
-			} else if ( get_current_user_id() === $user_id ) {
+			} elseif ( get_current_user_id() === $user_id ) {
 				return true;
-			} else if ( learndash_is_group_leader_user() ) {
+			} elseif ( learndash_is_group_leader_user() ) {
 				if ( learndash_is_group_leader_of_user( get_current_user_id(), $user_id ) ) {
 					return true;
 				}
 			}
 		}
 
-		function get_users_progress( $request ) {
+		/**
+		 * Get User Progress.
+		 *
+		 * @since 2.5.8
+		 *
+		 * @param object $request WP_REST_Request instance.
+		 */
+		public function get_users_progress( $request ) {
 			$user_id = $request['id'];
 			if ( empty( $user_id ) ) {
 				return new WP_Error( 'rest_user_invalid_id', esc_html__( 'Invalid user ID. #1', 'learndash' ), array( 'status' => 404 ) );
 			}
 
-			if ( is_user_logged_in() )
+			if ( is_user_logged_in() ) {
 				$current_user_id = get_current_user_id();
-			else
+			} else {
 				$current_user_id = 0;
+			}
 
 			$data = array();
 
 			$user_course_progress = get_user_meta( $user_id, '_sfwd-course_progress', true );
-			$user_course_progress = !empty( $user_course_progress ) ? $user_course_progress : array();
+			$user_course_progress = ! empty( $user_course_progress ) ? $user_course_progress : array();
 
 			$courses_registered = ld_get_mycourses( $user_id );
-			$courses_registered = !empty( $courses_registered ) ? $courses_registered : array();
+			$courses_registered = ! empty( $courses_registered ) ? $courses_registered : array();
 
 			$user_course_ids = array_keys( $user_course_progress );
 			$user_course_ids = array_merge( $user_course_ids, $courses_registered );
 			$user_course_ids = array_unique( $user_course_ids );
 
-			if ( ( !empty( $user_course_ids ) ) && ( learndash_is_group_leader_user() ) ) {
+			if ( ( ! empty( $user_course_ids ) ) && ( learndash_is_group_leader_user() ) ) {
 				$gl_groups_corses = learndash_get_group_leader_groups_courses( get_current_user_id() );
-				error_log('gl_groups_corses<pre>'. print_r($gl_groups_corses, true) .'</pre>');
 
-				if ( !empty( $gl_groups_corses ) ) {
+				if ( ! empty( $gl_groups_corses ) ) {
 					$user_course_ids = array_intersect( $gl_groups_corses, $user_course_ids );
 				}
 			}
 
-			if ( !empty( $user_course_ids ) ) {
+			if ( ! empty( $user_course_ids ) ) {
 
 				// Ensure a search string is set in case the orderby is set to 'relevance'.
 				if ( ! empty( $request['orderby'] ) && 'relevance' === $request['orderby'] && empty( $request['search'] ) ) {
@@ -220,22 +231,22 @@ if ( ( !class_exists( 'LD_REST_Users_Course_Progress_Controller_V1' ) ) && ( cla
 
 				// Force the post_type argument, since it's not a user input variable.
 				$args['post_type'] = $this->post_type;
-				$args['post__in'] = $user_course_ids;
-				$args['fields'] = 'ids';
-				
+				$args['post__in']  = $user_course_ids;
+				$args['fields']    = 'ids';
+
 				/**
-				 * Filters the query arguments for a request.
+				 * Filters the query arguments for user course progress REST request.
 				 *
 				 * Enables adding extra arguments or setting defaults for a post collection request.
 				 *
-				 * @since 4.7.0
+				 * @since 2.5.8
 				 *
 				 * @link https://developer.wordpress.org/reference/classes/wp_query/
 				 *
-				 * @param array           $args    Key value array of query var to query value.
-				 * @param WP_REST_Request $request The request used.
+				 * @param array           $args    An array of query arguments for getting users course progress.
+				 * @param WP_REST_Request $request The REST request object.
 				 */
-				$args       = apply_filters( "learndash_rest_users_course_progress_query", $args, $request );
+				$args       = apply_filters( 'learndash_rest_users_course_progress_query', $args, $request );
 				$query_args = $this->prepare_items_query( $args, $request );
 
 				$taxonomies = wp_list_filter( get_object_taxonomies( $this->post_type, 'objects' ), array( 'show_in_rest' => true ) );
@@ -263,43 +274,40 @@ if ( ( !class_exists( 'LD_REST_Users_Course_Progress_Controller_V1' ) ) && ( cla
 						);
 					}
 				}
-				error_log('query_args<pre>'. print_r($query_args, true) .'</pre>');
-				
+
 				$posts_query  = new WP_Query();
 				$query_result = $posts_query->query( $query_args );
-				error_log('query_result<pre>'. print_r($query_result, true) .'</pre>');
-				
-				
+
 				// Allow access to all password protected posts if the context is edit.
 				if ( 'edit' === $request['context'] ) {
 					add_filter( 'post_password_required', '__return_false' );
 				}
 
 				foreach ( $query_result as $course_id ) {
-					$data[$course_id] = array();
-					
-					if ( isset( $user_course_progress[$course_id] ) ) {
-						$converted = $this->user_meta_progress_normalized( $user_course_progress[$course_id] );
+					$data[ $course_id ] = array();
+
+					if ( isset( $user_course_progress[ $course_id ] ) ) {
+						$converted = $this->user_meta_progress_normalized( $user_course_progress[ $course_id ] );
 					} else {
 						$converted = array();
 					}
-				
+
 					$ld_course_steps_object = LDLMS_Factory_Post::course_steps( intval( $course_id ) );
 					$ld_course_steps_object->load_steps();
 					$course_steps_l = $ld_course_steps_object->get_steps( 'l' );
-					if ( !empty( $course_steps_l ) ) {
-						foreach( $course_steps_l as $step_key ) {
+					if ( ! empty( $course_steps_l ) ) {
+						foreach ( $course_steps_l as $step_key ) {
 							list( $step_type, $step_id ) = explode( ':', $step_key );
-							if ( isset( $converted[$step_key] ) ) {
-								$completed = $converted[$step_key];
+							if ( isset( $converted[ $step_key ] ) ) {
+								$completed = $converted[ $step_key ];
 							} else {
 								$completed = 0;
 							}
-							$data[$course_id][$step_id] = $completed;
+							$data[ $course_id ][ $step_id ] = $completed;
 						}
 					}
 				}
-				
+
 				// Reset filter.
 				if ( 'edit' === $request['context'] ) {
 					remove_filter( 'post_password_required', '__return_false' );
@@ -350,79 +358,29 @@ if ( ( !class_exists( 'LD_REST_Users_Course_Progress_Controller_V1' ) ) && ( cla
 			}
 			return $response;
 		}
-		
-		function user_meta_progress_normalized( $progress = array() ) {
+
+		/**
+		 * Get User Meta Progression.
+		 *
+		 * @since 2.5.8
+		 *
+		 * @param array $progress Array of course progress data.
+		 */
+		public function user_meta_progress_normalized( $progress = array() ) {
 			$converted = array();
-			
-			if ( ( isset( $progress['lessons'] ) ) && ( !empty( $progress['lessons'] ) ) ) {
-				foreach( $progress['lessons']  as $lesson_id => $lesson_complete ) {
-					$converted['sfwd-lessons:' . $lesson_id] = $lesson_complete;
-					if ( ( isset( $progress['topics'][$lesson_id] ) ) && ( !empty( $progress['topics'][$lesson_id] ) ) ) {
-						foreach( $progress['topics'][$lesson_id]  as $topic_id => $topic_complete ) {
-							$converted['sfwd-topic:' . $topic_id] = $topic_complete;
+
+			if ( ( isset( $progress['lessons'] ) ) && ( ! empty( $progress['lessons'] ) ) ) {
+				foreach ( $progress['lessons']  as $lesson_id => $lesson_complete ) {
+					$converted[ 'sfwd-lessons:' . $lesson_id ] = $lesson_complete;
+					if ( ( isset( $progress['topics'][ $lesson_id ] ) ) && ( ! empty( $progress['topics'][ $lesson_id ] ) ) ) {
+						foreach ( $progress['topics'][ $lesson_id ]  as $topic_id => $topic_complete ) {
+							$converted[ 'sfwd-topic:' . $topic_id ] = $topic_complete;
 						}
 					}
 				}
 			}
-			//error_log('converted<pre>'. print_r($converted, true) .'</pre>');
-			
+
 			return $converted;
 		}
-		
-		
-		/*
-		function set_items( $request ) {
-			$data = array();
-
-			// Create the response object
-			$response = rest_ensure_response( $data );
-
-			// Add a custom status code
-			$response->set_status( 200 );
-
-			return $response;
-		}
-		*/
-
-		/*
-		function lesson_mark_complete( $request ) {
-			$course_id = $request['course'];
-			$lesson_id = $request['id'];
-			if ( empty( $course_id ) ) {
-				return new WP_Error( 'rest_post_invalid_id_X', esc_html__( 'Invalid Course ID.', 'learndash' ), array( 'status' => 404 ) );
-			}
-			
-			if ( empty( $lesson_id ) ) {
-				return new WP_Error( 'rest_post_invalid_id_Y', esc_html__( 'Invalid Lesson ID.', 'learndash' ), array( 'status' => 404 ) );
-			}
-
-			$current_user_id = get_current_user_id();
-			if ( empty( $current_user_id ) ) {
-				return new WP_Error( 'rest_not_logged_in', esc_html__( 'You are not currently logged in.', 'learndash' ), array( 'status' => 401 ) );
-			}
-			//$current_user = wp_get_current_user();
-
-			$has_access = sfwd_lms_has_access( $course->ID, $current_user->ID );
-			if ( ( ! $has_access ) && ( $course_price_type != 'open' ) ) {
-				return new WP_Error( 'rest_cannot_view', esc_html__( 'Sorry, you are not allowed view items.', 'learndash' ), array( 'status' => rest_authorization_required_code() ) );
-			}
-
-			$return = learndash_process_mark_complete( $current_user_id, $lesson_id );
-			if ( $return === true ) {
-				$data = array( 
-					'completed_status' => true,
-					'completed_date_gmt' => $this->prepare_date_response( current_time( 'mysql' ) ) 
-				);
-
-				// Create the response object
-				$response = rest_ensure_response( $data );
-
-				// Add a custom status code
-				$response->set_status( 200 );
-
-				return $response;
-			}
-		}
-		*/
 	}
 }

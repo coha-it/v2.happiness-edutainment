@@ -8,26 +8,11 @@
 /**
  * Internal block libraries
  */
-const { __, _x, sprintf } = wp.i18n;
-const {
-	registerBlockType,
-} = wp.blocks;
-
-const {
-	InspectorControls,
-} = wp.editor;
-
-const {
-	ServerSideRender,
-	Tooltip,
-	PanelBody,
-	PanelRow,
-	RangeControl,
-	FormToggle,
-	SelectControl,
-	ToggleControl,
-	TextControl
-} = wp.components;
+import { __ } from '@wordpress/i18n';
+import { registerBlockType } from '@wordpress/blocks';
+import { InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, SelectControl, TextControl, ToggleControl } from '@wordpress/components';
+import ServerSideRender from '@wordpress/server-side-render';
 
 registerBlockType(
 	'learndash/ld-usermeta',
@@ -64,24 +49,17 @@ registerBlockType(
 		},
 		edit: props => {
 			const { attributes: { field, user_id, preview_show, preview_user_id },
-				className, setAttributes } = props;
+				setAttributes } = props;
 
 			const field_field = (
 				<SelectControl
 					key="field"
+					value={field || 'user_login'}
 					label={__('Field', 'learndash')}
 					options={[
 						{
 							label: __('User Login', 'learndash'),
 							value: 'user_login',
-						},
-						{
-							label: __('User Display Name', 'learndash'),
-							value: 'display_name',
-						},
-						{
-							label: __('User Nicename', 'learndash'),
-							value: 'user_nicename',
 						},
 						{
 							label: __('User First Name', 'learndash'),
@@ -90,6 +68,18 @@ registerBlockType(
 						{
 							label: __('User Last Name', 'learndash'),
 							value: 'last_name',
+						},
+						{
+							label: __('User First and Last Name', 'learndash'),
+							value: 'first_last_name',
+						},
+						{
+							label: __('User Display Name', 'learndash'),
+							value: 'display_name',
+						},
+						{
+							label: __('User Nicename', 'learndash'),
+							value: 'user_nicename',
 						},
 						{
 							label: __('User Nickname', 'learndash'),
@@ -142,7 +132,7 @@ registerBlockType(
 			);
 
 			const inspectorControls = (
-				<InspectorControls>
+				<InspectorControls key='controls'>
 					<PanelBody
 						title={__('Settings', 'learndash')}
 					>
@@ -158,6 +148,7 @@ registerBlockType(
 					return <ServerSideRender
 						block="learndash/ld-usermeta"
 						attributes={attributes}
+						key="learndash/ld-usermeta"
 					/>
 				} else {
 					return __('[usermeta] shortcode output shown here', 'learndash');

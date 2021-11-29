@@ -3,7 +3,7 @@
  * @package Content Aware Sidebars
  * @author Joachim Jensen <joachim@dev.institute>
  * @license GPLv3
- * @copyright 2019 by Joachim Jensen
+ * @copyright 2021 by Joachim Jensen
  */
 
 defined('ABSPATH') || exit;
@@ -33,13 +33,13 @@ final class CASConditionPlaceholder extends WPCAModule_Base
      */
     public function list_module($list)
     {
-        $list[] = array(
+        $list[] = [
             'id'            => $this->id,
             'text'          => $this->name,
             'placeholder'   => $this->placeholder,
             'default_value' => $this->default_value,
             'disabled'      => true,
-        );
+        ];
         return $list;
     }
 
@@ -81,9 +81,9 @@ final class CASConditionPlaceholder extends WPCAModule_Base
      *
      * @return void
      */
-    protected function _get_content($args = array())
+    protected function _get_content($args = [])
     {
-        return array();
+        return [];
     }
 
     /**
@@ -103,18 +103,7 @@ final class CASConditionPlaceholder extends WPCAModule_Base
      */
     public function get_context_data()
     {
-        return array();
-    }
-
-    /**
-     * @since 3.9
-     * @param array $posts
-     *
-     * @return array
-     */
-    public function filter_excluded_context($posts)
-    {
-        return $posts;
+        return [];
     }
 
     /**

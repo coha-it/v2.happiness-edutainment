@@ -1,9 +1,9 @@
 <?php
 /**
- * @package WP Content Aware Engine
+ * @package wp-content-aware-engine
  * @author Joachim Jensen <joachim@dev.institute>
  * @license GPLv3
- * @copyright 2019 by Joachim Jensen
+ * @copyright 2021 by Joachim Jensen
  */
 
 defined('ABSPATH') || exit;
@@ -19,30 +19,22 @@ defined('ABSPATH') || exit;
  */
 class WPCAModule_page_template extends WPCAModule_Base
 {
-
     /**
      * Cached search string
      * @var string
      */
     protected $search_string;
 
-    /**
-     * Constructor
-     */
     public function __construct()
     {
         parent::__construct('page_template', __('Page Templates', WPCA_DOMAIN));
         $this->placeholder = __('All Templates', WPCA_DOMAIN);
         $this->default_value = $this->id;
-
         $this->query_name = 'cpt';
     }
 
     /**
-     * Determine if content is relevant
-     *
-     * @since  1.0
-     * @return boolean
+     * @inheritDoc
      */
     public function in_context()
     {
@@ -54,35 +46,27 @@ class WPCAModule_page_template extends WPCAModule_Base
     }
 
     /**
-     * Get data from context
-     *
-     * @since  1.0
-     * @return array
+     * @inheritDoc
      */
     public function get_context_data()
     {
-        return array(
+        return [
             $this->id,
             get_post_meta(get_the_ID(), '_wp_page_template', true)
-        );
+        ];
     }
 
     /**
-     * Get page templates
-     *
-     * @since  1.0
-     * @param  array $args
-     * @return array
+     * @inheritDoc
      */
-    protected function _get_content($args = array())
+    protected function _get_content($args = [])
     {
         $templates = array_flip(get_page_templates());
-        if (isset($args['include'])) {
+        if ($args['include']) {
             $templates = array_intersect_key($templates, array_flip($args['include']));
-        }
-        if (isset($args['search']) && $args['search']) {
+        } elseif ($args['search']) {
             $this->search_string = $args['search'];
-            $templates = array_filter($templates, array($this,'_filter_search'));
+            $templates = array_filter($templates, [$this,'_filter_search']);
         }
         return $templates;
     }

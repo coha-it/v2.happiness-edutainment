@@ -96,9 +96,11 @@ if ( ! class_exists( 'LDLMS_Post_Types' ) ) {
 				$init_called = true;
 
 				/**
-				 * Fitler the list of custom database tables.
+				 * Filters the list of custom post types.
 				 *
 				 * @since 2.6.0
+				 *
+				 * @param array $post_types An array of Post type list.
 				 */
 				self::$post_types = apply_filters( 'learndash_custom_post_types', self::$post_types );
 			}
@@ -108,37 +110,104 @@ if ( ! class_exists( 'LDLMS_Post_Types' ) ) {
 		 * Get an array of all custom tables.
 		 *
 		 * @since 2.6.0
+		 * @since 3.2.3 Added `$return_type` and `$quote_char` parameter.
 		 *
 		 * @param string $post_type_section Which group of post_types to return. Default is all.
+		 * @param string $return_type       Used to designate the returned value. String or array.
+		 * @param string $quote_char        Wrap the return values in quote character. Only for return_type 'string'.
+		 *
 		 * @return array of post type slugs.
 		 */
-		public static function get_post_types( $post_type_section = 'all' ) {
+		public static function get_post_types( $post_type_section = 'all', $return_type = 'array', $quote_char = '' ) {
 			$post_types_return = array();
-			if ( ( ! empty( $post_type_section ) ) && ( isset( self::$post_type_sections[ $post_type_section ] ) ) ) {
-				$post_type_keys = self::$post_type_sections[ $post_type_section ];
-				if ( ! empty( $post_type_keys ) ) {
-					foreach ( $post_type_keys as $post_type_key ) {
-						$post_types_return[] = self::$post_types[ $post_type_key ];
+
+			if ( is_string( $post_type_section ) ) {
+				$post_type_section = explode( ',', $post_type_section );
+			}
+
+			if ( is_array( $post_type_section ) ) {
+				$post_type_section = array_map( 'trim', $post_type_section );
+				$return_slugs      = array();
+				foreach ( $post_type_section as $key ) {
+					if ( isset( self::$post_type_sections[ $key ] ) ) {
+
+						$post_types_return = array_merge( $post_types_return, self::get_post_type_slug( self::$post_type_sections[ $key ] ) );
 					}
 				}
+
+				if ( ! empty( $post_types_return ) ) {
+					$post_types_return = array_unique( $post_types_return );
+				}
+
+				if ( 'string' === $return_type ) {
+					$return = '';
+					foreach ( $post_types_return as $key ) {
+						if ( ! empty( $return ) ) {
+							$return .= ',';
+						}
+
+						$return .= $quote_char . $key . $quote_char;
+					}
+					return $return;
+				}
 			}
+
 			return $post_types_return;
 		}
 
 		/**
-		 * Utility function to return the post type slug. This is to prevent hard-coding
-		 * of the slug throughout the code files.
+		 * Utility function to return the post type slug(s). This is to prevent hard-coding
+		 * of the slug(s) throughout the code files.
 		 *
 		 * @since 2.6.0
+		 * @since 3.2.3 Added `$return_type` and `$quote_char` parameter.
 		 *
-		 * @param string $post_type_key Internal key used to identify the post_type.
-		 * @return string post type slug if found.
+		 * @param string|array $post_type_key Internal key used to identify the post_type.
+		 * @param string       $return_type   Used to designate the returned value. String or array.
+		 * @param string       $quote_char    Wrap the return values in quote character. Only for return_type 'string'.
+		 *
+		 * @return string|array post type slug if found.
 		 */
-		public static function get_post_type_slug( $post_type_key = '' ) {
+		public static function get_post_type_slug( $post_type_key = '', $return_type = '', $quote_char = '' ) {
+			if ( ! empty( $post_type_key ) ) {
+				if ( is_string( $post_type_key ) ) {
+					if ( empty( $return_type ) ) {
+						$return_type = 'string';
+					}
+					$post_type_key = explode( ',', $post_type_key );
+				} elseif ( is_array( $post_type_key ) ) {
+					if ( empty( $return_type ) ) {
+						$return_type = 'array';
+					}
+				} else {
+					return;
+				}
 
-			if ( isset( self::$post_types[ $post_type_key ] ) ) {
-				return self::$post_types[ $post_type_key ];
+				if ( is_array( $post_type_key ) ) {
+					$post_type_key = array_map( 'trim', $post_type_key );
+					$return_slugs  = array();
+					foreach ( $post_type_key as $key ) {
+						if ( isset( self::$post_types[ $key ] ) ) {
+							$return_slugs[] = self::$post_types[ $key ];
+						}
+					}
+
+					if ( 'string' === $return_type ) {
+						$return = '';
+						foreach ( $return_slugs as $key ) {
+							if ( ! empty( $return ) ) {
+								$return .= ',';
+							}
+							$return .= $quote_char . $key . $quote_char;
+						}
+
+						return $return;
+					} else {
+						return $return_slugs;
+					}
+				}
 			}
+			return '';
 		}
 
 		/**
@@ -151,7 +220,6 @@ if ( ! class_exists( 'LDLMS_Post_Types' ) ) {
 		 * @return string post type key if found.
 		 */
 		public static function get_post_type_key( $post_type_slug = '' ) {
-
 			if ( ( ! empty( self::$post_types ) ) && ( ! empty( $post_type_slug ) ) ) {
 				foreach ( self::$post_types as $_key => $_slug ) {
 					if ( $post_type_slug === $_slug ) {
@@ -159,6 +227,8 @@ if ( ! class_exists( 'LDLMS_Post_Types' ) ) {
 					}
 				}
 			}
+
+			return '';
 		}
 
 		// End of functions.
@@ -169,18 +239,36 @@ if ( ! class_exists( 'LDLMS_Post_Types' ) ) {
 global $learndash_post_types;
 $learndash_post_types = LDLMS_Post_Types::get_post_types();
 
-function learndash_get_post_types( $post_section_key = 'all' ) {
-	return LDLMS_Post_Types::get_post_types( $post_section_key );
+/** This function is documented in includes/class-ldlms-post-types.php */
+// phpcs:ignore Squiz.Commenting.FunctionComment
+function learndash_get_post_types( $post_section_key = 'all', $return_type = 'array', $quote_char = '' ) {
+	return LDLMS_Post_Types::get_post_types( $post_section_key, $return_type, $quote_char );
 }
 
-function learndash_get_post_type_slug( $post_type_key = '' ) {
-	if ( ! empty( $post_type_key ) ) {
-		return LDLMS_Post_Types::get_post_type_slug( $post_type_key );
-	}
+/** This function is documented in includes/class-ldlms-post-types.php */
+// phpcs:ignore Squiz.Commenting.FunctionComment
+function learndash_get_post_type_slug( $post_type_key = '', $return_type = '', $quote_char = '' ) {
+	return LDLMS_Post_Types::get_post_type_slug( $post_type_key, $return_type, $quote_char );
 }
 
+/** This function is documented in includes/class-ldlms-post-types.php */
+// phpcs:ignore Squiz.Commenting.FunctionComment
 function learndash_get_post_type_key( $post_type_slug = '' ) {
-	if ( ! empty( $post_type_slug ) ) {
-		return LDLMS_Post_Types::get_post_type_key( $post_type_slug );
+	return LDLMS_Post_Types::get_post_type_key( $post_type_slug );
+}
+
+/**
+ * Utility function to check if a post type slug is a valid LearnDash post type.
+ *
+ * @since 3.4.1
+ *
+ * @param string $post_type_slug Post Type slug.
+ *
+ * @return bool true if post type key is found.
+ */
+function learndash_is_valid_post_type( $post_type_slug = '' ) {
+	if ( ( ! empty( $post_type_slug ) ) && ( in_array( $post_type_slug, LDLMS_Post_Types::get_post_types(), true ) ) ) {
+		return true;
 	}
+	return false;
 }

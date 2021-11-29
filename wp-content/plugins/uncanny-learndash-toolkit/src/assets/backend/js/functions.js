@@ -26,9 +26,6 @@ jQuery( function($){
                 // Get elements
                 this.$elements.modulesContainer = $( '.ult .ult-directory-modules' );
                 this.$elements.modules = $( '.ult .ult-directory-module' );
-
-                // Create Shuffle Instance
-                this.createShuffleInstance();
             },
 
             // Search a module using a data attribute
@@ -38,24 +35,31 @@ jQuery( function($){
                 });
             },
 
-            // Shuffle
-            createShuffleInstance: function(){
-                // Get Shuffle
-                let Shuffle = window.Shuffle;
-
-                // Create Shuffle instance
-                this.ULT_Modules.shuffle = new Shuffle( this.$elements.modulesContainer, {
-                    itemSelector: '.ult-directory-module',
-                    sizer: '.ult-directory-module',
-                    buffer: 1,
-                });
-            },
-
             // Apply all filters
             filter: function(){
-                this.ULT_Modules.shuffle.filter(( element ) => {
-                    return this.ULT_Modules.Search.matchSearch( element ) && this.ULT_Modules.Filters.matchFilters( element );
-                });
+                const $results = this.$elements.modules
+                    .filter( ( index, toolkitModule ) => {
+                        // Check if we should show the element
+                        const shouldShow = (
+                            // Check search results
+                            this.ULT_Modules.Search.matchSearch( toolkitModule )
+                            // Check filters
+                            && this.ULT_Modules.Filters.matchFilters( toolkitModule )
+                        );
+
+                        const $toolkitModule = $( toolkitModule );
+
+                        if ( shouldShow && ! $toolkitModule.is( ':visible' ) ){
+                            $toolkitModule
+                                .fadeIn( 100 );
+                        } else if ( ! shouldShow && $toolkitModule.is( ':visible' ) ) {
+                            $toolkitModule
+                                .fadeOut( 100 );
+                        }
+
+                        return shouldShow;
+                    }
+                );    
             },
 
             // Show or hide loading animation
@@ -95,14 +99,11 @@ jQuery( function($){
                 // Fuse options
                 var options = {
                     shouldSort: true,
-                    threshold: 0.6,
-                    location: 0,
-                    distance: 100,
-                    maxPatternLength: 32,
+                    threshold: 0.2,
+                    ignoreLocation: true,
                     minMatchCharLength: 1,
                     keys: [
                         'title',
-                        'description',
                         'keywords',
                     ]
                 };
@@ -117,7 +118,7 @@ jQuery( function($){
             // Bind search
             bindSearch: function (){
                 // Bind input event
-                this.$elements.searchField.on( 'input', () => {
+                this.$elements.searchField.on( 'input', ULT_Utility.debounce( () => {
                     // Query
                     let query = this.$elements.searchField.val();
 
@@ -130,7 +131,7 @@ jQuery( function($){
 
                     // Filter
                     this.ULT_Modules.Modules.filter();
-                });
+                }, 300 ) );
             },
 
             // Search
@@ -147,7 +148,7 @@ jQuery( function($){
 
                 // Iterate each result
                 $.each( results, ( index, element ) => {
-                    ids.push( element.id );
+                    ids.push( element.item.id );
                 });
 
                 return ids;
@@ -161,7 +162,7 @@ jQuery( function($){
 
                 // If the user was trying to search an empty string then return true,
                 // Otherwise return true only if this element was one of the results
-                return this.searchQuery.length < 3 || results.includes( parseInt( element.dataset.id ) );
+                return this.searchQuery.length < 3 || $.inArray( element.dataset.id, results ) >= 0;;
             }
         },
 
@@ -186,7 +187,7 @@ jQuery( function($){
 
             createSelect2Instances: function(){
                 this.$elements.selects.select2({
-                    theme: 'default ult-select2'
+                    theme: 'ult-select2'
                 });
             },
 
@@ -390,7 +391,7 @@ jQuery( function($){
 
                 // Get elements
                 this.$elements.modals           = $( '.ult-modal' );
-                this.$elements.settingsButtons  = $( '.ult .ult-directory-module-settings' );
+                this.$elements.settingsButtons  = $( '.ult .ult-directory-module-settings--modal' );
                 this.$elements.bodyElement      = $( 'body' );
                 this.$elements.containerElement = $( '#wpwrap' );
 
@@ -406,6 +407,10 @@ jQuery( function($){
 
                 // Bind buttons
                 this.bindButtons();
+
+                // Set the visibility of fields depending on
+                // the values of other fields
+                this.conditionalVisibility();
             },
 
             bindButtons: function(){
@@ -417,12 +422,18 @@ jQuery( function($){
                     // Save button
                     let $button = $( this );
 
+                    // Get the module box
+                    let $moduleBox = $button.closest( '.ult-directory-module' );
+
                     // Get settings ID
                     let settingsId = ULT_Utility.removeBackslash( $button.data( 'settings' ) );
                     //settingsId = settingsId.toLowerCase();
 
                     // Get modal
                     let $modal = _this.getModal( settingsId );
+
+                    // Set the URL of the help buttons
+                    _this.setHelpButtonURL( $moduleBox, $modal );
 
                     // Show Modal
                     _this.showModal( $modal, settingsId );
@@ -451,6 +462,9 @@ jQuery( function($){
 
                     // Add loading class to submit button
                     $elements.submitButton.addClass( 'ult-modal-action__btn--loading' );
+
+                    // Hide the notices
+                    this.hideNotice( $modal );
 
                     // Save data
                     ULT_Utility.ajaxRequest({
@@ -505,6 +519,23 @@ jQuery( function($){
                 });
             },
 
+            setHelpButtonURL: function( $moduleBox, $modal ){
+                // Get the URL of the KB article
+                const KBArticleURL = $moduleBox.find( '.ult-directory-module-settings--kb-link' ).prop( 'href' );
+
+                // Get the "Help" button in the modal
+                const $helpButton = $modal.find( '.ult-modal-action__btn-help-js' );
+
+                // Check if it's defined
+                if ( ULT_Utility.isDefined( KBArticleURL ) ){
+                    // Set the URL
+                    $helpButton.prop( 'href', KBArticleURL );
+                }
+                else {
+                    $helpButton.hide();
+                }
+            },
+
             showNotice: function( $modal, type, message ){
                 // Get notice element
                 let $notice = $modal.find( '.ult-modal-notice' );
@@ -544,7 +575,7 @@ jQuery( function($){
 
                 // Show modal
                 $modal.fadeIn( 150, () => {
-                    // Add class to know 
+                    // Add class to know
                     $modal.addClass( 'ult-modal--visible' );
                 });
 
@@ -594,6 +625,36 @@ jQuery( function($){
             },
 
             fillFields: function( $modal, data ){
+                // Get the default values
+                let $fieldsWithDefaultValues = $modal.find( '.ult-modal-form-row:not([data-default=""])[data-id][data-type]' );
+                let fieldDefaultValues = {};
+                $.each( $fieldsWithDefaultValues, ( index, field ) => {
+                    // Get the jQuery element
+                    field = $( field );
+                    // Add the default value
+                    fieldDefaultValues[ field.data( 'id' ) ] = field.data( 'default' );
+                });
+
+                // Convert the array with the data from an array with objects
+                // to and object
+                let fieldData = {};
+                $.each( data, ( index, field ) => {
+                    fieldData[ field.name ] = field.value;
+                });
+
+                // Merge the default values with the field data
+                fieldData = $.extend( fieldDefaultValues, fieldData );
+
+                // Convert the field data from an object to an
+                // array with objects
+                data = [];
+                $.each( fieldData, ( key, value ) => {
+                    data.push({
+                        name:  key,
+                        value: value
+                    });
+                });
+
                 // Iterate each option
                 $.each( data, ( index, field ) => {
                     // Get field info
@@ -613,7 +674,7 @@ jQuery( function($){
                         case 'text':
                         case 'textarea':
                         case 'tinymce':
-                            field.$element.val( field.value );
+                            field.$element.val( field.value ).trigger( 'input' );
 
                             if ( field.type == 'tinymce' ){
                                 let editor = tinymce.get( field.name );
@@ -636,7 +697,7 @@ jQuery( function($){
                         case 'checkbox':
                             // Check if the checkbox is selected
                             if ( field.value == 'on' ){
-                                field.$element.prop( 'checked', true );
+                                field.$element.prop( 'checked', true ).trigger( 'change' );
                             }
                             break;
 
@@ -646,21 +707,25 @@ jQuery( function($){
                                 let $radio = $(this);
 
                                 if ( $radio.val() == field.value ){
-                                    $radio.prop( 'checked', true );
+                                    $radio.prop( 'checked', true ).trigger( 'change' );
                                 }
                             });
                             break;
                     };
-                })
+                });
             },
 
             getFieldByName: function( $modal, fieldName ){
                 // Find field
-                let $field = $modal.find( `*[name="${fieldName}"]` );
+                let $field    = $modal.find( `*[name="${ fieldName }"]` );
+                let $fieldRow = $field.closest( '.ult-modal-form-row' );
 
                 return {
-                    $element: $field,
-                    type:   $field.data( 'type' )
+                    $row:         $fieldRow,
+                    $element:     $field,
+                    type:         $field.data( 'type' ),
+                    showIf:       $fieldRow.data( 'show-if' ),
+                    defaultValue: $fieldRow.data( 'default' ),
                 };
             },
 
@@ -704,6 +769,70 @@ jQuery( function($){
                 return formData;
             },
 
+            conditionalVisibility: function(){
+                // Get all the fields with conditional visibility rules
+                const $fieldsWithShowIf = $( '.ult-modal-form-row:not([data-show-if=""])' );
+
+                // Get the modals that have a field that's shown dynamically
+                let $modals = $fieldsWithShowIf.closest( '.ult-modal' );
+
+                // Iterate the modals
+                $.each( $modals, ( index, $modal ) => {
+                    $modal = $( $modal );
+
+                    // Get the fields with conditional visibility in the modal
+                    const $fieldsWithShowIfInModal = $modal.find( '.ult-modal-form-row:not([data-show-if=""])' );
+
+                    // Get the visibility conditions of each field
+                    let fieldsWithShowIfInModal = {};
+                    $.each( $fieldsWithShowIfInModal, ( index, $field ) => {
+                        $field = $( $field );
+
+                        // Get the field row
+                        const $fieldRow = $field.closest( '.ult-modal-form-row' );
+
+                        // Try to get the show-if conditions
+                        let showIf = $fieldRow.data( 'show-if' );
+
+                        try {
+                            showIf = JSON.parse( showIf );
+                        } catch ( e ){}
+
+                        fieldsWithShowIfInModal[ $fieldRow.data( 'id' ) ] = {
+                            $fieldRow:  $fieldRow,
+                            conditions: showIf
+                        };
+                    });
+
+                    // Listen changes in the fields
+                    $modal.find( 'input, textarea, select' ).on( 'change input', ULT_Utility.debounce(() => {
+                        // Get the value of all the fields
+                        let fieldsValuesArray = $modal.find( 'form' ).serializeArray();
+                        fieldsValues = {};
+                        $.each( fieldsValuesArray, ( index, $field ) => {
+                            fieldsValues[ $field.name ] = $field.value;
+                        });
+
+                        // Iterate the fields with conditional visibility
+                        $.each( fieldsWithShowIfInModal, ( fieldID, field ) => {
+                            // Check if it matches the condition
+                            let shouldShow = Object.entries( field.conditions ).reduce(( accumulator, [ conditionKey, conditionValue ]) => {
+                                return accumulator && fieldsValues[ conditionKey ] == conditionValue;
+                            }, true );
+
+                            // Check if it should show the field
+                            if ( shouldShow ){
+                                field.$fieldRow.removeClass( 'ult-modal-form-row--hide' );
+                            }
+                            else {
+                                // Hide it
+                                field.$fieldRow.addClass( 'ult-modal-form-row--hide' );
+                            }
+                        });
+                    }, 20 ));
+                });
+            },
+
             disableScroll: function(){
                 // Add "noscroll" class to the html element
                 $( 'html' ).addClass( 'noscroll' );
@@ -724,7 +853,7 @@ jQuery( function($){
 
             initSelect2: function(){
                 $( '.ult-modal-form-row__select' ).select2({
-                    theme: 'default ult-select2 ult-select2--modal'
+                    theme: 'ult-select2'
                 });
             },
         },
@@ -805,6 +934,31 @@ jQuery( function($){
             }
 
             return fieldType;
-        }
+        },
+
+        throttle( func, interval ){
+            var lastCall = 0;
+
+            return function(){
+                var now = Date.now();
+                if ( lastCall + interval < now ){
+                    lastCall = now;
+                    return func.apply( this, arguments );
+                }
+            };
+        },
+
+        debounce( func, interval ){
+            var lastCall = -1;
+
+            return function(){
+                clearTimeout( lastCall );
+                var args = arguments;
+                var self = this;
+                lastCall = setTimeout( function(){
+                    func.apply( self, args );
+                }, interval );
+            };
+        },
     }
 });

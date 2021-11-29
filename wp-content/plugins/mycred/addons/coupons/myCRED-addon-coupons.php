@@ -33,19 +33,10 @@ if ( ! class_exists( 'myCRED_Coupons_Module' ) ) :
 
 			parent::__construct( 'myCRED_Coupons_Module', array(
 				'module_name' => 'coupons',
-				'defaults'    => array(
-					'log'         => 'Coupon redemption',
-					'invalid'     => 'This is not a valid coupon',
-					'expired'     => 'This coupon has expired',
-					'user_limit'  => 'You have already used this coupon',
-					'min'         => 'A minimum of %amount% is required to use this coupon',
-					'max'         => 'A maximum of %amount% is required to use this coupon',
-					'excluded'    => 'You can not use coupons.',
-					'success'     => '%amount% successfully deposited into your account'
-				),
+				'defaults'    => mycred_get_addon_defaults( 'coupons' ),
 				'register'    => false,
 				'add_to_core' => true,
-				'menu_pos'    => 80
+				'menu_pos'    => 90
 			) );
 
 			add_filter( 'mycred_parse_log_entry_coupon', array( $this, 'parse_log_entry' ), 10, 2 );
@@ -172,8 +163,7 @@ if ( ! class_exists( 'myCRED_Coupons_Module' ) ) :
 			// site in the network, bail.
 			if ( mycred_override_settings() && ! mycred_is_main_site() ) return;
 
-			add_submenu_page(
-				MYCRED_SLUG,
+			mycred_add_main_submenu(
 				__( 'Coupons', 'mycred' ),
 				__( 'Coupons', 'mycred' ),
 				$this->core->get_point_editor_capability(),
@@ -192,10 +182,10 @@ if ( ! class_exists( 'myCRED_Coupons_Module' ) ) :
 			global $pagenow;
 
 			if ( isset( $_GET['post'] ) && mycred_get_post_type( $_GET['post'] ) == MYCRED_COUPON_KEY && isset( $_GET['action'] ) && $_GET['action'] == 'edit' )
-				return MYCRED_SLUG;
+				return MYCRED_MAIN_SLUG;
 
 			if ( $pagenow == 'post-new.php' && isset( $_GET['post_type'] ) && $_GET['post_type'] == MYCRED_COUPON_KEY )
-				return MYCRED_SLUG;
+				return MYCRED_MAIN_SLUG;
 
 			return $parent;
 
@@ -552,14 +542,14 @@ if ( ! class_exists( 'myCRED_Coupons_Module' ) ) :
 			<div class="form-group">
 				<label for="mycred-coupon-global"><?php _e( 'Global Maximum', 'mycred' ); ?></label>
 				<input type="text" name="mycred_coupon[global]" class="form-control" id="mycred-coupon-global" value="<?php echo absint( $coupon->max_global ); ?>" />
-				<span class="description"><?php _e( 'The maximum number of times this coupon can be used in total. Once this is reached, the coupon is automatically trashed.', 'mycred' ); ?></span>
+				<span class="description"><?php _e( 'The maximum number of times this coupon can be used in total. Once this is reached, the coupon is automatically trashed. If 0 is selected then the coupon will not work and will automatically expire. For more info please read the <a href="https://codex.mycred.me/chapter-iii/coupons/creating-coupons/">Description</a>', 'mycred' ); ?></span>
 			</div>
 		</div>
 		<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
 			<div class="form-group">
 				<label for="mycred-coupon-user"><?php _e( 'User Maximum', 'mycred' ); ?></label>
 				<input type="text" name="mycred_coupon[user]" class="form-control" id="mycred-coupon-user" value="<?php echo absint( $coupon->max_user ); ?>" />
-				<span class="description"><?php _e( 'The maximum number of times this coupon can be used by a user.', 'mycred' ); ?></span>
+				<span class="description"><?php _e( 'The maximum number of times this coupon can be used by a user. If 0 is selected then the coupon will not work.', 'mycred' ); ?></span>
 			</div>
 		</div>
 	</div>

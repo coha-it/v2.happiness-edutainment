@@ -1,23 +1,44 @@
 <?php
-if ( ( !class_exists( 'LD_REST_Echo_Controller_V1' ) ) && ( class_exists( 'WP_REST_Controller' ) ) ) {
+/**
+ * LearnDash REST API V1 Echo Controller.
+ *
+ * @since 3.0.7
+ * @package LearnDash\REST\V1
+ */
 
-	class LD_REST_Echo_Controller_V1 extends WP_REST_Controller {
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+if ( ( ! class_exists( 'LD_REST_Echo_Controller_V1' ) ) && ( class_exists( 'WP_REST_Controller' ) ) ) {
+
+	/**
+	 * Class LearnDash REST API V1 Echo Controller.
+	 *
+	 * @since 3.0.7
+	 */
+	class LD_REST_Echo_Controller_V1 extends WP_REST_Controller { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedClassFound
+		/**
+		 * Version
+		 *
+		 * @var string
+		 */
 		protected $version = 'v1';
 
 		/**
 		 * Constructor.
 		 *
-		 * @since 5.0.0
+		 * @since 3.0.7
 		 */
 		public function __construct() {
-			$this->namespace = LEARNDASH_REST_API_NAMESPACE .'/'. $this->version;
+			$this->namespace = LEARNDASH_REST_API_NAMESPACE . '/' . $this->version;
 			$this->rest_base = 'echo';
 		}
 
 		/**
 		 * Registers the routes for the objects of the controller.
 		 *
-		 * @since 5.0.0
+		 * @since 3.0.7
 		 *
 		 * @see register_rest_route()
 		 */
@@ -49,9 +70,10 @@ if ( ( !class_exists( 'LD_REST_Echo_Controller_V1' ) ) && ( class_exists( 'WP_RE
 		/**
 		 * Checks if a given request has access to read the theme.
 		 *
-		 * @since 5.0.0
+		 * @since 3.0.7
 		 *
 		 * @param WP_REST_Request $request Full details about the request.
+		 *
 		 * @return true|WP_Error True if the request has read access for the item, otherwise WP_Error object.
 		 */
 		public function get_repsonse_permissions_check( $request ) {
@@ -59,25 +81,26 @@ if ( ( !class_exists( 'LD_REST_Echo_Controller_V1' ) ) && ( class_exists( 'WP_RE
 		}
 
 		/**
-		 * Retrieves a collection of themes.
+		 * Retrieves a response.
 		 *
-		 * @since 5.0.0
+		 * @since 3.0.7
 		 *
 		 * @param WP_REST_Request $request Full details about the request.
+		 *
 		 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 		 */
 		public function get_repsonse( $request ) {
-			$response_array = array();
-			$response_array['method'] = $request->get_method();
-			$response_array['route'] = $request->get_route();
+			$response_array                  = array();
+			$response_array['method']        = $request->get_method();
+			$response_array['route']         = $request->get_route();
 			$response_array['authenticated'] = is_user_logged_in() ? 1 : 0;
-			$response_array['query_params'] = $request->get_query_params();
-			
+			$response_array['query_params']  = $request->get_query_params();
+
 			$request_body = $request->get_body();
 			if ( ! empty( $request_body ) ) {
-				$request_body = json_decode( $request_body, true );
+				$request_body                   = json_decode( $request_body, true );
 				$response_array['content-type'] = $request->get_header( 'content-type' );
-				$response_array['body'] = $request_body;
+				$response_array['body']         = $request_body;
 			} else {
 				$response_array['body'] = '';
 			}
@@ -91,9 +114,9 @@ if ( ( !class_exists( 'LD_REST_Echo_Controller_V1' ) ) && ( class_exists( 'WP_RE
 		}
 
 		/**
-		 * Retrieves the theme's schema, conforming to JSON Schema.
+		 * Retrieves the schema, conforming to JSON Schema.
 		 *
-		 * @since 5.0.0
+		 * @since 3.0.7
 		 *
 		 * @return array Item schema data.
 		 */

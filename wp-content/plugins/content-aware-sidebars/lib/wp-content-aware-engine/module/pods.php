@@ -1,9 +1,9 @@
 <?php
 /**
- * @package WP Content Aware Engine
+ * @package wp-content-aware-engine
  * @author Joachim Jensen <joachim@dev.institute>
  * @license GPLv3
- * @copyright 2019 by Joachim Jensen
+ * @copyright 2021 by Joachim Jensen
  */
 
 defined('ABSPATH') || exit;
@@ -19,81 +19,77 @@ defined('ABSPATH') || exit;
  */
 class WPCAModule_pods extends WPCAModule_Base
 {
-
     /**
      * @var string
      */
     protected $category = 'plugins';
 
-    /**
-     * Constructor
-     */
     public function __construct()
     {
         parent::__construct('pods', __('Pods Pages', WPCA_DOMAIN));
         $this->placeholder = __('All Pods Pages', WPCA_DOMAIN);
         $this->default_value = $this->id;
-
         $this->query_name = 'cpo';
     }
 
     /**
-     * Determine if content is relevant
-     *
-     * @since  2.0
-     * @return boolean
+     * @inheritDoc
      */
-    public function in_context()
+    public function can_enable()
     {
-        return function_exists('is_pod_page') && is_pod_page();
+        return defined('PODS_DIR')
+            && function_exists('pod_page_exists')
+            && function_exists('is_pod_page')
+            && function_exists('pods_api');
     }
 
     /**
-     * Get data from context
-     *
-     * @since  2.0
-     * @return array
+     * @inheritDoc
+     */
+    public function in_context()
+    {
+        return is_pod_page();
+    }
+
+    /**
+     * @inheritDoc
      */
     public function get_context_data()
     {
-        $data = array(
+        $data = [
             $this->id
-        );
-        if (function_exists('pod_page_exists')) {
-            $pod_page = pod_page_exists();
-            $data[] = $pod_page['id'];
-        }
+        ];
+        $pod_page = pod_page_exists();
+        $data[] = $pod_page['id'];
         return $data;
     }
 
     /**
-     * Get Pod Pages
-     *
-     * @since  2.0
-     * @param  array $args
-     * @return array
+     * @inheritDoc
      */
-    protected function _get_content($args = array())
+    protected function parse_query_args($args)
     {
-        $args = wp_parse_args($args, array(
-            'include' => false,
-            'where'   => '',
-            'limit'   => -1,
-            'search'  => ''
-        ));
-        $args['ids'] = $args['include'];
-        unset($args['include']);
+        return [
+            'ids'    => $args['include'] ? $args['include'] : false,
+            'where'  => '',
+            'limit'  => $args['limit'],
+            'search' => $args['search']
+        ];
+    }
 
-        $pods = array();
-        if (function_exists('pods_api')) {
-            $results = pods_api()->load_pages($args);
-            foreach ($results as $result) {
-                $pods[$result['id']] = $result['name'];
-            }
+    /**
+     * @inheritDoc
+     */
+    protected function _get_content($args = [])
+    {
+        $pods = [];
+        $results = pods_api()->load_pages($this->parse_query_args($args));
+        foreach ($results as $result) {
+            $pods[$result['id']] = $result['name'];
         }
         if ($args['search']) {
             $this->search_string = $args['search'];
-            $pods = array_filter($pods, array($this,'_filter_search'));
+            $pods = array_filter($pods, [$this,'_filter_search']);
         }
 
         return $pods;

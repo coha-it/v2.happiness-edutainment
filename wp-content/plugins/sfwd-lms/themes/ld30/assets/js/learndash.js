@@ -1,54 +1,51 @@
-jQuery(document).ready(function($) {
-
+jQuery( function( $ ) {
 	var hash = window.location.hash;
 
+	learndashFocusModeSidebarAutoScroll();
+
 	initLoginModal();
-	if (hash == '#login') {
+	if ( '#login' == hash ) {
 		openLoginModal();
 	}
 
-	if( typeof ldGetUrlVars()['login'] !== 'undefined' ) {
+	if ( 'undefined' !== typeof ldGetUrlVars().login ) {
+		var loginStatus = ldGetUrlVars().login;
 
-		var loginStatus = ldGetUrlVars()['login'];
-
-		if( loginStatus == 'failed' ) {
+		if ( 'failed' == loginStatus ) {
 			openLoginModal();
 		}
 	}
 
-	if( typeof ldGetUrlVars()['ld-topic-page'] !== 'undefined' ) {
-
+	if ( 'undefined' !== typeof ldGetUrlVars()['ld-topic-page'] ) {
 		var topicPage = ldGetUrlVars()['ld-topic-page'];
-		var topicIds  = topicPage.split('-');
-		var topicId   = Object.values(topicIds)[0];
+		var topicIds = topicPage.split( '-' );
+		var topicId = Object.values( topicIds )[0];
 
-		var lesson = $('#ld-expand-' + topicId);
-		var button = $(lesson).find('.ld-expand-button');
+		var lesson = $( '#ld-expand-' + topicId );
+		var button = $( lesson ).find( '.ld-expand-button' );
 
 		ld_expand_element( button );
 
-		$('html, body').animate({
-		    scrollTop: ( $(lesson).offset().top )
+		$( 'html, body' ).animate( {
+			scrollTop: ( $( lesson ).offset().top ),
 		}, 500 );
-
 	}
 
-	$('body').on('click', 'a[href="#login"]', function(e) {
+	$( 'body' ).on( 'click', 'a[href="#login"]', function( e ) {
 		e.preventDefault();
 		openLoginModal();
-	});
+	} );
 
-
-	$('body').on('click', '.ld-modal-closer', function(e) {
+	$( 'body' ).on( 'click', '.ld-modal-closer', function( e ) {
 		e.preventDefault();
 		closeLoginModal();
-	});
+	} );
 
-	$('body').on('click', '#ld-comments-post-button', function(e) {
-		$(this).addClass('ld-open');
-		$('#ld-comments-form').removeClass('ld-collapsed');
-		$('textarea#comment').focus();
-	});
+	$( 'body' ).on( 'click', '#ld-comments-post-button', function( e ) {
+		$( this ).addClass( 'ld-open' );
+		$( '#ld-comments-form' ).removeClass( 'ld-collapsed' );
+		$( 'textarea#comment' ).focus();
+	} );
 
 	// Close modal if clicking away
 	/*
@@ -60,733 +57,863 @@ jQuery(document).ready(function($) {
 		}
 	});
 	*/
-	
-	// Close modal on Esc key
-	$(document).keyup(function(e) {
-	     if (e.keyCode === 27) {
-	     	closeLoginModal();
-	    }
-	});
 
-	$( '.learndash-wrapper' ).on( 'click', 'a.user_statistic', show_user_statistic );
+	// Close modal on Esc key
+	$( document ).on( 'keyup', function( e ) {
+		if ( 27 === e.keyCode ) {
+			closeLoginModal();
+		}
+	} );
+
+	$( '.learndash-wrapper' ).on( 'click', 'a.user_statistic', learndash_ld30_show_user_statistic );
 
 	focusMobileCheck();
 
-	$('body').on('click', '.ld-focus-sidebar-trigger', function(e) {
-		if ($('.ld-focus').hasClass('ld-focus-sidebar-collapsed')) {
+	$( 'body' ).on( 'click', '.ld-focus-sidebar-trigger', function( e ) {
+		if ( $( '.ld-focus' ).hasClass( 'ld-focus-sidebar-collapsed' ) ) {
 			openFocusSidebar();
 		} else {
 			closeFocusSidebar();
 		}
-	});
+	} );
 
-	$('body').on('click', '.ld-mobile-nav a', function(e) {
+	$( 'body' ).on( 'click', '.ld-mobile-nav a', function( e ) {
 		e.preventDefault();
-		if ($('.ld-focus').hasClass('ld-focus-sidebar-collapsed')) {
+		if ( $( '.ld-focus' ).hasClass( 'ld-focus-sidebar-collapsed' ) ) {
 			openFocusSidebar();
 		} else {
 			closeFocusSidebar();
 		}
+	} );
 
-	});
-
-	$('.ld-js-register-account').click(function(e) {
-
+	$( '.ld-js-register-account' ).on( 'click', function( e ) {
 		e.preventDefault();
-		
-		$('.ld-login-modal-register .ld-modal-text').slideUp('slow');
-		$('.ld-login-modal-register .ld-alert').slideUp('slow');
-		$(this).slideUp('slow', function() {
-			
-			$('#ld-user-register').slideDown('slow');
-		});
 
-	});
+		$( '.ld-login-modal-register .ld-modal-text' ).slideUp( 'slow' );
+		$( '.ld-login-modal-register .ld-alert' ).slideUp( 'slow' );
+		$( this ).slideUp( 'slow', function() {
+			$( '#ld-user-register' ).slideDown( 'slow' );
+		} );
+	} );
 
-	var windowWidth = $(window).width();
+	var windowWidth = $( window ).width();
 
-	$(window).on('orientationchange', function() {
-		windowWidth = $(window).width();
-	});
+	$( window ).on( 'orientationchange', function() {
+		windowWidth = $( window ).width();
+	} );
 
-	$(window).on('resize', function() {
-		if ($(this).width() !== windowWidth) {
-			setTimeout(function() {
-				focusMobileCheck();
-			}, 50);
+	$( window ).on( 'resize', function() {
+		if ( $( this ).width() !== windowWidth && 1024 >= $( this ).width() ) {
+			setTimeout( function() {
+				focusMobileResizeCheck();
+			}, 50 );
 		}
-	});
+	} );
 
-	if( $('.ld-course-status-content').length ) {
+	if ( $( '.ld-course-status-content' ).length ) {
 		var tallest = 0;
 
-		$('.ld-course-status-content').each(function() {
-			if($(this).height() > tallest){
-			   tallest = $(this).height();
-		   }
-		});
+		$( '.ld-course-status-content' ).each( function() {
+			if ( $( this ).height() > tallest ) {
+				tallest = $( this ).height();
+			}
+		} );
 
-		$('.ld-course-status-content').height(tallest);
-
+		$( '.ld-course-status-content' ).height( tallest );
 	}
 
 	function focusMobileCheck() {
-		if ($(window).width() < 768) {
+		if ( 1024 > $( window ).width() ) {
+			closeFocusSidebarPageLoad();
+		}
+	}
+
+	function focusMobileResizeCheck() {
+		if ( 1024 > $( window ).width() && ! $( '.ld-focus' ).hasClass( 'ld-focus-sidebar-collapsed' ) ) {
 			closeFocusSidebar();
-		} else {
+		} else if ( 1024 <= $( window ).width() && $( '.ld-focus' ).hasClass( 'ld-focus-sidebar-filtered' ) ) {
+			closeFocusSidebar();
+		} else if ( 1024 <= $( window ).width() &&
+			! $( '.ld-focus' ).hasClass( 'ld-focus-sidebar-filtered' ) &&
+			$( '.ld-focus' ).hasClass( 'ld-focus-sidebar-collapsed' ) ) {
 			openFocusSidebar();
 		}
 	}
 
+	function focusMobileHandleOrientationChange( e ) {
+		if ( e.matches ) {
+			if ( 1024 <= $( window ).width() &&
+			! $( '.ld-focus' ).hasClass( 'ld-focus-sidebar-filtered' ) &&
+			$( '.ld-focus' ).hasClass( 'ld-focus-sidebar-collapsed' ) ) {
+				openFocusSidebar();
+			}
+		}
+	}
+	window.matchMedia( '(orientation: landscape)' ).addListener( focusMobileHandleOrientationChange );
+
+	function closeFocusSidebarPageLoad() {
+		$( '.ld-focus' ).addClass( 'ld-focus-sidebar-collapsed' );
+		$( '.ld-mobile-nav' ).removeClass( 'expanded' );
+		positionTooltips();
+	}
+
 	function closeFocusSidebar() {
-		$('.ld-focus').addClass('ld-focus-sidebar-collapsed');
-		$('.ld-mobile-nav').removeClass('expanded');
+		$( '.ld-focus' ).addClass( 'ld-focus-sidebar-collapsed' );
+		$( '.ld-mobile-nav' ).removeClass( 'expanded' );
+
+		if ( $( '.ld-focus-sidebar-trigger .ld-icon' ).hasClass( 'ld-icon-arrow-left' ) ) {
+			$( '.ld-focus-sidebar-trigger .ld-icon' ).removeClass( 'ld-icon-arrow-left' );
+			$( '.ld-focus-sidebar-trigger .ld-icon' ).addClass( 'ld-icon-arrow-right' );
+		} else if ( $( '.ld-focus-sidebar-trigger .ld-icon' ).hasClass( 'ld-icon-arrow-right' ) ) {
+			$( '.ld-focus-sidebar-trigger .ld-icon' ).removeClass( 'ld-icon-arrow-right' );
+			$( '.ld-focus-sidebar-trigger .ld-icon' ).addClass( 'ld-icon-arrow-left' );
+		}
+
 		positionTooltips();
 	}
 
 	function openFocusSidebar() {
-		$('.ld-focus').removeClass('ld-focus-sidebar-collapsed');
-		$('.ld-mobile-nav').addClass('expanded');
+		$( '.ld-focus' ).removeClass( 'ld-focus-sidebar-collapsed' );
+		$( '.ld-mobile-nav' ).addClass( 'expanded' );
+
+		if ( $( '.ld-focus-sidebar-trigger .ld-icon' ).hasClass( 'ld-icon-arrow-left' ) ) {
+			$( '.ld-focus-sidebar-trigger .ld-icon' ).removeClass( 'ld-icon-arrow-left' );
+			$( '.ld-focus-sidebar-trigger .ld-icon' ).addClass( 'ld-icon-arrow-right' );
+		} else if ( $( '.ld-focus-sidebar-trigger .ld-icon' ).hasClass( 'ld-icon-arrow-right' ) ) {
+			$( '.ld-focus-sidebar-trigger .ld-icon' ).removeClass( 'ld-icon-arrow-right' );
+			$( '.ld-focus-sidebar-trigger .ld-icon' ).addClass( 'ld-icon-arrow-left' );
+		}
+
 		positionTooltips();
 	}
 
-
-	$('.ld-file-input' ).each( function() {
+	$( '.ld-file-input' ).each( function() {
 		var $input	 = $( this ),
 			$label	 = $input.next( 'label' ),
 			labelVal = $label.html();
 
 		$input.on( 'change', function( e ) {
-
 			var fileName = '';
-			if( this.files && this.files.length > 1 )
+			if ( this.files && 1 < this.files.length ) {
 				fileName = ( this.getAttribute( 'data-multiple-caption' ) || '' ).replace( '{count}', this.files.length );
-			else if( e.target.value )
+			} else if ( e.target.value ) {
 				fileName = e.target.value.split( '\\' ).pop();
-			if( fileName ) {
+			}
+			if ( fileName ) {
 				$label.find( 'span' ).html( fileName );
-				$label.addClass('ld-file-selected');
-				$('#uploadfile_btn').attr( 'disabled', false );
+				$label.addClass( 'ld-file-selected' );
+				$( '#uploadfile_btn' ).attr( 'disabled', false );
 			} else {
 				$label.html( labelVal );
-				$label.removeClass('ld-file-selected');
-				$('#uploadfile_btn').attr( 'disabled', true );
+				$label.removeClass( 'ld-file-selected' );
+				$( '#uploadfile_btn' ).attr( 'disabled', true );
 			}
-		});
+		} );
+
+		$( '#uploadfile_form' ).on( 'submit', function() {
+			$label.removeClass( 'ld-file-selected' );
+			$( '#uploadfile_btn' ).attr( 'disabled', true );
+		} );
 
 		// Firefox bug fix
 		$input
-		.on( 'focus', function(){ $input.addClass( 'has-focus' ); })
-		.on( 'blur', function(){ $input.removeClass( 'has-focus' ); });
-	});
+			.on( 'focus', function() {
+				$input.addClass( 'has-focus' );
+			} )
+			.on( 'blur', function() {
+				$input.removeClass( 'has-focus' );
+			} );
+	} );
 
-
-	$('body').on('click', '.ld-expand-button', function(e) {
-
+	$( 'body' ).on( 'click', '.ld-expand-button', function( e ) {
 		e.preventDefault();
 
-		ld_expand_element( $(this) );
+		ld_expand_element( $( this ) );
 
 		positionTooltips();
+	} );
 
-	});
-
-	$('body').on('click', '.ld-search-prompt', function(e) {
-
+	$( 'body' ).on( 'click', '.ld-search-prompt', function( e ) {
 		e.preventDefault();
 
-		$('#course_name_field').focus();
+		$( '#course_name_field' ).focus();
 
-		ld_expand_element( $(this) );
+		ld_expand_element( $( this ) );
+	} );
 
-	});
+	function ld_expand_button_state( state, elm ) {
+		var $expandText = ( $( elm )[0].hasAttribute( 'data-ld-expand-text' ) ) ? $( elm ).attr( 'data-ld-expand-text' ) : 'Expand';
+		var $collapseText = ( $( elm )[0].hasAttribute( 'data-ld-collapse-text' ) ) ? $( elm ).attr( 'data-ld-collapse-text' ) : 'Collapse';
 
-	function ld_expand_button_state(state, elm) {
-		var $expandText = ($(elm)[0].hasAttribute('data-ld-expand-text')) ? $(elm).attr('data-ld-expand-text') : 'Expand';
-		var $collapseText = ($(elm)[0].hasAttribute('data-ld-collapse-text')) ? $(elm).attr('data-ld-collapse-text') : 'Collapse';
-
-		if (state == 'collapse') {
-			$(elm).removeClass('ld-expanded');
-			if ($collapseText !== 'false') {
-				$(elm).find('.ld-text').text($expandText);
+		if ( 'collapse' == state ) {
+			$( elm ).removeClass( 'ld-expanded' );
+			if ( 'false' !== $collapseText ) {
+				$( elm ).find( '.ld-text' ).text( $expandText );
 			}
 		} else {
-			$(elm).addClass('ld-expanded');
-			if ($collapseText !== 'false') {
-				$(elm).find('.ld-text').text($collapseText);
+			$( elm ).addClass( 'ld-expanded' );
+			if ( 'false' !== $collapseText ) {
+				$( elm ).find( '.ld-text' ).text( $collapseText );
 			}
 		}
 	}
 
 	function ld_expand_element( elm, collapse ) {
-
-	   if(collapse === undefined) {
-	      collapse = false;
-	   }
+		if ( collapse === undefined ) {
+			collapse = false;
+		}
 
 		// Get the button's state
-		var $expanded = $(elm).hasClass('ld-expanded');
-
+		var $expanded = $( elm ).hasClass( 'ld-expanded' );
 
 		// Get the element to expand
-		if ($(elm)[0].hasAttribute('data-ld-expands')) {
+		if ( $( elm )[0] && $( elm )[0].hasAttribute( 'data-ld-expands' ) ) {
+			var $expands 		= $( elm ).attr( 'data-ld-expands' );
+			var $expandElm 		= $( '#' + $expands );
+			var $expandsChild 	= $( '#' + $expands ).find( '.ld-item-list-item-expanded' );
 
-			var $expands 		= $(elm).attr('data-ld-expands');
-			var $expandElm 		= $('#' + $expands);
-			var $expandsChild 	= $('#' + $expands).find('.ld-item-list-item-expanded');
-
-			if ($expandsChild.length) {
+			if ( $expandsChild.length ) {
 				$expandElm = $expandsChild;
 			}
 
 			var totalHeight = 0;
 
-			$expandElm.find('> *').each(function() {
-				totalHeight += $(this).outerHeight();
-			});
+			$expandElm.find( '> *' ).each( function() {
+				totalHeight += $( this ).outerHeight();
+			} );
 
-			$expandElm.attr('data-height', '' + (totalHeight + 50) + '');
+			$expandElm.attr( 'data-height', '' + ( totalHeight + 50 ) + '' );
 
 			// If the element expands a list
 
-			if ($('#' + $expands)[0].hasAttribute('data-ld-expand-list')) {
-
-				var $container = $('#' + $expands);
-				var innerButtons = $container.find('.ld-expand-button');
-				if ($expanded) {
-					ld_expand_button_state('collapse', elm);
-					innerButtons.each(function() {
-						ld_expand_element($(this), true);
-					});
+			if ( $( '#' + $expands )[0].hasAttribute( 'data-ld-expand-list' ) ) {
+				var $container = $( '#' + $expands );
+				var innerButtons = $container.find( '.ld-expand-button' );
+				if ( $expanded ) {
+					ld_expand_button_state( 'collapse', elm );
+					innerButtons.each( function() {
+						ld_expand_element( $( this ), true );
+					} );
 				} else {
-					ld_expand_button_state('expand', elm);
-					innerButtons.each(function() {
-						ld_expand_element($(this));
-					});
-
+					ld_expand_button_state( 'expand', elm );
+					innerButtons.each( function() {
+						ld_expand_element( $( this ) );
+					} );
 				}
 
-			// If the element expands an item
-
-			} else if ($('#' + $expands).length) {
-
-				if ($expanded || collapse == true) {
-					ld_expand_singular_item(elm, $('#' + $expands), $expandElm);
+				// If the element expands an item
+			} else if ( $( '#' + $expands ).length ) {
+				if ( $expanded || true == collapse ) {
+					ld_expand_singular_item( elm, $( '#' + $expands ), $expandElm );
 				} else {
-					ld_collapse_singular_item(elm, $('#' + $expands), $expandElm);
+					ld_collapse_singular_item( elm, $( '#' + $expands ), $expandElm );
 				}
-
 			} else {
-				console.log('LearnDash: No expandable content was found');
+				console.log( 'LearnDash: No expandable content was found' );
 			}
 			positionTooltips();
 		}
-
 	}
 
-	function ld_expand_singular_item(elm, $containerElm, $expandElm) {
+	function ld_expand_singular_item( elm, $containerElm, $expandElm ) {
+		$containerElm.removeClass( 'ld-expanded' );
+		ld_expand_button_state( 'collapse', elm );
 
-		$containerElm.removeClass('ld-expanded');
-		ld_expand_button_state('collapse', elm);
-
-		$expandElm.css({
-			'max-height': 0
-		});
+		$expandElm.css( {
+			'max-height': 0,
+		} );
 	}
 
-	function ld_collapse_singular_item(elm, $containerElm, $expandElm) {
+	function ld_collapse_singular_item( elm, $containerElm, $expandElm ) {
+		$containerElm.addClass( 'ld-expanded' );
 
-			$containerElm.addClass('ld-expanded');
+		ld_expand_button_state( 'expand', elm );
 
-			ld_expand_button_state('expand', elm);
-
-			$expandElm.css({
-				'max-height': $expandElm.data('height')
-			});
+		$expandElm.css( {
+			'max-height': $expandElm.data( 'height' ),
+		} );
 	}
 
-	$('body').on('click', '.ld-closer', function(e) {
-		ld_expand_element( $('.ld-search-prompt'), true );
-	});
+	$( 'body' ).on( 'click', '.ld-closer', function( e ) {
+		ld_expand_element( $( '.ld-search-prompt' ), true );
+	} );
 
-	$('body').on('click', '.ld-tabs-navigation .ld-tab', function() {
-		var $tab = $('#' + $(this).attr('data-ld-tab'));
-		if ($tab.length) {
-			$('.ld-tabs-navigation .ld-tab.ld-active').removeClass('ld-active');
-			$(this).addClass('ld-active');
-			$('.ld-tabs-content .ld-tab-content.ld-visible').removeClass('ld-visible');
-			$tab.addClass('ld-visible');
+	$( 'body' ).on( 'click', '.ld-tabs-navigation .ld-tab', function() {
+		var $tab = $( '#' + $( this ).attr( 'data-ld-tab' ) );
+		if ( $tab.length ) {
+			$( '.ld-tabs-navigation .ld-tab.ld-active' ).removeClass( 'ld-active' );
+			$( this ).addClass( 'ld-active' );
+			$( '.ld-tabs-content .ld-tab-content.ld-visible' ).removeClass( 'ld-visible' );
+			$tab.addClass( 'ld-visible' );
 		}
 		positionTooltips();
-	});
+	} );
 
-	var $tooltips = $('*[data-ld-tooltip]');
+	var $tooltips = $( '*[data-ld-tooltip]' );
 
 	initTooltips();
 
 	function initTooltips() {
-
 		// Clear out old tooltips
 
-
-		if( $('#learndash-tooltips').length ) {
-			$('#learndash-tooltips').remove();
-			$tooltips = $('*[data-ld-tooltip]');
+		if ( $( '#learndash-tooltips' ).length ) {
+			$( '#learndash-tooltips' ).remove();
+			$tooltips = $( '*[data-ld-tooltip]' );
 		}
 
-		if ($tooltips.length) {
-			$('body').prepend('<div id="learndash-tooltips"></div>');
-			var $ctr =1;
-			$tooltips.each(function() {
-				var anchor = $(this);
-				if (anchor.hasClass('ld-item-list-item')) {
-					anchor = anchor.find('.ld-item-title');
+		if ( $tooltips.length ) {
+			$( 'body' ).prepend( '<div id="learndash-tooltips"></div>' );
+			var $ctr = 1;
+			$tooltips.each( function() {
+				var anchor = $( this );
+				if ( anchor.hasClass( 'ld-item-list-item' ) ) {
+					anchor = anchor.find( '.ld-item-title' );
 				}
 				var elementOffsets = {
 					top: anchor.offset().top,
-					left: anchor.offset().left + (anchor.outerWidth() / 2)
+					left: anchor.offset().left + ( anchor.outerWidth() / 2 ),
 				};
-				var $content = $(this).attr('data-ld-tooltip');
-				var $rel_id = Math.floor((Math.random() * 99999));
+				var $content = $( this ).attr( 'data-ld-tooltip' );
+				var $rel_id = Math.floor( ( Math.random() * 99999 ) );
+
 				//var $tooltip = '<span id="ld-tooltip-' + $rel_id + '" class="ld-tooltip" style="top:' + elementOffsets.top + 'px; left:' + elementOffsets.left + 'px;">' + $content + '</span>';
 				var $tooltip = '<span id="ld-tooltip-' + $rel_id + '" class="ld-tooltip">' + $content + '</span>';
-				$(this).attr('data-ld-tooltip-id', $rel_id);
-				$('#learndash-tooltips').append($tooltip);
+				$( this ).attr( 'data-ld-tooltip-id', $rel_id );
+				$( '#learndash-tooltips' ).append( $tooltip );
 				$ctr++;
-				var $tooltip = $('#ld-tooltip-' + $rel_id);
-				$(this).hover(
-					function() {
-						$tooltip.addClass('ld-visible');
-					},
-					function() {
-						$tooltip.removeClass('ld-visible');
-					}
-				);
-			});
+				var $tooltip = $( '#ld-tooltip-' + $rel_id );
+				$( this ).on( 'mouseenter', function() {
+					$tooltip.addClass( 'ld-visible' );
+				} ).on( 'mouseleave', function() {
+					$tooltip.removeClass( 'ld-visible' );
+				} );
+			} );
 
-			$(window).on('resize', function() {
+			$( window ).on( 'resize', function() {
 				// Reposition tooltips after resizing
 				positionTooltips();
-			});
+			} );
 
-			$(window).add('.ld-focus-sidebar-wrapper').on('scroll', function() {
+			$( window ).add( '.ld-focus-sidebar-wrapper' ).on( 'scroll', function() {
 				// Hide tooltips so they don't persist while scrolling
-				$('.ld-visible.ld-tooltip').removeClass('ld-visible');
+				$( '.ld-visible.ld-tooltip' ).removeClass( 'ld-visible' );
+
 				// Reposition tooltips after scrolling
 				positionTooltips();
-			});
+			} );
 
 			positionTooltips();
 		}
 	}
 
 	function initLoginModal() {
-		var modal_wrapper = $('.learndash-wrapper-login-modal');
-		if ((typeof modal_wrapper !== 'undefined') && (modal_wrapper.length)) {
+		var modal_wrapper = $( '.learndash-wrapper-login-modal' );
+		if ( ( 'undefined' !== typeof modal_wrapper ) && ( modal_wrapper.length ) ) {
 			// Move the model to be first element of the body. See LEARNDASH-3503
-			$(modal_wrapper).prependTo('body');
+			$( modal_wrapper ).prependTo( 'body' );
 		}
 	}
 
 	function openLoginModal() {
-		var modal_wrapper = $('.learndash-wrapper-login-modal');
-		if ((typeof modal_wrapper !== 'undefined') && ( modal_wrapper.length ) ) {
-			$(modal_wrapper).addClass('ld-modal-open');
-			$(modal_wrapper).removeClass('ld-modal-closed');
+		var modal_wrapper = $( '.learndash-wrapper-login-modal' );
+		if ( ( 'undefined' !== typeof modal_wrapper ) && ( modal_wrapper.length ) ) {
+			$( modal_wrapper ).addClass( 'ld-modal-open' );
+			$( modal_wrapper ).removeClass( 'ld-modal-closed' );
 
 			// Removed LEARNDASH-3867 #4
-			$('html, body').animate({
-				scrollTop: $('.ld-modal', modal_wrapper).offset().top
-			}, 50);
+			$( 'html, body' ).animate( {
+				scrollTop: $( '.ld-modal', modal_wrapper ).offset().top,
+			}, 50 );
 		}
 	}
 
 	function closeLoginModal() {
-		var modal_wrapper = $('.learndash-wrapper-login-modal');
-		if ((typeof modal_wrapper !== 'undefined') && (modal_wrapper.length)) {
-			$(modal_wrapper).removeClass('ld-modal-open');
-			$(modal_wrapper).addClass('ld-modal-closed');
+		var modal_wrapper = $( '.learndash-wrapper-login-modal' );
+		if ( ( 'undefined' !== typeof modal_wrapper ) && ( modal_wrapper.length ) ) {
+			$( modal_wrapper ).removeClass( 'ld-modal-open' );
+			$( modal_wrapper ).addClass( 'ld-modal-closed' );
 		}
 	}
 
 	function positionTooltips() {
+		if ( 'undefined' !== typeof $tooltips ) {
+			setTimeout( function() {
+				$tooltips.each( function() {
+					var anchor = $( this );
+					var $rel_id = anchor.attr( 'data-ld-tooltip-id' );
+					$tooltip = $( '#ld-tooltip-' + $rel_id );
 
-		if ( typeof $tooltips !== 'undefined' ) {
-			setTimeout(function() {
-				
-				$tooltips.each(function() {
-					var anchor = $(this);
-					var $rel_id = anchor.attr('data-ld-tooltip-id');
-					$tooltip = $('#ld-tooltip-' + $rel_id);
-
-					if (anchor.hasClass('ld-item-list-item')) {
+					if ( anchor.hasClass( 'ld-item-list-item' ) ) {
 						//anchor = anchor.find('.ld-item-title');
-						anchor = anchor.find('.ld-status-icon');
+						anchor = anchor.find( '.ld-status-icon' );
 					}
-					console.log('anchor[%o]', anchor);
-					var parent_focus = jQuery(anchor).parents('.ld-focus-sidebar');
-					console.log('parent_focus[%o]', parent_focus);
-					var left_post = anchor.offset().left + (anchor.outerWidth() + 10);
-					if (parent_focus.length) {
-						left_post = anchor.offset().left + (anchor.outerWidth() -18);
-					} 
 
-					$tooltip.css({
-						'top' : anchor.offset().top + -3,
+					var parent_focus = jQuery( anchor ).parents( '.ld-focus-sidebar' );
+					var left_post = anchor.offset().left + ( anchor.outerWidth() + 10 );
+					if ( parent_focus.length ) {
+						left_post = anchor.offset().left + ( anchor.outerWidth() - 18 );
+					}
+
+					// Get the main content height
+					var focusModeMainContentHeight = $( '.ld-focus-main' ).height();
+
+					// Current tooltip height
+					var focusModeCurrentTooltipHeight = anchor.offset().top + -3;
+
+					// Position tooltip depending on focus mode or not
+					if ( ! focusModeMainContentHeight ) {
+						var anchorTop = anchor.offset().top + -3;
+						var anchorLeft = anchor.offset().left;
+					} else {
+						anchorTop = focusModeCurrentTooltipHeight < focusModeMainContentHeight ? focusModeCurrentTooltipHeight : focusModeMainContentHeight;
+						anchorLeft = left_post;
+					}
+
+					$tooltip.css( {
+						top: anchorTop,
+
 						//'left' : anchor.offset().left + (anchor.outerWidth() / 2),
-						'left': left_post, //anchor.offset().left + (anchor.outerWidth() +10),
-						'margin-left' : 0,
-						'margin-right' : 0
-					}).removeClass('ld-shifted-left ld-shifted-right');
-					if ($tooltip.offset().left <= 0) {
-						$tooltip.css({ 'margin-left' : Math.abs($tooltip.offset().left) }).addClass('ld-shifted-left');
+						//'left': left_post, //anchor.offset().left + (anchor.outerWidth() +10),
+						left: anchorLeft, //anchor.offset().left + (anchor.outerWidth() +10),
+						'margin-left': 0,
+						'margin-right': 0,
+					} ).removeClass( 'ld-shifted-left ld-shifted-right' );
+					if ( $tooltip.offset().left <= 0 ) {
+						$tooltip.css( { 'margin-left': Math.abs( $tooltip.offset().left ) } ).addClass( 'ld-shifted-left' );
 					}
-					var $tooltipRight = $(window).width() - ($tooltip.offset().left + $tooltip.outerWidth());
-					if ($tooltipRight <= 0) {
-						$tooltip.css({ 'margin-right' : Math.abs($tooltipRight) }).addClass('ld-shifted-right');
+					var $tooltipRight = $( window ).width() - ( $tooltip.offset().left + $tooltip.outerWidth() );
+					if ( 0 >= $tooltipRight ) {
+						$tooltip.css( { 'margin-right': Math.abs( $tooltipRight ) } ).addClass( 'ld-shifted-right' );
 					}
-
-				});
-			}, 500);
+				} );
+			}, 500 );
 		}
 	}
 
+	$( 'body' ).on( 'click', '#ld-profile .ld-reset-button', function( e ) {
+		e.preventDefault();
 
-	$('body').on( 'click', '#ld-profile .ld-reset-button', function(e) {
+		$( '#ld-profile #course_name_field' ).val('');
 
+		var searchVars = {
+			shortcode_instance: $( '#ld-profile' ).data( 'shortcode_instance' ),
+		};
+
+		searchVars['ld-profile-search'] = $( this ).parents( '.ld-item-search-wrapper' ).find( '#course_name_field' ).val();
+		searchVars['ld-profile-search-nonce'] = $( this ).parents( '.ld-item-search-wrapper' ).find( 'form.ld-item-search-fields' ).data( 'nonce' );
+
+		$( '#ld-profile #ld-main-course-list' ).addClass( 'ld-loading' );
+
+		$.ajax( {
+			type: 'GET',
+			url: ldVars.ajaxurl + '?action=ld30_ajax_profile_search',
+			data: searchVars,
+			success: function( response ) {
+				if ( 'undefined' !== typeof response.data.markup ) {
+					$( '#ld-profile' ).html( response.data.markup );
+					ld_expand_element( '#ld-profile .ld-search-prompt', false );
+				}
+			},
+		} );
+	} );
+
+	$( 'body' ).on( 'submit', '.ld-item-search-fields', function( e ) {
 		e.preventDefault();
 
 		var searchVars = {
-			shortcode_instance : $('#ld-profile').data('shortcode_instance')
+			shortcode_instance: $( '#ld-profile' ).data( 'shortcode_instance' ),
 		};
 
-		$('#ld-profile #ld-main-course-list').addClass('ld-loading');
+		searchVars['ld-profile-search'] = $( this ).parents( '.ld-item-search-wrapper' ).find( '#course_name_field' ).val();
+		searchVars['ld-profile-search-nonce'] = $( this ).parents( '.ld-item-search-wrapper' ).find( 'form.ld-item-search-fields' ).data( 'nonce' );
 
-		$.ajax({
+		$( '#ld-profile #ld-main-course-list' ).addClass( 'ld-loading' );
+
+		$.ajax( {
 			type: 'GET',
-			url: ajaxurl + '?action=ld30_ajax_profile_search',
+			url: ldVars.ajaxurl + '?action=ld30_ajax_profile_search',
 			data: searchVars,
 			success: function( response ) {
-
-				if( typeof response.data.markup !== 'undefined' ) {
-					$('#ld-profile').html( response.data.markup );
+				if ( 'undefined' !== typeof response.data.markup ) {
+					$( '#ld-profile' ).html( response.data.markup );
+					ld_expand_element( '#ld-profile .ld-search-prompt', false );
 				}
+			},
+		} );
+	} );
 
-			}
-		});
-
-	});
-
-	$('body').on( 'submit', '.ld-item-search-fields', function(e) {
-
-		e.preventDefault();
-
-		var searchVars = {
-			shortcode_instance : $('#ld-profile').data('shortcode_instance')
-		};
-
-		searchVars['ld-profile-search'] = $(this).parents('.ld-item-search-wrapper').find('#course_name_field').val();
-
-		$('#ld-profile #ld-main-course-list').addClass('ld-loading');
-
-		$.ajax({
-			type: 'GET',
-			url: ajaxurl + '?action=ld30_ajax_profile_search',
-			data: searchVars,
-			success: function( response ) {
-
-				if( typeof response.data.markup !== 'undefined' ) {
-					$('#ld-profile').html( response.data.markup );
-				}
-
-			}
-		});
-
-	});
-
-	$('body').on( 'click', '.ld-pagination a', function(e) {
-
+	$( 'body' ).on( 'click', '.ld-pagination a', function( e ) {
 		e.preventDefault();
 
 		var linkVars = {};
+		var parentVars = {};
 
-		$(this).attr('href').replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
-	        linkVars[key] = value;
-	    });
+		$( this ).attr( 'href' ).replace( /[?&]+([^=&]+)=([^&]*)/gi, function( m, key, value ) {
+			linkVars[key] = value;
+		} );
 
-		linkVars.pager_results = $(this).parents('.ld-pagination').data('pager-results');
+		linkVars.pager_nonce = $( this ).parents( '.ld-pagination' ).data( 'pager-nonce' );
 
-		linkVars.context   = $(this).data('context');
+		linkVars.pager_results = $( this ).parents( '.ld-pagination' ).data( 'pager-results' );
 
-		if( linkVars.context != 'profile' ) {
+		linkVars.context = $( this ).data( 'context' );
+		console.log( 'linkVars[%o]', linkVars );
 
-			linkVars.lesson_id = $(this).data('lesson_id');
-			linkVars.course_id = $(this).data('course_id');
+		parentVars.currentTarget = e.currentTarget;
 
-			if( $('.ld-course-nav-' + linkVars.course_id ).length ) {
-				linkVars.widget_instance = $('.ld-course-nav-' + linkVars.course_id ).data('widget_instance');
+		if ( 'profile' != linkVars.context ) {
+			linkVars.lesson_id = $( this ).data( 'lesson_id' );
+			linkVars.course_id = $( this ).data( 'course_id' );
+
+			if ( $( '.ld-course-nav-' + linkVars.course_id ).length ) {
+				linkVars.widget_instance = $( '.ld-course-nav-' + linkVars.course_id ).data( 'widget_instance' );
+			}
+		}
+
+		if ( 'course_topics' == linkVars.context ) {
+			$( '#ld-topic-list-' + linkVars.lesson_id ).addClass( 'ld-loading' );
+			$( '#ld-nav-content-list-' + linkVars.lesson_id ).addClass( 'ld-loading' );
+		}
+
+		if ( 'course_content_shortcode' == linkVars.context ) {
+			parentVars.parent_container = $( parentVars.currentTarget ).closest( '.ld-course-content-' + linkVars.course_id );
+			if ( ( 'undefined' !== typeof parentVars.parent_container ) && ( parentVars.parent_container.length ) ) {
+				$( parentVars.parent_container ).addClass( 'ld-loading' );
+				linkVars.shortcode_instance = $( parentVars.parent_container ).data( 'shortcode_instance' );
+			} else {
+				$( '.ld-course-content-' + linkVars.course_id ).addClass( 'ld-loading' );
+				linkVars.shortcode_instance = $( '.ld-course-content-' + linkVars.course_id ).data( 'shortcode_instance' );
+			}
+		} else if ( 'course_lessons' == linkVars.context ) {
+			var parent_container;
+
+			// Check if we are within the Course Navigation Widget.
+			if ( ( 'undefined' === typeof parentVars.parent_container ) || ( ! parentVars.parent_container.length ) ) {
+				parent_container = $( parentVars.currentTarget ).parents( '.ld-lesson-navigation' );
+				if ( ( 'undefined' !== typeof parent_container ) && ( parent_container.length ) ) {
+					parentVars.context_sub = 'course_navigation_widget';
+					parentVars.parent_container = $( parentVars.currentTarget ).parents( '#ld-lesson-list-' + linkVars.course_id );
+				}
 			}
 
+			// Check if we are within the Focus Mode Sidebar.
+			if ( ( 'undefined' === typeof parentVars.parent_container ) || ( ! parentVars.parent_container.length ) ) {
+				parent_container = $( parentVars.currentTarget ).parents( '.ld-focus-sidebar-wrapper' );
+				if ( ( 'undefined' !== typeof parent_container ) && ( parent_container.length ) ) {
+					parentVars.context_sub = 'focus_mode_sidebar';
+					parentVars.parent_container = $( parentVars.currentTarget ).parents( '#ld-lesson-list-' + linkVars.course_id );
+				}
+			}
+
+			if ( ( 'undefined' === typeof parentVars.parent_container ) || ( ! parentVars.parent_container.length ) ) {
+				parentVars.parent_container = $( parentVars.currentTarget ).closest( '#ld-item-list-' + linkVars.course_id, '#ld-lesson-list-' + linkVars.course_id );
+			}
+			if ( ( 'undefined' !== typeof parentVars.parent_container ) && ( parentVars.parent_container.length ) ) {
+				$( parentVars.parent_container ).addClass( 'ld-loading' );
+			} else {
+				// Fallback solution.
+				$( '#ld-item-list-' + linkVars.course_id ).addClass( 'ld-loading' );
+				$( '#ld-lesson-list-' + linkVars.course_id ).addClass( 'ld-loading' );
+			}
 		}
 
-		if( linkVars.context == 'course_topics' ) {
-			$('#ld-topic-list-' + linkVars.lesson_id ).addClass('ld-loading');
-			$('#ld-nav-content-list-' + linkVars.lesson_id ).addClass('ld-loading');
+		if ( 'profile' == linkVars.context ) {
+			$( '#ld-profile #ld-main-course-list' ).addClass( 'ld-loading' );
+			linkVars.shortcode_instance = $( '#ld-profile' ).data( 'shortcode_instance' );
 		}
 
-		if( linkVars.context == 'course_lessons' ) {
-			$('#ld-item-list-' + linkVars.course_id ).addClass('ld-loading');
-			$('#ld-lesson-list-' + linkVars.course_id ).addClass('ld-loading');
+		if ( 'course_info_courses' == linkVars.context ) {
+			$( '.ld-user-status' ).addClass( 'ld-loading' );
+			linkVars.shortcode_instance = $( '.ld-user-status' ).data( 'shortcode-atts' );
 		}
 
-		if( linkVars.context == 'profile' ) {
-			$('#ld-profile #ld-main-course-list').addClass('ld-loading');
-			linkVars.shortcode_instance = $('#ld-profile').data('shortcode_instance');
+		if ( 'group_courses' == linkVars.context ) {
+			linkVars.group_id = $( this ).data( 'group_id' );
+			if ( 'undefined' !== typeof linkVars.group_id ) {
+				parent_container = $( parentVars.currentTarget ).parents( '.ld-group-courses-' + linkVars.group_id );
+				if ( ( 'undefined' !== typeof parent_container ) && ( parent_container.length ) ) {
+					$( parent_container ).addClass( 'ld-loading' );
+					parentVars.parent_container = parent_container;
+				}
+			}
 		}
 
-		if( linkVars.context == 'course_content_shortcode' ) {
-			$('.ld-course-content-' + linkVars.course_id ).addClass('ld-loading');
-			linkVars.shortcode_instance = $('.ld-course-content-' + linkVars.course_id ).data('shortcode_instance');
-		}
-
-		if( linkVars.context == 'course_info_courses' ) {
-			$('.ld-user-status').addClass('ld-loading');
-			linkVars.shortcode_instance = $('.ld-user-status').data('shortcode-atts');
-			console.log(linkVars);
-		}
-
-		$.ajax({
+		$.ajax( {
 			type: 'GET',
-			url: ajaxurl + '?action=ld30_ajax_pager',
+			url: ldVars.ajaxurl + '?action=ld30_ajax_pager',
 			data: linkVars,
 			success: function( response ) {
-
 				// If we have a course listing, update
 
-				if( linkVars.context == 'course_topics' ) {
-
-					if( $('#ld-topic-list-' + linkVars.lesson_id ).length ) {
-
-						if( typeof response.data.topics !== 'undefined' ) {
-							$('#ld-topic-list-' + linkVars.lesson_id ).html( response.data.topics );
+				if ( 'course_topics' == linkVars.context ) {
+					if ( $( '#ld-topic-list-' + linkVars.lesson_id ).length ) {
+						if ( 'undefined' !== typeof response.data.topics ) {
+							$( '#ld-topic-list-' + linkVars.lesson_id ).html( response.data.topics );
 						}
 
-						if( typeof response.data.pager !== 'undefined' ) {
-							$('#ld-expand-'  + linkVars.lesson_id ).find('.ld-table-list-footer').html( response.data.pager );
+						if ( 'undefined' !== typeof response.data.pager ) {
+							$( '#ld-expand-' + linkVars.lesson_id ).find( '.ld-table-list-footer' ).html( response.data.pager );
 						}
 
-						learndashSetMaxHeight( $('.ld-lesson-item-' + linkVars.lesson_id ).find('.ld-item-list-item-expanded') );
+						learndashSetMaxHeight( $( '.ld-lesson-item-' + linkVars.lesson_id ).find( '.ld-item-list-item-expanded' ) );
 
-						$('#ld-topic-list-' + linkVars.lesson_id ).removeClass('ld-loading');
-
+						$( '#ld-topic-list-' + linkVars.lesson_id ).removeClass( 'ld-loading' );
 					}
 
-					if( $('#ld-nav-content-list-' + linkVars.lesson_id ).length ) {
-
-
-						if( typeof response.data.nav_topics !== 'undefined' ) {
-							$('#ld-nav-content-list-' + linkVars.lesson_id ).find('.ld-table-list-items' ).html( response.data.topics );
+					if ( $( '#ld-nav-content-list-' + linkVars.lesson_id ).length ) {
+						if ( 'undefined' !== typeof response.data.nav_topics ) {
+							$( '#ld-nav-content-list-' + linkVars.lesson_id ).find( '.ld-table-list-items' ).html( response.data.topics );
 						}
 
-						if( typeof response.data.pager !== 'undefined' ) {
-							$('#ld-nav-content-list-' + linkVars.lesson_id ).find('.ld-table-list-footer' ).html( response.data.pager );
+						if ( 'undefined' !== typeof response.data.pager ) {
+							$( '#ld-nav-content-list-' + linkVars.lesson_id ).find( '.ld-table-list-footer' ).html( response.data.pager );
 						}
 
-						$('#ld-nav-content-list-' + linkVars.lesson_id ).removeClass('ld-loading');
-
+						$( '#ld-nav-content-list-' + linkVars.lesson_id ).removeClass( 'ld-loading' );
 					}
-
 				}
 
-				if( linkVars.context == 'course_lessons') {
-
-					if( $('#ld-item-list-' + linkVars.course_id ).length ) {
-
-						if( typeof response.data.lessons !== 'undefined' ) {
-							$( '#ld-item-list-' + linkVars.course_id ).html( response.data.lessons ).removeClass('ld-loading');
+				if ( 'course_content_shortcode' == linkVars.context ) {
+					if ( 'undefined' !== typeof response.data.markup ) {
+						if ( ( 'undefined' !== typeof parentVars.parent_container ) && ( parentVars.parent_container.length ) ) {
+							$( parentVars.parent_container ).replaceWith( response.data.markup );
+						} else {
+							$( '#learndash_post_' + linkVars.course_id ).replaceWith( response.data.markup );
+						}
+					}
+				} else if ( 'course_lessons' == linkVars.context ) {
+					if ( ( 'undefined' !== typeof parentVars.parent_container ) && ( parentVars.parent_container.length ) ) {
+						if ( 'course_navigation_widget' == parentVars.context_sub ) {
+							if ( 'undefined' !== typeof response.data.nav_lessons ) {
+								$( parentVars.parent_container ).html( response.data.nav_lessons ).removeClass( 'ld-loading' );
+							}
+						} else if ( 'focus_mode_sidebar' == parentVars.context_sub ) {
+							if ( 'undefined' !== typeof response.data.nav_lessons ) {
+								$( parentVars.parent_container ).html( response.data.nav_lessons ).removeClass( 'ld-loading' );
+							}
+						} else if ( 'undefined' !== typeof response.data.lessons ) {
+							$( parentVars.parent_container ).html( response.data.lessons ).removeClass( 'ld-loading' );
+						}
+					} else {
+						if ( $( '#ld-item-list-' + linkVars.course_id ).length ) {
+							if ( 'undefined' !== typeof response.data.lessons ) {
+								$( '#ld-item-list-' + linkVars.course_id ).html( response.data.lessons ).removeClass( 'ld-loading' );
+							}
 						}
 
-					}
-
-					if( $( '#ld-lesson-list-' + linkVars.course_id ).length ) {
-
-						if( typeof response.data.nav_lessons !== 'undefined' ) {
-							$( '#ld-lesson-list-' + linkVars.course_id ).html( response.data.nav_lessons ).removeClass('ld-loading');
+						if ( $( '#ld-lesson-list-' + linkVars.course_id ).length ) {
+							if ( 'undefined' !== typeof response.data.nav_lessons ) {
+								$( '#ld-lesson-list-' + linkVars.course_id ).html( response.data.nav_lessons ).removeClass( 'ld-loading' );
+							}
 						}
-
 					}
-
 				}
 
-				if( linkVars.context == 'profile' ) {
-
-					if( typeof response.data.markup !== 'undefined' ) {
-						$('#ld-profile').html( response.data.markup );
+				if ( 'group_courses' == linkVars.context ) {
+					if ( ( 'undefined' !== typeof parentVars.parent_container ) && ( parentVars.parent_container.length ) ) {
+						if ( 'undefined' !== typeof response.data.markup ) {
+							$( parentVars.parent_container ).html( response.data.markup ).removeClass( 'ld-loading' );
+						}
 					}
-
 				}
 
-				if( linkVars.context == 'course_content_shortcode' ) {
-
-					if( typeof response.data.markup !== 'undefined' ) {
-						$('#learndash_post_' + linkVars.course_id ).replaceWith( response.data.markup );
+				if ( 'profile' == linkVars.context ) {
+					if ( 'undefined' !== typeof response.data.markup ) {
+						$( '#ld-profile' ).html( response.data.markup );
 					}
-
 				}
 
-				if( linkVars.context == 'course_info_courses' ) {
-
-					if( typeof response.data.markup !== 'undefined' ) {
-						$('.ld-user-status').replaceWith( response.data.markup );
+				if ( 'course_info_courses' == linkVars.context ) {
+					if ( 'undefined' !== typeof response.data.markup ) {
+						$( '.ld-user-status' ).replaceWith( response.data.markup );
 					}
-
 				}
 
-				$('body').trigger( 'ld_has_paginated' );
+				$( 'body' ).trigger( 'ld_has_paginated' );
 
 				initTooltips();
+			},
+		} );
+	} );
 
-			}
-		});
-
-	});
-
-	if( $('#learndash_timer').length ) {
-
+	if ( $( '#learndash_timer' ).length ) {
 		var timer_el 		= jQuery( '#learndash_timer' );
-		var timer_seconds 	= timer_el.attr('data-timer-seconds');
-		var timer_button_el = jQuery( timer_el.attr('data-button') );
+		var timer_seconds 	= timer_el.attr( 'data-timer-seconds' );
+		var timer_button_el = jQuery( timer_el.attr( 'data-button' ) );
 
-		var cookie_key = timer_el.attr('data-cookie-key');
+		var cookie_key = timer_el.attr( 'data-cookie-key' );
 
-		if (typeof cookie_key !== 'undefined') {
-			var cookie_name = 'learndash_timer_cookie_'+cookie_key;
+		if ( 'undefined' !== typeof cookie_key ) {
+			var cookie_name = 'learndash_timer_cookie_' + cookie_key;
 		} else {
 			var cookie_name = 'learndash_timer_cookie';
 		}
 
-		cookie_timer_seconds = jQuery.cookie(cookie_name);
+		cookie_timer_seconds = jQuery.cookie( cookie_name );
 
-		if (typeof cookie_timer_seconds !== 'undefined') {
+		if ( 'undefined' !== typeof cookie_timer_seconds ) {
 			timer_seconds = parseInt( cookie_timer_seconds );
 		}
 
-		if ( timer_seconds == 0 ) {
-			$(timer_el).hide();
+		if ( 0 == timer_seconds ) {
+			$( timer_el ).hide();
 		}
 
-		$(timer_button_el).on( 'learndash-time-finished', function() {
-			$(timer_el).hide();
-		});
-
+		$( timer_button_el ).on( 'learndash-time-finished', function() {
+			$( timer_el ).hide();
+		} );
 	}
 
-	$(document).on( 'learndash_video_disable_assets', function( event, status ) {
-
-        if ( typeof learndash_video_data == 'undefined' ) {
-            return false;
-        }
-
-		if (learndash_video_data.videos_shown == 'BEFORE' ) {
-
-			if ( status == true ) {
-				$('.ld-lesson-topic-list').hide();
-				$('.ld-lesson-navigation').find( '#ld-nav-content-list-' + ldVars.postID ).addClass('user_has_no_access');
-				$('.ld-quiz-list').hide();
-			} else {
-				$('.ld-lesson-topic-list').slideDown();
-				$('.ld-quiz-list').slideDown();
-				$('.ld-lesson-navigation').find( '#ld-nav-content-list-' + ldVars.postID ).removeClass('user_has_no_access');
-			}
+	$( document ).on( 'learndash_video_disable_assets', function( event, status ) {
+		if ( 'undefined' === typeof learndash_video_data ) {
+			return false;
 		}
 
-	});
+		if ( 'BEFORE' == learndash_video_data.videos_shown ) {
+			if ( true == status ) {
+				$( '.ld-lesson-topic-list' ).hide();
+				$( '.ld-lesson-navigation' ).find( '#ld-nav-content-list-' + ldVars.postID ).addClass( 'user_has_no_access' );
+				$( '.ld-quiz-list' ).hide();
+			} else {
+				$( '.ld-lesson-topic-list' ).slideDown();
+				$( '.ld-quiz-list' ).slideDown();
+				$( '.ld-lesson-navigation' ).find( '#ld-nav-content-list-' + ldVars.postID ).removeClass( 'user_has_no_access' );
+			}
+		}
+	} );
 
-	$('.learndash-wrapper').on( 'click', '.wpProQuiz_questionListItem input[type="radio"]', function(e) {
+	$( '.learndash-wrapper' ).on( 'click', '.wpProQuiz_questionListItem input[type="radio"]', function( e ) {
+		$( this ).parents( '.wpProQuiz_questionList' ).find( 'label' ).removeClass( 'is-selected' );
+		$( this ).parents( 'label' ).addClass( 'is-selected' );
+	} );
 
-		$(this).parents('.wpProQuiz_questionList').find('label').removeClass('is-selected');
-		$(this).parents('label').addClass('is-selected');
+	$( '.learndash-wrapper' ).on( 'click', '.wpProQuiz_questionListItem input[type="checkbox"]', function( e ) {
+		if ( jQuery( e.currentTarget ).is( ':checked' ) ) {
+			$( this ).parents( 'label' ).addClass( 'is-selected' );
+		} else {
+			$( this ).parents( 'label' ).removeClass( 'is-selected' );
+		}
+	} );
 
-	});
-
-	function show_user_statistic( e ) {
-
+	function learndash_ld30_show_user_statistic( e ) {
 		e.preventDefault();
 
-		var refId 				= 	jQuery(this).data('ref_id');
-		var quizId 				= 	jQuery(this).data('quiz_id');
-		var userId 				= 	jQuery(this).data('user_id');
-		var statistic_nonce 	= 	jQuery(this).data('statistic_nonce');
+		var refId 				= 	jQuery( this ).data( 'ref-id' );
+		var quizId 				= 	jQuery( this ).data( 'quiz-id' );
+		var userId 				= 	jQuery( this ).data( 'user-id' );
+		var statistic_nonce 	= 	jQuery( this ).data( 'statistic-nonce' );
 		var post_data = {
-			'action': 'wp_pro_quiz_admin_ajax',
-			'func': 'statisticLoadUser',
-			'data': {
-				'quizId': quizId,
-				'userId': userId,
-				'refId': refId,
-				'statistic_nonce': statistic_nonce,
-				'avg': 0
-			}
-		}
+			action: 'wp_pro_quiz_admin_ajax_statistic_load_user',
+			func: 'statisticLoadUser',
+			data: {
+				quizId: quizId,
+				userId: userId,
+				refId: refId,
+				statistic_nonce: statistic_nonce,
+				avg: 0,
+			},
+		};
 
-		jQuery('#wpProQuiz_user_overlay, #wpProQuiz_loadUserData').show();
-		var content = jQuery('#wpProQuiz_user_content').hide();
+		jQuery( '#wpProQuiz_user_overlay, #wpProQuiz_loadUserData' ).show();
+		var content = jQuery( '#wpProQuiz_user_content' ).hide();
 
-		jQuery.ajax({
-			type: "POST",
-			url: ajaxurl,
-			dataType: "json",
+		//console.log('- learndash.js');
+
+		jQuery.ajax( {
+			type: 'POST',
+			url: ldVars.ajaxurl,
+			dataType: 'json',
 			cache: false,
 			data: post_data,
-			error: function(jqXHR, textStatus, errorThrown ) {
+			error: function( jqXHR, textStatus, errorThrown ) {
 			},
-			success: function(reply_data) {
+			success: function( reply_data ) {
+				if ( 'undefined' !== typeof reply_data.html ) {
+					content.html( reply_data.html );
+					jQuery( '#wpProQuiz_user_content' ).show();
 
-				if ( typeof reply_data.html !== 'undefined' ) {
+					//console.log('trigger event change - learndash.js');
+					jQuery( 'body' ).trigger( 'learndash-statistics-contentchanged' );
 
-					content.html(reply_data.html);
-					jQuery('#wpProQuiz_user_content').show();
+					jQuery( '#wpProQuiz_loadUserData' ).hide();
 
-					jQuery('#wpProQuiz_loadUserData').hide();
-
-					content.find('.statistic_data').click(function() {
-						jQuery(this).parents('tr').next().toggle('fast');
+					content.find( '.statistic_data' ).on( 'click', function() {
+						jQuery( this ).parents( 'tr' ).next().toggle( 'fast' );
 
 						return false;
-					});
+					} );
 				}
-			}
-		});
+			},
+		} );
 
-		jQuery('#wpProQuiz_overlay_close').click(function() {
-			jQuery('#wpProQuiz_user_overlay').hide();
-		});
+		jQuery( '#wpProQuiz_overlay_close' ).on( 'click', function() {
+			jQuery( '#wpProQuiz_user_overlay' ).hide();
+		} );
 	}
 
 	function learndashSetMaxHeight( elm ) {
-
 		var totalHeight = 0;
 
-		elm.find('> *').each(function() {
-			totalHeight += $(this).outerHeight();
-		});
+		elm.find( '> *' ).each( function() {
+			totalHeight += $( this ).outerHeight();
+		} );
 
-		elm.attr('data-height', '' + (totalHeight + 50) + '');
+		elm.attr( 'data-height', '' + ( totalHeight + 50 ) + '' );
 
-		elm.css({
-			'max-height': totalHeight + 50
-		});
+		elm.css( {
+			'max-height': totalHeight + 50,
+		} );
 	}
 
-});
+	/**
+	 * Will scroll the position of the Focus Mode sidebar
+	 * to the active step.
+	 */
+	function learndashFocusModeSidebarAutoScroll() {
+		if ( jQuery( '.learndash-wrapper .ld-focus' ).length ) {
+			var sidebar_wrapper = jQuery( '.learndash-wrapper .ld-focus .ld-focus-sidebar-wrapper' );
+
+			var sidebar_curent_topic = jQuery( '.learndash-wrapper .ld-focus .ld-focus-sidebar-wrapper .ld-is-current-item' );
+			if ( ( 'undefined' !== typeof sidebar_curent_topic ) && ( sidebar_curent_topic.length ) ) {
+				var sidebar_scrollTo = sidebar_curent_topic;
+			} else {
+				var sidebar_curent_lesson = jQuery( '.learndash-wrapper .ld-focus .ld-focus-sidebar-wrapper .ld-is-current-lesson' );
+				if ( ( 'undefined' !== typeof sidebar_curent_lesson ) && ( sidebar_curent_lesson.length ) ) {
+					var sidebar_scrollTo = sidebar_curent_lesson;
+				}
+			}
+
+			if ( ( 'undefined' !== typeof sidebar_scrollTo ) && ( sidebar_scrollTo.length ) ) {
+				var offset_top = 0;
+				if ( jQuery( '.learndash-wrapper .ld-focus .ld-focus-header' ).length ) {
+					var logo_height = jQuery( '.learndash-wrapper .ld-focus .ld-focus-header' ).height();
+					offset_top += logo_height;
+				}
+				if ( jQuery( '.learndash-wrapper .ld-focus .ld-focus-sidebar .ld-course-navigation-heading' ).length ) {
+					var heading_height = jQuery( '.learndash-wrapper .ld-focus .ld-focus-sidebar .ld-course-navigation-heading' ).height();
+					offset_top += heading_height;
+				}
+				if ( jQuery( '.learndash-wrapper .ld-focus .ld-focus-sidebar .ld-focus-sidebar-wrapper' ).length ) {
+					var container_height = jQuery( '.learndash-wrapper .ld-focus .ld-focus-sidebar .ld-focus-sidebar-wrapper' ).height();
+					offset_top += container_height;
+				}
+
+				var current_item_height = jQuery( sidebar_scrollTo ).height();
+				offset_top -= current_item_height;
+
+				sidebar_wrapper.animate( {
+					scrollTop: sidebar_scrollTo.offset().top - offset_top,
+				}, 1000 );
+			}
+		}
+	}
+} );
 
 function ldGetUrlVars() {
+	var vars = {};
+	var parts = window.location.href.replace( /[?&]+([^=&]+)=([^&]*)/gi, function( m, key, value ) {
+		vars[key] = value;
+	} );
 
-    var vars = {};
-    var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
-        vars[key] = value;
-    });
-
-    return vars;
-
+	return vars;
 }

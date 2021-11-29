@@ -1,9 +1,9 @@
 <?php
 /**
- * @package WP Content Aware Engine
+ * @package wp-content-aware-engine
  * @author Joachim Jensen <joachim@dev.institute>
  * @license GPLv3
- * @copyright 2019 by Joachim Jensen
+ * @copyright 2021 by Joachim Jensen
  */
 
 defined('ABSPATH') || exit;
@@ -19,27 +19,30 @@ defined('ABSPATH') || exit;
  */
 class WPCAModule_transposh extends WPCAModule_Base
 {
-
     /**
      * @var string
      */
     protected $category = 'plugins';
 
-    /**
-     * Constructor
-     */
     public function __construct()
     {
         parent::__construct('language', __('Languages', WPCA_DOMAIN));
-
         $this->query_name = 'cl';
     }
 
     /**
-     * Determine if content is relevant
-     *
-     * @since  1.0
-     * @return boolean
+     * @inheritDoc
+     */
+    public function can_enable()
+    {
+        return defined('TRANSPOSH_PLUGIN_VER')
+            && function_exists('transposh_get_current_language')
+            && defined('TRANSPOSH_OPTIONS')
+            && method_exists('transposh_consts', 'get_language_orig_name');
+    }
+
+    /**
+     * @inheritDoc
      */
     public function in_context()
     {
@@ -47,32 +50,22 @@ class WPCAModule_transposh extends WPCAModule_Base
     }
 
     /**
-     * Get data from context
-     *
-     * @since  1.0
-     * @return array
+     * @inheritDoc
      */
     public function get_context_data()
     {
-        $data = array($this->id);
-        if (function_exists('transposh_get_current_language')) {
-            $data[] = transposh_get_current_language();
-        }
+        $data = [$this->id];
+        $data[] = transposh_get_current_language();
         return $data;
     }
 
     /**
-     * Get content for sidebar editor
-     *
-     * @global object $my_transposh_plugin
-     * @since  1.0
-     * @param  array $args
-     * @return array
+     * @inheritDoc
      */
-    protected function _get_content($args = array())
+    protected function _get_content($args = [])
     {
         global $my_transposh_plugin;
-        $langs = array();
+        $langs = [];
 
         /**
          * isset($my_transposh_plugin->options->viewable_languages)
@@ -80,17 +73,15 @@ class WPCAModule_transposh extends WPCAModule_Base
          * using get_option instead for robustness
          */
 
-        if (defined('TRANSPOSH_OPTIONS') && method_exists('transposh_consts', 'get_language_orig_name')) {
-            $options = get_option(TRANSPOSH_OPTIONS);
+        $options = get_option(TRANSPOSH_OPTIONS);
 
-            if (isset($options['viewable_languages'])) {
-                foreach (explode(',', $options['viewable_languages']) as $lng) {
-                    $langs[$lng] = transposh_consts::get_language_orig_name($lng);
-                }
+        if (isset($options['viewable_languages'])) {
+            foreach (explode(',', $options['viewable_languages']) as $lng) {
+                $langs[$lng] = transposh_consts::get_language_orig_name($lng);
             }
         }
 
-        if (isset($args['include'])) {
+        if ($args['include']) {
             $langs = array_intersect_key($langs, array_flip($args['include']));
         }
         return $langs;

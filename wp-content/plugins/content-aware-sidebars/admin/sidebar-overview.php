@@ -3,7 +3,7 @@
  * @package Content Aware Sidebars
  * @author Joachim Jensen <joachim@dev.institute>
  * @license GPLv3
- * @copyright 2019 by Joachim Jensen
+ * @copyright 2021 by Joachim Jensen
  */
 
 defined('ABSPATH') || exit;
@@ -37,18 +37,17 @@ final class CAS_Sidebar_Overview extends CAS_Admin
      */
     public function get_screen()
     {
-        global $_wp_last_object_menu;
-
-        $post_type_object = get_post_type_object(CAS_App::TYPE_SIDEBAR);
+        $post_type_object = $this->get_sidebar_type();
+        $notification_label = $this->notification_count ? sprintf(' <span class="awaiting-mod">%d</span>', $this->notification_count) : '';
 
         add_menu_page(
             $post_type_object->labels->name,
-            __('Content Aware', 'content-aware-sidebars'),
+            __('Content Aware', 'content-aware-sidebars') . $notification_label,
             $post_type_object->cap->edit_posts,
             CAS_App::BASE_SCREEN,
-            array($this,'render_screen'),
+            [$this,'render_screen'],
             $post_type_object->menu_icon,
-            ++$_wp_last_object_menu
+            60 //after Appearance
         );
 
         return add_submenu_page(
@@ -57,7 +56,7 @@ final class CAS_Sidebar_Overview extends CAS_Admin
             $post_type_object->labels->all_items,
             $post_type_object->cap->edit_posts,
             CAS_App::BASE_SCREEN,
-            array($this,'render_screen')
+            [$this,'render_screen']
         );
     }
 
@@ -78,10 +77,10 @@ final class CAS_Sidebar_Overview extends CAS_Admin
      */
     public function prepare_screen()
     {
-        add_screen_option('per_page', array(
+        add_screen_option('per_page', [
             'default' => 20,
             'option'  => 'cas_sidebars_per_page'
-        ));
+        ]);
 
         $this->table = new CAS_Sidebar_List_Table();
         $this->process_actions();//todo:add func to table to actions
@@ -96,18 +95,10 @@ final class CAS_Sidebar_Overview extends CAS_Admin
      */
     public function render_screen()
     {
-        $post_type_object = get_post_type_object(CAS_App::TYPE_SIDEBAR);
-
-        //Not only for decoration
-        //Older wp versions inject updated message after first h2
-        if (version_compare(get_bloginfo('version'), '4.3', '<')) {
-            $tag = 'h2';
-        } else {
-            $tag = 'h1';
-        }
+        $post_type_object = $this->get_sidebar_type();
 
         echo '<div class="wrap">';
-        echo '<'.$tag.'>';
+        echo '<h1>';
         echo esc_html($post_type_object->labels->name);
 
         if (current_user_can($post_type_object->cap->create_posts)) {
@@ -121,11 +112,11 @@ final class CAS_Sidebar_Overview extends CAS_Admin
             printf(' <span class="subtitle">' . __('Search results for &#8220;%s&#8221;') . '</span>', get_search_query());
         }
 
-        echo '</'.$tag.'>';
+        echo '</h1>';
 
         $this->bulk_messages();
 
-        $_SERVER['REQUEST_URI'] = remove_query_arg(array( 'locked', 'skipped', 'deleted', 'trashed', 'untrashed' ), $_SERVER['REQUEST_URI']);
+        $_SERVER['REQUEST_URI'] = remove_query_arg([ 'locked', 'skipped', 'deleted', 'trashed', 'untrashed' ], $_SERVER['REQUEST_URI']);
 
         $this->table->views();
 
@@ -149,7 +140,6 @@ final class CAS_Sidebar_Overview extends CAS_Admin
      */
     public function process_actions()
     {
-        $post_type = CAS_App::TYPE_SIDEBAR;
         $doaction = $this->table->current_action();
 
         if ($doaction) {
@@ -157,7 +147,7 @@ final class CAS_Sidebar_Overview extends CAS_Admin
 
             $pagenum = $this->table->get_pagenum();
 
-            $sendback = remove_query_arg(array('activated','deactivated','trashed', 'untrashed', 'deleted', 'locked', 'ids'), wp_get_referer());
+            $sendback = remove_query_arg(['activated','deactivated','trashed', 'untrashed', 'deleted', 'locked', 'ids'], wp_get_referer());
             $sendback = add_query_arg('paged', $pagenum, $sendback);
 
             if ('delete_all' == $doaction) {
@@ -195,17 +185,17 @@ final class CAS_Sidebar_Overview extends CAS_Admin
                         }
 
                         if ($doaction == 'activate') {
-                            $data = array(
+                            $data = [
                                 'ID'            => $post_id,
                                 'post_status'   => CAS_App::STATUS_ACTIVE,
                                 'post_date'     => current_time('mysql'),
                                 'post_date_gmt' => current_time('mysql', true)
-                            );
+                            ];
                         } else {
-                            $data = array(
+                            $data = [
                                 'ID'          => $post_id,
                                 'post_status' => CAS_App::STATUS_INACTIVE
-                            );
+                            ];
                         }
 
                         if (!wp_update_post($data)) {
@@ -214,7 +204,7 @@ final class CAS_Sidebar_Overview extends CAS_Admin
 
                         $handled++;
                     }
-                    $sendback = add_query_arg(array($doaction.'d' => $handled, 'ids' => join(',', $post_ids), 'locked' => $locked ), $sendback);
+                    $sendback = add_query_arg([$doaction.'d' => $handled, 'ids' => join(',', $post_ids), 'locked' => $locked ], $sendback);
                     break;
                 case 'trash':
                     $locked = 0;
@@ -236,7 +226,7 @@ final class CAS_Sidebar_Overview extends CAS_Admin
                         $handled++;
                     }
 
-                    $sendback = add_query_arg(array('trashed' => $handled, 'ids' => join(',', $post_ids), 'locked' => $locked ), $sendback);
+                    $sendback = add_query_arg(['trashed' => $handled, 'ids' => join(',', $post_ids), 'locked' => $locked ], $sendback);
                     break;
                 case 'untrash':
                     foreach ($post_ids as $post_id) {
@@ -254,8 +244,6 @@ final class CAS_Sidebar_Overview extends CAS_Admin
                     break;
                 case 'delete':
                     foreach ($post_ids as $post_id) {
-                        $post_del = get_post($post_id);
-
                         if (!current_user_can('delete_post', $post_id)) {
                             wp_die(__('You are not allowed to delete this item.'));
                         }
@@ -267,15 +255,17 @@ final class CAS_Sidebar_Overview extends CAS_Admin
                     }
                     $sendback = add_query_arg('deleted', $handled, $sendback);
                     break;
+                default:
+                    break;
             }
 
-            $sendback = remove_query_arg(array('action', 'action2', 'post_status', 'post', 'bulk_edit'), $sendback);
+            $sendback = remove_query_arg(['action', 'action2', 'post_status', 'post', 'bulk_edit'], $sendback);
 
             wp_safe_redirect($sendback);
             exit;
         }
         if (! empty($_REQUEST['_wp_http_referer'])) {
-            wp_safe_redirect(remove_query_arg(array('_wp_http_referer', '_wpnonce'), wp_unslash($_SERVER['REQUEST_URI'])));
+            wp_safe_redirect(remove_query_arg(['_wp_http_referer', '_wpnonce'], wp_unslash($_SERVER['REQUEST_URI'])));
             exit;
         }
     }
@@ -298,8 +288,7 @@ final class CAS_Sidebar_Overview extends CAS_Admin
 
     public function bulk_messages()
     {
-        $manage_widgets = sprintf(' <a href="%1$s">%2$s</a>', 'widgets.php', __('Manage widgets', 'content-aware-sidebars'));
-        $bulk_messages = array(
+        $bulk_messages = [
             'updated'     => _n_noop('%s sidebar updated.', '%s sidebars updated.', 'content-aware-sidebars'),
             'locked'      => _n_noop('%s sidebar not updated, somebody is editing it.', '%s sidebars not updated, somebody is editing them.', 'content-aware-sidebars'),
             'activated'   => _n_noop('%s sidebar activated.', '%s sidebars activated.', 'content-aware-sidebars'),
@@ -307,10 +296,10 @@ final class CAS_Sidebar_Overview extends CAS_Admin
             'deleted'     => _n_noop('%s sidebar permanently deleted.', '%s sidebars permanently deleted.', 'content-aware-sidebars'),
             'trashed'     => _n_noop('%s sidebar moved to the Trash.', '%s sidebars moved to the Trash.', 'content-aware-sidebars'),
             'untrashed'   => _n_noop('%s sidebar restored from the Trash.', '%s sidebars restored from the Trash.', 'content-aware-sidebars'),
-        );
+        ];
         $bulk_messages = apply_filters('cas/admin/bulk_messages', $bulk_messages);
 
-        $messages = array();
+        $messages = [];
         foreach ($bulk_messages as $key => $message) {
             if (isset($_REQUEST[$key])) {
                 $count = absint($_REQUEST[$key]);

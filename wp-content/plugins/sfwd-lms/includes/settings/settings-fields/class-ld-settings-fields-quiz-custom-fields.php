@@ -1,19 +1,28 @@
 <?php
 /**
- * LearnDash Settings field Quiz Custom Fields.
+ * LearnDash Quiz Custom Fields Settings Field.
  *
- * @package LearnDash
- * @subpackage Settings
+ * @since 3.0.0
+ * @package LearnDash\Settings\Field
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'LearnDash_Settings_Fields_Quiz_Custom_Fields' ) ) ) {
 	/**
-	 * Class to create the settings field.
+	 * Class LearnDash Quiz Custom Fields Settings Field.
+	 *
+	 * @since 3.0.0
+	 * @uses LearnDash_Settings_Fields
 	 */
 	class LearnDash_Settings_Fields_Quiz_Custom_Fields extends LearnDash_Settings_Fields {
 
 		/**
 		 * Public constructor for class
+		 *
+		 * @since 3.0.0
 		 */
 		public function __construct() {
 			$this->field_type = 'quiz-custom-fields';
@@ -24,14 +33,17 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 		/**
 		 * Function to crete the settiings field.
 		 *
-		 * @since 2.4
+		 * @since 3.0.0
 		 *
 		 * @param array $field_args An array of field arguments used to process the ouput.
 		 * @return void
 		 */
 		public function create_section_field( $field_args = array() ) {
+
+			/** This filter is documented in includes/settings/settings-fields/class-ld-settings-fields-checkbox-switch.php */
 			$field_args = apply_filters( 'learndash_settings_field', $field_args );
 
+			/** This filter is documented in includes/settings/settings-fields/class-ld-settings-fields-checkbox-switch.php */
 			$html = apply_filters( 'learndash_settings_field_html_before', '', $field_args );
 
 			$forms = $field_args['value'];
@@ -47,6 +59,7 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 				array_unshift( $forms, new WpProQuiz_Model_Form() );
 			}
 
+			$html .= wp_nonce_field( 'ld-quiz-custom-fields-nonce', 'ld-quiz-custom-fields-nonce', false, false );
 			$html .= '<div class="form_table_wrapper">
 				<table style=" width: 100%; text-align: left; " id="form_table">';
 			$html .= '<thead>
@@ -64,11 +77,11 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 			foreach ( $forms as $form ) {
 				$html .= '<tr ';
 
-				if ( $index++ == 0 ) {
+				if ( 0 == $index++ ) {
 					$html .= 'style="color: red; display: none;"';
 				}
-				$html             .= '>';
-				$html             .= '<td><a class="form_move" href="#" style="cursor:move;">
+				$html   .= '>';
+				$html   .= '<td><a class="form_move" href="#" style="cursor:move;">
             <svg width="10" height="6" xmlns="http://www.w3.org/2000/svg" viewBox="4 6 10 6" role="img" aria-hidden="true" focusable="false"><path d="M13,8c0.6,0,1-0.4,1-1s-0.4-1-1-1s-1,0.4-1,1S12.4,8,13,8z M5,6C4.4,6,4,6.4,4,7s0.4,1,1,1s1-0.4,1-1S5.6,6,5,6z M5,10 c-0.6,0-1,0.4-1,1s0.4,1,1,1s1-0.4,1-1S5.6,10,5,10z M13,10c-0.6,0-1,0.4-1,1s0.4,1,1,1s1-0.4,1-1S13.6,10,13,10z M9,6 C8.4,6,8,6.4,8,7s0.4,1,1,1s1-0.4,1-1S9.6,6,9,6z M9,10c-0.6,0-1,0.4-1,1s0.4,1,1,1s1-0.4,1-1S9.6,10,9,10z"></path></svg>
             <span class="screen-reader-text">Move</span>
 		  </a></td>';
@@ -76,11 +89,11 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 				if ( empty( $form_id ) ) {
 					$form_id = '';
 				}
-				$html             .= '	<td>' . esc_attr( $form_id ) . '</td>';
-			  	$html             .= '	<td>';
-				$html             .= '		<input type="text" name="form[][fieldname]" value="' . esc_attr( $form->getFieldname() ) . '" class="regular-text"/>
+				$html .= '	<td>' . esc_attr( $form_id ) . '</td>';
+				$html .= '	<td>';
+				$html .= '		<input type="text" name="form[][fieldname]" value="' . esc_attr( $form->getFieldname() ) . '" class="regular-text"/>
 							</td>';
-				
+
 				$html             .= '	<td style="position: relative;">';
 				$html             .= '		<select name="form[][type]">';
 							$html .= '<option value="' . WpProQuiz_Model_Form::FORM_TYPE_TEXT . '" ' . selected( $form->getType(), WpProQuiz_Model_Form::FORM_TYPE_TEXT, false ) . '>' . esc_html__( 'Text', 'learndash' ) . '</option>';
@@ -116,28 +129,28 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 								$html .= '<textarea rows="5" cols="50" name="form[][data]">' . $form_data . '</textarea>';
 
 							$html .= '</div>
-											
+
 									<input type="button" value="' . esc_html__( 'OK', 'learndash' ) . '" class="button-primary">
 								</div>
 							</td>
 							<td>
 								<!-- Wrap checkbox input element -->
-          						<div class="ld-switch-wrapper">
-            						<span class="ld-switch">
-              							<input type="checkbox" class="ld-switch__input" name="form[][required]" value="1" ' . checked( $form->isRequired(), 1, false ) . '>
-              							<span class="ld-switch__track"></span>
-              							<span class="ld-switch__thumb"></span>
-              							<span class="ld-switch__on-off"></span>
-            						</span>
-            						<label for="setting-1" class="screen-reader-text">Required</label>
-					          	</div>
-          						<!-- End wrap checkbox input element -->
+								<div class="ld-switch-wrapper">
+									<span class="ld-switch">
+										<input type="checkbox" class="ld-switch__input" name="form[][required]" value="1" ' . checked( $form->isRequired(), 1, false ) . '>
+										<span class="ld-switch__track"></span>
+										<span class="ld-switch__thumb"></span>
+										<span class="ld-switch__on-off"></span>
+									</span>
+									<label for="setting-1" class="screen-reader-text">Required</label>
+								</div>
+								<!-- End wrap checkbox input element -->
 							</td>
 							<td>
 								<input type="button" name="form_delete" value="' . esc_html__( 'Remove', 'learndash' ) . '" class="form_delete"><!-- classname update -->
-          						<!-- Remove the move link -->
-          						<input type="hidden" name="form[][form_id]" value="' . $form->getFormId() . '">
-		  						<input type="hidden" name="form[][form_delete]" value="0">
+								<!-- Remove the move link -->
+								<input type="hidden" name="form[][form_id]" value="' . esc_attr( $form->getFormId() ) . '">
+								<input type="hidden" name="form[][form_delete]" value="0">
 							</td>
 						</tr>';
 
@@ -145,21 +158,22 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 
 				$html .= '</tbody>
 				</table>
-					
+
 				<div id="form_add_wrapper">
 					<input type="button" name="form_add" id="form_add" value="' . esc_html__( 'Add field', 'learndash' ) . '" class="button-secondary">
 				</div>
 			</div>';
 
+			/** This filter is documented in includes/settings/settings-fields/class-ld-settings-fields-checkbox-switch.php */
 			$html = apply_filters( 'learndash_settings_field_html_after', $html, $field_args );
 
-			echo $html;
+			echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Need to output HTML
 		}
 
 		/**
 		 * Default validation function. Should be overriden in Field subclass.
 		 *
-		 * @since 2.4
+		 * @since 3.0.0
 		 *
 		 * @param mixed  $val Value to validate.
 		 * @param string $key Key of value being validated.

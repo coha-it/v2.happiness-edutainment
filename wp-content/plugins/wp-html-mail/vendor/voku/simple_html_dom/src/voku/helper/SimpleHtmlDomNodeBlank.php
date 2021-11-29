@@ -1,86 +1,106 @@
 <?php
 
+declare(strict_types=1);
+
 namespace voku\helper;
 
 /**
- * Class SimpleHtmlDomNodeBlank
- *
- * @package voku\helper
- *
- * @property-read string outertext <p>Get dom node's outer html.</p>
- * @property-read string plaintext <p>Get dom node's plain text.</p>
+ * {@inheritdoc}
  */
-class SimpleHtmlDomNodeBlank extends \ArrayObject implements SimpleHtmlDomNodeInterface
+class SimpleHtmlDomNodeBlank extends AbstractSimpleHtmlDomNode implements SimpleHtmlDomNodeInterface
 {
-  /** @noinspection MagicMethodsValidityInspection */
-  /**
-   * @param $name
-   *
-   * @return string
-   */
-  public function __get($name)
-  {
-    return '';
-  }
+    /**
+     * @param string   $selector
+     * @param int|null $idx
+     *
+     * @return null
+     */
+    public function find(string $selector, $idx = null)
+    {
+        return null;
+    }
 
-  /**
-   * @param $name
-   * @param $arguments
-   *
-   * @return string
-   */
-  public function __call($name, $arguments)
-  {
-    return null;
-  }
+    /**
+     * Find nodes with a CSS selector.
+     *
+     * @param string $selector
+     *
+     * @return SimpleHtmlDomInterface[]|SimpleHtmlDomNodeInterface<SimpleHtmlDomInterface>
+     */
+    public function findMulti(string $selector): SimpleHtmlDomNodeInterface
+    {
+        return new self();
+    }
 
-  /**
-   * @param string $selector
-   * @param int    $idx
-   *
-   * @return null
-   */
-  public function __invoke($selector, $idx = null)
-  {
-    return null;
-  }
+    /**
+     * Find nodes with a CSS selector.
+     *
+     * @param string $selector
+     *
+     * @return false
+     */
+    public function findMultiOrFalse(string $selector)
+    {
+        return false;
+    }
 
-  /**
-   * @return string
-   */
-  public function __toString()
-  {
-    return '';
-  }
+    /**
+     * Find one node with a CSS selector.
+     *
+     * @param string $selector
+     *
+     * @return null
+     */
+    public function findOne(string $selector)
+    {
+        return null;
+    }
 
-  /**
-   * Get html of Elements
-   *
-   * @return string
-   */
-  public function innerHtml()
-  {
-    return '';
-  }
+    /**
+     * Find one node with a CSS selector or false, if no element is found.
+     *
+     * @param string $selector
+     *
+     * @return false
+     */
+    public function findOneOrFalse(string $selector)
+    {
+        return false;
+    }
 
-  /**
-   * @param string $selector
-   * @param null   $idx
-   *
-   * @return null
-   */
-  public function find($selector, $idx = null)
-  {
-    return null;
-  }
+    /**
+     * @return string[]
+     */
+    public function innerHtml(): array
+    {
+        return [];
+    }
 
-  /**
-   * Get plain text
-   *
-   * @return string
-   */
-  public function text()
-  {
-    return '';
-  }
+    /**
+     * alias for "$this->innerHtml()" (added for compatibly-reasons with v1.x)
+     *
+     * @return string[]
+     */
+    public function innertext()
+    {
+        return [];
+    }
+
+    /**
+     * alias for "$this->innerHtml()" (added for compatibly-reasons with v1.x)
+     *
+     * @return string[]
+     */
+    public function outertext()
+    {
+        return [];
+    }
+
+    /**
+     * @return string[]
+     */
+    public function text(): array
+    {
+        return [];
+    }
 }

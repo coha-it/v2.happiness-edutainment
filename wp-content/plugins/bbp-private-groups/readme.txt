@@ -3,8 +3,8 @@ Contributors: Robin Wilson
 Tags: forum, bbpress, bbp, private, groups
 Requires at least: 3.0.1
 Donate link: http://www.rewweb.co.uk/donate
-Tested up to: 5.3
-Stable tag: 3.7.9
+Tested up to: 5.8
+Stable tag: 3.9.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -161,6 +161,28 @@ A shortcode to list users either across all groups or per group
 
 
 == Changelog ==
+
+3.9.0  allow for nil groups under php 8.0 to prevent fatal count error
+
+3.8.9  Hide forums in menus if visibility switched off
+
+3.8.8  revised filter for bsp-display-topic-index to deal with situation where forum= not used 
+
+3.8.6  amended user view forum check.  If  no group is set for a forum, then the private_groups_can_user_view_post function did set $can_view as true even if post was hidden or private.  This function now checks if user is allowed to see the forum if no group set and sets $can_view correctly
+
+3.8.5  amended filter for style pack pg_display_forum_query_filter to allow for forum visibility
+
+3.8.4  wordpress 5.5 tested version
+
+3.8.3  Correction to 3.8.2 to fix loading order
+
+3.8.2 Revised forum descriptions to match bbpress 2.6.x, revised sub forum filter to cope with 2.5.x and 2.6.x versions, amended bbp_filter to take account of multipgaed and date filters
+
+3.8.1 change to forum desciption and last activity to cater for sub forums
+
+3.8.0 minor chnage to meta-box to prevent non critical error if non logged in empty
+
+3.7.9 improved plugin information layout
 
 3.7.8 Admin warning limited to display 10 times
 

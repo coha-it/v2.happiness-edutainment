@@ -25,6 +25,7 @@ if ( ! class_exists( 'myCRED_Sell_Content_Module' ) ) :
 
 		public $current_user_id = 0;
 		public $priority        = 10;
+		public $bbp_content     = '';
 
 		/**
 		 * Construct
@@ -34,18 +35,7 @@ if ( ! class_exists( 'myCRED_Sell_Content_Module' ) ) :
 			parent::__construct( 'myCRED_Sell_Content_Module', array(
 				'module_name' => 'sell_content',
 				'register'    => false,
-				'defaults'    => array(
-					'post_types'  => 'post,page',
-						'filters'     => array(),
-					'type'        => array( MYCRED_DEFAULT_TYPE_KEY ),
-					'reload'      => 0,
-					'working'     => 'Processing ...',
-					'templates'   => array(
-						'members'     => '<div class="text-center"><h3>Premium Content</h3><p>Buy access to this content.</p><p>%buy_button%</p></div>',
-						'visitors'    => '<div class="text-center"><h3>Premium Content</h3><p>Login to buy access to this content.</p></div>',
-						'cantafford'  => '<div class="text-center"><h3>Premium Content</h3><p>Buy access to this content.</p><p><strong>Insufficient Funds</strong></p></div>'
-					)
-				),
+				'defaults'    => mycred_get_addon_defaults( 'sell_content' ),
 				'add_to_core' => true
 			) );
 
@@ -57,7 +47,7 @@ if ( ! class_exists( 'myCRED_Sell_Content_Module' ) ) :
 		/**
 		 * Module Init
 		 * @since 0.1
-		 * @version 1.2.1
+		 * @version 1.2.2
 		 */
 		public function module_init() {
 
@@ -80,8 +70,13 @@ if ( ! class_exists( 'myCRED_Sell_Content_Module' ) ) :
 			add_shortcode( MYCRED_SLUG . '_content_buyer_avatars', 'mycred_render_sell_buyer_avatars' );
 
 			// Setup Script
-			add_action( 'mycred_register_assets',          array( $this, 'register_assets' ) );
-			add_action( 'mycred_front_enqueue_footer',     array( $this, 'enqueue_footer' ) );
+			add_action( 'admin_enqueue_scripts', 						array( $this, 'admin_enqueue_scripts' ) );
+			add_action( 'mycred_register_assets',          				array( $this, 'register_assets' ) );
+			add_action( 'mycred_front_enqueue_footer',     				array( $this, 'enqueue_footer' ) );
+			add_action( 'bbp_template_redirect',           				array( $this, 'bbp_content' ), 10 ); 
+			add_action( 'mycred_delete_log_entry',                      array( $this, 'sale_content_count_ajax' ), 10, 2 );
+			add_action( 'wp_ajax_mycred_ajax_update_sell_count',        array( $this, 'ajax_update_sell_count' ) );
+	        add_action( 'wp_ajax_nopriv_mycred_ajax_update_sell_count', array( $this, 'ajax_update_sell_count' ) );
 
 		}
 
@@ -111,6 +106,23 @@ if ( ! class_exists( 'myCRED_Sell_Content_Module' ) ) :
 
 		}
 
+
+		/**
+		 * Enqueue Admin Script
+		 * @since 2.0.1
+		 * @version 1.0
+		 */
+		public function admin_enqueue_scripts()
+		{
+			wp_enqueue_script(
+				'mycred-admin-sell-content',
+				plugins_url( 'assets/js/admin.js', myCRED_SELL ),
+				array( 'jquery' ),
+				myCRED_SELL_VERSION,
+				true
+			);
+		}
+
 		/**
 		 * Register Assets
 		 * @since 1.7
@@ -122,7 +134,7 @@ if ( ! class_exists( 'myCRED_Sell_Content_Module' ) ) :
 				'mycred-sell-this',
 				plugins_url( 'assets/js/buy-content.js', myCRED_SELL ),
 				array( 'jquery' ),
-				'2.0.1',
+				myCRED_SELL_VERSION,
 				true
 			);
 
@@ -161,6 +173,39 @@ if ( ! class_exists( 'myCRED_Sell_Content_Module' ) ) :
 		}
 
 		/**
+		 * Fires when user deletes single log entry ref = buy_content
+		 * @since 2.2
+		 * @version 1.0
+		 */
+		public function sale_content_count_ajax( $row_id, $point_type )
+		{
+			$log = new myCRED_Query_Log( "entry_id = $row_id" );
+
+			$logs = $log->results;
+
+			foreach( $logs as $log )
+			{	
+				$content_id = '';
+
+				if( $log->ref == 'buy_content'  && $log->id == $row_id)
+				{
+				
+					$content_id = (int)$log->ref_id;
+						
+					$sold_content = mycred_get_post_meta( $content_id, '_mycred_content_sales' );
+				
+					$sold_content = (int)$sold_content[0];
+
+					$sold_content--;
+
+					mycred_update_post_meta( $content_id, '_mycred_content_sales', $sold_content );
+				}
+
+			}
+		}
+
+
+		/**
 		 * Setup Content Filter
 		 * We are using the template_redirect action to prevent this add-on having to run anywhere else but
 		 * in the front-end of our website, since the the_content filter is used in soooo many places.
@@ -192,12 +237,15 @@ if ( ! class_exists( 'myCRED_Sell_Content_Module' ) ) :
 
 			if ( is_user_logged_in() && ! mycred_is_admin() ) {
 
-				if ( isset( $_POST['action'] ) && $_POST['action'] == 'mycred-buy-content' && isset( $_POST['postid'] ) && isset( $_POST['token'] ) && wp_verify_nonce( $_POST['token'], 'mycred-buy-this-content' ) ) {
+				if ( isset( $_POST['action'] ) && $_POST['action'] == 'mycred-buy-content' && isset( $_POST['postid'] ) && isset( $_POST['token'] )  && wp_verify_nonce( $_POST['token'], 'mycred-buy-this-content' ) ) {
 
 					$post_id    = absint( $_POST['postid'] );
 					$point_type = sanitize_key( $_POST['ctype'] );
+					$buying_cred = $this->sell_content['type'];
+                    $point_types    = mycred_get_types( true );
+					global $mycred_types;
 
-					if ( mycred_force_singular_session( $this->current_user_id, 'mycred-last-content-purchase' ) )
+					if ( ! array_key_exists( $point_type, $mycred_types ) || mycred_force_singular_session( $this->current_user_id, 'mycred-last-content-purchase' ) || !in_array($point_type, $buying_cred) )
 						wp_send_json( 'ERROR' );
 
 					// If the content is for sale and we have not paid for it
@@ -252,13 +300,51 @@ if ( ! class_exists( 'myCRED_Sell_Content_Module' ) ) :
 		}
 
 		/**
+		 * AXAJ Updates sell count
+		 * @since 2.0.1
+		 * @version 1.0
+		 */
+		public function ajax_update_sell_count()
+		{
+			global $wpdb;
+
+			$wpdb->delete( 
+				$wpdb->postmeta,
+				array(
+					'meta_key'	=> '_mycred_content_sales'
+				)
+			);
+
+			$logs = new myCRED_Query_Log( 'ref=buy_content' );
+
+			$logs = $logs->results;
+
+			$ref_counts = array();
+
+			foreach( $logs as $log )
+				$ref_counts[] = $log->ref_id;
+			
+			$sell_counts = array_count_values( $ref_counts );
+
+			foreach( $sell_counts as $post_id => $sell_count )
+				update_post_meta( $post_id, '_mycred_content_sales', $sell_count );
+
+			echo 'Sell Counts Updated';
+			die;
+		}
+
+		/**
 		 * The Content Overwrite
 		 * Handles content sales by replacing the posts content with the appropriate template
 		 * for those who have not paid. Admins and authors are excluded.
 		 * @since 0.1
-		 * @version 1.2.2
+		 * @since 2.3 Added function `mycred_sc_is_points_enable` If points are disabled just return the content
+		 * @version 1.2.3
 		 */
 		public function the_content( $content ) {
+
+			if( !mycred_sc_is_points_enable() )
+				return $content;
 
 			global $mycred_partial_content_sale, $mycred_sell_this;
 
@@ -290,7 +376,7 @@ if ( ! class_exists( 'myCRED_Sell_Content_Module' ) ) :
 							$payment_options = mycred_sell_content_payment_buttons( $this->current_user_id, $post_id );
 
 							// User can buy
-							if ( $payment_options !== false ) {
+							if ( $payment_options !== false  ) {
 
 								$content = $this->sell_content['templates']['members'];
 								$content = str_replace( '%buy_button%', $payment_options, $content );
@@ -324,6 +410,143 @@ if ( ! class_exists( 'myCRED_Sell_Content_Module' ) ) :
 
 			return $content;
 
+		}
+
+
+
+		public function bbp_content() {
+
+			global $mycred_partial_content_sale, $mycred_sell_this;
+
+			$post_id = mycred_sell_content_post_id();
+
+
+			$post    = mycred_get_post( $post_id );
+
+			$content = '';
+
+
+
+			// If content is for sale
+			if ( mycred_post_is_for_sale( $post_id ) && ( bbp_is_single_forum() || bbp_is_single_topic() || bbp_is_single_reply() ) ) {
+
+				$mycred_sell_this = true;
+
+
+				// Partial Content Sale - We have already done the work in the shortcode
+				if ( $mycred_partial_content_sale === true )  return;
+
+				// Logged in users
+				if ( is_user_logged_in() ) {
+
+					// Authors and admins do not pay
+					if ( ! mycred_is_admin() && $post->post_author != $this->current_user_id ) {
+
+						// In case we have not paid
+						if ( ! mycred_user_paid_for_content( $this->current_user_id, $post_id ) ) {
+
+							// Get Payment Options
+							$payment_options = mycred_sell_content_payment_buttons( $this->current_user_id, $post_id );
+
+							// User can buy
+							if ( $payment_options !== false ) {
+
+								$content = $this->sell_content['templates']['members'];
+								
+								$content = str_replace( '%buy_button%', $payment_options, $content );
+								$content = mycred_sell_content_template( $content, $post, 'mycred-sell-entire-content', 'mycred-sell-unpaid' );
+								
+								$this->mycred_bbp_sell_forum_actions();
+
+							}
+
+							// Can not afford to buy
+							else {
+
+								$content = $this->sell_content['templates']['cantafford'];
+								$content = mycred_sell_content_template( $content, $post, 'mycred-sell-entire-content', 'mycred-sell-insufficient' );
+								$this->mycred_bbp_sell_forum_actions();
+
+							}
+
+						}
+
+					}
+
+				}
+
+				// Visitors
+				else {
+
+					$content = $this->sell_content['templates']['visitors'];
+					$content = mycred_sell_content_template( $content, $post, 'mycred-sell-entire-content', 'mycred-sell-visitor' );
+
+
+					$this->mycred_bbp_sell_forum_actions();
+
+				}
+
+			}
+
+			$this->bbp_content = $content;
+
+		}
+
+
+
+
+		public function mycred_bbp_sell_forum_actions() {
+
+			add_action( 'bbp_template_before_single_forum', array( $this, 'bbp_template_before_single' ) );
+			add_action( 'bbp_template_before_single_topic', array( $this, 'bbp_template_before_single' ) );
+			add_filter( 'bbp_no_breadcrumb', 				array( $this, 'bbp_remove_breadcrumb' ), 10 );
+			add_filter( 'bbp_is_single_topic',              array( $this, 'bbp_is_topic' ), 10  );
+			add_filter( 'bbp_get_forum_subscribe_link', 	array( $this, 'bbp_remove_subscribe_link' ), 10 , 3 );
+			add_filter( 'bbp_get_topic_subscribe_link', 	array( $this, 'bbp_remove_subscribe_link' ), 10 , 3 );
+			add_filter( 'bbp_get_topic_favorite_link', 		array( $this, 'bbp_remove_subscribe_link' ), 10 , 3 );
+			add_filter( 'bbp_get_template_part', 			array( $this, 'bbp_remove_templates' ), 10 , 3 );
+			add_filter( 'bbp_get_single_forum_description', array( $this, 'bbp_get_single_description' ), 10 , 3 );
+			add_filter( 'bbp_get_single_topic_description', array( $this, 'bbp_get_single_description' ), 10 , 3 );
+
+		}
+
+		public function bbp_template_before_single() {
+			
+			echo $this->bbp_content;
+
+		}
+
+		public function bbp_remove_breadcrumb( $is_front ) {
+			return true;
+		}
+
+		public function bbp_is_topic( $post_id = 0 ) {
+
+			// Assume false
+	    	$retval = false;
+
+	    	// Supplied ID is a topic
+	   		if ( ! empty( $post_id ) && ( bbp_get_topic_post_type() === get_post_type( $post_id ) ) ) {
+				$retval = true;
+	    	}
+
+	    	// Filter & return
+	    	return (bool) apply_filters( 'bbp_is_topic', $retval, $post_id );
+        }
+
+		public function bbp_remove_subscribe_link( $retval, $r, $args ) {
+			return '';
+		}
+
+		public function bbp_remove_templates( $templates, $slug, $name ) {
+
+			if ( $slug == 'content' ) return $templates;
+
+			return array('');
+		}
+
+		public function bbp_get_single_description( $retstr, $r, $args ) {
+			return '';
 		}
 
 		/**
@@ -751,7 +974,7 @@ if ( ! class_exists( 'myCRED_Sell_Content_Module' ) ) :
 				'textarea_rows' => 10
 			) );
 
-			echo '<p>' . $this->core->available_template_tags( array( 'post' ) ) . '</p>';
+			echo '<p>' . $this->core->available_template_tags( array( 'post' ), '%price%' ) . '</p>';
 
 ?>
 		</div>
@@ -771,6 +994,13 @@ if ( ! class_exists( 'myCRED_Sell_Content_Module' ) ) :
 			echo '<p>' . $this->core->available_template_tags( array( 'post' ) ) . '</p>';
 
 ?>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+			<h3><?php _e( 'Sales Count', 'mycred' ); ?></h3>
+			<button class="button button-primary" id="update-sales-count"><span class="dashicons dashicons-update mycred-update-sells-count" style="-webkit-animation: spin 2s linear infinite;animation: spin 2s linear infinite;display: none;vertical-align: middle;"></span>Update Sales Count</button>
 		</div>
 	</div>
 
@@ -993,7 +1223,7 @@ if ( ! class_exists( 'myCRED_Sell_Content_Module' ) ) :
 			$settings = mycred_sell_content_settings();
 
 			// Do not add the metabox unless we set this post type to be "manual"
-			if ( $settings['filters'][ $post->post_type ]['by'] !== 'manual' ) return;
+			if ( empty( $settings['filters'][ $post->post_type ] ) || $settings['filters'][ $post->post_type ]['by'] !== 'manual' ) return;
 
 			add_meta_box(
 				'mycred-sell-content-setup',

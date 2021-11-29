@@ -1,19 +1,28 @@
 <?php
 /**
- * LearnDash Settings administration field Multiselect.
+ * LearnDash Multiselect Settings Field.
  *
- * @package LearnDash
- * @subpackage Settings
+ * @since 3.0.0
+ * @package LearnDashSettings\Field
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'LearnDash_Settings_Fields_Multiselect' ) ) ) {
 	/**
-	 * Class to create the settings field.
+	 * Class LearnDash Multiselect Settings Field.
+	 *
+	 * @since 3.0.0
+	 * @uses LearnDash_Settings_Fields
 	 */
 	class LearnDash_Settings_Fields_Multiselect extends LearnDash_Settings_Fields {
 
 		/**
 		 * Public constructor for class
+		 *
+		 * @since 3.0.0
 		 */
 		public function __construct() {
 			$this->field_type = 'multiselect';
@@ -24,7 +33,7 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 		/**
 		 * Function to crete the settiings field.
 		 *
-		 * @since 2.4
+		 * @since 3.0.0
 		 *
 		 * @param array $field_args An array of field arguments used to process the ouput.
 		 * @return void
@@ -32,33 +41,32 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 		public function create_section_field( $field_args = array() ) {
 			// Force multiple.
 			$field_args['multiple'] = true;
-			
+
+			/** This filter is documented in includes/settings/settings-fields/class-ld-settings-fields-checkbox-switch.php */
 			$field_args = apply_filters( 'learndash_settings_field', $field_args );
-			$html       = apply_filters( 'learndash_settings_field_html_before', '', $field_args );
+
+			/** This filter is documented in includes/settings/settings-fields/class-ld-settings-fields-checkbox-switch.php */
+			$html = apply_filters( 'learndash_settings_field_html_before', '', $field_args );
+
+			$html .= '<span class="ld-select ld-select-multiple">';
+			$html .= '<select multiple autocomplete="off" ';
+			$html .= $this->get_field_attribute_name( $field_args );
+			$html .= $this->get_field_attribute_id( $field_args );
+			$html .= $this->get_field_attribute_class( $field_args );
+			$html .= $this->get_field_attribute_placeholder( $field_args );
+
+			if ( ( defined( 'LEARNDASH_SELECT2_LIB' ) ) && ( true === LEARNDASH_SELECT2_LIB ) ) {
+				if ( ! isset( $field_args['attrs']['data-ld-select2'] ) ) {
+					$html .= ' data-ld-select2="1" ';
+				}
+			}
+
+			$html .= $this->get_field_attribute_misc( $field_args );
+			$html .= $this->get_field_attribute_required( $field_args );
+
+			$html .= ' >';
 
 			if ( ( isset( $field_args['options'] ) ) && ( ! empty( $field_args['options'] ) ) ) {
-				$html .= '<span class="ld-select ld-select-multiple">';
-				$html .= '<select multiple autocomplete="off" ';
-				//$html .= $this->get_field_attribute_type( $field_args );
-				$html .= $this->get_field_attribute_name( $field_args );
-				$html .= $this->get_field_attribute_id( $field_args );
-				$html .= $this->get_field_attribute_class( $field_args );
-				$html .= $this->get_field_attribute_placeholder( $field_args );
-
-				if ( ( defined( 'LEARNDASH_SELECT2_LIB' ) ) && ( true === LEARNDASH_SELECT2_LIB ) ) {
-					if ( ! isset( $field_args['attrs']['data-ld-select2'] ) ) {
-						$html .= ' data-ld-select2="1" ';
-					}
-				}
-
-				$html .= $this->get_field_attribute_misc( $field_args );
-				$html .= $this->get_field_attribute_required( $field_args );
-
-				//if ( ( isset( $field_args['multiple'] ) ) && ( true === $field_args['multiple'] ) ) {
-				//	$html .= ' multiple="multiple" ';
-				//}
-				$html .= ' >';
-
 				foreach ( $field_args['options'] as $option_key => $option_label ) {
 					if ( ( '' === $option_key ) && ( defined( 'LEARNDASH_SELECT2_LIB' ) ) && ( true === LEARNDASH_SELECT2_LIB ) ) {
 						continue;
@@ -67,26 +75,28 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 					if ( is_string( $field_args['value'] ) ) {
 						$selected_item = selected( $option_key, $field_args['value'], false );
 					} elseif ( is_array( $field_args['value'] ) ) {
-						if ( in_array( $option_key, $field_args['value'] ) ) {
+						if ( in_array( $option_key, $field_args['value'], true ) ) {
 							$selected_item = ' selected="" ';
 						}
 					}
 
-					$html .= '<option value="' . $option_key . '" ' . $selected_item . '>' . $option_label . '</option>';
+					$html .= '<option value="' . esc_attr( $option_key ) . '" ' . $selected_item . '>' . wp_kses_post( $option_label ) . '</option>';
 				}
-				$html .= '</select>';
-				$html .= '</span>';
 			}
 
+			$html .= '</select>';
+			$html .= '</span>';
+
+			/** This filter is documented in includes/settings/settings-fields/class-ld-settings-fields-checkbox-switch.php */
 			$html = apply_filters( 'learndash_settings_field_html_after', $html, $field_args );
 
-			echo $html;
+			echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Need to output HTML
 		}
 
 		/**
 		 * Validate field
 		 *
-		 * @since 2.4
+		 * @since 3.0.0
 		 *
 		 * @param mixed  $val Value to validate.
 		 * @param string $key Key of value being validated.
@@ -108,6 +118,23 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 				return $val;
 			}
 			return false;
+		}
+
+		/**
+		 * Convert Settings Field value to REST value.
+		 *
+		 * @since 3.3.0
+		 *
+		 * @param mixed           $val        Value from REST to be converted to internal value.
+		 * @param string          $key        Key field for value.
+		 * @param array           $field_args Array of field args.
+		 * @param WP_REST_Request $request    Request object.
+		 */
+		public function field_value_to_rest_value( $val, $key, $field_args, WP_REST_Request $request ) {
+			if ( ! is_array( $val ) ) {
+				$val = array( $val );
+			}
+			return $val;
 		}
 
 		// end of functions.

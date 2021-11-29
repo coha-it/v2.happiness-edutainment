@@ -1,20 +1,17 @@
 <?php
 /**
- * @package WP Content Aware Engine
+ * @package wp-content-aware-engine
  * @author Joachim Jensen <joachim@dev.institute>
  * @license GPLv3
- * @copyright 2019 by Joachim Jensen
+ * @copyright 2021 by Joachim Jensen
  */
 
 defined('ABSPATH') || exit;
 
 /**
+ * Date Module
  *
- * URL Module
- *
- * Detects if current content is:
- * a) matching a URL or URL pattern
- *
+ * @deprecated 9.1
  */
 class WPCAModule_date extends WPCAModule_Base
 {
@@ -30,15 +27,14 @@ class WPCAModule_date extends WPCAModule_Base
         );
         $this->placeholder = __('Date Archives', WPCA_DOMAIN);
         $this->default_value = '0000-00-00';
-
+        if (get_class() === 'WPCAModule_date') {
+            $this->name .= ' (Legacy)';
+        }
         //$this->query_name = 'cd';
     }
 
     /**
-     * Determine if content is relevant
-     *
-     * @since  1.0
-     * @return boolean
+     * @inheritDoc
      */
     public function in_context()
     {
@@ -70,10 +66,10 @@ class WPCAModule_date extends WPCAModule_Base
      * @since  1.0
      * @return array
      */
-    protected function _get_content($args = array())
+    protected function _get_content($args = [])
     {
-        $data = array();
-        if (isset($args['include'])) {
+        $data = [];
+        if ($args['include']) {
             $data = array_intersect_key($data, array_flip($args['include']));
         }
         return $data;

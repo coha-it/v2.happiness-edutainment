@@ -1,26 +1,30 @@
 <?php
 /**
- * Displays an informational bar
+ * LearnDash LD30 Displays an informational bar
  *
  * This will have to be variable based on the current users context.
  * Different information is passed in based on if they are on a course, lesson,
  * topic etc...
  *
- * Having it in one place is advantagous over multiple instances of the status
- * bar for Guttenburg block placement.
+ * Having it in one place is advantageous over multiple instances of the status
+ * bar for Gutenberg block placement.
  *
  * Available Variables:
  *
- * $course_status   : Course Status
+ * $course_status : Course Status
  *
- *  $user_id         : Current User ID
- * $logged_in       : User is logged in
- * $current_user    : (object) Currently logged in user object
+ * $user_id      : Current User ID
+ * $logged_in     : User is logged in
+ * $current_user  : (object) Currently logged in user object
  *
- * @since 3.0
+ * @since 3.0.0
  *
- * @package LearnDash\Course
+ * @package LearnDash\Templates\LD30\Modules
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Thought process:
@@ -38,51 +42,50 @@
  * } else {
  *      return $slug . '-' . 'generic.php';
  * }
- *
  */
 
 /**
- * Action to add custom content before the infobar (all locations)
+ * Fires before the infobar (all locations).
  *
- * @since 3.0
+ * @since 3.0.0
+ *
+ * @param string|false $post_type Post type slug.
+ * @param int          $user_id   User ID.
  */
 do_action( 'learndash-all-infobar-before', get_post_type(), $user_id );
 
-SFWD::get_template_part( 'infobar', get_post_type() );
+learndash_get_template_part( 'infobar', get_post_type() );
 
 /**
- * Action to add custom content after the infobar (all locations)
+ * Fires after the infobar (all locations).
  *
- * @since 3.0
+ * @since 3.0.0
+ *
+ * @param string|false $post_type Post type slug.
+ * @param int          $user_id   User ID.
  */
 do_action( 'learndash-all-infobar-after', get_post_type(), $user_id );
 
 
-if( $logged_in ):
+if ( $logged_in ) :
 
-    /**
-     * User is logged in - can contextualize
-     * @var [type]
-     *
-     * Some logic to determine if this is a course lesson, topic, quiz, etc...
-     */
+	/**
+	 * User is logged in - can contextualize
+	 *
+	 * Some logic to determine if this is a course lesson, topic, quiz, etc...
+	 */
 
-     // TODO: Needs to be a filterable template call with more elegant fallback
+	// TODO: Needs to be a filterable template call with more elegant fallback.
+	if ( file_exists( 'infobar-' . get_post_type() . '.php' ) ) {
+		include 'infobar-' . get_post_type() . '.php';
+	} else {
+		include __DIR__ . '/infobar-generic.php';
+	}
 
+else :
 
+	/**
+	 * User isn't logged in - can't contextualize
+	 */
 
-     if( file_exists('infobar-'.get_post_type().'.php') ) {
-         incldue( 'infobar-' . get_post_type() . '.php' );
-     } else {
-         include( __DIR__ . '/infobar-generic.php' );
-     }
-
-
-else:
-
-    /**
-     * User isn't logged in - can't contextualize
-     * @var [type]
-     */
-
-endif; ?>
+endif;

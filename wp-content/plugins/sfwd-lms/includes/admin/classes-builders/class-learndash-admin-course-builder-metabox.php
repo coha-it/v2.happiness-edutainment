@@ -1,22 +1,37 @@
 <?php
 /**
- * LearnDash Course Builder Metabox Class.
+ * LearnDash Course Builder Metabox.
  *
- * @package LearnDash
- * @subpackage admin
+ * @since 2.5.0
+ * @package LearnDash\Builder
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_exists( 'Learndash_Admin_Builder' ) ) ) {
+
 	/**
-	 * Class for LearnDash Course Builder.
+	 * Class LearnDash Course Builder Metabox.
+	 *
+	 * @since 2.5.0
+	 * @uses Learndash_Admin_Builder
 	 */
 	class Learndash_Admin_Metabox_Course_Builder extends Learndash_Admin_Builder {
+
+		/**
+		 * LearnDash course steps object
+		 *
+		 * @var object
+		 */
+		public $ld_course_steps_object;
 
 		/**
 		 * Public constructor for class
 		 */
 		public function __construct() {
-			$this->builder_post_type = 'sfwd-courses';
+			$this->builder_post_type   = 'sfwd-courses';
 			$this->selector_post_types = array(
 				learndash_get_post_type_slug( 'lesson' ),
 				learndash_get_post_type_slug( 'topic' ),
@@ -30,27 +45,21 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 		 * Iniitialize builder for specific Course Item.
 		 *
 		 * @since 2.6.0
+		 *
 		 * @param integer $post_id Post ID to load.
 		 */
 		public function builder_init( $post_id = 0 ) {
 			if ( ! empty( $post_id ) ) {
-				$this->builder_post_id = intval( $post_id );
+				$this->builder_post_id        = intval( $post_id );
 				$this->ld_course_steps_object = LDLMS_Factory_Post::course_steps( $this->builder_post_id );
 			}
-		}
-
-		/**
-		 * Call via the WordPress load sequence for admin pages.
-		 */
-		public function builder_on_load() {
-			parent::builder_on_load();
 		}
 
 		/**
 		 * Prints content for Course Builder meta box for admin
 		 * This function is called from other add_meta_box functions
 		 *
-		 * @since 2.5
+		 * @since 2.6.0
 		 *
 		 * @param object $post WP_Post.
 		 */
@@ -61,63 +70,97 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 				?>
 				<style>
 					#learndash_builder_box_wrap .learndash_selectors #learndash-selector-post-listing-sfwd-lessons:empty::after {
-						content: "<?php echo sprintf(
+						content: "
+						<?php
+						echo sprintf(
 							// translators: placeholder: Lesson.
-							_x( 'Click the \'+\' to add a new %s', 'placeholder: Lesson', 'learndash' ),
-							LearnDash_Custom_Label::get_label( 'Lesson' )
-						); ?>";
+							esc_html_x( 'Click the \'+\' to add a new %s', 'placeholder: Lesson', 'learndash' ),
+							LearnDash_Custom_Label::get_label( 'Lesson' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
+						);
+						?>
+						";
 					}
 					#learndash_builder_box_wrap .learndash_selectors #learndash-selector-post-listing-sfwd-topic:empty::after {
-						content: "<?php echo sprintf(
+						content: "
+						<?php
+						echo sprintf(
 							// translators: placeholder: Topic.
-							_x( 'Click the \'+\' to add a new %s', 'placeholder: Topic', 'learndash' ),
-							LearnDash_Custom_Label::get_label( 'Topic' )
-						); ?>";
+							esc_html_x( 'Click the \'+\' to add a new %s', 'placeholder: Topic', 'learndash' ),
+							LearnDash_Custom_Label::get_label( 'Topic' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
+						);
+						?>
+						";
 					}
 					#learndash_builder_box_wrap .learndash_selectors #learndash-selector-post-listing-sfwd-quiz:empty::after {
-						content: "<?php echo sprintf(
+						content: "
+						<?php
+						echo sprintf(
 							// translators: placeholder: Quiz.
-							_x( 'Click the \'+\' to add a new %s', 'placeholder: Quiz', 'learndash' ),
-							LearnDash_Custom_Label::get_label( 'Quiz' )
-						); ?>";
+							esc_html_x( 'Click the \'+\' to add a new %s', 'placeholder: Quiz', 'learndash' ),
+							LearnDash_Custom_Label::get_label( 'Quiz' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
+						);
+						?>
+						";
 					}
 
 					#learndash_builder_box_wrap .learndash_builder_items .ld-course-builder-lesson-items:empty:after {
-						content: "<?php echo sprintf(
+						content: "
+						<?php
+						echo sprintf(
 							// translators: placeholder: Lessons.
 							esc_html_x( 'Drop %s Here', 'placeholder: Lessons', 'learndash' ),
-							LearnDash_Custom_Label::get_label( 'lessons' )
-						); ?>";
+							LearnDash_Custom_Label::get_label( 'lessons' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
+						);
+						?>
+						";
 					}
 					#learndash_builder_box_wrap .learndash_builder_items .ld-course-builder-topic-items:empty:after {
-						content: "<?php echo sprintf(
+						content: "
+						<?php
+						echo sprintf(
 							// translators: placeholder: Lesson, Topics.
 							esc_html_x( 'Drop %1$s %2$s Here', 'placeholder: Lesson, Topics', 'learndash' ),
-							LearnDash_Custom_Label::get_label( 'lesson' ),
-							LearnDash_Custom_Label::get_label( 'topics' )
-						); ?>";
+							LearnDash_Custom_Label::get_label( 'lesson' ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
+							LearnDash_Custom_Label::get_label( 'topics' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
+						);
+						?>
+						";
 					}
 					#learndash_builder_box_wrap .learndash_builder_items .ld-course-builder-quiz-items:empty:after {
-						content: "<?php echo sprintf(
+						content: "
+						<?php
+						echo sprintf(
 							// translators: placeholder: Quizzes.
 							esc_html_x( 'Drop Global %s Here', 'placeholder: Quizzes', 'learndash' ),
-							LearnDash_Custom_Label::get_label( 'quizzes' )
-						); ?>";
+							LearnDash_Custom_Label::get_label( 'quizzes' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
+						);
+						?>
+						";
 					}
 
 					#learndash_builder_box_wrap .learndash_builder_items .ld-course-builder-lesson-items .ld-course-builder-quiz-items:empty:after {
-						content: "<?php echo sprintf(
+						content: "
+						<?php
+						echo sprintf(
 							// translators: placeholder: Lesson, Quizzes.
 							esc_html_x( 'Drop %1$s %2$s Here', 'placeholder: Lesson, Quizzes', 'learndash' ),
-							LearnDash_Custom_Label::get_label( 'lesson' ), LearnDash_Custom_Label::get_label( 'quizzes' )
-						); ?>";
+							LearnDash_Custom_Label::get_label( 'lesson' ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
+							LearnDash_Custom_Label::get_label( 'quizzes' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
+						);
+						?>
+						";
 					}
 					#learndash_builder_box_wrap .learndash_builder_items .ld-course-builder-lesson-items .ld-course-builder-topic-items .ld-course-builder-quiz-items:empty:after {
-						content: "<?php echo sprintf(
+						content: "
+						<?php
+						echo sprintf(
 							// translators: placeholder: Topic, Quizzes.
 							esc_html_x( 'Drop %1$s %2$s Here', 'placeholder: Topic, Quizzes', 'learndash' ),
-							LearnDash_Custom_Label::get_label( 'topic' ), LearnDash_Custom_Label::get_label( 'quizzes' )
-						); ?>";
+							LearnDash_Custom_Label::get_label( 'topic' ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
+							LearnDash_Custom_Label::get_label( 'quizzes' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
+						);
+						?>
+						";
 					}
 				</style>
 				<?php
@@ -128,6 +171,7 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 		 * Get the selected items for a post type.
 		 *
 		 * @since 2.6.0
+		 *
 		 * @param string $selector_post_type Post Type is selector being processed.
 		 * @return array Selector post IDs.
 		 */
@@ -135,7 +179,7 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 			$selector_post_type_steps = array();
 			if ( ! empty( $selector_post_type ) ) {
 				$course_steps = $this->ld_course_steps_object->get_steps( 't' );
-				if ( ( isset( $course_steps[ $selector_post_type ] ) ) && ( !empty( $course_steps[ $selector_post_type ] ) ) ) {
+				if ( ( isset( $course_steps[ $selector_post_type ] ) ) && ( ! empty( $course_steps[ $selector_post_type ] ) ) ) {
 					$selector_post_type_steps = $course_steps[ $selector_post_type ];
 				}
 			}
@@ -144,6 +188,8 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 
 		/**
 		 * Get the number of current items in the builder.
+		 *
+		 * @since 2.6.0
 		 */
 		public function get_build_items_count() {
 			?>
@@ -161,14 +207,16 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 
 		/**
 		 * Call via the WordPress admin_footer action hook.
+		 *
+		 * @since 2.6.0
 		 */
 		public function builder_admin_footer() {
 			$builder_post_type_label = $this->get_label_for_post_type( $this->builder_post_type );
 
 			$this->builder_assets[ $this->builder_post_type ]['messages']['learndash_unload_message'] = sprintf(
 				// translators: placeholder: Course.
-				esc_html_x( 'You have unsaved %s Builder changes. Are you sure you want to leave?', 'placeholder: Course' ),
-				LearnDash_Custom_Label::get_label( $builder_post_type_label )
+				esc_html_x( 'You have unsaved %s Builder changes. Are you sure you want to leave?', 'placeholder: Course', 'learndash' ),
+				LearnDash_Custom_Label::get_label( $builder_post_type_label ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
 			);
 
 			foreach ( $this->selector_post_types as $selector_post_type ) {
@@ -178,12 +226,14 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 					$this->builder_assets[ $this->builder_post_type ]['messages'][ 'confirm_remove_' . $selector_post_type ] = sprintf(
 						// translators: 'placeholders: will be post type labels like Course, Lesson, Topic'.
 						esc_html_x( 'Are you sure you want to remove this %1$s from the %2$s? (This will also remove all sub-items)', 'placeholders: will be post type labels like Course, Lesson, Topic', 'learndash' ),
-						LearnDash_Custom_Label::get_label( $this->get_label_for_post_type( $selector_post_type ) ), LearnDash_Custom_Label::get_label( $builder_post_type_label )
+						LearnDash_Custom_Label::get_label( $this->get_label_for_post_type( $selector_post_type ) ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
+						LearnDash_Custom_Label::get_label( $builder_post_type_label ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
 					);
 
 					$this->builder_assets[ $this->builder_post_type ]['messages'][ 'confirm_trash_' . $selector_post_type ] = sprintf(
 						// translators: placeholder: will be post type label like Course, Lesson, Topic.
-						esc_html_x( 'Are you sure you want to move this %s to Trash?', 'placeholder: will be post type label like Course, Lesson, Topic', 'learndash' ), LearnDash_Custom_Label::get_label( $this->get_label_for_post_type( $selector_post_type ) )
+						esc_html_x( 'Are you sure you want to move this %s to Trash?', 'placeholder: will be post type label like Course, Lesson, Topic', 'learndash' ),
+						LearnDash_Custom_Label::get_label( $this->get_label_for_post_type( $selector_post_type ) ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
 					);
 				}
 			}
@@ -198,7 +248,6 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 		 *
 		 * @param string  $post_type Post Type slug.
 		 * @param boolean $singular True if singular label needed. False for plural.
-		 * @return string.
 		 */
 		public function get_label_for_post_type( $post_type = '', $singular = true ) {
 			switch ( $post_type ) {
@@ -233,6 +282,9 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 						return 'quizzes';
 					}
 					break;
+
+				default:
+					return '';
 			}
 		}
 
@@ -241,6 +293,7 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 		 * @since 2.5.0
 		 *
 		 * @param array $args Array of query args.
+		 *
 		 * @return array
 		 */
 		public function build_selector_query( $args = array() ) {
@@ -249,8 +302,15 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 				$per_page = 10;
 			}
 
+			$step_post_statuses = learndash_get_step_post_statuses();
+			if ( ! empty( $step_post_statuses ) ) {
+				$step_post_statuses = array_keys( $step_post_statuses );
+			} else {
+				$step_post_statuses = array( 'publish' );
+			}
+
 			$defaults = array(
-				'post_status'    => array( 'publish' ),
+				'post_status'    => $step_post_statuses,
 				'posts_per_page' => $per_page,
 				'paged'          => 1,
 				'orderby'        => 'title',
@@ -297,26 +357,17 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 					$m_include_ids = array_merge( $m_include_ids, $m_post_type_query->posts );
 					if ( ! isset( $m_args['post__not_in'] ) ) {
 						$m_args['post__not_in'] = array();
-					} 
+					}
 					$m_args['post__not_in'] = array_merge( $m_args['post__not_in'], $m_include_ids );
 				}
 
-				//if ( isset( $m_args['post__not_in'] ) ) {
-				//	unset( $m_args['post__not_in'] );
-				//}
-
 				/**
-				 * Allow externals to control inclusion of orphaned steps.
-				 * Orphaned steps are those not attached to a course.
+				 * Filters whether to include orphaned steps or not. Orphaned steps are the steps that are not attached to a course.
 				 *
 				 * @since 2.5.9
 				 *
-				 * @param boolean true The default value is true to include orphaned steps.
-				 * @param array $args The current query args array.
-				 *
-				 * @return the external filters should return:
-				 *  true  - Yes include orphaned steps.
-				 *  false - No do not inclide orphaned steps.
+				 * @param boolean $include_orphaned_steps Whether to include orphaned steps.
+				 * @param array   $args                   An array of query arguments.
 				 */
 				$include_orphaned_steps = apply_filters( 'learndash_course_builder_include_orphaned_steps', true, $args );
 				if ( true === $include_orphaned_steps ) {
@@ -349,7 +400,7 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 							'compare' => 'NOT EXISTS',
 						),
 					);
-					$m_post_type_query = new WP_Query( $m_args );
+					$m_post_type_query    = new WP_Query( $m_args );
 					if ( ( property_exists( $m_post_type_query, 'posts' ) ) && ( ! empty( $m_post_type_query->posts ) ) ) {
 						$m_include_ids = array_merge( $m_include_ids, $m_post_type_query->posts );
 						if ( ! isset( $m_args['post__not_in'] ) ) {
@@ -365,6 +416,13 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 					$args['post__in'] = array( 0 );
 				}
 			}
+			/**
+			 * Filters course builder query arguments.
+			 *
+			 * @since 2.5.0
+			 *
+			 * @param array $args An array of query arguments.
+			 */
 			return apply_filters( 'learndash_course_builder_selector_args', $args );
 		}
 
@@ -372,7 +430,9 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 		 * Common function to show Selector pager buttons.
 		 *
 		 * @since 2.5.0
+		 *
 		 * @param object $post_type_query WP_Query instance.
+		 *
 		 * @return string Button(s) HTML.
 		 */
 		public function build_selector_pages_buttons( $post_type_query ) {
@@ -382,24 +442,24 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 				$first_page = 1;
 
 				$current_page = intval( $post_type_query->query['paged'] );
-				$last_page = intval( $post_type_query->max_num_pages );
+				$last_page    = intval( $post_type_query->max_num_pages );
 				if ( empty( $last_page ) ) {
 					$last_page = 1;
 				}
 
 				if ( $current_page <= 1 ) {
-					$prev_page = 1;
+					$prev_page     = 1;
 					$prev_disabled = ' disabled="disabled" ';
 				} else {
-					$prev_page = $current_page - 1;
+					$prev_page     = $current_page - 1;
 					$prev_disabled = '';
 				}
 
 				if ( $current_page >= $last_page ) {
-					$next_page = $last_page;
+					$next_page     = $last_page;
 					$next_disabled = ' disabled="disabled" ';
 				} else {
-					$next_page = $current_page + 1;
+					$next_page     = $current_page + 1;
 					$next_disabled = '';
 				}
 
@@ -416,26 +476,28 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 		/**
 		 * Common function to show Selector pager buttons.
 		 *
-		 * @since 2.5.0
+		 * @since 3.0.0
+		 *
 		 * @param object $post_type_query WP_Query instance.
+		 *
 		 * @return string Button(s) HTML.
 		 */
 		public function build_selector_pages_buttons_json( $post_type_query ) {
 			$pager_buttons = [
-				'first_page' => 1,
-				'last_page' => 1,
-				'prev_page' => null,
+				'first_page'    => 1,
+				'last_page'     => 1,
+				'prev_page'     => null,
 				'prev_disabled' => false,
-				'next_page' => null,
+				'next_page'     => null,
 				'next_disabled' => false,
-				'current_page' => null,
+				'current_page'  => null,
 			];
 
 			if ( $post_type_query instanceof WP_Query ) {
 				$pager_buttons['first_page'] = 1;
 
 				$current_page = intval( $post_type_query->query['paged'] );
-				$last_page = intval( $post_type_query->max_num_pages );
+				$last_page    = intval( $post_type_query->max_num_pages );
 
 				$pager_buttons['current_page'] = $current_page;
 				if ( empty( $last_page ) ) {
@@ -444,18 +506,18 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 
 				if ( $current_page <= 1 ) {
 					$pager_buttons['prev_page'] = 1;
-					$pager_buttons['has_prev'] = false;
+					$pager_buttons['has_prev']  = false;
 				} else {
 					$pager_buttons['prev_page'] = $current_page - 1;
-					$pager_buttons['has_prev'] = true;
+					$pager_buttons['has_prev']  = true;
 				}
 
 				if ( $current_page >= $last_page ) {
 					$pager_buttons['next_page'] = $last_page;
-					$pager_buttons['has_next'] = false;
+					$pager_buttons['has_next']  = false;
 				} else {
 					$pager_buttons['next_page'] = $current_page + 1;
-					$pager_buttons['has_next'] = true;
+					$pager_buttons['has_next']  = true;
 				}
 			}
 
@@ -466,6 +528,7 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 		 * Show selector rows.
 		 *
 		 * @since 2.5.0
+		 *
 		 * @param object $post_type_query WP_Query instance.
 		 */
 		public function build_selector_rows( $post_type_query ) {
@@ -473,10 +536,11 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 
 			if ( $post_type_query instanceof WP_Query ) {
 				$selector_post_type = $post_type_query->query['post_type'];
+
 				$selector_post_type_object = get_post_type_object( $selector_post_type );
 
 				$selector_label = $selector_post_type_object->label;
-				$selector_slug = $this->get_label_for_post_type( $selector_post_type );
+				$selector_slug  = $this->get_label_for_post_type( $selector_post_type );
 
 				foreach ( $post_type_query->posts as $p ) {
 					$selector_rows .= $this->build_selector_row_single( $p, $selector_post_type );
@@ -489,7 +553,8 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 		/**
 		 * Show selector rows.
 		 *
-		 * @since 2.5.0
+		 * @since 3.0.0
+		 *
 		 * @param object $post_type_query WP_Query instance.
 		 */
 		public function build_selector_rows_json( $post_type_query ) {
@@ -499,7 +564,13 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 				$selector_post_type = $post_type_query->query['post_type'];
 
 				foreach ( $post_type_query->posts as $p ) {
-					$selector_rows[] = [ 'ID' => $p->ID, 'post_title' => get_the_title( $p->ID ), 'type' => $selector_post_type, 'edit_link' => get_edit_post_link( $p->ID, '' ) ];
+					$selector_rows[] = [
+						'ID'          => $p->ID,
+						'post_title'  => wp_kses_post( $p->post_title ),
+						'post_status' => learndash_get_step_post_status_slug( $p ),
+						'type'        => $selector_post_type,
+						'edit_link'   => get_edit_post_link( $p->ID, '' ),
+					];
 				}
 			}
 
@@ -510,9 +581,10 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 		 * Show selector single row.
 		 *
 		 * @since 2.5.0
+		 *
 		 * @param object $p WP_Post object to show.
 		 * @param string $selector_post_type Post type slug.
-		 * @return string Row HTML.
+		 * @return string Raw HTML.
 		 */
 		protected function build_selector_row_single( $p = null, $selector_post_type = '' ) {
 			$selector_row = '';
@@ -524,7 +596,7 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 			$selector_post_type_object = get_post_type_object( $selector_post_type );
 
 			$selector_label = $selector_post_type_object->label;
-			$selector_slug = $this->get_label_for_post_type( $selector_post_type );
+			$selector_slug  = $this->get_label_for_post_type( $selector_post_type );
 
 			$selector_sub_actions = '';
 
@@ -534,17 +606,19 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 			$view_post_link = '';
 
 			if ( $p ) {
-				$p_id = $p->ID;
+				$p_id    = $p->ID;
 				$p_title = get_the_title( $p->ID );
-				//$view_post_link = learndash_get_step_permalink( $p->ID, $this->builder_post_id );
 
 				/**
 				 * We add this to force the course_id to zero for the selectors as we don't
 				 * want the the 'view' URL to reflect the nested course.
 				 */
-				add_filter( 'learndash_post_link_course_id', function( $course_id ) {
-					return 0;
-				} );
+				add_filter(
+					'learndash_post_link_course_id',
+					function( $course_id ) {
+						return 0;
+					}
+				);
 
 				$view_post_link = get_permalink( $p->ID );
 				if ( current_user_can( 'edit_courses' ) ) {
@@ -553,7 +627,7 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 				}
 			} else {
 				// We need a unique ID.
-				$p_id = $selector_post_type . '-placeholder';
+				$p_id    = $selector_post_type . '-placeholder';
 				$p_title = $selector_post_type_object->labels->singular_name;
 			}
 
@@ -580,10 +654,11 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 			$selector_sub_actions .= '<span class="ld-course-builder-action ld-course-builder-action-remove ld-course-builder-action-' . $selector_slug . '-remove dashicons" title="' . sprintf(
 				// translators: placeholders: will contain post type label, Course.
 				esc_html_x( 'Remove %1$s from %2$s', 'placeholders: will contain post type label, Course', 'learndash' ),
-				LearnDash_Custom_Label::get_label( $selector_slug ), LearnDash_Custom_Label::get_label( 'Course' )
+				LearnDash_Custom_Label::get_label( $selector_slug ),
+				LearnDash_Custom_Label::get_label( 'Course' )
 			) . '"></span>';
 
-			$selector_sub_items	= '';
+			$selector_sub_items     = '';
 			$selector_action_expand = '';
 			if ( 'sfwd-lessons' === $selector_post_type ) {
 				$selector_sub_items .= '<div class="ld-course-builder-topic-items ld-course-builder-lesson-topic-items"></div>';
@@ -595,8 +670,6 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 				$selector_sub_items    .= '<div class="ld-course-builder-quiz-items ld-course-builder-topic-quiz-items"></div>';
 				$selector_action_expand = '<span class="ld-course-builder-action ld-course-builder-action-show-hide ld-course-builder-action-show ld-course-builder-action-' . $selector_slug . '-show dashicons" title="' . esc_html__( 'Expand/Collape Section', 'learndash' ) . '"></span>';
 
-			} elseif ( 'sfwd-quiz' === $selector_post_type ) {
-				// Nothing here.
 			}
 
 			$selector_row .= '<li id="ld-post-' . $p_id . '" class="ld-course-builder-item ld-course-builder-' . $selector_slug . '-item " data-ld-type="' . $selector_post_type . '" data-ld-id="' . $p_id . '">
@@ -604,9 +677,9 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 					<span class="ld-course-builder-actions">
 						<span class="ld-course-builder-action ld-course-builder-action-move ld-course-builder-action-' . $selector_slug . '-move dashicons" title="' . sprintf(
 				// translators: placeholder: will contain post type label.
-				esc_html_x( 'Move %s', 'placeholder: will contain post type label', 'learndash' ),
-				LearnDash_Custom_Label::get_label( $selector_slug )
-			) . '"></span>
+					esc_html_x( 'Move %s', 'placeholder: will contain post type label', 'learndash' ),
+					LearnDash_Custom_Label::get_label( $selector_slug )
+				) . '"></span>
 						<span class="ld-course-builder-sub-actions">' . $selector_sub_actions . '</span>
 					</span>
 					<span class="ld-course-builder-title"><span class="ld-course-builder-title-text">' . $p_title . '</span>
@@ -624,15 +697,16 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 
 		/**
 		 * Build Course Steps HTML.
+		 *
+		 * @since 2.5.0
 		 */
 		public function build_course_steps_html() {
 			$steps_html = '';
 
 			$course_steps = $this->ld_course_steps_object->get_steps();
 
-			//if ( ! empty( $course_steps ) ) {
-				$steps_html .= $this->process_course_steps( $course_steps );
-			//}
+			$steps_html .= $this->process_course_steps( $course_steps );
+
 			return $steps_html;
 		}
 
@@ -640,8 +714,10 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 		 * Build course steps HTML.
 		 *
 		 * @since 2.5.0
+		 *
 		 * @param array  $steps Array of current course steps.
 		 * @param string $steps_parent_type Parent post type slug. Default is 'sfwd-courses'.
+		 *
 		 * @return string Steps HTML.
 		 */
 		protected function process_course_steps( $steps = array(), $steps_parent_type = 'sfwd-courses' ) {
@@ -653,12 +729,12 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 					if ( ! empty( $steps_items ) ) {
 						foreach ( $steps_items as $steps_id => $steps_set ) {
 							$steps_section_item_html = $this->process_course_steps( $steps_set, $steps_type );
-							$edit_post_link = get_edit_post_link( $steps_id );
-							$edit_post_link = add_query_arg( 'course_id', $this->builder_post_id, $edit_post_link );
+							$edit_post_link          = get_edit_post_link( $steps_id );
+							$edit_post_link          = add_query_arg( 'course_id', $this->builder_post_id, $edit_post_link );
 
 							$view_post_link = learndash_get_step_permalink( $steps_id, $this->builder_post_id );
 
-							if ( $steps_type == 'sfwd-lessons' ) {
+							if ( 'sfwd-lessons' === $steps_type ) {
 								$steps_section_item_html = '<div id="ld-post-' . $steps_id . '" class="ld-course-builder-item ld-course-builder-lesson-item" data-ld-type="' . $steps_type . '" data-ld-id="' . $steps_id . '">
 									<div class="ld-course-builder-lesson-header ld-course-builder-header">
 										<span class="ld-course-builder-actions">
@@ -676,12 +752,12 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 
 												<span class="ld-course-builder-action ld-course-builder-action-remove ld-course-builder-action-lesson-remove dashicons" title="' .
 												// translators: placeholders: Lesson, Course.
-												sprintf( esc_html_x( 'Remove %1$s from %2$s', 'placeholders: Lesson, Course', 'learndash' ), LearnDash_Custom_Label::get_label('Lesson'), LearnDash_Custom_Label::get_label( 'Course' ) ) . '"></span>
+												sprintf( esc_html_x( 'Remove %1$s from %2$s', 'placeholders: Lesson, Course', 'learndash' ), LearnDash_Custom_Label::get_label( 'Lesson' ), LearnDash_Custom_Label::get_label( 'Course' ) ) . '"></span>
 											</span>
 										</span>
 										<span class="ld-course-builder-title"><span class="ld-course-builder-title-text">' . get_the_title( $steps_id ) . '</span>
 											<span class="ld-course-builder-action ld-course-builder-edit-title-pencil dashicons" title="' . esc_html__( 'Edit Title', 'learndash' ) . '" ></span>
-											<span class="ld-course-builder-action ld-course-builder-edit-title-ok dashicons" title="'. esc_html__( 'Ok', 'learndash' ) . '" ></span>
+											<span class="ld-course-builder-action ld-course-builder-edit-title-ok dashicons" title="' . esc_html__( 'Ok', 'learndash' ) . '" ></span>
 											<span class="ld-course-builder-action ld-course-builder-edit-title-cancel dashicons" title="' . esc_html__( 'Cancel', 'learndash' ) . '" ></span>
 										</span>
 
@@ -690,7 +766,7 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 									</div>
 									<div class="ld-course-builder-sub-items" style="display:none">' . $steps_section_item_html . '</div>
 								</div>';
-							} else if ( 'sfwd-topic' === $steps_type ) {
+							} elseif ( 'sfwd-topic' === $steps_type ) {
 								$steps_section_item_html = '<div id="ld-post-' . $steps_id . '" class="ld-course-builder-item ld-course-builder-topic-item" data-ld-type="' . $steps_type . '" data-ld-id="' . $steps_id . '">
 									<div class="ld-course-builder-topic-header ld-course-builder-header">
 										<span class="ld-course-builder-actions">
@@ -717,15 +793,15 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 									</div>
 									<div class="ld-course-builder-sub-items" style="display:none">' . $steps_section_item_html . '</div>
 								</div>';
-							} else if ( 'sfwd-quiz' === $steps_type ) {
+							} elseif ( 'sfwd-quiz' === $steps_type ) {
 								$steps_section_item_html = '<div id="ld-post-' . $steps_id . '" class="ld-course-builder-item ld-course-builder-quiz-item" data-ld-type="' . $steps_type . '" data-ld-id="' . $steps_id . '">
 									<div class="ld-course-builder-quiz-header ld-course-builder-header">
 										<span class="ld-course-builder-actions">
 											<span class="ld-course-builder-action ld-course-builder-action-move ld-course-builder-action-quiz-move dashicons" title="' . esc_html__( 'Move', 'learndash' ) . '"></span>
 											<span class="ld-course-builder-sub-actions">
 												<a target="_blank" class="ld-course-builder-action ld-course-builder-action-edit ld-course-builder-action-quiz-edit dashicons" href="' . $edit_post_link . '"><span class="screen-reader-text">' .
-												// translators: placeholder: placeholder: Topic.
-												sprintf( esc_html_x( 'Edit %s Settings (new window)', 'placeholder: Topic', 'learndash' ), LearnDash_Custom_Label::get_label( 'Quiz' ) ) . '" ></span></a>
+												// translators: placeholder: Topic.
+												sprintf( esc_html_x( 'Edit %s Settings (new window)', 'placeholder: Quiz', 'learndash' ), LearnDash_Custom_Label::get_label( 'Quiz' ) ) . '" ></span></a>
 												<a target="_blank" class="ld-course-builder-action ld-course-builder-action-view ld-course-builder-action-quiz-view dashicons" href="' . $view_post_link . '"><span class="screen-reader-text" >' .
 												// translators: placeholder: placeholder: Quiz.
 												sprintf( esc_html_x( 'View %s (new window)', 'placeholder: Quiz', 'learndash' ), LearnDash_Custom_Label::get_label( 'Quiz' ) ) . '"></span></a>
@@ -754,14 +830,14 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 						} elseif ( 'sfwd-quiz' === $steps_type ) {
 							$steps_section_html .= '<div class="ld-course-builder-quiz-items ld-course-builder-course-quiz-items">' . $steps_section_items_html . '</div>';
 						}
-					} else if ( 'sfwd-lessons' === $steps_parent_type ) {
-						if ( $steps_type == 'sfwd-topic' ) {
+					} elseif ( 'sfwd-lessons' === $steps_parent_type ) {
+						if ( 'sfwd-topic' === $steps_type ) {
 							$steps_section_html = '<div class="ld-course-builder-topic-items ld-course-builder-lesson-topic-items">' . $steps_section_items_html . '</div>';
 
-						} else if ( 'sfwd-quiz' === $steps_type ) {
+						} elseif ( 'sfwd-quiz' === $steps_type ) {
 							$steps_section_html .= '<div class="ld-course-builder-quiz-items ld-course-builder-lesson-quiz-items">' . $steps_section_items_html . '</div>';
 						}
-					} else if ( 'sfwd-topic' === $steps_parent_type ) {
+					} elseif ( 'sfwd-topic' === $steps_parent_type ) {
 						if ( 'sfwd-quiz' === $steps_type ) {
 							$steps_section_html = '<div class="ld-course-builder-quiz-items ld-course-builder-topic-quiz-items">' . $steps_section_items_html . '</div>';
 						}
@@ -780,6 +856,7 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 		/** Save Course Builder steps
 		 *
 		 * @since 2.5.0
+		 *
 		 * @param integer $post_id Post ID of course being saved.
 		 * @param object  $post WP_Post object instance being saved.
 		 * @param boolean $update False is an update. True if new post.
@@ -787,7 +864,7 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 		public function save_course_builder( $post_id, $post, $update ) {
 			$return_status = false;
 
-			$cb_nonce_key = $this->builder_prefix . '_nonce';
+			$cb_nonce_key   = $this->builder_prefix . '_nonce';
 			$cb_nonce_value = $this->builder_prefix . '_' . $post->post_type . '_' . $post_id . '_nonce';
 
 			if ( ( isset( $_POST[ $cb_nonce_key ] ) ) && ( wp_verify_nonce( $_POST[ $cb_nonce_key ], $cb_nonce_value ) ) ) {
@@ -816,6 +893,8 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 		/**
 		 * Handle AJAX pager requests.
 		 *
+		 * @since 2.6.0
+		 *
 		 * @param array $query_args array of values for AJAX request.
 		 */
 		public function learndash_builder_selector_pager( $query_args = array() ) {
@@ -824,38 +903,39 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 
 			if ( isset( $query_args['format'] ) && 'json' === $query_args['format'] ) {
 				$reply_data['selector_pager'] = [];
-				$reply_data['selector_rows'] = [];
-			}
-			else {
+				$reply_data['selector_rows']  = [];
+			} else {
 				$reply_data['selector_pager'] = '';
-				$reply_data['selector_rows'] = '';
+				$reply_data['selector_rows']  = '';
 			}
 
 			if ( ! empty( $query_args ) ) {
 				$post_type_query_args = $this->build_selector_query( $query_args );
+
 				if ( ! empty( $post_type_query_args ) ) {
 					$post_type_query = new WP_Query( $post_type_query_args );
 					if ( $post_type_query->have_posts() ) {
 
 						if ( isset( $query_args['format'] ) && 'json' === $query_args['format'] ) {
 							$reply_data['selector_pager'] = $this->build_selector_pages_buttons_json( $post_type_query );
-							$reply_data['selector_rows'] = $this->build_selector_rows_json( $post_type_query );
-						}
-						else {
+							$reply_data['selector_rows']  = $this->build_selector_rows_json( $post_type_query );
+						} else {
 							$reply_data['selector_pager'] = $this->build_selector_pages_buttons( $post_type_query );
-							$reply_data['selector_rows'] = $this->build_selector_rows( $post_type_query );
+							$reply_data['selector_rows']  = $this->build_selector_rows( $post_type_query );
 						}
 					}
 				}
 			}
 
-			echo json_encode( $reply_data );
+			echo wp_json_encode( $reply_data );
 
 			wp_die();
 		}
 
 		/**
 		 * Handle AJAX search requests.
+		 *
+		 * @since 2.6.0
 		 *
 		 * @param array $query_args array of values for AJAX request.
 		 */
@@ -865,11 +945,10 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 
 			if ( isset( $query_args['format'] ) && 'json' === $query_args['format'] ) {
 				$reply_data['selector_pager'] = [];
-				$reply_data['selector_rows'] = [];
-			}
-			else {
+				$reply_data['selector_rows']  = [];
+			} else {
 				$reply_data['selector_pager'] = '';
-				$reply_data['selector_rows'] = '';
+				$reply_data['selector_rows']  = '';
 			}
 
 			if ( ! empty( $query_args ) ) {
@@ -879,17 +958,16 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 					if ( $post_type_query->have_posts() ) {
 						if ( isset( $query_args['format'] ) && 'json' === $query_args['format'] ) {
 							$reply_data['selector_pager'] = $this->build_selector_pages_buttons_json( $post_type_query );
-							$reply_data['selector_rows'] = $this->build_selector_rows_json( $post_type_query );
-						}
-						else {
+							$reply_data['selector_rows']  = $this->build_selector_rows_json( $post_type_query );
+						} else {
 							$reply_data['selector_pager'] = $this->build_selector_pages_buttons( $post_type_query );
-							$reply_data['selector_rows'] = $this->build_selector_rows( $post_type_query );
+							$reply_data['selector_rows']  = $this->build_selector_rows( $post_type_query );
 						}
 					}
 				}
 			}
 
-			echo json_encode( $reply_data );
+			echo wp_json_encode( $reply_data );
 
 			wp_die();
 		}
@@ -897,17 +975,19 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 		/**
 		 * Handle AJAX new step requests.
 		 *
+		 * @since 2.6.0
+		 *
 		 * @param array $query_args array of values for AJAX request.
 		 */
 		public function learndash_builder_selector_step_new( $query_args = array() ) {
 			global $wpdb;
 
-			$reply_data = array();
+			$reply_data              = array();
 			$reply_data['new_steps'] = array();
 
 			if ( ( isset( $query_args['new_steps'] ) ) && ( ! empty( $query_args['new_steps'] ) ) ) {
 				foreach ( $query_args['new_steps'] as $old_step_id => $step_set ) {
-					if ( ( isset( $step_set['post_type'] ) ) && ( ! empty( $step_set['post_type'] ) ) && ( false !== in_array( $step_set['post_type'], array( 'sfwd-lessons', 'sfwd-topic', 'sfwd-quiz' ) ) ) ) {
+					if ( ( isset( $step_set['post_type'] ) ) && ( ! empty( $step_set['post_type'] ) ) && ( false !== in_array( $step_set['post_type'], array( 'sfwd-lessons', 'sfwd-topic', 'sfwd-quiz' ), true ) ) ) {
 						$post_args = array(
 							'post_type'    => esc_attr( $step_set['post_type'] ),
 							'post_status'  => 'publish',
@@ -923,65 +1003,49 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 								$post_args['post_title'] = $post_type_object->labels->singular_name;
 							}
 						}
+						/**
+						 * Filters course builder new step post arguments.
+						 *
+						 * @since 2.5.0
+						 *
+						 * @param array $post_args An array of new step post arguments.
+						 */
+						// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
 						$new_step_id = wp_insert_post( apply_filters( 'course_builder_selector_new_step_post_args', $post_args ) );
 						if ( $new_step_id ) {
 							/**
-							 * We have to set the guid manually because the one assigned within wp_insert_post is non-unique. 
+							 * We have to set the guid manually because the one assigned within wp_insert_post is non-unique.
 							 * See LEARNDASH-3853
-							 */ 
+							 */
 							$wpdb->update(
-								$wpdb->posts, 
-								array( 'guid' => add_query_arg( array( 'post_type' => $step_set['post_type'], 'p' => $new_step_id ), home_url() ) ),  
+								$wpdb->posts,
+								array(
+									'guid' => add_query_arg(
+										array(
+											'post_type' => $step_set['post_type'],
+											'p'         => $new_step_id,
+										),
+										home_url()
+									),
+								),
 								array( 'ID' => $new_step_id )
 							);
 
 							$reply_data['status'] = true;
 
-							$reply_data['new_steps'][ $old_step_id ] = array();
-							$reply_data['new_steps'][ $old_step_id ]['post_id'] = $new_step_id;
-							$reply_data['new_steps'][ $old_step_id ]['view_url'] = get_permalink( $new_step_id );
-							$reply_data['new_steps'][ $old_step_id ]['edit_url'] = get_edit_post_link( $new_step_id );
+							$reply_data['new_steps'][ $old_step_id ]                = array();
+							$reply_data['new_steps'][ $old_step_id ]['post_id']     = $new_step_id;
+							$reply_data['new_steps'][ $old_step_id ]['view_url']    = get_permalink( $new_step_id );
+							$reply_data['new_steps'][ $old_step_id ]['edit_url']    = get_edit_post_link( $new_step_id );
+							$reply_data['new_steps'][ $old_step_id ]['post_status'] = get_post_status( $new_step_id );
 
-							if ( $post_args['post_type'] == 'sfwd-quiz' ) {
-
-								// This form element is required when creating a new Quiz in WPProQuiz. Don't ask.
-								//$_POST['form'] = array();
-								//$_POST['name'] = $post_args['post_title'];
-								//$_POST['text'] = 'AAZZAAZZ';
-
-								//$pro_quiz = new WpProQuiz_Controller_Quiz();
-								//ob_start();
-								//$pro_quiz->route(
-								//	array(
-								//		'action'  => 'addEdit',
-								//		'quizId'  => 0,
-								//		'post_id' => $new_step_id,
-								//	)
-								//);
-								//ob_get_clean();
-
-								//$quiz_id = learndash_get_setting( $new_step_id, 'quiz_pro' );
-
-								//$quiz_meta = SFWD_CPT_Instance::$instances['sfwd-quiz']->get_settings_values( 'sfwd-quiz' );
-								//if ( ! empty( $quiz_meta ) ) {
-								//	$quiz_meta_values = wp_list_pluck( $quiz_meta, 'value' );
-								//	if ( ! empty( $quiz_id ) ) {
-								//		$quiz_meta_values['sfwd-quiz_quiz_pro'] = intval( $quiz_id );
-								//		//update_post_meta( $new_step_id, 'quiz_pro_id_' . $quiz_id, $quiz_id );
-								//		//update_post_meta( $new_step_id, 'quiz_pro_id', $quiz_id );
-								//		learndash_update_setting( $new_step_id, 'quiz_pro', $quiz_id );
-								//
-								//		// Set the 'View Statistics on Profile' for the new quiz.
-								//		update_post_meta( $new_step_id, '_viewProfileStatistics', 1 );
-								//	}
-								//	update_post_meta( $new_step_id, '_sfwd-quiz', $quiz_meta_values );
-								//}
+							if ( 'sfwd-quiz' === $post_args['post_type'] ) {
 
 								$quiz_mapper = new WpProQuiz_Model_QuizMapper();
-								$quiz_pro = new WpProQuiz_Model_Quiz();
+								$quiz_pro    = new WpProQuiz_Model_Quiz();
 								$quiz_pro->setName( $post_args['post_title'] );
 								$quiz_pro->setText( 'AAZZAAZZ' );
-								$quiz_pro = $quiz_mapper->save( $quiz_pro );
+								$quiz_pro    = $quiz_mapper->save( $quiz_pro );
 								$quiz_pro_id = $quiz_pro->getId();
 								$quiz_pro_id = absint( $quiz_pro_id );
 								learndash_update_setting( $new_step_id, 'quiz_pro', $quiz_pro_id );
@@ -990,23 +1054,20 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 								update_post_meta( $new_step_id, '_viewProfileStatistics', 1 );
 							}
 
-							learndash_update_setting( $new_step_id, 'course', '0' );
-							update_post_meta( $new_step_id, 'course_id', '0' );
-							if ( in_array( $step_set['post_type'], array( 'sfwd-topic', 'sfwd-quiz' ) ) ) {
-								learndash_update_setting( $new_step_id, 'lesson', '0' );
-								update_post_meta( $new_step_id, 'lesson_id', '0' );
-							}
+							learndash_update_setting( $new_step_id, 'course', absint( $this->builder_post_id ) );
 						}
 					}
 				}
 			}
-			echo json_encode( $reply_data );
+			echo wp_json_encode( $reply_data );
 
 			wp_die();
 		}
 
 		/**
 		 * Handle AJAX trash step requests.
+		 *
+		 * @since 2.6.0
 		 *
 		 * @param array $query_args array of values for AJAX request.
 		 */
@@ -1020,26 +1081,28 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 
 			$post_args = wp_parse_args( $query_args, $post_args );
 
-			$post_args['post_id'] = intval( $query_args['post_id'] );
+			$post_args['post_id']   = intval( $query_args['post_id'] );
 			$post_args['post_type'] = esc_attr( $query_args['post_type'] );
 
 			if ( ( empty( $post_args['post_type'] ) ) || ( empty( $post_args['post_id'] ) ) ) {
-				$reply_data['status'] = false;
+				$reply_data['status']        = false;
 				$reply_data['error_message'] = esc_html__( '#1: Invalid post data', 'learndash' );
-			} else if ( in_array( $post_args['post_type'], $this->selector_post_types ) === false ) {
-				$reply_data['status'] = false;
+			} elseif ( in_array( $post_args['post_type'], $this->selector_post_types, true ) === false ) {
+				$reply_data['status']        = false;
 				$reply_data['error_message'] = esc_html__( '#2: Invalid post data', 'learndash' );
 			} else {
-				$new_step_id = wp_trash_post( $post_args['post_id'] );
+				$new_step_id          = wp_trash_post( $post_args['post_id'] );
 				$reply_data['status'] = true;
 			}
-			echo json_encode( $reply_data );
+			echo wp_json_encode( $reply_data );
 
 			wp_die();
 		}
 
 		/**
 		 * Handle AJAX set title requests.
+		 *
+		 * @since 2.6.0
 		 *
 		 * @param array $query_args array of values for AJAX request.
 		 */
@@ -1054,15 +1117,15 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 			);
 			$post_args = wp_parse_args( $query_args, $post_args );
 
-			$post_args['post_id'] = absint( $query_args['post_id'] );
-			$post_args['post_type'] = esc_attr( $query_args['post_type'] );
-			$post_args['post_title'] = sanitize_post_field( 'post_title', $query_args['new_title'], $post_args['post_id'], 'db' );
+			$post_args['post_id']    = absint( $query_args['post_id'] );
+			$post_args['post_type']  = esc_attr( $query_args['post_type'] );
+			$post_args['post_title'] = wp_unslash( sanitize_post_field( 'post_title', $query_args['new_title'], $post_args['post_id'], 'db' ) );
 
 			if ( ( empty( $post_args['post_title'] ) ) || ( empty( $post_args['post_type'] ) ) || ( empty( $post_args['post_id'] ) ) ) {
-				$reply_data['status'] = false;
+				$reply_data['status']        = false;
 				$reply_data['error_message'] = esc_html__( '#1: Invalid post data', 'learndash' );
-			} else if ( in_array( $post_args['post_type'], $this->selector_post_types ) === false ) {
-				$reply_data['status'] = false;
+			} elseif ( in_array( $post_args['post_type'], $this->selector_post_types, true ) === false ) {
+				$reply_data['status']        = false;
 				$reply_data['error_message'] = esc_html__( '#2: Invalid post data', 'learndash' );
 			} else {
 				$edit_post = array(
@@ -1076,17 +1139,17 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 				if ( 'sfwd-quiz' === $post_args['post_type'] ) {
 					$quiz_id = get_post_meta( $post_args['post_id'], 'quiz_pro_id', true );
 					if ( ! empty( $quiz_id ) ) {
-						$quizMapper = new WpProQuiz_Model_QuizMapper();
-						$quiz = $quizMapper->fetch( $quiz_id );
+						$quiz_mapper = new WpProQuiz_Model_QuizMapper();
+						$quiz        = $quiz_mapper->fetch( $quiz_id );
 						if ( is_a( $quiz, 'WpProQuiz_Model_Quiz' ) ) {
 							$quiz->setName( $post_args['post_title'] );
-							$quizMapper->save( $quiz );
+							$quiz_mapper->save( $quiz );
 						}
 					}
 				}
 			}
 
-			echo json_encode( $reply_data );
+			echo wp_json_encode( $reply_data );
 
 			wp_die();
 		}
@@ -1094,7 +1157,10 @@ if ( ( ! class_exists( 'Learndash_Admin_Metabox_Course_Builder' ) ) && ( class_e
 		// End of functions.
 	}
 }
-add_action( 'learndash_builders_init', function() {
-	Learndash_Admin_Metabox_Course_Builder::add_instance();
-} );
+add_action(
+	'learndash_builders_init',
+	function() {
+		Learndash_Admin_Metabox_Course_Builder::add_instance();
+	}
+);
 

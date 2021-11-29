@@ -5,9 +5,9 @@ Contributors: Benjamin_Zekavica
 Donate link: https://www.paypal.me/benjaminzekavica
 Tags: svg, svg support, upload svg, svg media, easy upload, easy-svg, easy svg, files, upload, icons, upload limit
 Requires at least: 4.9
-Tested up to: 5.2.3
+Tested up to: 5.8
 Requires PHP: 7.0
-Stable tag: 2.6
+Stable tag: 3.1.0
 License: GNU Version 2 or Any Later Version
 License URI: http://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -24,6 +24,8 @@ EASY SVG Support is a Plugin which allows you to upload SVG Files into your Medi
 * Uploading SVG Support for WordPress
 * Easy installation
 * Display SVG Files in the Media Libary
+* Updated for the new WordPress Gutenberg Editor
+* Support for PHP 8.0
 
 
 = Documentation & Support =
@@ -39,14 +41,6 @@ info@benjamin-zekavica.de or you can ask your question in the forums section.
 3. Upload now your SVG Files.
 4. Go to the Page or ACF and choose your File and save changes.
 
-Remember: Please add into your theme this Code in CSS:
-
-
-img[src*='.svg']{
-    width: 100%;
-    height: auto;
-}
-
 
 == Frequently Asked Questions ==
 
@@ -58,7 +52,7 @@ One options panel, where you can customize your SVG Files and SVG Sprites.
 
 Please check out my repository on Github:
 
-https://github.com/BenjaminZekavica/WordPress-Easy-SVG
+https://github.com/bz-projects/Easy-SVG
 
 == Screenshots ==
 1. Easy SVG Support in Gutenberg
@@ -66,6 +60,39 @@ https://github.com/BenjaminZekavica/WordPress-Easy-SVG
 
 
 == Changelog ==
+
+= 3.1.0: 21th of July, 2021 =
+
+* Support for new WordPress version 5.8
+* Support Gutenberg Version 
+
+
+= 3.0.0: 26th of May, 2021 =
+
+* Support for new WordPress version
+
+= 2.9.1: 28th of January, 2021 =
+
+* Add PHP 8.0 support
+* Support for new version of the Gutenberg Editor
+* Support for new WordPress version
+
+= 2.9: 28th of October, 2020 =
+
+* Security Fixes
+* Support for new WordPress version
+
+= 2.8: 02th of July, 2020 =
+
+* Security Fixes
+* Updated Language files
+* Support for new WordPress version
+
+= 2.7: 24th of January, 2020 =
+
+* Add Support for WordPress 5.3.2
+* Gutenberg Editor Post Image Size  
+* Security Fixes
 
 = 2.6: 21th of September, 2019 =
 

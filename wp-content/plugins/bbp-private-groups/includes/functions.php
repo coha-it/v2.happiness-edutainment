@@ -1,5 +1,7 @@
 <?php
 
+global $rpg_settingsf ;
+
 add_action('bbp_template_redirect', 'private_group_enforce_permissions', 1);
 add_filter('protected_title_format', 'pg_remove_protected_title');
 add_filter('private_title_format', 'pg_remove_private_title');
@@ -19,11 +21,18 @@ add_filter( 'bbp_user_can_view_forum', 'rpg_user_can_view_forum', 10, 3 );
 //filter back end access to topics and replies to ensure that moderators can only see their forums they have access to
 add_filter( 'bbp_request', 'rpg_filter_bbp_request', 10, 1 );
     
+add_action( 'admin_notices', 'rpg_warning' );
 
 
-//This code hides the author link if needed - we only potentailly need to get this link if forum visibility is active, otherwise it is not needed.
-//and user can't see the post - but then function will test that !
 global $rpg_settingsf ;
+
+//hide forum menu items if visibilty switched off
+if (empty($rpg_settingsf['set_forum_visibility'])) add_filter( 'wp_get_nav_menu_items', 'rpg_exclude_menu_items', null, 3 );
+
+
+//This code hides the author link if needed - we only potentially need to get this link if forum visibility is active, otherwise it is not needed.
+//and user can't see the post - but then function will test that !
+
 if (!empty ($rpg_settingsf['set_forum_visibility']) ) {
 remove_filter( 'bbp_get_author_link',          'bbp_suppress_private_author_link', 10, 2 );
 		remove_filter( 'bbp_get_topic_author_link',    'bbp_suppress_private_author_link', 10, 2 );
@@ -247,6 +256,11 @@ function pg_get_forum_freshness_title () {
 }
 
 function rpg_get_forum_last_active_id ($active_id, $forum_id) {
+	//amended to allow for case where a forum has topics in the forum, and sub forums as well - previosuly only allowed for subforums
+	//so first check if the last active is in this forum itself (rather than a sub forum) if so then we can just retirn $active)id
+	$parent = get_post_meta( $active_id, '_bbp_forum_id', true );
+	if ($parent == $forum_id ) return $active_id ;
+	//else we need to check which sub forums this user can see.
 	$sub_forums = private_groups_get_permitted_subforums($forum_id) ;
 	if ( !empty( $sub_forums ) ) {
 		$active_id = 0;
@@ -279,6 +293,9 @@ function rpg_get_forum_last_active_id ($active_id, $forum_id) {
 			$active_id = 0;
 		}
 	}
+	
+	
+	
 	return apply_filters( 'pg_get_forum_last_active_id', $active_id, $forum_id );
 }
 
@@ -287,7 +304,10 @@ function rpg_get_forum_last_active_id ($active_id, $forum_id) {
 function pg_get_forum_freshness_link_anchor( $forum_id = 0 ) {
 	global $rpg_settingsf ;
 		$forum_id  = bbp_get_forum_id( $forum_id );
-		$active_id = bbp_get_forum_last_active_id( $forum_id );
+		
+		//this returns the wrong answer - I suspect because there is another filter acting
+		//$active_id = bbp_get_forum_last_active_id( $forum_id );
+		$active_id = (int) get_post_meta( $forum_id, '_bbp_last_active_id', true );
 		
 		
 		if ( empty( $active_id ) )
@@ -298,6 +318,7 @@ function pg_get_forum_freshness_link_anchor( $forum_id = 0 ) {
 		
 		//then reset forum_id to the forum of the active topic in case it is a sub forum
 		$forum_id = private_groups_get_forum_id_from_post_id($active_id) ;
+		
 		$link_url  = $title = '';
 
 		if ( bbp_is_topic( $active_id ) ) {
@@ -313,7 +334,7 @@ function pg_get_forum_freshness_link_anchor( $forum_id = 0 ) {
 		}
 
 		$time_since = bbp_get_forum_last_active_time( $forum_id );
-		
+				
 
 	if ( !empty( $time_since ) && !empty( $link_url ) ) {
 			//test if user can see this post, and post link if they can
@@ -323,6 +344,7 @@ function pg_get_forum_freshness_link_anchor( $forum_id = 0 ) {
 				$anchor ['link_url'] = $link_url ;
 				$anchor ['title'] = $title;
 				$anchor ['display'] = $time_since;
+				//$anchor ['display'] = $forum_id ;
 				
 			}
 			//if it is private, then check user can view
@@ -399,6 +421,31 @@ function pg_get_forum_freshness_link_anchor( $forum_id = 0 ) {
 	
 	return $anchor;
 }
+
+//not currently used - put in whilst testing time since - can be removed if this line still shows !
+function rpg_get_forum_last_active_time( $forum_id = 0 ) {
+
+		// Verify forum and get last active meta
+		$forum_id    = bbp_get_forum_id( $forum_id );
+		$last_active = get_post_meta( $forum_id, '_bbp_last_active_time', true );
+
+		if ( empty( $last_active ) ) {
+			$reply_id = bbp_get_forum_last_reply_id( $forum_id );
+			if ( ! empty( $reply_id ) ) {
+				$last_active = get_post_field( 'post_date', $reply_id );
+			} else {
+				$topic_id = bbp_get_forum_last_topic_id( $forum_id );
+				if ( ! empty( $topic_id ) ) {
+					$last_active = bbp_get_topic_last_active_time( $topic_id );
+				}
+			}
+		}
+
+		$active_time = ! empty( $last_active ) ? bbp_get_time_since( bbp_convert_date( $last_active ) ) : '';
+
+		// Filter & return
+		return apply_filters( 'rpg_get_forum_last_active', $active_time, $forum_id );
+	}
 
 //I can't see where I use this function !!
 //this function is only used if we have a user with 'access own topics' only to forum
@@ -543,6 +590,8 @@ function pg_set_user_group ($user_id) {
 
 //function for style pack topic index query
 function pg_display_topic_index_query_filter ($args) {
+	//	if we have no forums to select against then do nothing as this function has nothing to do.  has_topics will do the filter
+		if (!empty ($args['post_parent__in'])) {
 		//get forums this user is allowed to see
 		$allowed_posts = pg_get_user_forums () ;
 		if (empty ($allowed_posts))  $allowed_posts[] = -1 ;
@@ -556,6 +605,7 @@ function pg_display_topic_index_query_filter ($args) {
 		
 		//then we can create the post__in data		
         $args['post_parent__in'] = $allowed_posts;
+		}
 		
               
 	return apply_filters( 'pg_display_topic_index_query_filter', $args );
@@ -564,21 +614,23 @@ function pg_display_topic_index_query_filter ($args) {
 
 //function for style pack topic index query
 function pg_display_forum_query_filter ($args) {
+	global $rpg_settingsf ;
+	//if forums are visible to everyone, then skip filtering, so if set_forum_visibility is empty then we need to filter, otherwise don't
+	if (empty($rpg_settingsf['set_forum_visibility'])) {
 		//get forums this user is allowed to see
 		$allowed_posts = pg_get_user_forums () ;
 		if (empty ($allowed_posts))  $allowed_posts[] = -1 ;
 	     // now we have $allowed forums, so then we need to only have forums that are common to both (intersect)
 		if (!empty($args['post__in'])) {
-		$allowed_posts = array_intersect( $allowed_posts, $args['post__in']);
+			$allowed_posts = array_intersect( $allowed_posts, $args['post__in']);
 		}
 		//if there are no allowed forums set post_type to rubbish to ensure a nil return (otherwise it shows all allowed as post__in is blank)
 		if (empty ($allowed_posts)) $args['post_type'] = 'qvyzzvxx' ;
-		
 		//then we can create the post__in data		
         $args['post__in'] = $allowed_posts;
+	}
 		
-              
-	return apply_filters( 'pg_display_topic_index_query_filter', $args );
+return apply_filters( 'pg_display_topic_index_query_filter', $args );
 }
 
 
@@ -652,8 +704,9 @@ function rpg_get_single_forum_description(  $retstr, $r  ) {
 		$rc_int      = bbp_get_forum_reply_count( $forum_id, false );
 		$topic_count = bbp_get_forum_topic_count( $forum_id );
 		$reply_count = bbp_get_forum_reply_count( $forum_id );
-				
-		$last_active = bbp_get_forum_last_active_id( $forum_id );
+		// this taken out as it seems to get a faulty answer, possibly due to something alreday filtering the bbp_get_forum_last_active_id function !  so now go direct !	
+		//$last_active = bbp_get_forum_last_active_id( $forum_id );
+		$last_active = (int) get_post_meta( $forum_id, '_bbp_last_active_id', true );
 	
 		// Has replies
 		if ( !empty( $reply_count ) ) {
@@ -661,32 +714,41 @@ function rpg_get_single_forum_description(  $retstr, $r  ) {
 		}
 
 		$topic_text      = sprintf( _n( '%s topic', '%s topics', $tc_int, 'bbpress' ), $topic_count );
+		$check=false ;
 		
 		// Forum has active data
 		if ( !empty( $last_active ) ) {
 			$last_updated_by = bbp_get_author_link( array( 'post_id' => $last_active, 'size' => $r['size'] ) );
-			$forum_id = private_groups_get_forum_id_from_post_id($last_active) ;
-			$time_since      = bbp_get_forum_last_active_time( $forum_id );
+			//$last_updated_by = $forum_id.' '.$last_active ;
+			//now get the forum the LAST ACTIVE topic/reply comes from
+			$last_active_forum_id = private_groups_get_forum_id_from_post_id($last_active) ;
+			//and see if our user is allowed to see this post, if so display the lastest
+			if (private_groups_can_user_view_post_id($last_active_forum_id )) {
+				$check = true ; //set check as we're outputing in this section
+				$time_since      = bbp_get_forum_last_active_time( $forum_id );
+				//$time_since      = bbp_get_forum_freshness_link( $forum_id );
+				
+			
+				// Has replies
+			if ( ! empty( $reply_count ) ) {
+				$retstr = bbp_is_forum_category( $forum_id )
+					? sprintf( esc_html__( 'This category has %1$s, %2$s, and was last updated %3$s by %4$s.', 'bbpress' ), $topic_text, $reply_text, $time_since, $last_updated_by )
+					: sprintf( esc_html__( 'This forum has %1$s, %2$s, and was last updated %3$s by %4$s.',    'bbpress' ), $topic_text, $reply_text, $time_since, $last_updated_by );
 
-			if ( !empty( $reply_count ) ) {
-
-				if ( bbp_is_forum_category( $forum_id ) ) {
-					$retstr = sprintf( esc_html__( 'This category contains %1$s and %2$s, and was last updated by %3$s %4$s.', 'bbpress' ), $topic_text, $reply_text, $last_updated_by, $time_since );
-				} else {
-					$retstr = sprintf( esc_html__( 'This forum contains %1$s and %2$s, and was last updated by %3$s %4$s.',    'bbpress' ), $topic_text, $reply_text, $last_updated_by, $time_since );
-				}
-
+			// Only has topics
 			} else {
-
-				if ( bbp_is_forum_category( $forum_id ) ) {
-					$retstr = sprintf( esc_html__( 'This category contains %1$s, and was last updated by %2$s %3$s.', 'bbpress' ), $topic_text, $last_updated_by, $time_since );
-				} else {
-					$retstr = sprintf( esc_html__( 'This forum contains %1$s, and was last updated by %2$s %3$s.',    'bbpress' ), $topic_text, $last_updated_by, $time_since );
-				}
+				$retstr = bbp_is_forum_category( $forum_id )
+					? sprintf( esc_html__( 'This category has %1$s, and was last updated %2$s by %3$s.', 'bbpress' ), $topic_text, $time_since, $last_updated_by )
+					: sprintf( esc_html__( 'This forum has %1$s, and was last updated %2$s by %3$s.',    'bbpress' ), $topic_text, $time_since, $last_updated_by );
 			}
+				
+				
+			}  //end of if user can view
 
 		// Forum has no last active data
-		} else {
+		//OR user is not allowed to see this data 
+		}
+		if ($check == false)   {
 
 			if ( !empty( $reply_count ) ) {
 
@@ -887,7 +949,7 @@ function rpg_get_forum_post_count ($retval, $forum_id) {
 function rpg_ID_column_add($columns)  {
 	$new = array();
   foreach($columns as $key => $title) {
-    if ($key=='bbp_forum_topic_count') // Put the forum ID column before the Topics column
+    if ($key=='bbp_reply_topic') // Put the forum ID column before the Topics column
       $new['rpg_id'] = 'Forum ID';
     $new[$key] = $title;
   }
@@ -939,7 +1001,9 @@ function rpg_filter_bbp_request( $array ) {
 	$link = $_SERVER['REQUEST_URI'];
 	$topic_admin = '/wp-admin/edit.php?post_type='.bbp_get_topic_post_type() ;
 	$reply_admin = '/wp-admin/edit.php?post_type='.bbp_get_reply_post_type() ;
-	if ($link == $topic_admin || $link == $reply_admin ) {
+	$topic_date_filter = '/wp-admin/edit.php?s&post_status=all&post_type='.bbp_get_topic_post_type() ;
+	$reply_date_filter = '/wp-admin/edit.php?s&post_status=all&post_type='.bbp_get_reply_post_type() ;
+	if ( strpos($link, $topic_admin) !== false || strpos($link, $reply_admin) !== false || strpos($link, $topic_date_filter) !== false || strpos($link, $reply_date_filter) !== false ) {
 		global $wpdb;
 		$forum=bbp_get_forum_post_type() ;
 		$forum_ids=$wpdb->get_col("select ID from $wpdb->posts where post_type = '$forum'") ;
@@ -952,16 +1016,8 @@ function rpg_filter_bbp_request( $array ) {
 	return $array ;
 }
 
-
-
-
-
-add_action( 'admin_notices', 'rpg_warning' );
-
 function rpg_warning(){
 
-// your logic goes here
-$test='yes' ;
 // bbpress version
 	if (function_exists('bbPress')) {
 		$bbp = bbpress();
@@ -975,14 +1031,11 @@ $test='yes' ;
 		$bbpversion = '???';
 	}	
 
-	
-
 // this is a success message
 if($bbpversion =='2.6' ): 
 	$n = get_option ('rpg_warning', 0) ;
 	$n++ ;
 	if ($n<11) {
-
 ?>
 <div class='notice notice-success is-dismissible'>
 <?php
@@ -992,8 +1045,18 @@ _e('WARNING : You have bbp-Private-Groups plugin working with bbPress 2.6. If yo
 update_option ('rpg_warning' , $n) ;
 	}
 
-
-
 endif;
 }
+
+function rpg_exclude_menu_items( $items, $menu, $args ) {
+	// Iterate over the items to search and remove
+    foreach ( $items as $key => $item ) {
+		if ( $item->object == 'forum' ) {
+			 if (!private_groups_can_user_view_post_id($item->object_id)) unset( $items[$key] );
+		}
+	}
+return $items;
+}
+
+
 

@@ -1,9 +1,9 @@
 <?php
 /**
- * @package WP Content Aware Engine
+ * @package wp-content-aware-engine
  * @author Joachim Jensen <joachim@dev.institute>
  * @license GPLv3
- * @copyright 2019 by Joachim Jensen
+ * @copyright 2021 by Joachim Jensen
  */
 
 defined('ABSPATH') || exit;
@@ -19,15 +19,11 @@ defined('ABSPATH') || exit;
  */
 class WPCAModule_bbpress extends WPCAModule_author
 {
-
     /**
      * @var string
      */
     protected $category = 'plugins';
 
-    /**
-     * Constructor
-     */
     public function __construct()
     {
         parent::__construct();
@@ -35,48 +31,47 @@ class WPCAModule_bbpress extends WPCAModule_author
         $this->name = __('bbPress User Profiles', WPCA_DOMAIN);
         $this->placeholder = __('All Profiles', WPCA_DOMAIN);
         $this->default_value = $this->id;
-
         $this->query_name = 'cbb';
     }
 
     /**
-     * Initiate module
-     *
-     * @since  2.0
-     * @return void
+     * @inheritDoc
      */
     public function initiate()
     {
         parent::initiate();
         add_filter(
             'wpca/module/post_type/db-where',
-            array($this,'add_forum_dependency')
+            [$this,'add_forum_dependency']
         );
     }
 
     /**
-     * Determine if content is relevant
-     *
-     * @since  1.0
-     * @return boolean
+     * @inheritDoc
      */
-    public function in_context()
+    public function can_enable()
     {
-        return function_exists('bbp_is_single_user') && bbp_is_single_user();
+        return function_exists('bbp_get_version')
+            && function_exists('bbp_is_single_user')
+            && function_exists('bbp_get_displayed_user_id')
+            && function_exists('bbp_get_forum_id');
     }
 
     /**
-     * Get data from context
-     *
-     * @since  1.0
-     * @return array
+     * @inheritDoc
+     */
+    public function in_context()
+    {
+        return bbp_is_single_user();
+    }
+
+    /**
+     * @inheritDoc
      */
     public function get_context_data()
     {
-        $data = array($this->id);
-        if (function_exists('bbp_get_displayed_user_id')) {
-            $data[] = bbp_get_displayed_user_id();
-        }
+        $data = [$this->id];
+        $data[] = bbp_get_displayed_user_id();
         return $data;
     }
 
@@ -90,15 +85,13 @@ class WPCAModule_bbpress extends WPCAModule_author
      */
     public function add_forum_dependency($where)
     {
-        if (is_singular(array('topic','reply'))) {
-            $data = array(
+        if (is_singular(['topic','reply'])) {
+            $data = [
                 get_post_type(),
                 get_the_ID(),
                 'forum'
-            );
-            if (function_exists('bbp_get_forum_id')) {
-                $data[] = bbp_get_forum_id();
-            }
+            ];
+            $data[] = bbp_get_forum_id();
             $where = "(cp.meta_value IS NULL OR cp.meta_value IN('".implode("','", $data)."'))";
         }
         return $where;

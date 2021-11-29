@@ -1,3 +1,9 @@
+<?php
+/**
+ * Design settings for email footer
+ * has been replaced by the email designer in 3.0 and will be removed in a future version
+ */
+?>
 <div class="postbox">
     <h3 class="hndle"><span><?php _e('Footer','wp-html-mail'); ?></span></h3>
     <div style="" class="inside">
@@ -10,18 +16,21 @@
                     </td>
                 </tr>
                 <tr valign="top">
-                    <th scope="row"><label for="haet_mailfooter"><?php _e('Footer','wp-html-mail'); ?></label></th>
+                    <th scope="row"><label for="haet_mailfooter"><?php _e('Footer','wp-html-mail'); ?> <?php $this->multilanguage->maybe_print_language_label( $theme_options, 'footer' ); ?></label></th>
                     <td>
                         <?php 
-                            wp_editor(stripslashes(str_replace('\\&quot;','',$theme_options['footer'])),'haet_mailfooter',array('textarea_name'=>'haet_mail_theme[footer]','wpautop'=>false,'textarea_rows'=>6));
+                            $footer = $this->multilanguage->get_translateable_theme_option( $theme_options, 'footer' );
+                            $footer_field_key = $this->multilanguage->get_translateable_theme_options_key( $theme_options, 'footer' );
+                            wp_editor(stripslashes(str_replace('\\&quot;','',$footer)),'haet_mailfooter',array('textarea_name'=>'haet_mail_theme[' . $footer_field_key . ']','wpautop'=>false,'textarea_rows'=>6));
                         ?>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2">
-                        <input type="hidden" name="haet_mail_theme[footerlink]" value="0">
-                        <input type="checkbox" id="haet_mail_theme_footerlink" name="haet_mail_theme[footerlink]" value="1" <?php echo ($theme_options['footerlink']==1 || !isset($theme_options['footerlink'])?'checked':''); ?>>
-                        <label for="haet_mail_theme_footerlink"><?php _e('Show "powered by" link in email footer','wp-html-mail'); ?></label>
+                        <?php if( $this->multilanguage->is_multilanguage_site() ): ?>
+                            <input type="hidden" name="haet_mail_theme[footer_enable_translation]" value="0">
+                            <input type="checkbox" id="haet_mail_theme_footer_enable_translation" name="haet_mail_theme[footer_enable_translation]" value="1" <?php echo (isset($theme_options['footer_enable_translation']) && $theme_options['footer_enable_translation']==1 ?'checked':''); ?>>
+                            <label for="haet_mail_theme_footer_enable_translation">
+                                <?php _e('Enable translation for this field','wp-html-mail'); ?> 
+                                <span class="dashicons dashicons-editor-help haet-mail-info-icon" data-tooltip="<?php esc_attr_e( 'If enabled you can use individual settings depending on the current language selected at the top of the page in your admin bar.','wp-html-mail' ); ?>"></span>
+                            </label>
+                        <?php endif; ?>
                     </td>
                 </tr>
             </tbody>

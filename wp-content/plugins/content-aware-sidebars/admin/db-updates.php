@@ -3,7 +3,7 @@
  * @package Content Aware Sidebars
  * @author Joachim Jensen <joachim@dev.institute>
  * @license GPLv3
- * @copyright 2019 by Joachim Jensen
+ * @copyright 2021 by Joachim Jensen
  */
 
 defined('ABSPATH') || exit;
@@ -16,6 +16,92 @@ $cas_db_updater->register_version_update('3.1', 'cas_update_to_31');
 $cas_db_updater->register_version_update('3.4', 'cas_update_to_34');
 $cas_db_updater->register_version_update('3.5.1', 'cas_update_to_351');
 $cas_db_updater->register_version_update('3.8', 'cas_update_to_38');
+$cas_db_updater->register_version_update('3.15.2', 'cas_update_to_3152');
+$cas_db_updater->register_version_update('3.16.1', 'cas_update_to_3161');
+
+
+/**
+ * Enable legacy date module and
+ * negated conditions if in use
+ *
+ * Clear condition type cache
+ *
+ * @since 3.16.1
+ *
+ * @return bool
+ */
+function cas_update_to_3161()
+{
+    update_option('_ca_condition_type_cache', []);
+
+    global $wpdb;
+
+    $types = WPCACore::types()->get_all();
+
+    $options = [
+            'legacy.date_module'        => [],
+            'legacy.negated_conditions' => []
+    ];
+
+    $options['legacy.date_module'] = array_flip((array)$wpdb->get_col("
+        SELECT p.post_type FROM $wpdb->posts p
+        INNER JOIN $wpdb->posts c on p.ID = c.post_parent
+        INNER JOIN $wpdb->postmeta m on c.ID = m.post_id
+        WHERE c.post_type = 'condition_group' AND m.meta_key = '_ca_date'
+    "));
+
+    $options['legacy.negated_conditions'] = array_flip((array)$wpdb->get_col("
+        SELECT p.post_type FROM $wpdb->posts p
+        INNER JOIN $wpdb->posts c on p.ID = c.post_parent
+        WHERE c.post_type = 'condition_group' AND c.post_status = 'negated'
+    "));
+
+    foreach ($types as $type => $val) {
+        foreach ($options as $option => $post_types) {
+            if (isset($post_types[$type])) {
+                WPCACore::save_option($type, $option, true);
+            } elseif (WPCACore::get_option($type, $option, false)) {
+                WPCACore::save_option($type, $option, false);
+            }
+        }
+    }
+
+    return true;
+}
+
+/**
+ * Add -1 to condition groups with select terms
+ *
+ * @since 3.15.2
+ *
+ * @return bool
+ */
+function cas_update_to_3152()
+{
+    $taxonomies = array_map(function ($value) {
+        return "'" . esc_sql($value) . "'";
+    }, get_taxonomies(['public' => true]));
+
+    if (empty($taxonomies)) {
+        return true;
+    }
+
+    global $wpdb;
+
+    $condition_group_ids = array_unique((array)$wpdb->get_col("
+        SELECT p.ID FROM $wpdb->posts p
+        INNER JOIN $wpdb->term_relationships r ON r.object_id = p.ID
+        INNER JOIN $wpdb->term_taxonomy t ON t.term_taxonomy_id = r.term_taxonomy_id
+        WHERE p.post_type = 'condition_group'
+        AND t.taxonomy IN (".implode(',', $taxonomies).')
+    '));
+
+    foreach ($condition_group_ids as $id) {
+        add_post_meta($id, '_ca_taxonomy', '-1');
+    }
+
+    return true;
+}
 
 /**
  * Update to version 3.8
@@ -135,11 +221,11 @@ function cas_update_to_30()
     global $wpdb;
 
     // Get all sidebars
-    $posts = get_posts(array(
-        'numberposts'     => -1,
-        'post_type'       => 'sidebar',
-        'post_status'     => 'publish,pending,draft,future,private,trash'
-    ));
+    $posts = get_posts([
+        'numberposts' => -1,
+        'post_type'   => 'sidebar',
+        'post_status' => 'publish,pending,draft,future,private,trash'
+    ]);
 
     if (!empty($posts)) {
         $wpdb->query("
@@ -148,7 +234,7 @@ function cas_update_to_30()
 			WHERE post_type = 'sidebar_group'
 		");
 
-        $metadata = array(
+        $metadata = [
             'post_types'     => 'post_type',
             'taxonomies'     => 'taxonomy',
             'authors'        => 'author',
@@ -162,7 +248,7 @@ function cas_update_to_30()
             'handle'         => 'handle',
             'host'           => 'host',
             'merge-pos'      => 'merge_pos'
-        );
+        ];
 
         foreach ($metadata as $old_key => $new_key) {
             $wpdb->query("
@@ -189,6 +275,8 @@ function cas_update_to_30()
 						AND meta_value LIKE '_cas_sub_%'
 					");
                     break;
+                default:
+                    break;
             }
         }
 
@@ -211,7 +299,7 @@ function cas_update_to_20()
 {
     global $wpdb;
 
-    $module_keys = array(
+    $module_keys = [
         'static',
         'post_types',
         'authors',
@@ -220,24 +308,24 @@ function cas_update_to_20()
         'language',
         'bb_profile',
         'bp_member'
-    );
+    ];
 
     // Get all sidebars
-    $posts = get_posts(array(
-        'numberposts'     => -1,
-        'post_type'       => 'sidebar',
-        'post_status'     => 'publish,pending,draft,future,private,trash'
-    ));
+    $posts = get_posts([
+        'numberposts' => -1,
+        'post_type'   => 'sidebar',
+        'post_status' => 'publish,pending,draft,future,private,trash'
+    ]);
     if (!empty($posts)) {
         foreach ($posts as $post) {
 
             //Create new condition group
-            $group_id = wp_insert_post(array(
-                'post_status'           => $post->post_status,
-                'post_type'             => 'sidebar_group',
-                'post_author'           => $post->post_author,
-                'post_parent'           => $post->ID,
-            ));
+            $group_id = wp_insert_post([
+                'post_status' => $post->post_status,
+                'post_type'   => 'sidebar_group',
+                'post_author' => $post->post_author,
+                'post_parent' => $post->ID,
+            ]);
 
             if ($group_id) {
 
@@ -270,21 +358,21 @@ function cas_update_to_20()
  */
 function cas_update_to_11()
 {
-    $moduledata = array(
+    $moduledata = [
         'static',
         'post_types',
         'authors',
         'page_templates',
         'taxonomies',
         'language'
-    );
+    ];
 
     // Get all sidebars
-    $posts = get_posts(array(
-        'numberposts'     => -1,
-        'post_type'       => 'sidebar',
-        'post_status'     => 'publish,pending,draft,future,private,trash'
-    ));
+    $posts = get_posts([
+        'numberposts' => -1,
+        'post_type'   => 'sidebar',
+        'post_status' => 'publish,pending,draft,future,private,trash'
+    ]);
 
     if (!empty($posts)) {
         foreach ($posts as $post) {

@@ -1,19 +1,29 @@
 <?php
 /**
- * LearnDash LearnDash 3.0 Theme Register.
+ * LearnDash LD30 Theme Register.
  *
- * @package LearnDash
- * @subpackage Settings
+ * @since 3.0.0
+ *
+ * @package LearnDash\Templates\LD30
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 if ( ( class_exists( 'LearnDash_Theme_Register' ) ) && ( ! class_exists( 'LearnDash_Theme_Register_LD30' ) ) ) {
 	/**
 	 * Class to create the settings section.
+	 *
+	 * @since 3.0.0
+	 * @uses LearnDash_Theme_Register
 	 */
 	class LearnDash_Theme_Register_LD30 extends LearnDash_Theme_Register {
 
 		/**
 		 * Protected constructor for class
+		 *
+		 * @since 3.0.0
 		 */
 		protected function __construct() {
 			$this->theme_key          = 'ld30';
@@ -35,6 +45,6 @@ add_action(
 
 
 if ( learndash_is_active_theme( 'ld30' ) ) {
-	// Include the helper functions
+	// Include the helper functions.
 	include_once __DIR__ . '/helpers.php';
 }

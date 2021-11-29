@@ -1,20 +1,29 @@
 <?php
 /**
- * LearnDash Settings field Timer Entry.
+ * LearnDash Timer Entry Settings Field.
  *
- * @package LearnDash
- * @subpackage Settings
+ * @since 3.0.0
+ * @package LearnDash\Settings\Field
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'LearnDash_Settings_Fields_Timer_Entry' ) ) ) {
 
 	/**
-	 * Class to create the settings field.
+	 * Class LearnDash Timer Entry Settings Field.
+	 *
+	 * @since 3.0.0
+	 * @uses LearnDash_Settings_Fields
 	 */
 	class LearnDash_Settings_Fields_Timer_Entry extends LearnDash_Settings_Fields {
 
 		/**
 		 * Public constructor for class
+		 *
+		 * @since 3.0.0
 		 */
 		public function __construct() {
 			$this->field_type = 'timer-entry';
@@ -25,7 +34,7 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 		/**
 		 * Function to crete the settiings field.
 		 *
-		 * @since 2.4
+		 * @since 3.0.0
 		 *
 		 * @param array $field_args An array of field arguments used to process the ouput.
 		 * @return void
@@ -33,8 +42,11 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 		public function create_section_field( $field_args = array() ) {
 			global $wp_locale;
 
+			/** This filter is documented in includes/settings/settings-fields/class-ld-settings-fields-checkbox-switch.php */
 			$field_args = apply_filters( 'learndash_settings_field', $field_args );
-			$html       = apply_filters( 'learndash_settings_field_html_before', '', $field_args );
+
+			/** This filter is documented in includes/settings/settings-fields/class-ld-settings-fields-checkbox-switch.php */
+			$html = apply_filters( 'learndash_settings_field_html_before', '', $field_args );
 
 			if ( ( isset( $field_args['value'] ) ) && ( ! empty( $field_args['value'] ) ) ) {
 				$field_args['value'] = learndash_convert_lesson_time_time( $field_args['value'] );
@@ -59,21 +71,22 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 
 			$html .= '<div class="ld_timer_selector">' . sprintf(
 				// translators: placeholders: Hour, Minute, Second.
-				esc_html__( '%1$s:%2$s:%3$s' ),
+				esc_html__( '%1$s:%2$s:%3$s', 'learndash' ),
 				$hour_field,
 				$minute_field,
 				$second_field
 			) . '</div>';
 
+			/** This filter is documented in includes/settings/settings-fields/class-ld-settings-fields-checkbox-switch.php */
 			$html = apply_filters( 'learndash_settings_field_html_after', $html, $field_args );
 
-			echo $html;
+			echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Need to output HTML
 		}
 
 		/**
 		 * Validate field
 		 *
-		 * @since 2.6.0
+		 * @since 3.0.0
 		 *
 		 * @param mixed  $val Value to validate.
 		 * @param string $key Key of value being validated.
@@ -82,17 +95,18 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 		 * @return integer value.
 		 */
 		public function validate_section_field( $val, $key, $args = array() ) {
-			return sanitize_text_field( $val );
+			return absint( $val );
 		}
 
 		/**
-		 * Default validation function. Should be overriden in Field subclass.
+		 * Get Settings Field Value
 		 *
-		 * @since 2.4
+		 * @since 3.0.0
 		 *
-		 * @param mixed  $val Value to validate.
-		 * @param string $key Key of value being validated.
-		 * @param array  $args Array of field args.
+		 * @param mixed  $val       Value to validate.
+		 * @param string $key       Key of value being validated.
+		 * @param array  $args      Array of field args.
+		 * @param array  $post_args Array of post args.
 		 *
 		 * @return mixed $val validated value.
 		 */
@@ -100,29 +114,59 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 			if ( ( isset( $args['field']['type'] ) ) && ( $args['field']['type'] === $this->field_type ) ) {
 
 				if ( isset( $val['hh'] ) ) {
-					$val['hh'] = absint( $val['hh'] );
+					$val_hh = absint( $val['hh'] );
 				} else {
-					$val['hh'] = 0;
+					$val_hh = 0;
 				}
 
 				if ( isset( $val['mn'] ) ) {
-					$val['mn'] = absint( $val['mn'] );
+					$val_mn = absint( $val['mn'] );
 				} else {
-					$val['mn'] = 0;
+					$val_mn = 0;
 				}
 
 				if ( isset( $val['ss'] ) ) {
-					$val['ss'] = absint( $val['ss'] );
+					$val_ss = absint( $val['ss'] );
 				} else {
-					$val['ss'] = 0;
+					$val_ss = 0;
 				}
 
-				$val_seconds = $val['ss'] + ( $val['mn'] * 60 ) + ( $val['hh'] * 60 * 60 );
+				$val_seconds = $val_ss + ( $val_mn * 60 ) + ( $val_hh * 60 * 60 );
 				return $val_seconds;
 			}
 
 			return false;
 		}
+
+		/**
+		 * Convert REST submit value to internal Settings Field acceptable value.
+		 *
+		 * @since 3.4.0
+		 *
+		 * @param mixed  $val        Value from REST to be converted to internal value.
+		 * @param string $key        Key field for value.
+		 * @param array  $field_args Array of field args.
+		 */
+		public function rest_value_to_field_value( $val = '', $key = '', $field_args = array() ) {
+			$value_hh = 0;
+			$value_mn = 0;
+			$value_ss = 0;
+
+			if ( ! empty( $val ) ) {
+				$val      = learndash_convert_lesson_time_time( $val );
+				$value_hh = gmdate( 'H', $val );
+				$value_mn = gmdate( 'i', $val );
+				$value_ss = gmdate( 's', $val );
+			}
+			$val = array(
+				'hh' => $value_hh,
+				'mn' => $value_mn,
+				'ss' => $value_ss,
+			);
+
+			return $val;
+		}
+
 		// End of functions.
 	}
 }

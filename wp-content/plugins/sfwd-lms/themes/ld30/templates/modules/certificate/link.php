@@ -1,6 +1,18 @@
 <?php
 /**
- * Displays a link to the relevant certificate if it exists
+ * LearnDash LD30.
+ *
+ * @since 3.0.0
+ *
+ * @package LearnDash\Templates\LD30
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * LearnDash LD30 Displays a link to the relevant certificate if it exists
  *
  * This will have to be variable based on the current users context.
  * Different information is passed in based on if they are on a course, lesson,
@@ -15,9 +27,9 @@
  * $logged_in       : User is logged in
  * $current_user    : (object) Currently logged in user object
  *
- * @since 3.0
+ * @since 3.0.0
  *
- * @package LearnDash\Course
+ * @package LearnDash\Templates\LD30\Modules
  */
 
 /**
@@ -39,9 +51,9 @@
  *
  */
 
-// No access to any certificates if you're not logged in
-if( $logged_in ) {
+// No access to any certificates if you're not logged in.
+if ( $logged_in ) {
 
-    // SFWD::get_template_part( 'modules/link', get_post_type() );
+	// SFWD::get_template_part( 'modules/link', get_post_type() );
 
 }

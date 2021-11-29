@@ -1,19 +1,27 @@
 <?php
 /**
- * LearnDash Settings Page Quizzes Options.
+ * LearnDash Settings Section Side Quick Links Metabox.
  *
- * @package LearnDash
- * @subpackage Settings
+ * @since 2.6.0
+ * @package LearnDash\Settings\Sections
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'LearnDash_Settings_Section_Side_Quick_Links' ) ) ) {
 	/**
-	 * Class to create the settings metabox.
+	 * Class LearnDash Settings Section Side Quick Links Metabox.
+	 *
+	 * @since 2.6.0
 	 */
 	class LearnDash_Settings_Section_Side_Quick_Links extends LearnDash_Settings_Section {
 
 		/**
 		 * Public constructor for class
+		 *
+		 * @since 2.6.0
 		 *
 		 * @param array $args Array of class args.
 		 */
@@ -44,7 +52,7 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 		/**
 		 * Show custom metabox output for Quick Links.
 		 *
-		 * @since 2.5.9
+		 * @since 2.6.0
 		 */
 		public function show_meta_box() {
 			global $wp_meta_boxes;
@@ -75,7 +83,7 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 							foreach ( $meta_box_order_items as $meta_box_order_item ) {
 								$meta_box_order_item = trim( $meta_box_order_item );
 								if ( isset( $q_links[ $meta_box_order_item ] ) ) {
-									echo '<li><a href="#' . $meta_box_order_item . '" >' . $q_links[ $meta_box_order_item ] . '</a></li>';
+									echo '<li><a href="#' . esc_attr( $meta_box_order_item ) . '" >' . esc_html( $q_links[ $meta_box_order_item ] ) . '</a></li>';
 									unset( $q_links[ $meta_box_order_item ] );
 								}
 							}
@@ -83,7 +91,7 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 
 						if ( ! empty( $q_links ) ) {
 							foreach ( $q_links as $link_id => $link_title ) {
-								echo '<li><a href="#' . $link_id . '" >' . $link_title . '</a></li>';
+								echo '<li><a href="#' . esc_attr( $link_id ) . '" >' . esc_html( $link_title ) . '</a></li>';
 							}
 						}
 						echo '</ul>';
@@ -94,7 +102,11 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 			<?php
 		}
 
-		// This is a requires function.
+		/**
+		 * Load settings fields
+		 *
+		 * This is a requires function.
+		 */
 		public function load_settings_fields() {
 		}
 	}

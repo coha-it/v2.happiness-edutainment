@@ -227,29 +227,50 @@ if ( ! function_exists( 'mycred_render_sell_history' ) ) :
 		if ( ! empty( $purchases ) ) {
 			foreach ( $purchases as $entry ) {
 
-				$mycred       = mycred( $entry->ctype );
-				$expirares_in = mycred_sell_content_get_expiration_length( $entry->ref_id, $entry->ctype );
-
-				echo '<td class="mycred-sell-' . $column_id . ' ' . $column_id . '">';
+				$mycred = mycred( $entry->ctype );
+				
+				$hours  = mycred_sell_content_get_expiration_length( $entry->ref_id, $entry->ctype );
+			
+				$expires_in = apply_filters( 'mycred_sell_content_expires_in', $hours );
+  	
+				echo '<tr>';
 
 				foreach ( $columns as $column_id => $column_label ) {
+  		
 
 					if ( $column_id == 'col-date' )
-						echo date( $date_format, $entry->time );
+						echo '<td class="' . $column_id . '">'.date( $date_format, $entry->time ).'</td>';
 
 					elseif ( $column_id == 'col-title' )
-						echo '<a href="' . mycred_get_permalink( $entry->ref_id ) . '">' . mycred_get_the_title( $entry->ref_id ) . '</a>';
+						echo '<td class="' . $column_id . '"><a href="' . mycred_get_permalink( $entry->ref_id ) . '">' . mycred_get_the_title( $entry->ref_id ) . '</a></td>';
 
 					elseif ( $column_id == 'col-amount' )
-						echo '<td class="">' . $mycred->format_creds( abs( $entry->creds ) ) . '</td>';
+						echo '<td class="' . $column_id . '">' . $mycred->format_creds( abs( $entry->creds ) ) . '</td>';
 
 					elseif ( $column_id == 'col-expires' ) {
 
 						$expires = __( 'Never', 'mycred' );
-						if ( $prefs['expire'] > 0 )
-							$expires = sprintf( _x( 'Purchase expires in %s', 'e.g. 10 hours', 'mycred' ), $expirares_in . ' ' . $expiration );
 
-						echo '<td class="">' . $expires . '</td>';
+						if ( $expires_in > 0 ) {
+							$days = $hours * 60 * 60;
+					 		$date = time()- $entry->time;
+					 		$time_change = $days - $date;
+							$expires_in  = mycred_seconds_to_time( $time_change );
+
+							if( $expires < $time_change ){
+							
+								$expires = sprintf( _x( 'Purchase expires in %s', 'e.g. 10 hours', 'mycred' ), $expires_in. ' ' );
+							
+							}
+							else{
+							
+								$expires = 'Expired';
+							
+							}
+
+						}
+					
+						echo '<td class="' . $column_id . '">' . $expires . '</td>';
 
 					}
 					else {
@@ -261,7 +282,7 @@ if ( ! function_exists( 'mycred_render_sell_history' ) ) :
 
 				}
 
-				echo '</td>';
+				echo '</tr>';
 
 			}
 		}

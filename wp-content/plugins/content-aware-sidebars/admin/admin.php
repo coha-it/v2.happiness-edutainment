@@ -3,7 +3,7 @@
  * @package Content Aware Sidebars
  * @author Joachim Jensen <joachim@dev.institute>
  * @license GPLv3
- * @copyright 2019 by Joachim Jensen
+ * @copyright 2021 by Joachim Jensen
  */
 
 defined('ABSPATH') || exit;
@@ -17,6 +17,11 @@ abstract class CAS_Admin
      * @var string
      */
     protected $_screen;
+
+    /**
+     * @var int
+     */
+    protected $notification_count = 0;
 
     public function __construct()
     {
@@ -121,11 +126,11 @@ abstract class CAS_Admin
      */
     public function add_general_scripts_styles()
     {
-        $this->enqueue_script('cas/admin/general', 'general', array('jquery'), '', true);
-        wp_localize_script('cas/admin/general', 'CAS', array(
+        $this->enqueue_script('cas/admin/general', 'general', ['jquery'], '', true);
+        wp_localize_script('cas/admin/general', 'CAS', [
             'showPopups'    => !cas_fs()->can_use_premium_code(),
             'enableConfirm' => __('This sidebar is already scheduled to be activated. Do you want to activate it now?', 'content-aware-sidebars')
-        ));
+        ]);
         $this->enqueue_style('cas/admin/style', 'style');
         $this->add_scripts_styles();
     }
@@ -148,10 +153,11 @@ abstract class CAS_Admin
         $tour_manager = new WP_Pointer_Tour(CAS_App::META_PREFIX.'cas_tour');
         $tour_taken = (int) $tour_manager->get_user_option();
         if ($tour_taken && (time() - $tour_taken) >= WEEK_IN_SECONDS) {
+            $this->notification_count++;
             $path = plugin_dir_path(dirname(__FILE__)).'view/';
-            $view = WPCAView::make($path.'notice_review.php', array(
+            WPCAView::make($path.'notice_review.php', [
                 'current_user' => wp_get_current_user()
-            ))->render();
+            ])->render();
         }
     }
 
@@ -182,7 +188,7 @@ abstract class CAS_Admin
     {
         __('Enhance your sidebars and widget areas with: %s and more.', 'content-aware-sidebars');
         __('Sync widgets across themes', 'content-aware-sidebars');
-        $features = array(
+        $features = [
             __('Extra Display Conditions', 'content-aware-sidebars'),
             __('Insert Widget Areas in Theme Hooks', 'content-aware-sidebars'),
             __('Widget Area Designer', 'content-aware-sidebars'),
@@ -191,10 +197,10 @@ abstract class CAS_Admin
             __('Time & Weekday Schedule', 'content-aware-sidebars'),
             __('Widget Cleaner', 'content-aware-sidebars'),
             __('and so much more...', 'content-aware-sidebars')
-        );
+        ];
         echo '<a style="display:none;" class="thickbox js-cas-pro-popup" href="#TB_inline?width=600&amp;height=350&amp;inlineId=pro-popup-notice" title="'.__('Content Aware Sidebars Pro', 'content-aware-sidebars').'"></a>';
         echo '<div id="pro-popup-notice" style="display:none;">';
-        echo '<img style="margin-top:15px;" class="alignright" src="'.plugins_url('assets/css/icon.png', dirname(__FILE__)).'" width="128" height="128" />';
+        echo '<img style="margin-top:15px;" class="alignright" src="'.plugins_url('assets/img/icon.png', dirname(__FILE__)).'" width="128" height="128" />';
         echo '
 		<h2>'.__('Get All Features With Content Aware Sidebars Pro', 'content-aware-sidebars').'</h2>';
         echo '<ul>';
@@ -204,7 +210,7 @@ abstract class CAS_Admin
         echo '</ul>';
         echo '<p>'.__('You can upgrade without leaving the admin panel by clicking below.', 'content-aware-sidebars');
         echo '<br />'.__('Free updates and email support included.', 'content-aware-sidebars').'</p>';
-        echo '<p><a class="button-primary" target="_blank" href="'.esc_url(cas_fs()->get_upgrade_url()).'">'.__('Upgrade Now', 'content-aware-sidebars').'</a> <a href="" class="button-secondary js-cas-pro-read-more" target="_blank" href="">'.__('Read More', 'content-aware-sidebars').'</a></p>';
+        echo '<p><a class="button-primary" target="_blank" href="'.esc_url(cas_fs()->get_upgrade_url()).'">'.__('Upgrade Now', 'content-aware-sidebars').'</a> <a href="" class="button-secondary js-cas-pro-read-more" target="_blank" rel="noopener" href="">'.__('Read More', 'content-aware-sidebars').'</a></p>';
         echo '</div>';
     }
 
@@ -220,7 +226,7 @@ abstract class CAS_Admin
     protected function add_action($tag, $callback, $priority = 10, $accepted_args = 1)
     {
         if (is_string($callback)) {
-            $callback = array($this, $callback);
+            $callback = [$this, $callback];
         }
         add_action($tag, $callback, $priority, $accepted_args);
     }
@@ -237,7 +243,7 @@ abstract class CAS_Admin
     protected function add_filter($tag, $callback, $priority = 10, $accepted_args = 1)
     {
         if (is_string($callback)) {
-            $callback = array($this, $callback);
+            $callback = [$this, $callback];
         }
         add_filter($tag, $callback, $priority, $accepted_args);
     }
@@ -252,7 +258,7 @@ abstract class CAS_Admin
      *
      * @return void
      */
-    protected function enqueue_script($handle, $filename, $deps = array(), $ver = '', $in_footer = false)
+    protected function enqueue_script($handle, $filename, $deps = [], $ver = '', $in_footer = false)
     {
         $this->register_script($handle, $filename, $deps, $ver, $in_footer);
         wp_enqueue_script($handle);
@@ -268,16 +274,13 @@ abstract class CAS_Admin
      *
      * @return void
      */
-    protected function register_script($handle, $filename, $deps = array(), $ver = '', $in_footer = false)
+    protected function register_script($handle, $filename, $deps = [], $ver = '', $in_footer = false)
     {
         $suffix = '.min.js';
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            $suffix = '.js';
-        }
         if ($ver === '') {
             $ver = CAS_App::PLUGIN_VERSION;
         }
-        wp_register_script($handle, plugins_url('js/'.$filename.$suffix, dirname(__FILE__)), $deps, $ver, $in_footer);
+        wp_register_script($handle, plugins_url('assets/js/'.$filename.$suffix, dirname(__FILE__)), $deps, $ver, $in_footer);
     }
 
     /**
@@ -289,7 +292,7 @@ abstract class CAS_Admin
      *
      * @return void
      */
-    protected function enqueue_style($handle, $filename, $deps = array(), $ver = '')
+    protected function enqueue_style($handle, $filename, $deps = [], $ver = '')
     {
         $this->register_style($handle, $filename, $deps, $ver);
         wp_enqueue_style($handle);
@@ -304,7 +307,7 @@ abstract class CAS_Admin
      *
      * @return void
      */
-    protected function register_style($handle, $filename, $deps = array(), $ver = '')
+    protected function register_style($handle, $filename, $deps = [], $ver = '')
     {
         $suffix = '.css';
         if ($ver === '') {

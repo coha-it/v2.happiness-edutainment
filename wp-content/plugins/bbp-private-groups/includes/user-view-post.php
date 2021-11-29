@@ -87,6 +87,14 @@ function private_groups_can_user_view_post( $user_id, $forum_id = '' ) {
 			
 			
 		}
+		//else allow for private and hidden forums that don't have groups set
+		//my assumption is that by creating an allowed list (post__in) I override wordpress/bbpress checking if a forum can be displayed to the user, so it displays anyway - this fixes that
+		else {
+		//check if forum is private or hidden and see if user is allowed to view
+		$status = get_post_status ($forum_id) ;
+		if ($status == 'hidden' && !current_user_can( 'read_hidden_forums' )) $can_view = false ;
+		if ($status == 'private' && !current_user_can( 'read_private_forums' )) $can_view = false ;
+		}
 	
 
 	/* Allow developers to overwrite the final return value. */

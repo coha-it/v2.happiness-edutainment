@@ -1,94 +1,156 @@
 <?php
 /**
- * Displays the Course Switcher displayed within the Associate Content admin widget. 
+ * Displays the Course Switcher displayed within the Associate Content admin widget.
  * Available Variables:
  * none
- * 
+ *
  * @since 2.5.0
- * 
- * @package LearnDash\Course
+ *
+ * @package LearnDash\Templates\Legacy\Shortcodes
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit; // Exit if accessed directly.
 }
 
-if ( ( isset( $_GET['post'] ) ) && ( !empty( $_GET['post'] ) ) ) {
-	$post = get_post( intval( $_GET['post'] ) );
-	if ( is_a( $post, 'WP_Post' ) && ( in_array( $post->post_type, array( 'sfwd-lessons', 'sfwd-topic', 'sfwd-quiz' ) ) ) ) {
-		$cb_courses = learndash_get_courses_for_step( $post->ID );
-		$count_primary = 0;
-		$count_secondary = 0;
+if ( ( isset( $_GET['post'] ) ) && ( ! empty( $_GET['post'] ) ) ) {
+	$learndash_edit_post = get_post( intval( $_GET['post'] ) );
+	if ( is_a( $learndash_edit_post, 'WP_Post' ) && ( in_array( $learndash_edit_post->post_type, learndash_get_post_types( 'course_steps' ), true ) ) ) {
+		$learndash_cb_courses      = learndash_get_courses_for_step( $learndash_edit_post->ID );
+		$learndash_count_primary   = 0;
+		$learndash_count_secondary = 0;
 
-		if ( isset( $cb_courses['primary'] ) ) 
-			$count_primary = count( $cb_courses['primary'] );
+		if ( isset( $learndash_cb_courses['primary'] ) ) {
+			$learndash_count_primary = count( $learndash_cb_courses['primary'] );
+		}
 
-		if ( isset( $cb_courses['secondary'] ) ) 
-			$count_secondary = count( $cb_courses['secondary'] );
+		if ( isset( $learndash_cb_courses['secondary'] ) ) {
+			$learndash_count_secondary = count( $learndash_cb_courses['secondary'] );
+		}
 
-		if ( ( $count_primary > 0 ) || ( $count_secondary > 0 ) ) {
-	
-			$use_select_opt_groups = false;
-			if ( ( $count_primary > 0 ) && ( $count_secondary > 0 ) ) {
-				$use_select_opt_groups = true;
+		if ( ( $learndash_count_primary > 0 ) || ( $learndash_count_secondary > 0 ) ) {
+
+			$learndash_use_select_opt_groups = false;
+			if ( ( $learndash_count_primary > 0 ) && ( $learndash_count_secondary > 0 ) ) {
+				$learndash_use_select_opt_groups = true;
 			}
-	
-			$default_course_id = learndash_get_course_id( $post->ID, true );
 
-			$course_post_id = 0;
+			$learndash_default_course_id = learndash_get_course_id( $learndash_edit_post->ID, true );
+
+			$learndash_course_post_id = 0;
 			if ( isset( $_GET['course_id'] ) ) {
-				$course_post_id = intval( $_GET['course_id'] );
+				$learndash_course_post_id = intval( $_GET['course_id'] );
 			}
-	
-			?><p class="widget_course_switcher"><?php echo sprintf( esc_html_x( '%s switcher', 'placeholder: Course', 'learndash' ), LearnDash_Custom_Label::get_label( 'Course' ) ); ?><br />
-			<span class="ld-course-message" style="display:none"><?php echo sprintf( esc_html_x('Switch to the Primary %s to edit this setting', 'placeholder: Course', 'learndash'), LearnDash_Custom_Label::get_label( 'Course' ) ) ?></span>
-			<input type="hidden" id="ld-course-primary" name="ld-course-primary" value="<?php echo $default_course_id; ?>" />
+
+			if ( ( empty( $learndash_course_post_id ) ) && ( ! empty( $learndash_default_course_id ) ) ) {
+				$learndash_course_post_id = absint( $learndash_default_course_id );
+			}
+
+			?><p class="widget_course_switcher">
+			<?php
+			// translators: placeholder: Course.
+			echo sprintf( esc_html_x( '%s switcher', 'placeholder: Course', 'learndash' ), LearnDash_Custom_Label::get_label( 'Course' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			?>
+			<br />
+			<span class="ld-course-message" style="display:none">
+			<?php
+			// translators: placeholder: Course.
+			echo sprintf( esc_html_x( 'Switch to the Primary %s to edit this setting', 'placeholder: Course', 'learndash' ), LearnDash_Custom_Label::get_label( 'course' ) ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			?>
+			</span>
+			<input type="hidden" id="ld-course-primary" name="ld-course-primary" value="<?php echo absint( $learndash_default_course_id ); ?>" />
 
 			<?php
-				$item_url = get_edit_post_link( $post->ID );
+				$learndash_item_url = get_edit_post_link( $learndash_edit_post->ID );
 			?>
 			<select name="ld-course-switcher" id="ld-course-switcher">
-				<option value=""><?php echo sprintf( esc_html_x('Select a %s', 'placeholder: Course', 'learndash'), LearnDash_Custom_Label::get_label( 'Course' ) ); ?></option>
+				<option value="">
 				<?php
-					if ( ( $post->post_type == 'sfwd-quiz' ) && ( empty( $count_primary ) ) && ( empty( $count_secondary ) ) ) {
-						$selected = ' selected="selected" ';
-						?><option <?php echo $selected ?> data-course_id="0" value="<?php echo remove_query_arg( 'course_id', $item_url ); ?>"><?php echo sprintf( esc_html_x('Standalone %s', 'placeholder: Quiz', 'learndash'), LearnDash_Custom_Label::get_label( 'Quiz' ) ); ?></option><?php
-					} 
+				// translators: placeholder: Course.
+				echo sprintf( esc_html_x( 'Select a %s', 'placeholder: Course', 'learndash' ), LearnDash_Custom_Label::get_label( 'Course' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				?>
+				</option>
+				<?php
+				if ( ( learndash_get_post_type_slug( 'quiz' ) === $learndash_edit_post->post_type ) && ( empty( $learndash_count_primary ) ) && ( empty( $learndash_count_secondary ) ) ) {
+					?>
+						<option selected="selected" data-course_id="0" value="<?php echo esc_url( remove_query_arg( 'course_id', $learndash_item_url ) ); ?>">
+						<?php
+						// translators: placeholder: Quiz.
+						echo sprintf( esc_html_x( 'Standalone %s', 'placeholder: Quiz', 'learndash' ), LearnDash_Custom_Label::get_label( 'Quiz' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						?>
+						</option>
+						<?php
+				}
 				?>
 				<?php
-
-				foreach( $cb_courses as $course_key => $course_set ) {
-					if ( $use_select_opt_groups === true ) {
-						if ( $course_key == 'primary' ) {
-							?><optgroup label="<?php echo sprintf( esc_html_x('Primary %s', 'placeholder: Course', 'learndash'), LearnDash_Custom_Label::get_label( 'Course' ) ) ?>"><?php
-						} else if ( $course_key == 'secondary' ) {
-							?><optgroup label="<?php echo sprintf( esc_html_x('Other %s', 'placeholder: Courses', 'learndash'), LearnDash_Custom_Label::get_label( 'Courses' ) ) ?>"><?php
+				$learndash_selected_course_id = 0;
+				foreach ( $learndash_cb_courses as $learndash_course_key => $learndash_course_set ) {
+					if ( true === $learndash_use_select_opt_groups ) {
+						if ( 'primary' === $learndash_course_key ) {
+							?>
+							<optgroup label="
+							<?php
+							// translators: placeholder: Course.
+							echo sprintf( esc_html_x( 'Primary %s', 'placeholder: Course', 'learndash' ), LearnDash_Custom_Label::get_label( 'Course' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+							?>
+							">
+							<?php
+						} elseif ( 'secondary' === $learndash_course_key ) {
+							?>
+							<optgroup label="
+							<?php
+							// translators: placeholder: Courses.
+							echo sprintf( esc_html_x( 'Shared %s', 'placeholder: Courses', 'learndash' ), LearnDash_Custom_Label::get_label( 'Courses' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+							?>
+							">
+							<?php
 						}
 					}
-			
-					foreach( $course_set as $course_id => $course_title ) {
-						//if ( intval( $course_id ) != intval( $default_course_id ) ) {
-							$item_url = add_query_arg('course_id', $course_id, $item_url );
-						//} 
-						
-						$selected = '';
-						if ( $post->post_type == 'sfwd-quiz' ) {
-							if ( $course_id == $course_post_id ) {
-								$selected = ' selected="selected" ';
+
+					foreach ( $learndash_course_set as $learndash_course_id => $learndash_course_title ) {
+						$learndash_item_url = add_query_arg( 'course_id', $learndash_course_id, $learndash_item_url );
+
+						$learndash_selected = '';
+						if ( learndash_get_post_type_slug( 'quiz' ) === $learndash_edit_post->post_type ) {
+							if ( $learndash_course_id == $learndash_course_post_id ) {
+								$learndash_selected           = ' selected="selected" ';
+								$learndash_selected_course_id = $learndash_course_id;
 							}
 						} else {
-							if ( ( $course_id == $course_post_id ) || ( ( empty( $course_post_id ) ) && ( $course_id == $default_course_id ) ) ) {
-								$selected = ' selected="selected" ';
+							if ( ( $learndash_course_id == $learndash_course_post_id ) || ( ( empty( $learndash_course_post_id ) ) && ( $learndash_course_id == $learndash_default_course_id ) ) ) {
+								$learndash_selected           = ' selected="selected" ';
+								$learndash_selected_course_id = $learndash_course_id;
 							}
 						}
-						?><option <?php echo $selected ?> data-course_id="<?php echo $course_id ?>" value="<?php echo $item_url; ?>"><?php echo get_the_title( $course_id );  ?></option><?php
+						?>
+						<option <?php echo esc_attr( $learndash_selected ); ?> data-course_id="<?php echo absint( $learndash_course_id ); ?>" value="<?php echo esc_url( $learndash_item_url ); ?>"><?php echo wp_kses_post( get_the_title( $learndash_course_id ) ); ?></option>
+						<?php
 					}
-			
-					if ( $use_select_opt_groups === true ) {
-						?></optgroup><?php
+
+					if ( true === $learndash_use_select_opt_groups ) {
+						?>
+						</optgroup>
+						<?php
 					}
 				}
-			?></select></p><?php
+				?>
+			</select></p>
+			<?php
+
+			if ( absint( $learndash_selected_course_id ) !== absint( $learndash_default_course_id ) ) {
+				wp_nonce_field( 'ld-course-primary-set-nonce', 'ld-course-primary-set-nonce', false );
+				?>
+				<input type="checkbox" id="ld-course-primary-set" name="ld-course-primary-set" value="<?php echo absint( $learndash_selected_course_id ); ?>" /> <label for="ld-course-primary-set">
+				<?php
+					echo sprintf(
+						// translators: placeholder: Course.
+						esc_html_x( 'Set Primary %s', 'placeholder: Course', 'learndash' ),
+						LearnDash_Custom_Label::get_label( 'course' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					);
+				?>
+				</label>
+				<?php
+			}
 		}
 	}
 }

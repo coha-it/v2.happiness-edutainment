@@ -1,9 +1,9 @@
 <?php
 /**
- * @package WP Content Aware Engine
+ * @package wp-content-aware-engine
  * @author Joachim Jensen <joachim@dev.institute>
  * @license GPLv3
- * @copyright 2019 by Joachim Jensen
+ * @copyright 2021 by Joachim Jensen
  */
 
 defined('ABSPATH') || exit;
@@ -20,7 +20,7 @@ if (!class_exists('WPCAObjectManager')) {
          *
          * @var array
          */
-        private $objects = array();
+        private $objects = [];
 
         /**
          * Constructor

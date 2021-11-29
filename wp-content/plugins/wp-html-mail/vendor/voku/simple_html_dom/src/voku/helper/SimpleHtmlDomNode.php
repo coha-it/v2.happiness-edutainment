@@ -1,144 +1,163 @@
 <?php
 
+declare(strict_types=1);
+
 namespace voku\helper;
 
 /**
- * Class SimpleHtmlDomNode
- *
- * @package voku\helper
- *
- * @property-read string outertext <p>Get dom node's outer html.</p>
- * @property-read string plaintext <p>Get dom node's plain text.</p>
+ * {@inheritdoc}
  */
-class SimpleHtmlDomNode extends \ArrayObject implements SimpleHtmlDomNodeInterface
+class SimpleHtmlDomNode extends AbstractSimpleHtmlDomNode implements SimpleHtmlDomNodeInterface
 {
-  /** @noinspection MagicMethodsValidityInspection */
-  /**
-   * @param string $name
-   *
-   * @return array|null
-   */
-  public function __get($name)
-  {
-    $name = strtolower($name);
+    /**
+     * Find list of nodes with a CSS selector.
+     *
+     * @param string   $selector
+     * @param int|null $idx
+     *
+     * @return SimpleHtmlDomNodeInterface<SimpleHtmlDomInterface>|SimpleHtmlDomNodeInterface[]|null
+     */
+    public function find(string $selector, $idx = null)
+    {
+        // init
+        $elements = new static();
 
-    if ($this->count() > 0) {
-      $return = array();
-
-      foreach ($this as $node) {
-        if ($node instanceof SimpleHtmlDom) {
-          $return[] = $node->{$name};
+        foreach ($this as $node) {
+            \assert($node instanceof SimpleHtmlDomInterface);
+            foreach ($node->find($selector) as $res) {
+                $elements[] = $res;
+            }
         }
-      }
 
-      return $return;
+        // return all elements
+        if ($idx === null) {
+            if (\count($elements) === 0) {
+                return new SimpleHtmlDomNodeBlank();
+            }
+
+            return $elements;
+        }
+
+        // handle negative values
+        if ($idx < 0) {
+            $idx = \count($elements) + $idx;
+        }
+
+        // return one element
+        return $elements[$idx] ?? null;
     }
 
-    return null;
-  }
-
-  /**
-   * alias for "$this->innerHtml()" (added for compatibly-reasons with v1.x)
-   */
-  public function outertext()
-  {
-    $this->innerHtml();
-  }
-
-  /**
-   * alias for "$this->innerHtml()" (added for compatibly-reasons with v1.x)
-   */
-  public function innertext()
-  {
-    $this->innerHtml();
-  }
-
-  /**
-   * @param string $selector
-   * @param int    $idx
-   *
-   * @return SimpleHtmlDomNode[]|SimpleHtmlDomNode|null
-   */
-  public function __invoke($selector, $idx = null)
-  {
-    return $this->find($selector, $idx);
-  }
-
-  /**
-   * @return string
-   */
-  public function __toString()
-  {
-    $html = '';
-    foreach ($this as $node) {
-      $html .= $node->outertext;
+    /**
+     * Find nodes with a CSS selector.
+     *
+     * @param string $selector
+     *
+     * @return SimpleHtmlDomInterface[]|SimpleHtmlDomNodeInterface<SimpleHtmlDomInterface>
+     */
+    public function findMulti(string $selector): SimpleHtmlDomNodeInterface
+    {
+        return $this->find($selector, null);
     }
 
-    return $html;
-  }
+    /**
+     * Find nodes with a CSS selector.
+     *
+     * @param string $selector
+     *
+     * @return false|SimpleHtmlDomInterface[]|SimpleHtmlDomNodeInterface<SimpleHtmlDomInterface>
+     */
+    public function findMultiOrFalse(string $selector)
+    {
+        $return = $this->find($selector, null);
 
-  /**
-   * Find list of nodes with a CSS selector.
-   *
-   * @param string $selector
-   * @param int    $idx
-   *
-   * @return SimpleHtmlDomNode[]|SimpleHtmlDomNode|null
-   */
-  public function find($selector, $idx = null)
-  {
-    $elements = new self();
-    foreach ($this as $node) {
-      foreach ($node->find($selector) as $res) {
-        $elements->append($res);
-      }
+        if ($return instanceof SimpleHtmlDomNodeBlank) {
+            return false;
+        }
+
+        return $return;
     }
 
-    // return all elements
-    if (null === $idx) {
-      return $elements;
+    /**
+     * Find one node with a CSS selector.
+     *
+     * @param string $selector
+     *
+     * @return SimpleHtmlDomNodeInterface<SimpleHtmlDomInterface>|null
+     */
+    public function findOne(string $selector)
+    {
+        return $this->find($selector, 0);
     }
 
-    // handle negative values
-    if ($idx < 0) {
-      $idx = count($elements) + $idx;
+    /**
+     * Find one node with a CSS selector.
+     *
+     * @param string $selector
+     *
+     * @return false|SimpleHtmlDomNodeInterface<SimpleHtmlDomInterface>
+     */
+    public function findOneOrFalse(string $selector)
+    {
+        $return = $this->find($selector, 0);
+
+        if ($return === null) {
+            return false;
+        }
+
+        return $return;
     }
 
-    // return one element
-    if (isset($elements[$idx])) {
-      return $elements[$idx];
+    /**
+     * Get html of elements.
+     *
+     * @return string[]
+     */
+    public function innerHtml(): array
+    {
+        // init
+        $html = [];
+
+        foreach ($this as $node) {
+            $html[] = $node->outertext;
+        }
+
+        return $html;
     }
 
-    return null;
-  }
-
-  /**
-   * Get html of elements.
-   *
-   * @return array
-   */
-  public function innerHtml()
-  {
-    $html = array();
-    foreach ($this as $node) {
-      $html[] = $node->outertext;
+    /**
+     * alias for "$this->innerHtml()" (added for compatibly-reasons with v1.x)
+     *
+     * @return string[]
+     */
+    public function innertext()
+    {
+        return $this->innerHtml();
     }
 
-    return $html;
-  }
-
-  /**
-   * Get plain text.
-   *
-   * @return array
-   */
-  public function text()
-  {
-    $text = array();
-    foreach ($this as $node) {
-      $text[] = $node->plaintext;
+    /**
+     * alias for "$this->innerHtml()" (added for compatibly-reasons with v1.x)
+     *
+     * @return string[]
+     */
+    public function outertext()
+    {
+        return $this->innerHtml();
     }
 
-    return $text;
-  }
+    /**
+     * Get plain text.
+     *
+     * @return string[]
+     */
+    public function text(): array
+    {
+        // init
+        $text = [];
+
+        foreach ($this as $node) {
+            $text[] = $node->plaintext;
+        }
+
+        return $text;
+    }
 }

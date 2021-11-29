@@ -7,6 +7,10 @@
  * @since 2.5.9
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 if ( ( class_exists( 'LearnDash_Gutenberg_Block' ) ) && ( ! class_exists( 'LearnDash_Gutenberg_Block_User_Groups' ) ) ) {
 	/**
 	 * Class for handling LearnDash User Groups Block
@@ -18,29 +22,29 @@ if ( ( class_exists( 'LearnDash_Gutenberg_Block' ) ) && ( ! class_exists( 'Learn
 		 */
 		public function __construct() {
 
-			$this->shortcode_slug = 'user_groups';
-			$this->block_slug = 'ld-user-groups';
+			$this->shortcode_slug   = 'user_groups';
+			$this->block_slug       = 'ld-user-groups';
 			$this->block_attributes = array(
-				'user_id' => array(
+				'user_id'         => array(
 					'type' => 'string',
 				),
-				'per_page' => array(
+				'per_page'        => array(
 					'type' => 'integer',
 				),
-				'order' => array(
+				'order'           => array(
 					'type' => 'string',
 				),
-				'orderby' => array(
+				'orderby'         => array(
 					'type' => 'string',
 				),
-				'preview_show' => array(
+				'preview_show'    => array(
 					'type' => 'boolean',
 				),
 				'preview_user_id' => array(
 					'type' => 'string',
 				),
 			);
-			$this->self_closing = true;
+			$this->self_closing     = true;
 
 			$this->init();
 		}
@@ -58,6 +62,7 @@ if ( ( class_exists( 'LearnDash_Gutenberg_Block' ) ) && ( ! class_exists( 'Learn
 		 * @return none The output is echoed.
 		 */
 		public function render_block( $attributes = array() ) {
+			$attributes = $this->preprocess_block_attributes( $attributes );
 
 			if ( is_user_logged_in() ) {
 
@@ -71,7 +76,7 @@ if ( ( class_exists( 'LearnDash_Gutenberg_Block' ) ) && ( ! class_exists( 'Learn
 						if ( ( ! isset( $attributes['user_id'] ) ) && ( 'preview_user_id' === $key ) && ( '' !== $val ) ) {
 							if ( learndash_is_admin_user( get_current_user_id() ) ) {
 								// If admin user they can preview any user_id.
-							} else if ( learndash_is_group_leader_user( get_current_user_id() ) ) {
+							} elseif ( learndash_is_group_leader_user( get_current_user_id() ) ) {
 								// If group leader user we ensure the preview user_id is within their group(s).
 								if ( ! learndash_is_group_leader_of_user( get_current_user_id(), $val ) ) {
 									continue;
@@ -92,7 +97,10 @@ if ( ( class_exists( 'LearnDash_Gutenberg_Block' ) ) && ( ! class_exists( 'Learn
 				}
 
 				$shortcode_params_str = '[' . $this->shortcode_slug . ' ' . $shortcode_params_str . ']';
-				$shortcode_out = do_shortcode( $shortcode_params_str );
+				$shortcode_out        = do_shortcode( $shortcode_params_str );
+				if ( empty( $shortcode_out ) ) {
+					$shortcode_out = '[' . $this->shortcode_slug . '] placeholder output.';
+				}
 
 				return $this->render_block_wrap( $shortcode_out );
 			}

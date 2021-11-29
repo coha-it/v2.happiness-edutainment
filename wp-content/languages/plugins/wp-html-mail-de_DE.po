@@ -1,61 +1,395 @@
-# Translation of Plugins - WP HTML Mail &#8211; Email Designer - Stable (latest release) in German
-# This file is distributed under the same license as the Plugins - WP HTML Mail &#8211; Email Designer - Stable (latest release) package.
+# Translation of Plugins - WordPress Email Template Designer &#8211; WP HTML Mail - Stable (latest release) in German
+# This file is distributed under the same license as the Plugins - WordPress Email Template Designer &#8211; WP HTML Mail - Stable (latest release) package.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2018-10-03 15:18:52+0000\n"
+"PO-Revision-Date: 2021-07-09 07:50:50+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: GlotPress/2.4.0-alpha\n"
+"X-Generator: GlotPress/3.0.0-alpha.2\n"
 "Language: de\n"
-"Project-Id-Version: Plugins - WP HTML Mail &#8211; Email Designer - Stable (latest release)\n"
+"Project-Id-Version: Plugins - WordPress Email Template Designer &#8211; WP HTML Mail - Stable (latest release)\n"
+
+#: views/admin/settings-webfonts-sales-page.php:63
+msgid "get the webfonts extension"
+msgstr "hol dir das Webfonts AddOn"
+
+#: views/admin/settings-webfonts-sales-page.php:60
+msgid "Works with our BuddyPress extension."
+msgstr "Funktioniert mit unserem BuddyPress AddOn"
+
+#: views/admin/settings-webfonts-sales-page.php:58
+msgid "Works with our Easy Digital Downloads extension."
+msgstr "Funktioniert mit unserem AddOn für Easy Digital Downloads"
+
+#: views/admin/settings-webfonts-sales-page.php:56
+msgid "Works with our WooCommerce extension."
+msgstr "Funktioniert mit unserem WooCommerce AddOn"
+
+#: views/admin/settings-webfonts-sales-page.php:54
+msgid "Most requested feature by our users."
+msgstr "Das am häufigsten gewünschte Feature unserer User"
+
+#: views/admin/settings-webfonts-sales-page.php:52
+msgid "Use more than 1000 Google fonts."
+msgstr "Verwende mehr als 1000 Google Fonts."
+
+#: views/admin/settings-webfonts-sales-page.php:49
+msgid "You are a user of our product so we do not want you to buy something you can't use as expected.<br/>This is one of the reasons for our <i class=\"dashicons dashicons-star-filled\"></i><i class=\"dashicons dashicons-star-filled\"></i><i class=\"dashicons dashicons-star-filled\"></i><i class=\"dashicons dashicons-star-filled\"></i><i class=\"dashicons dashicons-star-filled\"></i> ratings."
+msgstr "Du bist ein User unseres Plugins daher möchten wir auf keinen Fall, dass du etwas kaufst, das du dann nicht so verwenden kannst wie du es dir wünschst.<br/>Vielleicht ein Grund für unsere <i class=\"dashicons dashicons-star-filled\"></i><i class=\"dashicons dashicons-star-filled\"></i><i class=\"dashicons dashicons-star-filled\"></i><i class=\"dashicons dashicons-star-filled\"></i><i class=\"dashicons dashicons-star-filled\"></i> Bewertungen."
+
+#: views/admin/settings-webfonts-sales-page.php:47
+msgid "Not the sales pitch you expected?"
+msgstr "Nicht der Verkaufs-Pitch den du erwartest hattest?"
+
+#: views/admin/settings-webfonts-sales-page.php:40
+msgid "See our own tests here"
+msgstr "Sieh dir hier unsere Tests an"
+
+#: views/admin/settings-webfonts-sales-page.php:38
+msgid "Test your emails in multiple email clients to make sure they look either great or at least ok and not completely different than expected."
+msgstr "Teste deine E-Mails in verschiedenen Mail-Programmen um sicher zu sein, dass sie überall großartig (oder zumindest gut) aussehen und nicht komplett anders als erwartet."
+
+#: views/admin/settings-webfonts-sales-page.php:36
+msgid "Test, test, test"
+msgstr "Testen, testen, testen"
+
+#: views/admin/settings-webfonts-sales-page.php:31
+msgid "caniemail.com statistics"
+msgstr "caniemail.com Statistiken"
+
+#: views/admin/settings-webfonts-sales-page.php:29
+msgid "If you already know how many of your recipients use Outlook, Gmail, Apple Mail, Thunderbird, ... check the stats on whether or not it even makes sense to use non standard fonts."
+msgstr "Wenn du bereits eine Vorstellung hast wie viele deiner Empfänger Outlook, Gmail, Apple Mail, Thunderbird, ... benutzen sieh dir die Statistiken an ob es überhaupt Sinn macht andere als die Standard-Schriften zu verwenden."
+
+#: views/admin/settings-webfonts-sales-page.php:27
+msgid "Know your recipients"
+msgstr "Kenne deine Empfänger"
+
+#: views/admin/settings-webfonts-sales-page.php:23
+msgid "Those users whose email clients do not support webfonts will see an alternative font so use webfonts that can be replaced easily by a standard font without destroying your complete email design."
+msgstr "Die Empfänger, deren E-Mail Programm keine Webfonts unterstützt bekommen eine Alternativ-Schrift angezeigt. Achte also darauf, keine zu ausgefallenen Schriften zu verwenden bei denen die Alternative dein Layout zerstören würde."
+
+#: views/admin/settings-webfonts-sales-page.php:21
+msgid "Choose fonts with suitable fallbacks"
+msgstr "Such dir Schriften mit passenden Alternativen aus"
+
+#: views/admin/settings-webfonts-sales-page.php:17
+msgid "To be honest, this is a really bad value! So what does it mean for us?"
+msgstr "Ehrlich gesagt ist das echt ein schlechter Wert, aber was bedeutet das in der Praxis?"
+
+#: views/admin/settings-webfonts-sales-page.php:15
+msgid "According to caniemail.com webfonts in emails work for just around 52% of users."
+msgstr "Laut den Daten von caniemail.com funktionieren Webfonts in E-Mails für ca 52% der Empfänger."
+
+#: views/admin/settings-webfonts-sales-page.php:13
+msgid "The facts"
+msgstr "Die Fakten"
+
+#: views/admin/settings.php:135
+msgid "Please select a language in your admin bar at the top of the page to show the preview."
+msgstr "Bitte wähle oben in der Admin-Bar eine Sprache aus um die Vorschau anzuzeigen."
+
+#: views/admin/settings-sender.php:30
+msgid "Normally we change the sender name and sender address of all emails. You can customize this for each plugin on tab \"Plugins\" but you can also set a default value here."
+msgstr "Normalerweise ändern wir Name und E-Mail-Adresse des Absenders für alle ausgehenden Nachrichten. Du kannst das auf dem Tab \"Plugins\" für viele Plugins individuell einstellen oder hier das Standard-Verhalten definieren."
+
+#: views/admin/settings-sender.php:29
+msgid "Do not change email sender by default"
+msgstr "Den Absender standardmäßig nicht überschreiben"
+
+#: views/admin/settings-sender.php:25
+msgid "Overwrite sender by default?"
+msgstr "Absender standardmäßig überschreiben?"
+
+#: includes/class-haet-mail.php:281
+msgid "Webfonts"
+msgstr "Webfonts"
+
+#: includes/class-template-designer.php:120
+msgid "You successfully upgraded to our <strong>new email editor</strong>! Please <a href=\"%1$s\">review your settings</a> to make sure everything still looks as expected."
+msgstr "Du hast erfolgreich ein Upgrade deines <strong>neuen E-Mail-Editors</strong> vorgenommen! Bitte <a href=\"%1$s\">überprüfe deine Einstellungen</a>, um sicherzustellen, dass immer noch alles aussieht, wie es soll."
+
+#. Plugin Name of the plugin
+msgid "WP HTML Mail - Email Template Designer"
+msgstr "WP HTML Mail - Email Template Designer"
+
+#: views/admin/settings-advanced.php:96
+msgid "Go back to our old editor if you don't like our new JavaScript based template designer."
+msgstr "Zu alten Editor wechseln, falls dir unser neuer JavaScript basierender Editor nicht gefällt."
+
+#: views/admin/settings-advanced.php:92
+msgid "Old template editor"
+msgstr "Alter Template Editor"
+
+#: views/admin/settings.php:103 views/admin/settings.php:131
+msgid "Preview"
+msgstr "Vorschau"
+
+#: views/admin/settings-sender.php:8
+msgid "Email sender"
+msgstr "Absender"
+
+#: views/admin/settings-header.php:62
+msgid "align"
+msgstr "Ausrichtung"
+
+#: views/admin/settings-header.php:59
+msgid "If you would like to provide the header image in retina quality, upload an image with a higher resultion, such as for example 1200px x 400px and enter only half the size values in the input fields on the left (600 x 200)."
+msgstr "Falls du das Bild in Retina Auflösung anzeigen möchtest lade es einfach in doppelter Größe hoch (zB 1200px x 400px) und skalier es dann auf die Hälfte (zB 600px x 200px)"
+
+#: views/admin/settings-header.php:57
+msgid "height"
+msgstr "Höhe"
+
+#: views/admin/settings-header.php:55
+msgid "width"
+msgstr "Breite"
+
+#: views/admin/settings-header.php:21 js/template-designer/dev/main.js:1099
+#: js/template-designer/dist/main.js:1
+msgid "Show image below text"
+msgstr "Bild nach dem Text"
+
+#: views/admin/settings-header.php:20 js/template-designer/dev/main.js:1096
+#: js/template-designer/dist/main.js:1
+msgid "Show image above text"
+msgstr "Bild vor dem Text"
+
+#: views/admin/settings-header.php:19
+msgid "Show image only (use text as alt attribute)"
+msgstr "Nur das Bild (Text als alt-Attribut)"
+
+#: views/admin/settings-header.php:18 js/template-designer/dev/main.js:1090
+#: js/template-designer/dist/main.js:1
+msgid "Show just a text header"
+msgstr "Zeige nur den Text-Header"
+
+#: views/admin/settings-header.php:14 js/template-designer/dev/main.js:1084
+#: js/template-designer/dist/main.js:1
+msgid "Image and text placement"
+msgstr "Bild und Text Platzierung"
+
+#: includes/class-haet-mail.php:273
+msgid "Sender"
+msgstr "Absender"
+
+#: includes/class-haet-mail.php:272
+msgid "Template"
+msgstr "Vorlage"
+
+#: includes/class-template-designer.php:127
+msgid "In order to use our <strong>new email editor</strong> you need to upgrade to WordPress 5.4 or higher. In the meanwhile you can still use our classic settings pages."
+msgstr "Um unseren <strong>neuen E-Mail Editor</strong> zu verwenden musst du WordPress auf 5.4 oder höher aktualisieren. Inzwischen kannst du unsere klassischen Einstellungen verwenden."
+
+#: views/admin/template-library.php:49
+msgid "Importing template, please wait a moment."
+msgstr "Vorlage wird importiert, bitte warte einen Augenblick..."
+
+#: views/admin/template-library.php:40
+msgid "Import template (and overwrite my existing settings)"
+msgstr "Vorlage importieren (und meine Einstellungen überschreiben)"
+
+#: views/admin/template-library.php:22
+msgid "We could not find any templates. Maybe your server cannnot connect to our template library."
+msgstr "Wir konnten keine Vorlagen finden, eventuell kann sich dein Server nicht mit unserer Template Library verbinden."
+
+#: views/admin/template-library.php:21
+msgid "No templates found"
+msgstr "Keine Vorlagen gefunden"
+
+#: views/admin/template-library.php:14
+msgid "Use one of our templates to get started"
+msgstr "Nutze eine unsere Vorlagen um den Start zu erleichtern"
+
+#: views/admin/template-library.php:8
+msgid "back"
+msgstr "zurück"
+
+#: views/admin/settings-advanced.php:55
+msgid "All emails created with our mailbuilder are stored as custom post types. You can manage them at the link above"
+msgstr "Alle E-Mails, die du mit dem Mailbuilder erstellst werden als Custom Post Types gespeichert. Diese kannst du hier verwalten."
+
+#: views/admin/settings-advanced.php:53
+msgid "Show all emails"
+msgstr "Alle E-Mails anzeigen"
+
+#: views/admin/settings-advanced.php:51
+msgid "Mailbuilder custom posts"
+msgstr "Mailbuilder Custom Posts"
+
+#: views/admin/settings-advanced.php:25
+msgid "Start Import"
+msgstr "Import starten"
 
 #: views/admin/settings-advanced.php:23
+msgid "Paste settings from another site to the field above."
+msgstr "Kopiere die Einstellungen einer anderen Seite in das Feld oberhalb."
+
+#: views/admin/settings-advanced.php:15
+msgid "Copy the settings above and paste into another site."
+msgstr "Kopiere die Einstellungen oberhalb und füge sie auf einer anderen Seite ein."
+
+#: views/admin/settings-advanced.php:11
+msgid "Import template"
+msgstr "Vorlage importieren"
+
+#: views/admin/settings-advanced.php:10
+msgid "Export template"
+msgstr "Vorlage exportieren"
+
+#: views/admin/settings-advanced.php:8
+msgid "Import / Export template"
+msgstr "Vorlage importieren / exportieren"
+
+#: includes/class-haet-mail.php:961
+msgid "Uppercase"
+msgstr "Großbuchstaben"
+
+#: views/admin/settings-footer.php:31 views/admin/settings-header.php:78
+#: views/admin/settings-header.php:136 js/template-designer/dev/main.js:305
+#: js/template-designer/dev/main.js:484 js/template-designer/dev/main.js:945
+#: js/template-designer/dist/main.js:1
+msgid "If enabled you can use individual settings depending on the current language selected at the top of the page in your admin bar."
+msgstr "Wenn du die Übersetzung aktivierst kannst du pro Sprache andere Einstellungen wählen abhängig von der Sprache, die du oben in der Admin-Bar eingestellt hast."
+
+#: views/admin/settings-footer.php:30 views/admin/settings-header.php:77
+#: views/admin/settings-header.php:135 js/template-designer/dev/main.js:303
+#: js/template-designer/dev/main.js:482 js/template-designer/dev/main.js:943
+#: js/template-designer/dist/main.js:1
+msgid "Enable translation for this field"
+msgstr "Übersetzung für dieses Feld aktivieren"
+
+#: views/admin/settings.php:145
+msgid "Translation settings for this field are updated."
+msgstr "Die Übersetzungseinstellungen für dieses Feld werden aktualisiert"
+
+#: views/admin/settings.php:143 views/admin/template-library.php:47
+msgid "Please wait"
+msgstr "Bitte warten …"
+
+#: views/admin/settings-survey.php:209
+msgid "Custom Webfonts"
+msgstr "Eigene Webfonts"
+
+#: views/admin/settings-advanced.php:37
+msgid "From security perspective you should not enable this option but some plugin developers send HTML code in their emails without setting the correct content type header, so you might see HTML tags in your emails."
+msgstr "Aus Sicherheitsgründen sollte diese Option eigentlich nicht aktiviert werden, aber einige Plugin Entwickler senden ihre im HTML Format ohne den dafür nötigen Header mit anzugeben und so kann es passieren, dass du dann den HTML Code in deinen Mails siehst."
+
+#: views/admin/settings-advanced.php:35
+msgid "Allow HTML code in plain text content type"
+msgstr "HTML Code in Plain Text E-Mails"
+
+#: views/admin/settings-advanced.php:31
+msgid "Content type"
+msgstr "Content Type"
+
+#: views/admin/settings-advanced.php:81
+msgid "If you don't use a child theme and need an update save place to store your email template you can also copy the template file from the plugin to <strong>wp-content/uploads/wp-html-mail/template.html</strong>."
+msgstr "Falls du kein kein Child-Theme verwendest und auch kein eigenes Theme in dem du Code verändern möchtest, kannst du die Template-Datei aus dem Plugin nach <strong>wp-content/uploads/wp-html-mail/template.html</strong> kopieren."
+
+#. Author URI of the plugin
+msgid "https://codemiq.com"
+msgstr "https://codemiq.com"
+
+#. Author of the plugin
+msgid "Hannes Etzelstorfer // codemiq"
+msgstr "Hannes Etzelstorfer // codemiq"
+
+#. Plugin URI of the plugin
+msgid "https://codemiq.com/en/plugins/wp-html-mail-email-templates/"
+msgstr "https://codemiq.com/de/plugins/wp-html-mail-e-mail-templates/"
+
+#: views/admin/single-plugin.php:32
+msgid "Hide footer"
+msgstr "Footer verbergen"
+
+#: views/admin/single-plugin.php:28
+msgid "Hide header"
+msgstr "Header verbergen"
+
+#: views/admin/settings-advanced.php:111
+msgid "also enable debug outputs"
+msgstr "auch Debug-Ausgaben aktivieren?"
+
+#: includes/class-mailbuilder.php:254
+msgid "show / hide footer for this email"
+msgstr "Fußzeile für diese E-Mail ein- oder ausblenden"
+
+#: includes/class-mailbuilder.php:244
+msgid "show / hide header for this email"
+msgstr "Header für diese E-Mail ein- oder ausblenden"
+
+#: views/admin/settings-advanced.php:114
+msgid "Enable email test mode to redirect all messages to your own email address."
+msgstr "Aktiviere den Test-Modus um alle WordPress E-Mails an deine E-Mail Adresse umzuleiten."
+
+#: views/admin/settings-advanced.php:105
+msgid "enable test mode"
+msgstr "Testmodus aktivieren"
+
+#: views/admin/settings-advanced.php:101
+msgid "E-Mail test mode"
+msgstr "E-Mail Test Modus"
+
+#: includes/class-haet-mail.php:1013
+msgid "<strong>Warning:</strong> WP HTML Mail – Email test mode is enabled. All emails are redirected to <strong>%1$s</strong>."
+msgstr "<strong>Achtung:</strong> Der E-Mail Test Modus von WP HTML Mail ist aktiv. Alle E-Mails werden an <strong>%1$s</strong> umgeleitet."
+
+#: views/admin/settings-advanced.php:78
+msgid "<strong>Only use this feature if you know what you are doing!</strong><br>From this point you have to continue your work in HTML and CSS code."
+msgstr "<strong>Verwende diese Funktion nur wenn du auch weißt was du tust!</strong><br>Ab diesem Punkt musst du die weitere Formatierung in HTML und CSS fortsetzen."
+
+#: views/admin/settings-advanced.php:67
+msgid "Are you sure you want to write your own code?"
+msgstr "Sicher, dass du deinen eigenen Code schreiben möchtest?"
+
+#: views/admin/settings-advanced.php:45
 msgid "Delete ALL settings"
 msgstr "ALLE Einstellungen löschen"
 
-#: views/admin/settings-advanced.php:22 views/admin/settings-advanced.php:23
-msgid "Are you sure? This can not be undone!"
-msgstr "Bist du dir sicher? Das kann nicht rückgängig gemacht werden!"
-
-#: views/admin/settings-advanced.php:20
-msgid "Delete plugin settings"
-msgstr "Plugin Einstellungen löschen"
-
-#: views/admin/settings-advanced.php:22
+#: views/admin/settings-advanced.php:44
 msgid "Delete design settings"
 msgstr "Design Einstellungen löschen"
 
-#: includes/class-mailbuilder.php:280
+#: views/admin/settings-advanced.php:44 views/admin/settings-advanced.php:45
+msgid "Are you sure? This can not be undone!"
+msgstr "Bist du dir sicher? Das kann nicht rückgängig gemacht werden!"
+
+#: views/admin/settings-advanced.php:42
+msgid "Delete plugin settings"
+msgstr "Plugin Einstellungen löschen"
+
+#: includes/class-mailbuilder.php:308
 msgid "Done"
 msgstr "Erledigt"
 
-#: includes/class-mailbuilder.php:275
+#: includes/class-mailbuilder.php:303
 msgid "CSS changes are not shown live. Please save the email to see your changes."
 msgstr "CSS Änderungen werden nicht live angezeigt. Bitte speichere deine E-Mail um die Änderungen zu sehen."
 
-#: includes/class-mailbuilder.php:272
+#: includes/class-mailbuilder.php:300
 msgid "Mobile CSS"
 msgstr "CSS mobil"
 
-#: includes/class-mailbuilder.php:271
+#: includes/class-mailbuilder.php:299
 msgid "WP HTML Mail converts all desktop styling to inline CSS code for better support in webmail clients. Mobile CSS stays in the head, so please don't write @media queries to the field above but use the mobil CSS field below"
 msgstr "WP HTML Mail wandelt alle Desktop Styles in Inline CSS um. Damit wird die Darstellung in Webmail Clients verbessert. Mobile CSS Regeln bleiben im Head. Demnach bitte  keine @media-Queries einfügen sondern mobile Regeln in das Feld unterhalb einfügen."
 
-#: includes/class-mailbuilder.php:234 includes/class-mailbuilder.php:268
+#: includes/class-mailbuilder.php:262 includes/class-mailbuilder.php:296
 msgid "Custom CSS"
 msgstr "Custom CSS"
 
-#: includes/class-haet-mail.php:615
+#: includes/class-haet-mail.php:1002
 msgid "Settings"
 msgstr "Einstellungen"
 
-#: includes/class-haet-mail.php:141 includes/class-haet-mail.php:150
+#: includes/class-haet-mail.php:169 includes/class-haet-mail.php:178
 msgid "Settings deleted."
 msgstr "Einstellungen gelöscht."
 
-#: includes/class-mailbuilder.php:115
+#: includes/class-mailbuilder.php:128
 msgid "Update"
 msgstr "Aktualisieren"
 
@@ -71,429 +405,436 @@ msgstr "Desktop Padding"
 msgid "Content Element Settings"
 msgstr "Content Element Einstellungen"
 
-#: includes/class-mailbuilder.php:99
-msgid "Attach files"
-msgstr "Dateien anhängen"
-
-#: includes/class-mailbuilder.php:142
+#: includes/class-mailbuilder.php:155
 msgid "Add attachments"
 msgstr "Anhänge hinzufügen"
 
+#: includes/class-mailbuilder.php:112
+msgid "Attach files"
+msgstr "Dateien anhängen"
+
 #: wp-html-mail.php:54
-msgid "<strong>Warning:</strong> To use WP HTML Mail please update your PHP version to 5.6 or higher in your hosting admin panel."
-msgstr "<strong>Warnung:</strong> Um WP HTML Mail benutzen zu können, aktualisiere deine PHP Version, im Adminpanel deines Webhosters, auf 5.6 oder höher. "
+msgid "<strong>Warning:</strong> To use WP HTML Mail please update your PHP version to 7.2 or higher in your hosting admin panel."
+msgstr "<strong>Warnung:</strong> Um WP HTML Mail benutzen zu können, aktualisiere bitte deine PHP-Version auf Version 7.2 oder höher in deinem Hosting-Adminbereich."
 
-#: views/admin/settings-survey.php:2
-msgid "Help me improve WP HTML Mail"
-msgstr "Bitte hilf mit WP HTML Mail zu verbessern"
-
-#: views/admin/settings-survey.php:26
-msgid "How do you like WP HTML Mail so far?"
-msgstr "Wie bist du mit WP HTML Mail zufrieden?"
-
-#: views/admin/settings-survey.php:27
-msgid "Your overall impression."
-msgstr "Dein Gesamteindruck."
-
-#: views/admin/settings-survey.php:47
-msgid "How satisfied are you with your final email template?"
-msgstr "Wie zufrieden bist du mit dem Ergebnis deines E-Mail Templates?"
-
-#: views/admin/settings-survey.php:48
-msgid "Does ist look as expected?"
-msgstr "Sieht es so aus wie geplant?"
-
-#: views/admin/settings-survey.php:63
-msgid "How would you rate the configuration usability?"
-msgstr "Wie würdest du die Benutzerfreundlichkeit des Plugins bewerten?"
-
-#: views/admin/settings-survey.php:64
-msgid "Is it clear and comprehensive?"
-msgstr "Ist es übersichtlich und verständlich?"
-
-#: views/admin/settings-survey.php:79
-msgid "What about the styling features?"
-msgstr "Wie sieht's mit den Formatierungsmöglichkeiten aus?"
-
-#: views/admin/settings-survey.php:80
-msgid "Did you find everything you need?"
-msgstr "Hast du alles gefunden, was du brauchst?"
-
-#: views/admin/settings-survey.php:95
-msgid "How did the plugin integrate with other plugins and themes?"
-msgstr "Wie zufrieden warst du mit der Kompatibilität zu anderen Plugins?"
-
-#: views/admin/settings-survey.php:96
-msgid "You can suggest plugins to integrate in the next step."
-msgstr "Du kannst im nächsten Schritt Plugins vorschlagen, die noch integriert werden sollten."
-
-#: views/admin/settings-survey.php:113 views/admin/settings-survey.php:267
-msgid "Submit"
-msgstr "Absenden"
-
-#: views/admin/settings-survey.php:146
-msgid "What do you think might help you to be more satisfied with your final email template?"
-msgstr "Was würde dir helfen um mit dem Aussehen deines Templates zufriedener zu sein?"
-
-#: views/admin/settings-survey.php:158
-msgid "Any details you want me to improve regarding usability?"
-msgstr "Gibt es etwas, das du in Bezug auf die Benutzerfreundlichkeit verbessern würdest?"
-
-#: views/admin/settings-survey.php:169
-msgid "Which of your plugins send emails with WP HTML Mail?"
-msgstr "Welche deiner Plugins senden E-Mails mit WP HTML MailP"
-
-#: views/admin/settings-survey.php:191
-msgid "Are there any plugins you want to see supported in future versions?"
-msgstr "Welche Plugins hättest du gerne in zukünftigen Versionen unterstützt?"
-
-#: views/admin/settings-survey.php:200
-msgid "What are the features you would like to see in future versions?"
-msgstr "Welche Features wünscht du dir für zukünftige Versionen?"
-
-#: views/admin/settings-survey.php:204
-msgid "A set of ready to use templates"
-msgstr "Eine Auswahl vordefinierter Templates"
-
-#: views/admin/settings-survey.php:209
-msgid "An editor to add custom CSS code"
-msgstr "Einen Editor für eigenen CSS Code"
-
-#: views/admin/settings-survey.php:214
-msgid "Mobile email preview"
-msgstr "Eine mobile Vorschau für E-Mails"
-
-#: views/admin/settings-survey.php:219
-msgid "Social media icons"
-msgstr "Social Media Icons"
-
-#: views/admin/settings-survey.php:224
-msgid "Attachments"
-msgstr "Attachments"
-
-#: views/admin/settings-survey.php:229
-msgid "Conditions to turn the template on and off for some emails"
-msgstr "Regeln um das Template für bestimmte E-Mails ein und aus zu schalten"
-
-#: views/admin/settings-survey.php:233
-msgid "Other:"
-msgstr "Andere:"
-
-#: views/admin/settings-survey.php:243
-msgid "I want to add some testimonials to my website.<br>Would you mind writing a few lines to inspire other customers to use the plugin?"
-msgstr "Ich möchte auf meiner Website ein paar Kundenstimmen anzeigen.<br>Könntest du mir ein paar Zeilen schreiben welche Erfahrung du mit dem Plugin gemacht hast?"
-
-#: views/admin/settings-survey.php:249
-msgid "Your name, company and job description:"
-msgstr "Dein Name, Unternehmen und Rolle:"
-
-#: views/admin/settings-survey.php:254
-msgid "Website / Twitter profile:"
-msgstr "Website oder Twitter:"
-
-#: views/admin/settings-survey.php:259
-msgid "Email for questions (optional):"
-msgstr "E-Mail für Rückfragen (optional):"
-
-#: views/admin/settings-survey.php:290
-msgid "Thank you for your feedback!"
-msgstr "Vielen Dank für dein Feedback!"
-
-#: views/admin/settings-survey.php:291
-msgid "This will help me to constantly improve the plugin."
-msgstr "Das hilft mir wirklich das Plugin weiterhin zu verbessern."
-
-#: views/admin/settings-survey.php:293
-msgid "If you want to buy some of my plugins you can use the following discount code to get 10% off."
-msgstr "Falls du Plugins von mir kaufen möchtest, kannst du den folgenden 10% Gutschein verwenden, als kleines Dankeschön für deine Zeit."
-
-#: views/admin/settings-survey.php:296
-msgid "Go to my website"
-msgstr "Zu meiner Website"
-
-#: views/admin/settings-survey.php:302
-msgid "Leave a review on WordPress.org"
-msgstr "Schreib eine Bewertung auf WordPress.org"
-
-#. Plugin URI of the plugin/theme
-msgid "http://wp-html-mail.com/"
-msgstr "http://wp-html-mail.com/"
-
-#. Description of the plugin/theme
+#. Description of the plugin
 msgid "Create your own professional email design for all your outgoing WordPress emails"
 msgstr "Erstelle dein eigenes professionelles E-Mail Design für all deine WordPress E-Mails"
 
-#. Author URI of the plugin/theme
-msgid "http://etzelstorfer.com/en/"
-msgstr "http://etzelstorfer.com/"
+#: views/admin/single-plugin.php:48
+msgid "install"
+msgstr "installieren"
 
-#: includes/class-contenttype-text.php:47
-msgid "Text"
-msgstr "Text"
+#: views/admin/single-plugin.php:45
+msgid "is currently not installed."
+msgstr "ist aktuell nicht installiert."
 
-#: includes/class-contenttype-twocol.php:47
-msgid "Two Columns"
-msgstr "Zwei Spalten"
+#: views/admin/single-plugin.php:39
+msgid "Install WP HTML Mail for"
+msgstr "Installiere WP HTML Mail für"
 
-#: includes/class-haet-mail.php:127
-msgid "Email"
-msgstr "E-Mail"
-
-#: includes/class-haet-mail.php:127
-msgid "Email template"
-msgstr "E-Mail Template"
-
-#: includes/class-haet-mail.php:172
-msgid "Settings Updated."
-msgstr "Einstellungen gespeichert"
-
-#: includes/class-haet-mail.php:227 views/admin/settings-general.php:2
-msgid "General"
-msgstr "Allgemein"
-
-#: includes/class-haet-mail.php:228 views/admin/settings-header.php:2
-msgid "Header"
-msgstr "Header"
-
-#: includes/class-haet-mail.php:229 views/admin/settings-content.php:2
-msgid "Content"
-msgstr "Inhalt"
-
-#: includes/class-haet-mail.php:236 views/admin/settings-footer.php:2
-#: views/admin/settings-footer.php:13
-msgid "Footer"
-msgstr "Footer"
-
-#: includes/class-haet-mail.php:237
-msgid "Plugins"
-msgstr "Plugins"
-
-#: includes/class-haet-mail.php:241
-msgid "Advanced"
-msgstr "Erweitert"
-
-#: includes/class-haet-sender-plugin-ninja-forms.php:41
-msgid "Yes"
-msgstr "Ja"
-
-#: includes/class-haet-sender-plugin-ninja-forms.php:42
-msgid "No"
-msgstr "Nein"
-
-#: includes/class-haet-sender-plugin-wp-e-commerce.php:9
-msgid "Transaction Report"
-msgstr "Transaktionsbericht"
-
-#: includes/class-haet-sender-plugin-wp-e-commerce.php:10
-msgid "Purchase Receipt"
-msgstr "Rechnung"
-
-#: includes/class-haet-sender-plugin-wp-e-commerce.php:11
-msgid "Order Pending: Payment Required"
-msgstr "Bestellung in Bearbeitung: Zahlung ausstehend"
-
-#: includes/class-haet-sender-plugin-wp-e-commerce.php:13
-msgid "The administrator has unlocked your file"
-msgstr "Der Administrator hat Ihre Datei entsperrt"
-
-#: includes/class-mailbuilder.php:47
-msgid "custom emails"
-msgstr "Eigene E-Mails"
-
-#: includes/class-mailbuilder.php:48
-msgid "custom email"
-msgstr "Eigene E-Mail"
-
-#: includes/class-mailbuilder.php:49 includes/class-mailbuilder.php:50
-msgid "Add New Custom Email"
-msgstr "Neue E-Mail"
-
-#: includes/class-mailbuilder.php:51
-msgid "Edit Custom Email"
-msgstr "E-Mail bearbeiten"
-
-#: includes/class-mailbuilder.php:52
-msgid "New Custom Email"
-msgstr "Neue E-Mail"
-
-#: includes/class-mailbuilder.php:53
-msgid "View Custom Email"
-msgstr "E-Mail anzeigen"
-
-#: includes/class-mailbuilder.php:54
-msgid "Search Custom Emails"
-msgstr "E-Mail suchen"
-
-#: includes/class-mailbuilder.php:55
-msgid "No Custom Emails found"
-msgstr "keine E-Mails gefunden"
-
-#: includes/class-mailbuilder.php:56
-msgid "No Custom Emails found in Trash"
-msgstr "Keine E-Mails im Papierkorb gefunden"
-
-#: includes/class-mailbuilder.php:57
-msgid "Parent Custom Email:"
-msgstr "übergeordnete E-Mail"
-
-#: includes/class-mailbuilder.php:58
-msgid "Custom Emails"
-msgstr "Eigene E-Mails"
-
-#: includes/class-mailbuilder.php:92
-msgid "Message"
-msgstr "Nachricht"
-
-#: includes/class-mailbuilder.php:94
-msgid "Email Subject"
-msgstr "E-Mail Betreff"
-
-#: includes/class-mailbuilder.php:96
-msgid "Email Content Builder"
-msgstr "E-Mail Content Builder"
-
-#: includes/class-contenttype.php:195 includes/class-mailbuilder.php:258
-msgid "Apply"
-msgstr "Anwenden"
-
-#: includes/class-contenttype.php:199 includes/class-mailbuilder.php:262
-msgid "Cancel"
-msgstr "Abbrechen"
-
-#: includes/class-mailbuilder.php:328
-msgid "Add Content Element"
-msgstr "Inhalt hinzufügen"
-
-#: views/admin/settings-advanced.php:2
-msgid "Advanced features"
-msgstr "Erweiterte Funktionen"
-
-#: includes/class-contenttype.php:131 views/admin/settings-content.php:7
-#: views/admin/settings-footer.php:7 views/admin/settings-general.php:7
-#: views/admin/settings-header.php:7
-msgid "Background color"
-msgstr "Hintergrundfarbe"
-
-#: views/admin/settings-content.php:14
-msgid "Headline Font"
-msgstr "Überschrift Schriftart"
-
-#: views/admin/settings-content.php:49
-msgid "Subsubheadline Font"
-msgstr "Untertitel Schriftart"
-
-#: views/admin/settings-content.php:84
-msgid "Content Font"
-msgstr "Inhalt Schriftart"
-
-#: views/admin/settings-content.php:119
-msgid "Link styling"
-msgstr "Link Formatierung"
-
-#: views/admin/settings-footer.php:24
-msgid "Show \"powered by\" link in email footer"
-msgstr "Zeige den \\\"powered by\\\" Link in der E-Mail Fußzeile"
-
-#: views/admin/settings-general.php:13
-msgid "Email sender name"
-msgstr "Absender Name"
-
-#: views/admin/settings-general.php:19
-msgid "Email sender address"
-msgstr "Absender E-Mail"
-
-#: views/admin/settings-header.php:14
-msgid "Header image"
-msgstr "Header Bild"
-
-#: views/admin/settings-header.php:19
-msgid "Select image"
-msgstr "Bild wählen"
-
-#: views/admin/settings-header.php:23
-msgid "Add your logo or image header (optional). max 600px wide"
-msgstr "Wähle dein Headerbild oder Logo (optional). maximal 600px breit"
-
-#: views/admin/settings-header.php:28
-msgid "Padding"
-msgstr "Innerer Abstand"
-
-#: views/admin/settings-header.php:31
-msgid "top"
-msgstr "oben"
-
-#: views/admin/settings-header.php:38
-msgid "right"
-msgstr "rechts"
-
-#: views/admin/settings-header.php:45
-msgid "bottom"
-msgstr "unten"
-
-#: views/admin/settings-header.php:52
-msgid "left"
-msgstr "links"
-
-#: views/admin/settings-header.php:62
-msgid "Header text"
-msgstr "Header Text"
-
-#: views/admin/settings-header.php:70
-msgid "Font"
-msgstr "Schriftart"
-
-#: views/admin/settings-plugins.php:2
-msgid "Use template for mails sent by your installed plugins"
-msgstr "Verwende dieses Template, die von deinen installierten Plugins gesendet werden"
-
-#: views/admin/settings.php:66
-msgid "Save and Preview"
-msgstr "Speichern und Vorschau"
-
-#: views/admin/settings.php:67
-msgid "Discard changes and reload template"
-msgstr "Änderungen verwerfen und Template neu laden"
-
-#: views/admin/settings.php:79
-msgid "Send a test mail"
-msgstr "Testnachricht versenden"
-
-#: views/admin/settings.php:82
-msgid "send test mail"
-msgstr "Testnachricht versenden"
-
-#: views/admin/settings.php:83
-msgid "Email sent"
-msgstr "E-Mail gesendet"
-
-#: views/admin/settings.php:85
-msgid "Your message has been sent."
-msgstr "Deine E-Mail wurde gesendet."
+#: views/admin/single-plugin.php:36
+msgid "Overwrite sender"
+msgstr "Absender überschreiben"
 
 #: views/admin/single-plugin.php:24
 msgid "Use template"
 msgstr "Template verwenden"
 
-#: views/admin/single-plugin.php:28
-msgid "Overwrite sender"
-msgstr "Absender überschreiben"
+#: views/admin/settings.php:118
+msgid "Your message has been sent."
+msgstr "Deine E-Mail wurde gesendet."
 
-#: views/admin/single-plugin.php:31
-msgid "Install WP HTML Mail for"
-msgstr "Installiere WP HTML Mail für"
+#: views/admin/settings.php:116
+msgid "Email sent"
+msgstr "E-Mail gesendet"
 
-#: views/admin/single-plugin.php:37
-msgid "is currently not installed."
-msgstr "ist aktuell nicht installiert."
+#: views/admin/settings.php:113
+msgid "Send a test mail"
+msgstr "Testnachricht versenden"
 
-#: views/admin/single-plugin.php:39
-msgid "install"
-msgstr "installieren"
+#: views/admin/settings.php:88
+msgid "Discard changes and reload template"
+msgstr "Änderungen verwerfen und Template neu laden"
 
-#. Plugin Name of the plugin/theme
-msgid "WP HTML Mail"
-msgstr "WP HTML Mail"
+#: views/admin/settings.php:87 js/template-designer/dev/main.js:1331
+#: js/template-designer/dist/main.js:1
+msgid "Save and Preview"
+msgstr "Speichern und Vorschau"
 
-#. Author of the plugin/theme
-msgid "Hannes Etzelstorfer"
-msgstr "Hannes Etzelstorfer"
+#: views/admin/settings.php:8
+msgid "Please help us to improve this plugin."
+msgstr "Bitte hilf mir das Plugin zu verbessern."
+
+#: views/admin/settings-survey.php:302
+msgid "Leave a review on WordPress.org"
+msgstr "Schreib eine Bewertung auf WordPress.org"
+
+#: views/admin/settings-survey.php:296
+msgid "Go to our website"
+msgstr "Zu meiner Website"
+
+#: views/admin/settings-survey.php:293
+msgid "If you want to buy some of our plugins you can use the following discount code to get 20% off."
+msgstr "Falls du Plugins von mir kaufen möchtest, kannst du den folgenden 10% Gutschein verwenden, als kleines Dankeschön für deine Zeit."
+
+#: views/admin/settings-survey.php:291
+msgid "This will help us to constantly improve the plugin."
+msgstr "Das hilft mir wirklich das Plugin weiterhin zu verbessern."
+
+#: views/admin/settings-survey.php:290
+msgid "Thank you for your feedback!"
+msgstr "Vielen Dank für dein Feedback!"
+
+#: views/admin/settings-survey.php:259
+msgid "Email for questions (optional):"
+msgstr "E-Mail für Rückfragen (optional):"
+
+#: views/admin/settings-survey.php:254
+msgid "Website / Twitter profile:"
+msgstr "Website oder Twitter:"
+
+#: views/admin/settings-survey.php:249
+msgid "Your name, company and job description:"
+msgstr "Dein Name, Unternehmen und Rolle:"
+
+#: views/admin/settings-survey.php:243
+msgid "I want to add some testimonials to my website.<br>Would you mind writing a few lines to inspire other customers to use the plugin?"
+msgstr "Ich möchte auf meiner Website ein paar Kundenstimmen anzeigen.<br>Könntest du mir ein paar Zeilen schreiben welche Erfahrung du mit dem Plugin gemacht hast?"
+
+#: views/admin/settings-survey.php:233
+msgid "Other:"
+msgstr "Andere:"
+
+#: views/admin/settings-survey.php:229
+msgid "Conditions to turn the template on and off for some emails"
+msgstr "Regeln um das Template für bestimmte E-Mails ein und aus zu schalten"
+
+#: views/admin/settings-survey.php:224
+msgid "Attachments"
+msgstr "Anhänge"
+
+#: views/admin/settings-survey.php:219
+msgid "Social media icons"
+msgstr "Social Media Icons"
+
+#: views/admin/settings-survey.php:214
+msgid "Mobile email preview"
+msgstr "Eine mobile Vorschau für E-Mails"
+
+#: views/admin/settings-survey.php:204
+msgid "A set of ready to use templates"
+msgstr "Eine Auswahl vordefinierter Templates"
+
+#: views/admin/settings-survey.php:200
+msgid "What are the features you would like to see in future versions?"
+msgstr "Welche Features wünscht du dir für zukünftige Versionen?"
+
+#: views/admin/settings-survey.php:191
+msgid "Are there any plugins you want to see supported in future versions?"
+msgstr "Welche Plugins hättest du gerne in zukünftigen Versionen unterstützt?"
+
+#: views/admin/settings-survey.php:169
+msgid "Which of your plugins send emails with WP HTML Mail?"
+msgstr "Welche deiner Plugins senden E-Mails mit WP HTML MailP"
+
+#: views/admin/settings-survey.php:158
+msgid "Any details you want me to improve regarding usability?"
+msgstr "Gibt es etwas, das du in Bezug auf die Benutzerfreundlichkeit verbessern würdest?"
+
+#: views/admin/settings-survey.php:146
+msgid "What do you think might help you to be more satisfied with your final email template?"
+msgstr "Was würde dir helfen um mit dem Aussehen deines Templates zufriedener zu sein?"
+
+#: views/admin/settings-survey.php:112 views/admin/settings-survey.php:267
+msgid "Submit"
+msgstr "Absenden"
+
+#: views/admin/settings-survey.php:95
+msgid "You can suggest plugins to integrate in the next step."
+msgstr "Du kannst im nächsten Schritt Plugins vorschlagen, die noch integriert werden sollten."
+
+#: views/admin/settings-survey.php:94
+msgid "How did the plugin integrate with other plugins and themes?"
+msgstr "Wie zufrieden warst du mit der Kompatibilität zu anderen Plugins?"
+
+#: views/admin/settings-survey.php:79
+msgid "Did you find everything you need?"
+msgstr "Hast du alles gefunden, was du brauchst?"
+
+#: views/admin/settings-survey.php:78
+msgid "What about the styling features?"
+msgstr "Wie sieht's mit den Formatierungsmöglichkeiten aus?"
+
+#: views/admin/settings-survey.php:63
+msgid "Is it clear and comprehensive?"
+msgstr "Ist es übersichtlich und verständlich?"
+
+#: views/admin/settings-survey.php:62
+msgid "How would you rate the configuration usability?"
+msgstr "Wie würdest du die Benutzerfreundlichkeit des Plugins bewerten?"
+
+#: views/admin/settings-survey.php:47
+msgid "Does ist look as expected?"
+msgstr "Sieht es so aus wie geplant?"
+
+#: views/admin/settings-survey.php:46
+msgid "How satisfied are you with your final email template?"
+msgstr "Wie zufrieden bist du mit dem Ergebnis deines E-Mail Templates?"
+
+#: views/admin/settings-survey.php:26
+msgid "Your overall impression."
+msgstr "Dein Gesamteindruck."
+
+#: views/admin/settings-survey.php:25 views/admin/settings.php:9
+msgid "How do you like WP HTML Mail so far?"
+msgstr "Wie bist du mit WP HTML Mail zufrieden?"
+
+#: views/admin/settings-survey.php:2
+msgid "Help us improve WP HTML Mail"
+msgstr "Bitte hilf mit WP HTML Mail zu verbessern"
+
+#: views/admin/settings-plugins.php:2
+msgid "Use template for mails sent by your installed plugins"
+msgstr "Verwende dieses Template, die von deinen installierten Plugins gesendet werden"
+
+#: views/admin/settings-header.php:143 js/template-designer/dev/main.js:422
+#: js/template-designer/dist/main.js:1
+msgid "Font"
+msgstr "Schriftart"
+
+#: views/admin/settings-header.php:123 js/template-designer/dev/main.js:409
+#: js/template-designer/dev/main.js:520 js/template-designer/dist/main.js:1
+msgid "Header text"
+msgstr "Header Text"
+
+#: views/admin/settings-header.php:113
+msgid "left"
+msgstr "links"
+
+#: views/admin/settings-header.php:106
+msgid "bottom"
+msgstr "unten"
+
+#: views/admin/settings-header.php:99
+msgid "right"
+msgstr "rechts"
+
+#: views/admin/settings-header.php:92
+msgid "top"
+msgstr "oben"
+
+#: views/admin/settings-header.php:89 js/template-designer/dev/main.js:1117
+#: js/template-designer/dist/main.js:1
+msgid "Padding"
+msgstr "Innerer Abstand"
+
+#: views/admin/settings-header.php:51
+msgid "Add your logo or image header (optional). max 600px wide"
+msgstr "Wähle dein Headerbild oder Logo (optional). maximal 600px breit"
+
+#: views/admin/settings-header.php:50 js/template-designer/dev/main.js:235
+#: js/template-designer/dist/main.js:1
+msgid "Select image"
+msgstr "Bild wählen"
+
+#: views/admin/settings-header.php:41 js/template-designer/dev/main.js:190
+#: js/template-designer/dist/main.js:1
+msgid "Header image"
+msgstr "Header Bild"
+
+#: views/admin/settings-general.php:25 views/admin/settings-sender.php:19
+msgid "Email sender address"
+msgstr "Absender E-Mail"
+
+#: views/admin/settings-general.php:19 views/admin/settings-sender.php:13
+msgid "Email sender name"
+msgstr "Absender Name"
+
+#: views/admin/settings-content.php:133 js/template-designer/dev/main.js:745
+#: js/template-designer/dist/main.js:1
+msgid "Link styling"
+msgstr "Link Formatierung"
+
+#: views/admin/settings-content.php:98 js/template-designer/dev/main.js:692
+#: js/template-designer/dist/main.js:1
+msgid "Content Font"
+msgstr "Inhalt Schriftart"
+
+#: views/admin/settings-content.php:59
+msgid "Subsubheadline Font"
+msgstr "Untertitel Schriftart"
+
+#: views/admin/settings-content.php:20 js/template-designer/dev/main.js:574
+#: js/template-designer/dist/main.js:1
+msgid "Headline Font"
+msgstr "Überschrift Schriftart"
+
+#: includes/class-contenttype.php:131 views/admin/settings-content.php:13
+#: views/admin/settings-footer.php:13 views/admin/settings-general.php:13
+#: views/admin/settings-header.php:34 js/template-designer/dev/main.js:565
+#: js/template-designer/dev/main.js:916 js/template-designer/dev/main.js:1107
+#: js/template-designer/dev/main.js:1250 js/template-designer/dist/main.js:1
+msgid "Background color"
+msgstr "Hintergrundfarbe"
+
+#: views/admin/settings-advanced.php:85
+msgid "Your template has been created."
+msgstr "Dein Template wurde angelegt"
+
+#: views/admin/settings-advanced.php:83
+msgid "Template created"
+msgstr "Template angelegt"
+
+#: views/admin/settings-advanced.php:75
+msgid "Customize your mail template as far as you can. Then click this button to export the template to your theme directory for further modifications.<br>The template will be created in <strong>wp-content/YOUR-THEME/wp-html-mail/template.html</strong>"
+msgstr "Formatiere dein Template so weit du kannst und klicke dann den Button um das Template zu generieren und weitere Änderungen im Quellcode vorzunehmen.<br>Das Template wird im Ordner <strong>wp-content/DEIN-THEME/wp-html-mail/template.html</strong> erstellt"
+
+#: views/admin/settings-advanced.php:72
+msgid "WARNING: Your theme directory is not writable by the server. Please change the permission to allow us to create the mail template."
+msgstr "ACHTUNG: Dein Theme-Order ist nicht beschreibbar. Bitte ändere die Zugriffsrechte, damit das Template angelegt werden kann."
+
+#: views/admin/settings-advanced.php:69
+msgid "You already have a custom template. If you create a new one the existing template will be backed up."
+msgstr "Du hast bereits ein eigenes Template angelegt. Wenn du ein weiteres anlegst wird zuerst ein Backup des aktuellen erstellt."
+
+#: views/admin/settings-advanced.php:67
+msgid "create template file in my theme folder"
+msgstr "Template Dateien in meinem Theme Ordner anlegen"
+
+#: views/admin/settings-advanced.php:64
+msgid "Create custom template"
+msgstr "Eigenes Template erstellen"
+
+#: views/admin/settings-advanced.php:2
+msgid "Advanced features"
+msgstr "Erweiterte Funktionen"
+
+#: includes/class-mailbuilder.php:362
+msgid "Add Content Element"
+msgstr "Inhalt hinzufügen"
+
+#: includes/class-contenttype.php:199 includes/class-mailbuilder.php:290
+msgid "Cancel"
+msgstr "Abbrechen"
+
+#: includes/class-contenttype.php:195 includes/class-mailbuilder.php:286
+msgid "Apply"
+msgstr "Anwenden"
+
+#: includes/class-mailbuilder.php:109
+msgid "Email Content Builder"
+msgstr "E-Mail Content Builder"
+
+#: includes/class-mailbuilder.php:107
+msgid "Email Subject"
+msgstr "E-Mail Betreff"
+
+#: includes/class-mailbuilder.php:105
+msgid "Message"
+msgstr "Nachricht"
+
+#: includes/class-mailbuilder.php:71
+msgid "Custom Emails"
+msgstr "Eigene E-Mails"
+
+#: includes/class-mailbuilder.php:70
+msgid "Parent Custom Email:"
+msgstr "übergeordnete E-Mail"
+
+#: includes/class-mailbuilder.php:69
+msgid "No Custom Emails found in Trash"
+msgstr "Keine E-Mails im Papierkorb gefunden"
+
+#: includes/class-mailbuilder.php:68
+msgid "No Custom Emails found"
+msgstr "keine E-Mails gefunden"
+
+#: includes/class-mailbuilder.php:67
+msgid "Search Custom Emails"
+msgstr "E-Mail suchen"
+
+#: includes/class-mailbuilder.php:66
+msgid "View Custom Email"
+msgstr "E-Mail anzeigen"
+
+#: includes/class-mailbuilder.php:65
+msgid "New Custom Email"
+msgstr "Neue E-Mail"
+
+#: includes/class-mailbuilder.php:64
+msgid "Edit Custom Email"
+msgstr "E-Mail bearbeiten"
+
+#: includes/class-mailbuilder.php:62 includes/class-mailbuilder.php:63
+msgid "Add New Custom Email"
+msgstr "Neue E-Mail"
+
+#: includes/class-mailbuilder.php:61
+msgid "custom email"
+msgstr "Eigene E-Mail"
+
+#: includes/class-mailbuilder.php:60
+msgid "custom emails"
+msgstr "Eigene E-Mails"
+
+#: includes/class-haet-sender-plugin-wp-e-commerce.php:13
+msgid "The administrator has unlocked your file"
+msgstr "Der Administrator hat Ihre Datei entsperrt"
+
+#: includes/class-haet-sender-plugin-wp-e-commerce.php:11
+msgid "Order Pending: Payment Required"
+msgstr "Bestellung in Bearbeitung: Zahlung ausstehend"
+
+#: includes/class-haet-sender-plugin-wp-e-commerce.php:10
+msgid "Purchase Receipt"
+msgstr "Rechnung"
+
+#: includes/class-haet-sender-plugin-wp-e-commerce.php:9
+msgid "Transaction Report"
+msgstr "Transaktionsbericht"
+
+#: includes/class-haet-mail.php:284
+msgid "Advanced"
+msgstr "Erweitert"
+
+#: includes/class-haet-mail.php:282
+msgid "Plugins"
+msgstr "Plugins"
+
+#: includes/class-haet-mail.php:269 views/admin/settings-footer.php:8
+#: views/admin/settings-footer.php:19
+msgid "Footer"
+msgstr "Footer"
+
+#: includes/class-haet-mail.php:262 views/admin/settings-content.php:8
+msgid "Content"
+msgstr "Inhalt"
+
+#: includes/class-haet-mail.php:261 views/admin/settings-header.php:8
+msgid "Header"
+msgstr "Header"
+
+#: includes/class-haet-mail.php:260 views/admin/settings-general.php:8
+msgid "General"
+msgstr "Allgemein"
+
+#: includes/class-haet-mail.php:206
+msgid "Settings Updated."
+msgstr "Einstellungen gespeichert"
+
+#: includes/class-haet-mail.php:155
+msgid "Email template"
+msgstr "E-Mail Template"
+
+#: includes/class-haet-mail.php:155
+msgid "Email"
+msgstr "E-Mail"
+
+#: includes/class-contenttype-twocol.php:47
+msgid "Two Columns"
+msgstr "Zwei Spalten"
+
+#: includes/class-contenttype-text.php:47
+msgid "Text"
+msgstr "Text"

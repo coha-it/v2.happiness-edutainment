@@ -2,18 +2,26 @@
 /**
  * LearnDash Settings Section Quiz Email Settings.
  *
- * @package LearnDash
- * @subpackage Settings
+ * @since 3.0.0
+ * @package LearnDash\Settings\Sections
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'LearnDash_Settings_Quizzes_Email' ) ) ) {
 	/**
-	 * Class to create the Quiz Email Section.
+	 * Class LearnDash Settings Section Quiz Email Settings.
+	 *
+	 * @since 3.0.0
 	 */
 	class LearnDash_Settings_Quizzes_Email extends LearnDash_Settings_Section {
 
 		/**
 		 * Protected constructor for class
+		 *
+		 * @since 3.0.0
 		 */
 		protected function __construct() {
 			// What screen ID are we showing on.
@@ -44,7 +52,7 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 				learndash_get_custom_label_lower( 'quiz' )
 			);
 
-			// Define the depreacted Class and Fields
+			// Define the depreacted Class and Fields.
 			$this->settings_deprecated = array(
 				'LearnDash_Settings_Quizzes_Admin_Email' => array(
 					'option_key' => 'learndash_settings_quizzes_admin_email',
@@ -77,6 +85,8 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 
 		/**
 		 * Load the field settings values
+		 *
+		 * @since 3.0.0
 		 */
 		public function load_settings_values() {
 			parent::load_settings_values();
@@ -116,6 +126,8 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 
 		/**
 		 * Load the field settings fields
+		 *
+		 * @since 3.0.0
 		 */
 		public function load_settings_fields() {
 			$this->setting_option_fields = array(
@@ -165,12 +177,12 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 						<ul>
 							<li><span>$userId</span> - ' . esc_html__( 'User-ID', 'learndash' ) . '</li>
 							<li><span>$username</span> - ' . esc_html__( 'Username', 'learndash' ) . '</li>
+							<li><span>$userlogin</span> - ' . esc_html__( 'User Login', 'learndash' ) . '</li>
 							<li><span>$quizname</span> - ' . esc_html__( 'Quiz-Name', 'learndash' ) . '</li>
 							<li><span>$result</span> - ' . esc_html__( 'Result in percent', 'learndash' ) . '</li>
 							<li><span>$points</span> - ' . esc_html__( 'Reached points', 'learndash' ) . '</li>
-							<li><span>$ip</span> - ' . esc_html__( 'IP-address of the user', 'learndash' ) . '</li>
 							<li><span>$categories</span> - ' . esc_html__( 'Category-Overview', 'learndash' ) . '</li>
-						</ul>	
+						</ul>
 					</div>',
 				),
 				'admin_mail_html'       => array(
@@ -188,7 +200,7 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 					'type'      => 'text',
 					'label'     => esc_html__( 'From Name', 'learndash' ),
 					'help_text' => esc_html__( 'This is the name of the sender. If not provided will default to the system email name.', 'learndash' ),
-					'value'     => isset( $this->setting_option_values['admin_mail_from_name'] ) ? $this->setting_option_values['admin_mail_from_name'] : '',
+					'value'     => isset( $this->setting_option_values['user_mail_from_name'] ) ? $this->setting_option_values['user_mail_from_name'] : '',
 				),
 				'user_mail_from_email'  => array(
 					'name'      => 'user_mail_from_email',
@@ -221,13 +233,13 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 						<h4>' . esc_html__( 'Supported variables', 'learndash' ) . ':</h4>
 						<ul>
 							<li><span>$userId</span> - ' . esc_html__( 'User-ID', 'learndash' ) . '</li>
-							<li><span>$username</span> - ' . esc_html__( 'Username', 'learndash' ) . '</li>
+							<li><span>$username</span> - ' . esc_html__( 'User Display Name', 'learndash' ) . '</li>
+							<li><span>$userlogin</span> - ' . esc_html__( 'User Login', 'learndash' ) . '</li>
 							<li><span>$quizname</span> - ' . esc_html__( 'Quiz-Name', 'learndash' ) . '</li>
 							<li><span>$result</span> - ' . esc_html__( 'Result in percent', 'learndash' ) . '</li>
 							<li><span>$points</span> - ' . esc_html__( 'Reached points', 'learndash' ) . '</li>
-							<li><span>$ip</span> - ' . esc_html__( 'IP-address of the user', 'learndash' ) . '</li>
 							<li><span>$categories</span> - ' . esc_html__( 'Category-Overview', 'learndash' ) . '</li>
-						</ul>	
+						</ul>
 					</div>',
 				),
 				'user_mail_html'        => array(
@@ -241,6 +253,7 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 				),
 			);
 
+			/** This filter is documented in includes/settings/settings-metaboxes/class-ld-settings-metabox-course-access-settings.php */
 			$this->setting_option_fields = apply_filters( 'learndash_settings_fields', $this->setting_option_fields, $this->settings_section_key );
 
 			parent::load_settings_fields();
@@ -249,7 +262,7 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 		/**
 		 * Hook into action after the fieldset is output. This allows adding custom content like JS/CSS.
 		 *
-		 * @since 2.5.9
+		 * @since 3.0.0
 		 *
 		 * @param string $html This is the field output which will be send to the screen.
 		 * @param array  $field_args Array of field args used to build the field HTML.
@@ -271,10 +284,15 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 		}
 
 		/**
-		 * Add Header and description on email sections.
+		 * Settings row outside before
+		 *
+		 * @since 3.0.0
+		 *
+		 * @param string $content    Content to show before row.
+		 * @param array  $field_args Row field Args.
 		 */
 		public function learndash_settings_row_outside_before( $content = '', $field_args = array() ) {
-			if ( ( isset( $field_args['name'] ) ) && ( in_array( $field_args['name'], array( 'admin_mail_from_name', 'user_mail_from_name' ) ) ) ) {
+			if ( ( isset( $field_args['name'] ) ) && ( in_array( $field_args['name'], array( 'admin_mail_from_name', 'user_mail_from_name' ), true ) ) ) {
 				if ( 'admin_mail_from_name' === $field_args['name'] ) {
 					$content .= '<div class="ld-settings-email-header-wrapper">';
 
@@ -284,8 +302,9 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 
 					$content .= '<div class="ld-settings-email-description">';
 					$content .= sprintf(
-						// translators: placeholder: quiz, quiz.
-						esc_html_x( 'Manage the email content that will be sent out to the admin, group leader or other supervisors when a user completes a %1$s. You must enable "Admin Notification" on a per %2$s basis.', 'placeholder: quiz, quiz', 'learndash' ),
+						// translators: placeholder: group leader, quiz, quiz.
+						esc_html_x( 'Manage the email content that will be sent out to the admin, %1$s or other supervisors when a user completes a %2$s. You must enable "Admin Notification" on a per %3$s basis.', 'placeholder: group leader, quiz, quiz', 'learndash' ),
+						learndash_get_custom_label_lower( 'group_leader' ),
 						learndash_get_custom_label_lower( 'quiz' ),
 						learndash_get_custom_label_lower( 'quiz' )
 					);

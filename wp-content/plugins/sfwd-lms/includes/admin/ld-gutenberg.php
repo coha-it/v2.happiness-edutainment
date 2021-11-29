@@ -4,26 +4,38 @@
  *
  * Used to customize Gutenberg behavior.
  *
+ * @since 3.0.0
  * @package LearnDash
  */
 
 namespace LearnDash\Admin\Gutenberg;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
- * Disable Gutenberg on specific CPTs.
+ * Disables the Gutenberg editor on specific custom post types.
  *
- * @param bool   $is_enabled Define if Gutenberg is enabled.
- * @param string $post_type  Current post type.
- * @return bool
+ * Fires on `use_block_editor_for_post_type` and `gutenberg_can_edit_post_type` hook.
+ *
+ * @since 3.0.0
+ *
+ * @param boolean $is_enabled Whether the Gutenberg editor is enabled or not.
+ * @param string  $post_type  Current post type slug.
+ *
+ * @return boolean Returns true to enable Gutenberg editor otherwise false.
  */
 function disable_on_cpts( $is_enabled, $post_type ) {
 	// Disable Gutenberg on the following CPTs.
 	$disabled_cpts = array(
 		'sfwd-question',
-		'groups',
+		'sfwd-certificates',
+		'sfwd-essays',
+		// 'groups',
 	);
 
-	if ( in_array( $post_type, $disabled_cpts ) ) {
+	if ( in_array( $post_type, $disabled_cpts, true ) ) {
 		return false;
 	}
 

@@ -2,9 +2,13 @@
 /**
  * LearnDash Settings Fields Loader.
  *
- * @package LearnDash
- * @subpackage Settings
+ * @since 3.0.0
+ * @package LearnDash\Settings\Field
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 // All known LD setting field type (for now).
 require_once __DIR__ . '/class-ld-settings-fields-text.php';

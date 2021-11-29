@@ -64,7 +64,7 @@
 		var transferform = $(this);
 		var formrefid    = transferform.data( 'ref' );
 		var formid       = '#mycred-transfer-form-' + formrefid;
-		var submitbutton = $( formid + ' input.mycred-submit-transfer' );
+		var submitbutton = $( formid + ' button.mycred-submit-transfer' );
 		var buttonlabel  = submitbutton.val();
 
 		e.preventDefault();
@@ -72,28 +72,29 @@
 		$.ajax({
 			type       : "POST",
 			data       : {
-				action    : 'mycred-new-transfer',
-				form      : transferform.serialize(),
+				action			: 'mycred-new-transfer',
+				form			: transferform.serialize()
 			},
 			dataType   : "JSON",
 			url        : myCREDTransfer.ajaxurl,
 			beforeSend : function() {
 
-				$( formid + 'input.form-control' ).each(function(index){
+				$( formid + ' input.form-control' ).each(function(index){
 					$(this).attr( 'disabled', 'disabled' );
 				});
 
+				submitbutton.attr( 'disabled', 'disabled' );
 				submitbutton.val( myCREDTransfer.working );
 
 			},
 			success    : function( response ) {
-
 				console.log( response );
 
 				$( formid + ' input.form-control' ).each(function(index){
 					$(this).removeAttr( 'disabled' );
 				});
 
+				submitbutton.removeAttr( 'disabled', 'disabled' );
 				submitbutton.val( buttonlabel );
 
 				if ( response.success !== undefined ) {

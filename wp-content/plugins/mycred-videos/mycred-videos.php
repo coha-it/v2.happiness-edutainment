@@ -1,25 +1,25 @@
 <?php
 /**
- * Plugin Name: myCRED Video Add-on
- * Description: Replaced the built-in myCRED video hook with a premium version that suppots YouTube and Vimeo videos.
- * Version: 1.2.2
- * Author: myCRED
+ * Plugin Name: myCred Video Add-on
+ * Description: Replaced the built-in myCred video hook with a premium version that suppots YouTube and Vimeo videos.
+ * Version: 1.2.3
+ * Author: myCred
  * Author URI: http://mycred.me
  * Author Email: support@mycred.me
  * Requires at least: WP 4.8
- * Tested up to: WP 5.0.2
+ * Tested up to: WP 5.3.2
  * Text Domain: mycred_video
  * Domain Path: /lang
  * License: Copyrighted
  *
- * Copyright © 2013 - 2017 myCRED
+ * Copyright © 2013 - 2020 myCred
  * 
  * Permission is hereby granted, to the licensed domain to install and run this
  * software and associated documentation files (the "Software") for an unlimited
  * time with the followning restrictions:
  *
  * - This software is only used under the domain name registered with the purchased
- *   license though the myCRED website (mycred.me). Exception is given for localhost
+ *   license though the myCred website (mycred.me). Exception is given for localhost
  *   installations or test enviroments.
  *
  * - This software can not be copied and installed on a website not licensed.
@@ -45,7 +45,7 @@ if ( ! class_exists( 'myCRED_Video_Plus_Core' ) ) :
 	final class myCRED_Video_Plus_Core {
 
 		// Plugin Version
-		public $version             = '1.2.2';
+		public $version             = '1.2.3';
 
 		public $id                  = 540;
 

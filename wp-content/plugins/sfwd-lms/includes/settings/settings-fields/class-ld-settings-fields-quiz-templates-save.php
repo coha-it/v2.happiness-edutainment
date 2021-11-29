@@ -1,19 +1,28 @@
 <?php
 /**
- * LearnDash Settings field Quiz / Question Templates.
+ * LearnDash Quiz / Question Templates Settings Field.
  *
- * @package LearnDash
- * @subpackage Settings
+ * @since 3.0.0
+ * @package LearnDash\Settings\Field
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'LearnDash_Settings_Fields_Quiz_Templates_Save' ) ) ) {
 	/**
-	 * Class to create the settings field.
+	 * Class LearnDash Quiz / Question Templates Settings Field.
+	 *
+	 * @since 3.0.0
+	 * @uses LearnDash_Settings_Fields
 	 */
 	class LearnDash_Settings_Fields_Quiz_Templates_Save extends LearnDash_Settings_Fields {
 
 		/**
 		 * Public constructor for class
+		 *
+		 * @since 3.0.0
 		 */
 		public function __construct() {
 			$this->field_type = 'quiz-templates-save';
@@ -24,14 +33,17 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 		/**
 		 * Function to crete the settiings field.
 		 *
-		 * @since 2.4
+		 * @since 3.0.0
 		 *
 		 * @param array $field_args An array of field arguments used to process the ouput.
 		 * @return void
 		 */
 		public function create_section_field( $field_args = array() ) {
+
+			/** This filter is documented in includes/settings/settings-fields/class-ld-settings-fields-checkbox-switch.php */
 			$field_args = apply_filters( 'learndash_settings_field', $field_args );
 
+			/** This filter is documented in includes/settings/settings-fields/class-ld-settings-fields-checkbox-switch.php */
 			$html = apply_filters( 'learndash_settings_field_html_before', '', $field_args );
 
 			$select_template_options = array();
@@ -57,10 +69,8 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 			}
 
 			$html .= '<span class="ld-select">';
-			//$html .= '<select name="templateSaveList" class="learndash-section-field-select" data-ld-select2="1">';
 			$html .= '<select autocomplete="off" ';
 			$html .= $this->get_field_attribute_type( $field_args );
-			//$html .= $this->get_field_attribute_name( $field_args );
 			$html .= ' name="templateSaveList" ';
 			$html .= $this->get_field_attribute_id( $field_args );
 			$html .= $this->get_field_attribute_class( $field_args );
@@ -78,6 +88,7 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 
 			$html .= ' >';
 
+			/** This filter is documented in includes/class-ld-lms.php */
 			if ( ( defined( 'LEARNDASH_SELECT2_LIB' ) ) && ( true === apply_filters( 'learndash_select2_lib', LEARNDASH_SELECT2_LIB ) ) ) {
 				$html .= '   <option value="-1">';
 			} else {
@@ -89,23 +100,24 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 
 			if ( ! empty( $select_template_options ) ) {
 				foreach ( $select_template_options as $template_id => $template_name ) {
-					$html .= '<option value="' . $template_id . '">' . $template_name . '</option>';
+					$html .= '<option value="' . esc_attr( $template_id ) . '">' . esc_html( $template_name ) . '</option>';
 				}
 			}
-			
+
 			$html .= '</select>';
 			$html .= '</span><br />';
 			$html .= '<input type="text" placeholder="' . esc_html__( 'new template name', 'learndash' ) . '" class="regular-text -medium" name="templateName">';
 
+			/** This filter is documented in includes/settings/settings-fields/class-ld-settings-fields-checkbox-switch.php */
 			$html = apply_filters( 'learndash_settings_field_html_after', $html, $field_args );
 
-			echo $html;
+			echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Need to output HTML
 		}
 
 		/**
 		 * Default validation function. Should be overriden in Field subclass.
 		 *
-		 * @since 2.4
+		 * @since 3.0.0
 		 *
 		 * @param mixed  $val Value to validate.
 		 * @param string $key Key of value being validated.

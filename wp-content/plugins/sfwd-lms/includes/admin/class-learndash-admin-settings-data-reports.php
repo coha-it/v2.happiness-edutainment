@@ -1,11 +1,84 @@
 <?php
+/**
+ * LearnDash Reports Base Class.
+ *
+ * @since 2.3.0
+ * @package LearnDash
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 if ( ! class_exists( 'Learndash_Admin_Settings_Data_Reports' ) ) {
+	/**
+	 * LearnDash Reports Base Class.
+	 *
+	 * @since 2.3.0
+	 */
 	class Learndash_Admin_Settings_Data_Reports {
 
+		/**
+		 * Process times
+		 *
+		 * @var array $process_times
+		 */
 		protected $process_times = array();
-		private $report_actions  = array();
 
+		/**
+		 * Parent menu page URL
+		 *
+		 * @var string
+		 */
+		protected $parent_menu_page_url;
+
+		/**
+		 * Capability for menu page
+		 *
+		 * @var string
+		 */
+		protected $menu_page_capability;
+
+		/**
+		 * Settings page ID
+		 *
+		 * @var string
+		 */
+		protected $settings_page_id;
+
+		/**
+		 * Settings page title
+		 *
+		 * @var string
+		 */
+		protected $settings_page_title;
+
+		/**
+		 * Settings tab title
+		 *
+		 * @var string
+		 */
+		protected $settings_tab_title;
+
+		/**
+		 * Settings tab priority
+		 *
+		 * @var integer
+		 */
+		protected $settings_tab_priority = 0;
+
+		/**
+		 * Report actions
+		 *
+		 * @var array $report_actions
+		 */
+		private $report_actions = array();
+
+		/**
+		 * Public constructor for class
+		 *
+		 * @since 2.3.0
+		 */
 		public function __construct() {
 
 			$this->parent_menu_page_url  = 'admin.php?page=learndash-lms-reports';
@@ -19,15 +92,22 @@ if ( ! class_exists( 'Learndash_Admin_Settings_Data_Reports' ) ) {
 			add_action( 'admin_menu', array( $this, 'admin_menu' ) );
 
 			if ( ! defined( 'LEARNDASH_PROCESS_TIME_PERCENT' ) ) {
+				/** This filter is documented in includes/admin/class-learndash-admin-data-upgrades.php */
 				define( 'LEARNDASH_PROCESS_TIME_PERCENT', apply_filters( 'learndash_process_time_percent', 80 ) );
 			}
 
 			if ( ! defined( 'LEARNDASH_PROCESS_TIME_SECONDS' ) ) {
+				/** This filter is documented in includes/admin/class-learndash-admin-data-upgrades.php */
 				define( 'LEARNDASH_PROCESS_TIME_SECONDS', apply_filters( 'learndash_process_time_seconds', 10 ) );
 			}
 
 		}
 
+		/**
+		 * Init check for download request.
+		 *
+		 * @since 2.3.0
+		 */
 		public function init_check_for_download_request() {
 			if ( isset( $_GET['ld-report-download'] ) ) {
 
@@ -38,7 +118,7 @@ if ( ! class_exists( 'Learndash_Admin_Settings_Data_Reports' ) ) {
 
 						$transient_data = $this->get_transient( $transient_key );
 						if ( ( isset( $transient_data['report_filename'] ) ) && ( ! empty( $transient_data['report_filename'] ) ) ) {
-							//$report_filename = ABSPATH . $transient_data['report_filename'];
+							// $report_filename = ABSPATH . $transient_data['report_filename'];
 							$report_filename = $transient_data['report_filename'];
 							if ( ( file_exists( $report_filename ) ) && ( is_readable( $report_filename ) ) ) {
 								$http_headers = array(
@@ -48,15 +128,37 @@ if ( ! class_exists( 'Learndash_Admin_Settings_Data_Reports' ) ) {
 									'Pragma: no-cache',
 									'Expires: 0',
 								);
+								/**
+								 * Filters http headers for CSV download request.
+								 *
+								 * @since 2.4.7
+								 *
+								 * @param array  $http_headers  An array of http headers.
+								 * @param array  $transient_data An array of transient data for csv download.
+								 * @param string $data_slug     The slug of the data to be downloaded.
+								 */
 								$http_headers = apply_filters( 'learndash_csv_download_headers', $http_headers, $transient_data, esc_attr( $_GET['data-slug'] ) );
 								if ( ! empty( $http_headers ) ) {
 									foreach ( $http_headers as $http_header ) {
 										header( $http_header );
 									}
 								}
+								/**
+								 * Fires after setting CSV download headers.
+								 *
+								 * @since 2.4.7
+								 */
 								do_action( 'learndash_csv_download_after_headers' );
 
-								echo file_get_contents( $report_filename );
+								set_time_limit( 0 );
+								$report_fp = @fopen( $report_filename, 'rb' );
+								while ( ! feof( $report_fp ) ) {
+									print( @fread( $report_fp, 1024 * 8 ) );
+									if ( ob_get_level() > 0 ) {
+										ob_flush();
+									}
+									flush();
+								}
 							}
 						}
 					}
@@ -67,12 +169,13 @@ if ( ! class_exists( 'Learndash_Admin_Settings_Data_Reports' ) ) {
 
 		/**
 		 * Register settings page
+		 *
+		 * @since 2.3.0
 		 */
 		public function admin_menu() {
 
-			$element               = Learndash_Admin_Data_Upgrades::get_instance();
-			$data_settings_courses = $element->get_data_settings( 'user-meta-courses' );
-			$data_settings_quizzes = $element->get_data_settings( 'user-meta-quizzes' );
+			$data_settings_courses = learndash_data_upgrades_setting( 'user-meta-courses' );
+			$data_settings_quizzes = learndash_data_upgrades_setting( 'user-meta-quizzes' );
 
 			if ( ( ! empty( $data_settings_courses ) ) && ( ! empty( $data_settings_quizzes ) ) ) {
 				$this->settings_page_id = add_submenu_page(
@@ -86,7 +189,7 @@ if ( ! class_exists( 'Learndash_Admin_Settings_Data_Reports' ) ) {
 				add_action( 'load-' . $this->settings_page_id, array( $this, 'on_load_panel' ) );
 
 			} else {
-				// If the data upgreades have not been performed then we call the old Reports page output in ld-admin.php
+				// If the data upgrades have not been performed then we call the old Reports page output in ld-admin.php.
 				$this->settings_page_id = add_submenu_page(
 					'learndash-lms',
 					$this->settings_page_title,
@@ -98,6 +201,14 @@ if ( ! class_exists( 'Learndash_Admin_Settings_Data_Reports' ) ) {
 			}
 		}
 
+		/**
+		 * Admin tabs
+		 *
+		 * @since 2.4.0
+		 *
+		 * @param object $admin_menu_section Settings Section instance.
+		 * @param object $ld_admin_tabs      LearnDash Admin Tabs instance.
+		 */
 		public function admin_tabs( $admin_menu_section, $ld_admin_tabs ) {
 			if ( $admin_menu_section == $this->parent_menu_page_url ) {
 
@@ -113,12 +224,16 @@ if ( ! class_exists( 'Learndash_Admin_Settings_Data_Reports' ) ) {
 			}
 		}
 
-
+		/**
+		 * On load panel
+		 *
+		 * @since 2.3.0
+		 */
 		public function on_load_panel() {
 
 			wp_enqueue_style(
 				'learndash_style',
-				LEARNDASH_LMS_PLUGIN_URL . 'assets/css/style' . leardash_min_asset() . '.css',
+				LEARNDASH_LMS_PLUGIN_URL . 'assets/css/style' . learndash_min_asset() . '.css',
 				array(),
 				LEARNDASH_SCRIPT_VERSION_TOKEN
 			);
@@ -127,7 +242,7 @@ if ( ! class_exists( 'Learndash_Admin_Settings_Data_Reports' ) ) {
 
 			wp_enqueue_style(
 				'sfwd-module-style',
-				LEARNDASH_LMS_PLUGIN_URL . 'assets/css/sfwd_module' . leardash_min_asset() . '.css',
+				LEARNDASH_LMS_PLUGIN_URL . 'assets/css/sfwd_module' . learndash_min_asset() . '.css',
 				array(),
 				LEARNDASH_SCRIPT_VERSION_TOKEN
 			);
@@ -136,7 +251,7 @@ if ( ! class_exists( 'Learndash_Admin_Settings_Data_Reports' ) ) {
 
 			wp_enqueue_script(
 				'learndash-admin-settings-data-reports-script',
-				LEARNDASH_LMS_PLUGIN_URL . 'assets/js/learndash-admin-settings-data-reports' . leardash_min_asset() . '.js',
+				LEARNDASH_LMS_PLUGIN_URL . 'assets/js/learndash-admin-settings-data-reports' . learndash_min_asset() . '.js',
 				array( 'jquery' ),
 				LEARNDASH_SCRIPT_VERSION_TOKEN,
 				true
@@ -147,13 +262,35 @@ if ( ! class_exists( 'Learndash_Admin_Settings_Data_Reports' ) ) {
 
 		}
 
+		/**
+		 * Init Report Action
+		 *
+		 * @since 2.3.0
+		 */
 		public function init_report_actions() {
 
+			/**
+			 * Filters admin report register actions.
+			 *
+			 * @since 2.3.0
+			 *
+			 * @param array $report_actions An array of report actions.
+			 */
 			$this->report_actions = apply_filters( 'learndash_admin_report_register_actions', $this->report_actions );
 		}
 
+		/**
+		 * Admin page
+		 *
+		 * @since 2.3.0
+		 */
 		public function admin_page() {
 
+			/**
+			 * Fires before settings page content.
+			 *
+			 * @since 3.0.0
+			 */
 			do_action( 'learndash_settings_page_before_content' );
 			?>
 			<div id="learndash-settings" class="wrap">
@@ -169,7 +306,7 @@ if ( ! class_exists( 'Learndash_Admin_Settings_Data_Reports' ) ) {
 
 										<table id="learndash-data-reports" class="wc_status_table widefat" cellspacing="0">
 										<?php
-											//error_log('report_actions<pre>'. print_r($this->report_actions, true) .'</pre>');
+										wp_nonce_field( 'learndash-data-reports-nonce-' . get_current_user_id(), 'learndash-data-reports-nonce' );
 										foreach ( $this->report_actions as $report_action_slug => $report_action ) {
 											$report_action['instance']->show_report_action();
 										}
@@ -185,6 +322,16 @@ if ( ! class_exists( 'Learndash_Admin_Settings_Data_Reports' ) ) {
 			<?php
 		}
 
+		/**
+		 * Do data reports
+		 *
+		 * @since 2.3.0
+		 *
+		 * @param array $post_data  Array of post data to process.
+		 * @param array $reply_data Array of reply data to return.
+		 *
+		 * @return array
+		 */
 		public function do_data_reports( $post_data = array(), $reply_data = array() ) {
 
 			$this->init_report_actions();
@@ -199,7 +346,11 @@ if ( ! class_exists( 'Learndash_Admin_Settings_Data_Reports' ) ) {
 			return $reply_data;
 		}
 
-
+		/**
+		 * Init process times
+		 *
+		 * @since 2.3.0
+		 */
 		public function init_process_times() {
 			$this->process_times['started'] = time();
 			$this->process_times['limit']   = ini_get( 'max_execution_time' );
@@ -209,13 +360,18 @@ if ( ! class_exists( 'Learndash_Admin_Settings_Data_Reports' ) ) {
 			}
 		}
 
+		/**
+		 * Out of time check
+		 *
+		 * @since 2.3.0
+		 */
 		public function out_of_timer() {
 			$this->process_times['current_time'] = time();
 
 			$this->process_times['ticks']   = $this->process_times['current_time'] - $this->process_times['started'];
 			$this->process_times['percent'] = ( $this->process_times['ticks'] / $this->process_times['limit'] ) * 100;
 
-			// If we are over 80% of the allowed processing time or over 10 seconds then finish up and return
+			// If we are over 80% of the allowed processing time or over 10 seconds then finish up and return.
 			if ( ( $this->process_times['percent'] >= LEARNDASH_PROCESS_TIME_PERCENT ) || ( $this->process_times['ticks'] > LEARNDASH_PROCESS_TIME_SECONDS ) ) {
 				return true;
 			}
@@ -223,33 +379,96 @@ if ( ! class_exists( 'Learndash_Admin_Settings_Data_Reports' ) ) {
 			return false;
 		}
 
+		/**
+		 * Get process transient data.
+		 *
+		 * @since 2.4.0
+		 *
+		 * @param string $transient_key Unique transient key.
+		 */
 		public function get_transient( $transient_key = '' ) {
+			$transient_data = array();
+
 			if ( ! empty( $transient_key ) ) {
-				$options_key = 'learndash_reports_' . $transient_key;
-				$options_key = str_replace( '-', '_', $options_key );
-				return get_option( $options_key );
+				$transient_key = str_replace( '-', '_', $transient_key );
+				$options_key   = 'learndash_reports_' . $transient_key;
+
+				if ( ( defined( 'LEARNDASH_TRANSIENT_CACHE_STORAGE' ) ) && ( 'file' === LEARNDASH_TRANSIENT_CACHE_STORAGE ) ) {
+					$wp_upload_dir = wp_upload_dir();
+
+					$ld_file_part = '/learndash/cache/learndash_reports_data_' . $transient_key . '.txt';
+
+					$ld_transient_filename = $wp_upload_dir['basedir'] . $ld_file_part;
+					if ( wp_mkdir_p( dirname( $ld_transient_filename ) ) === false ) {
+						$data['error_message'] = esc_html__( 'ERROR: Cannot create working folder. Check that the parent folder is writable', 'learndash' ) . ' ' . dirname( $ld_transient_filename );
+						return;
+					}
+
+					if ( file_exists( $ld_transient_filename ) ) {
+						$transient_fp = fopen( $ld_transient_filename, 'r' );
+						if ( $transient_fp ) {
+							$transient_data = '';
+							while ( ! feof( $transient_fp ) ) {
+								$transient_data .= fread( $transient_fp, 4096 );
+							}
+							fclose( $transient_fp );
+
+							$transient_data = maybe_unserialize( $transient_data );
+						}
+					}
+				} else {
+					$transient_data = get_option( $options_key );
+				}
+
+				return $transient_data;
 			}
 		}
 
+		/**
+		 * Set process Option cache
+		 *
+		 * @since 3.1.0
+		 *
+		 * @param string $transient_key  Unique transient key.
+		 * @param string $transient_data Array od data to store.
+		 */
 		public function set_option_cache( $transient_key = '', $transient_data = '' ) {
 
 			if ( ! empty( $transient_key ) ) {
-				$options_key = 'learndash_reports_' . $transient_key;
-				$options_key = str_replace( '-', '_', $options_key );
+				$transient_key = str_replace( '-', '_', $transient_key );
+				$options_key   = 'learndash_reports_' . $transient_key;
 
 				if ( ! empty( $transient_data ) ) {
-					update_option( $options_key, $transient_data );
+					if ( ( defined( 'LEARNDASH_TRANSIENT_CACHE_STORAGE' ) ) && ( 'file' === LEARNDASH_TRANSIENT_CACHE_STORAGE ) ) {
+						$wp_upload_dir = wp_upload_dir();
+
+						$ld_file_part = '/learndash/cache/learndash_reports_data_' . $transient_key . '.txt';
+
+						$ld_transient_filename = $wp_upload_dir['basedir'] . $ld_file_part;
+						if ( wp_mkdir_p( dirname( $ld_transient_filename ) ) === false ) {
+							$data['error_message'] = esc_html__( 'ERROR: Cannot create working folder. Check that the parent folder is writable', 'learndash' ) . ' ' . dirname( $ld_transient_filename );
+							return;
+						}
+
+						$transient_fp = fopen( $ld_transient_filename, 'w' );
+						if ( $transient_fp ) {
+							fwrite( $transient_fp, serialize( $transient_data ) );
+							fclose( $transient_fp );
+						}
+					} else {
+						update_option( $options_key, $transient_data );
+					}
 				} else {
 					delete_option( $options_key );
 				}
 			}
 		}
 
-		// End of functions
+		// End of functions.
 	}
 }
 
-// Go ahead and inlcude out User Meta Courses upgrade class
+// Go ahead and inlcude out User Meta Courses upgrade class.
 require_once LEARNDASH_LMS_PLUGIN_DIR . 'includes/admin/classes-data-reports-actions/class-learndash-admin-data-reports-user-courses.php';
 require_once LEARNDASH_LMS_PLUGIN_DIR . 'includes/admin/classes-data-reports-actions/class-learndash-admin-data-reports-user-quizzes.php';
 
@@ -261,26 +480,29 @@ add_action(
 	}
 );
 
-
+/**
+ * Data Reports AJAX function.
+ * Handles AJAX requests for Reports.
+ *
+ * @since 2.3.0
+ */
 function learndash_data_reports_ajax() {
 	$reply_data = array( 'status' => false );
 
 	if ( current_user_can( 'read' ) ) {
-		if ( isset( $_POST['data'] ) ) {
-			$post_data = $_POST['data'];
-		} else {
-			$post_data = array();
+		if ( ( isset( $_POST['nonce'] ) ) && ( ! empty( $_POST['nonce'] ) ) && ( wp_verify_nonce( $_POST['nonce'], 'learndash-data-reports-nonce-' . get_current_user_id() ) ) ) {
+			if ( ( isset( $_POST['data'] ) ) && ( ! empty( $_POST['data'] ) ) ) {
+
+				$ld_admin_settings_data_reports = new Learndash_Admin_Settings_Data_Reports();
+				$reply_data['data']             = $ld_admin_settings_data_reports->do_data_reports( $_POST['data'], $reply_data );
+
+				if ( ! empty( $reply_data ) ) {
+					echo wp_json_encode( $reply_data );
+				}
+			}
 		}
-
-		$ld_admin_settings_data_reports = new Learndash_Admin_Settings_Data_Reports();
-		$reply_data['data']             = $ld_admin_settings_data_reports->do_data_reports( $post_data, $reply_data );
 	}
-
-	if ( ! empty( $reply_data ) ) {
-		echo json_encode( $reply_data );
-	}
-
-	wp_die(); // this is required to terminate immediately and return a proper response
+	wp_die(); // this is required to terminate immediately and return a proper response.
 }
 
 add_action( 'wp_ajax_learndash-data-reports', 'learndash_data_reports_ajax' );

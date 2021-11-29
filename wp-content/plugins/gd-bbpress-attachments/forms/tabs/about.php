@@ -5,7 +5,7 @@
 
         $status = ucfirst($options["status"]);
         if ($options["revision"] > 0) {
-            $status.= " #".$options["revision"];
+            $status .= " #".$options["revision"];
         }
 
         _e("Release Date: ", "gd-bbpress-attachments");
@@ -22,12 +22,12 @@
         <h3><?php _e("System Requirements", "gd-bbpress-attachments"); ?></h3>
         <?php
 
-            _e("PHP: ", "gd-bbpress-attachments");
-            echo '<strong>5.6 or newer</strong><br/>';
-            _e("WordPress: ", "gd-bbpress-attachments");
-            echo '<strong>4.7 or newer</strong><br/>';
-            _e("bbPress: ", "gd-bbpress-attachments");
-            echo '<strong>2.5 or newer</strong>';
+        _e("PHP: ", "gd-bbpress-attachments");
+        echo '<strong>7.0 or newer</strong><br/>';
+        _e("WordPress: ", "gd-bbpress-attachments");
+        echo '<strong>5.1 or newer</strong><br/>';
+        _e("bbPress: ", "gd-bbpress-attachments");
+        echo '<strong>2.6.2 or newer</strong>';
 
         ?>
     </fieldset>
@@ -48,5 +48,7 @@
 </div>
 <div class="d4p-clear"></div>
 <div class="d4p-copyright">
-    Dev4Press &copy; 2008 - 2019 <a target="_blank" href="https://www.dev4press.com/">www.dev4press.com</a> | Golden Dragon WebStudio <a target="_blank" href="https://www.gdragon.info">www.gdragon.info</a>
+    Dev4Press &copy; 2008 - 2021
+    <a target="_blank" href="https://www.dev4press.com/">www.dev4press.com</a> | Golden Dragon WebStudio
+    <a target="_blank" href="https://www.gdragon.info">www.gdragon.info</a>
 </div>

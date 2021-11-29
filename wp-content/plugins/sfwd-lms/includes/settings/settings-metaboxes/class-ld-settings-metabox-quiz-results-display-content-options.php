@@ -6,12 +6,21 @@
  * @subpackage Settings
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'LearnDash_Settings_Metabox_Quiz_Results_Options' ) ) ) {
 	/**
 	 * Class to create the settings section.
 	 */
 	class LearnDash_Settings_Metabox_Quiz_Results_Options extends LearnDash_Settings_Metabox {
 
+		/**
+		 * Quiz edit
+		 *
+		 * @var object
+		 */
 		protected $quiz_edit = null;
 		/**
 		 * Public constructor for class
@@ -32,61 +41,62 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 
 			// Map internal settings field ID to legacy field ID.
 			$this->settings_fields_map = array(
-				'resultGradeEnabled'        => 'resultGradeEnabled',
-				'resultText'                => 'resultText',
-				'resultTextGrade'           => 'resultTextGrade',
+				'resultGradeEnabled'         => 'resultGradeEnabled',
+				'resultText'                 => 'resultText',
+				'resultTextGrade'            => 'resultTextGrade',
 
-				'btnRestartQuizHidden'      => 'btnRestartQuizHidden',
-				'showAverageResult'         => 'showAverageResult',
-				'showCategoryScore'         => 'showCategoryScore',
-				'hideResultPoints'          => 'hideResultPoints',
-				'hideResultCorrectQuestion' => 'hideResultCorrectQuestion',
-				'hideResultQuizTime'        => 'hideResultQuizTime',
+				'btnRestartQuizHidden'       => 'btnRestartQuizHidden',
+				'showAverageResult'          => 'showAverageResult',
+				'showCategoryScore'          => 'showCategoryScore',
+				'hideResultPoints'           => 'hideResultPoints',
+				'hideResultCorrectQuestion'  => 'hideResultCorrectQuestion',
+				'hideResultQuizTime'         => 'hideResultQuizTime',
 
-				'hideAnswerMessageBox'      => 'hideAnswerMessageBox',
-				'disabledAnswerMark'        => 'disabledAnswerMark',
-				'btnViewQuestionHidden'     => 'btnViewQuestionHidden',
-
+				'hideAnswerMessageBox'       => 'hideAnswerMessageBox',
+				'disabledAnswerMark'         => 'disabledAnswerMark',
+				'btnViewQuestionHidden'      => 'btnViewQuestionHidden',
+				'custom_answer_feedback'     => 'custom_answer_feedback',
+				'custom_result_data_display' => 'custom_result_data_display',
 			);
 
 			parent::__construct();
 		}
 
-
+		/**
+		 * Save fields to post
+		 *
+		 * @param object $pro_quiz_edit   WpProQuiz_Controller_Quiz instance (not used).
+		 * @param array  $settings_values Settings values.
+		 */
 		public function save_fields_to_post( $pro_quiz_edit, $settings_values = array() ) {
-
-			$_POST['resultGradeEnabled'] = $settings_values['resultGradeEnabled'];
-
-			$_POST['btnRestartQuizHidden']      = $settings_values['btnRestartQuizHidden'];
-			$_POST['showAverageResult']         = $settings_values['showAverageResult'];
-			$_POST['showCategoryScore']         = $settings_values['showCategoryScore'];
-			$_POST['hideResultPoints']          = $settings_values['hideResultPoints'];
-			$_POST['hideResultCorrectQuestion'] = $settings_values['hideResultCorrectQuestion'];
-			$_POST['hideResultQuizTime']        = $settings_values['hideResultQuizTime'];
-			$_POST['hideAnswerMessageBox']      = $settings_values['hideAnswerMessageBox'];
-			$_POST['disabledAnswerMark']        = $settings_values['disabledAnswerMark'];
-			$_POST['btnViewQuestionHidden']     = $settings_values['btnViewQuestionHidden'];
+			foreach ( $settings_values as $setting_key => $setting_value ) {
+				if ( isset( $this->settings_fields_map[ $setting_key ] ) ) {
+					$_POST[ $setting_key ] = $setting_value;
+				}
+			}
 		}
 
 		/**
 		 * Initialize the metabox settings values.
 		 */
 		public function load_settings_values() {
+			$reload_pro_quiz = false;
+			if ( true !== $this->settings_values_loaded ) {
+				$reload_pro_quiz = true;
+			}
+
 			parent::load_settings_values();
 
-			$this->quiz_edit = $this->init_quiz_edit( $this->_post );
-
 			if ( true === $this->settings_values_loaded ) {
+				$this->quiz_edit = $this->init_quiz_edit( $this->_post, $reload_pro_quiz );
 
-				if ( $this->quiz_edit['quiz'] ) {
+				if ( ( isset( $this->quiz_edit['quiz'] ) ) && ( ! empty( $this->quiz_edit['quiz'] ) ) ) {
 					$this->setting_option_values['resultGradeEnabled'] = $this->quiz_edit['quiz']->isResultGradeEnabled();
 					if ( true === $this->setting_option_values['resultGradeEnabled'] ) {
 						$this->setting_option_values['resultGradeEnabled'] = true;
 					} else {
 						$this->setting_option_values['resultGradeEnabled'] = '';
 					}
-					// Always enabled.
-					//$this->setting_option_values['resultGradeEnabled'] = true;
 
 					$this->setting_option_values['btnRestartQuizHidden'] = $this->quiz_edit['quiz']->isBtnRestartQuizHidden();
 					if ( true !== $this->setting_option_values['btnRestartQuizHidden'] ) {
@@ -173,7 +183,7 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 
 					$this->setting_option_values['resultTextGrade'] = array();
 					$this->setting_option_values['resultText']      = $this->quiz_edit['quiz']->getResultText();
-					if ( ( '' === $this->setting_option_values['resultText'] ) || ( isset ( $this->setting_option_values['resultText']['text'][0] ) ) && ( ! empty( $this->setting_option_values['resultText']['text'][0] ) ) ) {
+					if ( ( '' === $this->setting_option_values['resultText'] ) || ( isset( $this->setting_option_values['resultText']['text'][0] ) ) && ( ! empty( $this->setting_option_values['resultText']['text'][0] ) ) ) {
 						$this->setting_option_values['resultGradeEnabled'] = 'on';
 						if ( is_array( $this->setting_option_values['resultText'] ) ) {
 							$this->setting_option_values['resultTextGrade'] = $this->setting_option_values['resultText'];
@@ -188,6 +198,7 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 				}
 			}
 
+			// Ensure all settings fields are present.
 			foreach ( $this->settings_fields_map as $_internal => $_external ) {
 				if ( ! isset( $this->setting_option_values[ $_internal ] ) ) {
 					$this->setting_option_values[ $_internal ] = '';
@@ -201,8 +212,14 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 		public function load_settings_fields() {
 			global $sfwd_lms;
 
+			if ( ( isset( $this->quiz_edit['quiz'] ) ) && ( ! empty( $this->quiz_edit['quiz'] ) ) ) {
+				$result_messages = $this->get_custom_result_messages();
+			} else {
+				$result_messages = '';
+			}
+
 			$this->setting_option_fields = array(
-				'resultGradeEnabled'       => array(
+				'resultGradeEnabled'         => array(
 					'name'                => 'resultGradeEnabled',
 					'type'                => 'checkbox-switch',
 					'label'               => esc_html__( 'Result Message(s)', 'learndash' ),
@@ -226,7 +243,7 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 					'label_none'     => true,
 					'input_full'     => true,
 					'parent_setting' => 'resultGradeEnabled',
-					'html'           => $this->get_custom_result_messages(),
+					'html'           => $result_messages,
 				),
 
 				'btnRestartQuizHidden'       => array(
@@ -241,6 +258,16 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 					'default' => 'on',
 					'options' => array(
 						'on' => '',
+					),
+					'rest'    => array(
+						'show_in_rest' => LearnDash_REST_API::enabled(),
+						'rest_args'    => array(
+							'schema' => array(
+								'field_key' => 'restart_button_hide',
+								'type'      => 'boolean',
+								'default'   => true,
+							),
+						),
 					),
 				),
 
@@ -272,6 +299,16 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 						'on' => '',
 					),
 					'parent_setting' => 'custom_result_data_display',
+					'rest'           => array(
+						'show_in_rest' => LearnDash_REST_API::enabled(),
+						'rest_args'    => array(
+							'schema' => array(
+								'field_key' => 'show_average_result',
+								'type'      => 'boolean',
+								'default'   => true,
+							),
+						),
+					),
 				),
 
 				'showCategoryScore'          => array(
@@ -289,6 +326,16 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 						'on' => '',
 					),
 					'parent_setting' => 'custom_result_data_display',
+					'rest'           => array(
+						'show_in_rest' => LearnDash_REST_API::enabled(),
+						'rest_args'    => array(
+							'schema' => array(
+								'field_key' => 'show_category_score',
+								'type'      => 'boolean',
+								'default'   => true,
+							),
+						),
+					),
 				),
 
 				'hideResultPoints'           => array(
@@ -304,6 +351,16 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 							// translators: placeholder: Quiz.
 							esc_html_x( 'The achieved %s score is NOT be displayed on the Results page', 'placeholder: Quiz', 'learndash' ),
 							learndash_get_custom_label( 'quiz' )
+						),
+					),
+					'rest'           => array(
+						'show_in_rest' => LearnDash_REST_API::enabled(),
+						'rest_args'    => array(
+							'schema' => array(
+								'field_key' => 'hide_result_points',
+								'type'      => 'boolean',
+								'default'   => true,
+							),
 						),
 					),
 				),
@@ -322,6 +379,16 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 							learndash_get_custom_label( 'questions' )
 						),
 					),
+					'rest'           => array(
+						'show_in_rest' => LearnDash_REST_API::enabled(),
+						'rest_args'    => array(
+							'schema' => array(
+								'field_key' => 'hide_result_correct_question',
+								'type'      => 'boolean',
+								'default'   => true,
+							),
+						),
+					),
 				),
 
 				'hideResultQuizTime'         => array(
@@ -333,6 +400,16 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 					'default'        => 'on',
 					'options'        => array(
 						'on' => '',
+					),
+					'rest'           => array(
+						'show_in_rest' => LearnDash_REST_API::enabled(),
+						'rest_args'    => array(
+							'schema' => array(
+								'field_key' => 'hide_result_quiz_time',
+								'type'      => 'boolean',
+								'default'   => true,
+							),
+						),
 					),
 				),
 
@@ -351,6 +428,16 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 						'on' => '',
 					),
 					'child_section_state' => ( 'on' === $this->setting_option_values['custom_answer_feedback'] ) ? 'open' : 'closed',
+					'rest'                => array(
+						'show_in_rest' => LearnDash_REST_API::enabled(),
+						'rest_args'    => array(
+							'schema' => array(
+								'field_key' => 'custom_answer_feedback',
+								'type'      => 'boolean',
+								'default'   => true,
+							),
+						),
+					),
 				),
 
 				'hideAnswerMessageBox'       => array(
@@ -363,6 +450,16 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 						'on' => '',
 					),
 					'parent_setting' => 'custom_answer_feedback',
+					'rest'           => array(
+						'show_in_rest' => LearnDash_REST_API::enabled(),
+						'rest_args'    => array(
+							'schema' => array(
+								'field_key' => 'hide_answer_message_box',
+								'type'      => 'boolean',
+								'default'   => true,
+							),
+						),
+					),
 				),
 				'disabledAnswerMark'         => array(
 					'name'           => 'disabledAnswerMark',
@@ -374,6 +471,16 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 						'on' => '',
 					),
 					'parent_setting' => 'custom_answer_feedback',
+					'rest'           => array(
+						'show_in_rest' => LearnDash_REST_API::enabled(),
+						'rest_args'    => array(
+							'schema' => array(
+								'field_key' => 'disabled_answer_mark',
+								'type'      => 'boolean',
+								'default'   => true,
+							),
+						),
+					),
 				),
 				'btnViewQuestionHidden'      => array(
 					'name'           => 'btnViewQuestionHidden',
@@ -389,10 +496,21 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 						'on' => '',
 					),
 					'parent_setting' => 'custom_answer_feedback',
+					'rest'           => array(
+						'show_in_rest' => LearnDash_REST_API::enabled(),
+						'rest_args'    => array(
+							'schema' => array(
+								'field_key' => 'view_question_button_hidden',
+								'type'      => 'boolean',
+								'default'   => true,
+							),
+						),
+					),
 				),
 
 			);
 
+			/** This filter is documented in includes/settings/settings-metaboxes/class-ld-settings-metabox-course-access-settings.php */
 			$this->setting_option_fields = apply_filters( 'learndash_settings_fields', $this->setting_option_fields, $this->settings_metabox_key );
 
 			parent::load_settings_fields();
@@ -401,7 +519,7 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 		/**
 		 * Filter settings values for metabox before save to database.
 		 *
-		 * @param array $settings_values Array of settings values.
+		 * @param array  $settings_values Array of settings values.
 		 * @param string $settings_metabox_key Metabox key.
 		 * @param string $settings_screen_id Screen ID.
 		 * @return array $settings_values.
@@ -414,12 +532,6 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 				} else {
 					$settings_values['resultGradeEnabled'] = false;
 				}
-
-				//if ( isset( $_POST['resultTextGrade'] ) ) {
-				//	if ( ( isset( $_POST['resultTextGrade']['text'][0] ) ) && ( ! empty( $_POST['resultTextGrade']['text'][0] ) ) ) {
-				//		$settings_values['btnRestartQuizHidden'] = true;
-				//	}
-				//}
 
 				if ( ( ! isset( $settings_values['btnRestartQuizHidden'] ) ) || ( 'on' === $settings_values['btnRestartQuizHidden'] ) ) {
 					$settings_values['btnRestartQuizHidden'] = false;
@@ -474,6 +586,13 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 				if ( ! isset( $settings_values['custom_answer_feedback'] ) ) {
 					$settings_values['custom_answer_feedback'] = '';
 				}
+
+				if ( '' === $settings_values['custom_answer_feedback'] ) {
+					$settings_values['hideAnswerMessageBox']  = true;
+					$settings_values['disabledAnswerMark']    = true;
+					$settings_values['btnViewQuestionHidden'] = true;
+				}
+
 				if ( ! isset( $settings_values['custom_result_data_display'] ) ) {
 					$settings_values['custom_result_data_display'] = '';
 				}
@@ -481,11 +600,13 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 
 			return $settings_values;
 		}
-
+		/**
+		 * Get custom results messages
+		 */
 		public function get_custom_result_messages() {
 			$result_text = $this->setting_option_values['resultText'];
-			$html       = '';
-			$level      = ob_get_level();
+			$html        = '';
+			$level       = ob_get_level();
 			ob_start();
 			?>
 			<div  id="learndash-quiz-resultList">
@@ -527,7 +648,7 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 						$message_show_style      = ' display:none;';
 						$message_arrow_direction = 'up';
 						$message_editor_style    = '';
-						$message_prozent_value    = '1';
+						$message_prozent_value   = '1';
 					} elseif ( 0 === $i ) {
 						$message_delete_enabled  = false;
 						$message_arrow_direction = 'up';
@@ -535,32 +656,34 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 					}
 
 					?>
-					<li style="<?php echo $message_show_style; ?>">
+					<li style="<?php echo esc_attr( $message_show_style ); ?>">
 						<div class="resultHeader">
-							<input type="hidden" value="<?php echo $message_activ_value; ?>" name="resultTextGrade[activ][]">
+							<input type="hidden" value="<?php echo esc_attr( $message_activ_value ); ?>" name="resultTextGrade[activ][]">
 							<?php
 								echo sprintf(
 									// translators: placeholder: input form field.
 									esc_html_x( 'From %s %% score, display this message:', 'placeholder: input form field', 'learndash' ),
-									'<input type="number" ' . $message_input_disabled . ' name="resultTextGrade[prozent][]" min="1" max="100" step="1" class="-small small-text" value="' . $message_prozent_value . '">'
+									'<input type="number" ' . esc_html( $message_input_disabled ) . ' name="resultTextGrade[prozent][]" min="1" max="100" step="1" class="-small small-text" value="' . esc_attr( $message_prozent_value ) . '">'
 								);
 							?>
 							<div class="expand-arrow expand-arrow-<?php echo esc_attr( $message_arrow_direction ); ?>">
 								<svg width="11" height="8" viewBox="0 0 14 8" xmlns="http://www.w3.org/2000/svg"><path d="M1 1l6 6 6-6" stroke="#0073aa" stroke-width="2" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path></svg>
 								</div>
+
 								<?php if ( true === $message_delete_enabled ) { ?>
 									<input type="button" value="<?php esc_html_e( 'Delete graduation', 'learndash' ); ?>" class="deleteResult">
 								<?php } ?>
 								<div style="clear: right;"></div>
 							</div>
-							<div class="resultEditor" style="<?php echo $message_editor_style; ?>">
+							<div class="resultEditor" style="<?php echo esc_attr( $message_editor_style ); ?>">
 							<?php
 							wp_editor(
 								$message_text_value,
 								'resultText_' . $i,
 								array(
-									'textarea_rows' => 3,
-									'textarea_name' => 'resultTextGrade[text][]',
+									'default_editor' => 'html',
+									'textarea_rows'  => 3,
+									'textarea_name'  => 'resultTextGrade[text][]',
 								)
 							);
 							?>

@@ -1,8 +1,31 @@
 <?php
-if ( ( class_exists( 'LearnDash_Shortcodes_Section' ) ) && ( ! class_exists( 'LearnDash_Shortcodes_Section_learndash_login' ) ) ) {
-	class LearnDash_Shortcodes_Section_learndash_login extends LearnDash_Shortcodes_Section {
+/**
+ * LearnDash Shortcode Section for Login [learndash_login].
+ *
+ * @since 3.0.7
+ * @package LearnDash\Settings\Shortcodes
+ */
 
-		function __construct( $fields_args = array() ) {
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+if ( ( class_exists( 'LearnDash_Shortcodes_Section' ) ) && ( ! class_exists( 'LearnDash_Shortcodes_Section_learndash_login' ) ) ) {
+	/**
+	 * Class LearnDash Shortcode Section for Login [learndash_login].
+	 *
+	 * @since 3.0.7
+	 */
+	class LearnDash_Shortcodes_Section_learndash_login extends LearnDash_Shortcodes_Section { //phpcs:ignore PEAR.NamingConventions.ValidClassName.Invalid
+
+		/**
+		 * Public constructor for class.
+		 *
+		 * @since 3.0.7
+		 *
+		 * @param array $fields_args Field Args.
+		 */
+		public function __construct( $fields_args = array() ) {
 			$this->fields_args = $fields_args;
 
 			$this->shortcodes_section_key         = 'learndash_login';
@@ -13,7 +36,12 @@ if ( ( class_exists( 'LearnDash_Shortcodes_Section' ) ) && ( ! class_exists( 'Le
 			parent::__construct();
 		}
 
-		function init_shortcodes_section_fields() {
+		/**
+		 * Initialize the shortcode fields.
+		 *
+		 * @since 3.0.7
+		 */
+		public function init_shortcodes_section_fields() {
 			$this->shortcodes_option_fields = array(
 				'login_description'  => array(
 					'id'         => $this->shortcodes_section_key . '_login_description',
@@ -65,17 +93,6 @@ if ( ( class_exists( 'LearnDash_Shortcodes_Section' ) ) && ( ! class_exists( 'Le
 						'link' => esc_html__( 'Link', 'learndash' ),
 					),
 				),
-				/*
-				'login_url_redirect' => array(
-					'id'			=>	$this->shortcodes_section_key . '_login_url_redirect',
-					'name'  		=> 	'login_url_redirect',
-					'type'  		=> 	'text',
-					'label' 		=> 	esc_html__('Login URL Redirect', 'learndash'),
-					'value' 		=> 	'',
-					'help_text'		=>	esc_html__( 'URL to redirect to after login. Default is the current page URL.', 'learndash' ),
-				),
-				*/
-
 				'logout_description' => array(
 					'id'         => $this->shortcodes_section_key . '_logout_description',
 					'name'       => 'logout_description',
@@ -128,6 +145,7 @@ if ( ( class_exists( 'LearnDash_Shortcodes_Section' ) ) && ( ! class_exists( 'Le
 				),
 			);
 
+			/** This filter is documented in includes/settings/settings-metaboxes/class-ld-settings-metabox-course-access-settings.php */
 			$this->shortcodes_option_fields = apply_filters( 'learndash_settings_fields', $this->shortcodes_option_fields, $this->shortcodes_section_key );
 
 			parent::init_shortcodes_section_fields();

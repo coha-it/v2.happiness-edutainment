@@ -28,11 +28,12 @@ class LoginRedirect extends Config implements RequiredFunctions {
 			$redirect_priority = 999;
 			
 			$settings = get_option( 'LoginRedirect', Array() );
-			
-			foreach ( $settings as $setting ) {
-				
-				if ( 'redirect_priority' === $setting['name'] ) {
-					$redirect_priority = $setting['value'];
+			if ( ! empty( $settings ) ) {
+				foreach ( $settings as $setting ) {
+					
+					if ( 'redirect_priority' === $setting['name'] ) {
+						$redirect_priority = $setting['value'];
+					}
 				}
 			}
 			if ( empty( $redirect_priority ) ) {
@@ -51,7 +52,7 @@ class LoginRedirect extends Config implements RequiredFunctions {
 	 * @return array
 	 */
 	public static function get_details() {
-
+		$module_id         = 'log-in-log-out-redirects';
 		$class_title       = esc_html__( 'Log In/Log Out Redirects', 'uncanny-learndash-toolkit' );
 		$kb_link           = 'https://www.uncannyowl.com/knowledge-base/learndash-login-redirect/';
 		$class_description = esc_html__( 'Redirects all non-admin roles to a specific URL after logging into and/or out of the site.', 'uncanny-learndash-toolkit' );
@@ -60,6 +61,7 @@ class LoginRedirect extends Config implements RequiredFunctions {
 		$type              = 'free';
 
 		return array(
+			'id'               => $module_id,
 			'title'            => $class_title,
 			'type'             => $type,
 			'category'         => $category,
@@ -133,6 +135,7 @@ class LoginRedirect extends Config implements RequiredFunctions {
 	 * @return string
 	 */
 	public static function login_redirect( $redirect_to, $request, $user ) {
+		
 		//If uo_login shortcode with redirect is set, just return that
 		if ( strpos( $redirect_to, 'uo_redirect' ) ) {
 			return $redirect_to;

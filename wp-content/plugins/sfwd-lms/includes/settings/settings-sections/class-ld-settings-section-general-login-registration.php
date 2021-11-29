@@ -2,18 +2,26 @@
 /**
  * LearnDash Settings Section for Login Registration Metabox.
  *
- * @package LearnDash
- * @subpackage Settings
+ * @since 3.0.0
+ * @package LearnDash\Settings\Sections
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'LearnDash_Settings_Section_General_Login_Registration' ) ) ) {
 	/**
-	 * Class to create the settings section.
+	 * Class LearnDash Settings Section for Login Registration Metabox.
+	 *
+	 * @since 3.0.0
 	 */
 	class LearnDash_Settings_Section_General_Login_Registration extends LearnDash_Settings_Section {
 
 		/**
 		 * Protected constructor for class
+		 *
+		 * @since 3.0.0
 		 */
 		protected function __construct() {
 			$this->settings_page_id = 'learndash_lms_settings';
@@ -35,6 +43,8 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 
 		/**
 		 * Initialize the metabox settings values.
+		 *
+		 * @since 3.0.0
 		 */
 		public function load_settings_values() {
 			parent::load_settings_values();
@@ -50,6 +60,8 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 
 		/**
 		 * Initialize the metabox settings fields.
+		 *
+		 * @since 3.0.0
 		 */
 		public function load_settings_fields() {
 
@@ -58,13 +70,6 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 					'name'              => 'login_logo',
 					'type'              => 'media-upload',
 					'label'             => esc_html__( 'Login Logo', 'learndash' ),
-					/*
-					'help_text' => sprintf(
-						// translators: placeholder: Default per page number.
-						esc_html_x( 'Default per page controls all shortcodes and widget. Default is %d. Set to zero for no pagination.', 'placeholder: Default per page', 'learndash' ),
-						LEARNDASH_LMS_DEFAULT_WIDGET_PER_PAGE
-					),
-					*/
 					'value'             => $this->setting_option_values['login_logo'],
 					'validate_callback' => array( $this, 'validate_section_field_media_upload' ),
 					'validate_args'     => array(
@@ -88,6 +93,7 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 				),
 			);
 
+			/** This filter is documented in includes/settings/settings-metaboxes/class-ld-settings-metabox-course-access-settings.php */
 			$this->setting_option_fields = apply_filters( 'learndash_settings_fields', $this->setting_option_fields, $this->settings_section_key );
 
 			parent::load_settings_fields();
@@ -95,6 +101,8 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 
 		/**
 		 * Validate settings field.
+		 *
+		 * @since 3.0.0
 		 *
 		 * @param string $val Value to be validated.
 		 * @param string $key settings fields key.

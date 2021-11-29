@@ -49,32 +49,50 @@ if ( ! class_exists( 'myCRED_Remote' ) ) :
 		/**
 		 * Handle Magic Quotes
 		 * @since 1.3
-		 * @version 1.0
+		 * @version 1.1
 		 */
 		public function handle_magic() {
 
-			if ( get_magic_quotes_gpc() ) {
+            if ( function_exists( 'get_magic_quotes_gpc' ) )
+            {
+                if ( get_magic_quotes_gpc() ) {
+                    $process = array( &$_GET, &$_POST, &$_COOKIE, &$_REQUEST );
 
-				$process = array( &$_GET, &$_POST, &$_COOKIE, &$_REQUEST );
-				while ( list( $key, $val ) = each( $process ) ) {
-					foreach ( $val as $k => $v ) {
-						unset( $process[ $key ][ $k ] );
-						if ( is_array( $v ) ) {
-							$process[ $key ][ stripslashes( $k ) ] = $v;
-							$process[] = &$process[ $key ][ stripslashes( $k ) ];
-						} else {
-							$process[ $key ][ stripslashes( $k ) ] = stripslashes( $v );
-						}
-					}
-				}
-				unset( $process );
+                    foreach ( $process as $key => $val ) {
+                        foreach ( $val as $k => $v ) {
+                            unset( $process[ $key ][ $k ] );
+                            if ( is_array( $v ) ) {
+                                $process[ $key ][ stripslashes( $k ) ] = $v;
+                                $process[] = &$process[ $key ][ stripslashes( $k ) ];
+                            } else {
+                                $process[ $key ][ stripslashes( $k ) ] = stripslashes( $v );
+                            }
+                        }
+                    }
 
-			}
+                    unset( $process );
+                }
+            }
+            else
+            {
+                $process = array( &$_GET, &$_POST, &$_COOKIE, &$_REQUEST );
 
-			// Let others play
-			do_action_ref_array( 'mycred_remote_magic', array( &$this ) );
-
-		}
+                foreach ( $process as $key => $val ) {
+                    foreach ( $val as $k => $v ) {
+                        unset( $process[ $key ][ $k ] );
+                        if ( is_array( $v ) ) {
+                            $process[ $key ][ $k ] = $v;
+                            $process[] = &$process[ $key ][ $k ];
+                        } else {
+                            $process[ $key ][ $k ] = $v ;
+                        }
+                    }
+                }
+                unset( $process );
+            }
+            // Let others play
+            do_action_ref_array( 'mycred_remote_magic', array( &$this ) );
+        }
 
 		/**
 		 * Set Headers
@@ -367,7 +385,7 @@ if ( ! class_exists( 'myCRED_Remote' ) ) :
 						$type = $this->core->get_cred_id();
 
 					// Prep Amount
-					$amount = $this->core->format_number( $this->request['amount'] );
+					$amount = floatval( $this->request['amount'] );
 					if ( $this->request['action'] == 'DEBIT' )
 						$amount = 0-$amount;
 					else

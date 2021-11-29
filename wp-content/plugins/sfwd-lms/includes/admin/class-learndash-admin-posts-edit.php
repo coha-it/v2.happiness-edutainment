@@ -1,14 +1,21 @@
 <?php
 /**
- * LearnDash Post Edit Abstract Class.
+ * LearnDash Post Edit Base.
  *
+ * @since 2.6.0
  * @package LearnDash
- * @subpackage admin
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 if ( ! class_exists( 'Learndash_Admin_Post_Edit' ) ) {
+
 	/**
-	 * Absract for LearnDash Post Edit Pages.
+	 * Class LearnDash Post Edit Base.
+	 *
+	 * @since 2.6.0
 	 */
 	abstract class Learndash_Admin_Post_Edit {
 
@@ -31,16 +38,19 @@ if ( ! class_exists( 'Learndash_Admin_Post_Edit' ) ) {
 		 *
 		 * @var array $_metaboxes;
 		 */
-		protected $_metaboxes = array();
+		protected $_metaboxes = array(); //phpcs:ignore PSR2.Classes.PropertyDeclaration.Underscore
 
 		/**
 		 * Public constructor for class.
+		 *
+		 * @since 2.6.0
 		 */
 		public function __construct() {
 			// Hook into the on-load action for our post_type editor.
 			add_action( 'load-post.php', array( $this, 'on_load' ) );
 			add_action( 'load-post-new.php', array( $this, 'on_load' ) );
 			add_action( 'save_post', array( $this, 'save_post' ), 50, 3 );
+			add_action( 'edit_post_' . $this->post_type, array( $this, 'edit_post_post_type' ), 50, 2 );
 			add_filter( 'wp_insert_post_parent', array( $this, 'filter_post_parent' ), 30, 4 );
 
 			add_filter( 'enter_title_here', array( $this, 'gutenberg_placeholder_enter_title_here' ), 30, 2 );
@@ -53,7 +63,9 @@ if ( ! class_exists( 'Learndash_Admin_Post_Edit' ) ) {
 		 * Common function to check if we are editing a correct post type.
 		 *
 		 * @since 2.6.0
+		 *
 		 * @param mixed $edit_post WP_Post object or post type string.
+		 *
 		 * @return boolean true is correct, else false.
 		 */
 		protected function post_type_check( $edit_post = null ) {
@@ -76,6 +88,8 @@ if ( ! class_exists( 'Learndash_Admin_Post_Edit' ) ) {
 		 * On Load handler function for this post type edit.
 		 * This function is called by a WP action when the admin
 		 * page 'post.php' or 'post-new.php' are loaded.
+		 *
+		 * @since 2.6.0
 		 */
 		public function on_load() {
 			global $sfwd_lms;
@@ -83,6 +97,16 @@ if ( ! class_exists( 'Learndash_Admin_Post_Edit' ) ) {
 
 			if ( $this->post_type_check() ) {
 
+				/**
+				 * Filters post metaboxes init settings.
+				 *
+				 * The Dynamic part `$post_type` refers to the post type slug.
+				 *
+				 * @since 3.0.0
+				 *
+				 * @param string $post_type Post type slug.
+				 * @param array  $metaboxes Common array set to contain the metaboxes shown on the post edit screen.
+				 */
 				$this->_metaboxes = apply_filters( 'learndash_post_settings_metaboxes_init_' . $this->post_type, $this->_metaboxes );
 
 				if ( ( isset( $_GET['post'] ) ) && ( ! empty( $_GET['post'] ) ) ) {
@@ -125,7 +149,7 @@ if ( ! class_exists( 'Learndash_Admin_Post_Edit' ) ) {
 				if ( ! isset( $learndash_assets_loaded['styles']['learndash-admin-binary-selector-script'] ) ) {
 					wp_enqueue_script(
 						'learndash-admin-binary-selector-script',
-						LEARNDASH_LMS_PLUGIN_URL . 'assets/js/learndash-admin-binary-selector' . leardash_min_asset() . '.js',
+						LEARNDASH_LMS_PLUGIN_URL . 'assets/js/learndash-admin-binary-selector' . learndash_min_asset() . '.js',
 						array( 'jquery' ),
 						LEARNDASH_SCRIPT_VERSION_TOKEN,
 						true
@@ -136,7 +160,7 @@ if ( ! class_exists( 'Learndash_Admin_Post_Edit' ) ) {
 				if ( ! isset( $learndash_assets_loaded['styles']['learndash-admin-binary-selector-style'] ) ) {
 					wp_enqueue_style(
 						'learndash-admin-binary-selector-style',
-						LEARNDASH_LMS_PLUGIN_URL . 'assets/css/learndash-admin-binary-selector' . leardash_min_asset() . '.css',
+						LEARNDASH_LMS_PLUGIN_URL . 'assets/css/learndash-admin-binary-selector' . learndash_min_asset() . '.css',
 						array(),
 						LEARNDASH_SCRIPT_VERSION_TOKEN
 					);
@@ -149,7 +173,7 @@ if ( ! class_exists( 'Learndash_Admin_Post_Edit' ) ) {
 				if ( ! isset( $learndash_assets_loaded['styles']['learndash-admin-style'] ) ) {
 					wp_enqueue_style(
 						'learndash-admin-style',
-						LEARNDASH_LMS_PLUGIN_URL . 'assets/css/learndash-admin-style' . leardash_min_asset() . '.css',
+						LEARNDASH_LMS_PLUGIN_URL . 'assets/css/learndash-admin-style' . learndash_min_asset() . '.css',
 						array(),
 						LEARNDASH_SCRIPT_VERSION_TOKEN
 					);
@@ -196,7 +220,9 @@ if ( ! class_exists( 'Learndash_Admin_Post_Edit' ) ) {
 		 * Check superglobal data.
 		 *
 		 * @since 2.6.0
+		 *
 		 * @param mixed $data Array data or null.
+		 *
 		 * @return array filtered data.
 		 */
 		protected function clear_request_data( $data = null ) {
@@ -211,7 +237,8 @@ if ( ! class_exists( 'Learndash_Admin_Post_Edit' ) ) {
 		 * Called from WP at the start of the post edit <form> tag. Allows us
 		 * to inject needed support fields.
 		 *
-		 * @since 3.0
+		 * @since 3.0.0
+		 *
 		 * @param object $post WP Post object instance being edited.
 		 */
 		public function edit_form_top( $post ) {
@@ -220,7 +247,7 @@ if ( ! class_exists( 'Learndash_Admin_Post_Edit' ) ) {
 				if ( isset( $_GET['currentTab'] ) ) {
 					$current_tab = esc_attr( $_GET['currentTab'] );
 				}
-				echo '<input type="hidden" id="ld_post_edit_current_tab" name="ld_post_edit_current_tab" value="' . $current_tab . '" />';
+				echo '<input type="hidden" id="ld_post_edit_current_tab" name="ld_post_edit_current_tab" value="' . esc_attr( $current_tab ) . '" />';
 			}
 		}
 
@@ -228,30 +255,35 @@ if ( ! class_exists( 'Learndash_Admin_Post_Edit' ) ) {
 		 * Called from WP when saving a post edit form. This filter allows us
 		 * to interject a 'currentTab' query string variable.
 		 *
-		 * @since 3.0
+		 * @since 3.0.0
+		 *
 		 * @param string  $location URL to redirect to after edit post processing.
 		 * @param integer $post_id Post ID of item being edited.
+		 *
 		 * @return string  $location URL.
 		 */
 		public function redirect_post_location( $location = '', $post_id = 0 ) {
-			if ( ( ! empty( $location ) ) && ( ! empty( $post_id  ) ) ) {
+			if ( ( ! empty( $location ) ) && ( ! empty( $post_id ) ) ) {
 				$post_type = get_post_type( $post_id );
 				if ( $this->post_type_check( $post_type ) ) {
 					if ( ( isset( $_POST['ld_post_edit_current_tab'] ) ) && ( ! empty( $_POST['ld_post_edit_current_tab'] ) ) ) {
 						$current_tab = esc_attr( $_POST['ld_post_edit_current_tab'] );
-						$location = add_query_arg( 'currentTab', $current_tab, $location );
+						$location    = add_query_arg( 'currentTab', $current_tab, $location );
 					}
 				}
 				return $location;
 			}
+			return '';
 		}
 
 		/**
 		 * Override Gutenberg placeholder title shown when adding new post.
 		 *
 		 * @since 2.6.0
+		 *
 		 * @param string $placeholder_title Placeholder title to be shown. Default is 'Add title'.
 		 * @param object $post WP_Post instance of post_type being added.
+		 *
 		 * @return string $placeholder_title.
 		 */
 		public function gutenberg_placeholder_enter_title_here( $placeholder_title = '', $post = null ) {
@@ -272,8 +304,10 @@ if ( ! class_exists( 'Learndash_Admin_Post_Edit' ) ) {
 		 * Override Gutenberg placeholder text shown when adding new post.
 		 *
 		 * @since 2.6.0
+		 *
 		 * @param string $placeholder_text Placeholder text to be shown. Default is 'Write your story'.
 		 * @param object $post WP_Post instance of post_type being added.
+		 *
 		 * @return string $placeholder_text.
 		 */
 		public function gutenberg_placeholder_write_your_story( $placeholder_text = ' ', $post = null ) {
@@ -295,6 +329,7 @@ if ( ! class_exists( 'Learndash_Admin_Post_Edit' ) ) {
 		 * Save Question handler function.
 		 *
 		 * @since 2.6.0
+		 *
 		 * @param integer $post_id Post ID Question being edited.
 		 * @param object  $post WP_Post Question being edited.
 		 * @param boolean $update If update true, else false.
@@ -318,46 +353,69 @@ if ( ! class_exists( 'Learndash_Admin_Post_Edit' ) ) {
 			}
 
 			// Check permissions.
-			if ( ! current_user_can( 'edit_courses', $post_id ) ) {
+			if ( learndash_get_post_type_slug( 'group' ) === $post->post_type ) {
+				if ( ! current_user_can( 'edit_group', $post_id ) ) {
+					return false;
+				}
+			} elseif ( ! current_user_can( 'edit_course', $post_id ) ) {
 				return false;
 			}
+
+			// Remove our save_Post hook to prevent recursive save loops.
+			remove_action( 'save_post', array( $this, 'save_post' ), 50, 3 );
+
+			// Clear the oEmbed post cache.
+			$this->post_clear_oembed_cache( $post_id );
 
 			return true;
 		}
 
 		/**
-		 * Filter post_parent before update/insert. Ensure the post_parent fiel is zero for course post types. 
-		 * @since 3.1
+		 * Edit Post handler function.
+		 *
+		 * @since 3.2.3
+		 *
+		 * @param integer $post_id Post ID being edited.
+		 * @param object  $post    WP_Post being edited.
+		 */
+		public function edit_post_post_type( $post_id = 0, $post = null ) {
+		}
+
+		/**
+		 * Filter post_parent before update/insert. Ensure the post_parent fiel is zero for course post types.
+		 *
+		 * @since 3.1.0
+		 *
 		 * @param  integer $post_parent Post Parent post ID.
 		 * @param  integer $post_id     Post ID being edited.
 		 * @param  array   $new_postarr Array of updated POST fields to be saved.
 		 * @param  array   $postarr     Array of previous POST fields to be saved.
+		 *
 		 * @return integer $post_parent
 		 */
 		public function filter_post_parent( $post_parent = 0, $post_id = 0, $new_postarr = array(), $postarr = array() ) {
-			if ( $this->post_type_check() ) {
-				$course_post_types = LDLMS_Post_Types::get_post_types( 'course' );
-				if ( ( ! empty( $course_post_types ) ) && ( in_array( $this->post_type, $course_post_types ) ) ) {
+			if ( ( ! empty( $post_parent ) ) && ( isset( $new_postarr['post_type'] ) ) && ( $this->post_type === $new_postarr['post_type'] ) ) {
+				if ( in_array( $this->post_type, learndash_get_post_types( 'course' ), true ) ) {
 					$post_parent = 0;
 				}
 			}
-
 			return $post_parent;
 		}
 
-
 		/**
-		 * Register metaboxes for Question edit.
+		 * Register metaboxes for course Associated Content
 		 *
 		 * @since 2.6.0
-		 * @param string $post_type Port Type being edited.
+		 *
+		 * @param string $post_type Post Type being edited.
+		 * @param object $post      WP_Post Post being edited.
 		 */
-		public function add_metaboxes( $post_type = '' ) {
+		public function add_metaboxes( $post_type = '', $post = null ) {
 			if ( $this->post_type_check( $post_type ) ) {
 
 				// If we are showing a course or related 'step' we show the Assoc Content metabox.
 				$course_post_types = LDLMS_Post_Types::get_post_types( 'course' );
-				if ( ( ! empty( $course_post_types ) ) && ( in_array( $this->post_type, $course_post_types ) ) ) {
+				if ( ( ! empty( $course_post_types ) ) && ( in_array( $this->post_type, $course_post_types, true ) ) ) {
 					add_meta_box(
 						'learndash_course_navigation_admin_meta',
 						esc_html__( 'Associated Content', 'learndash' ),
@@ -368,11 +426,11 @@ if ( ! class_exists( 'Learndash_Admin_Post_Edit' ) ) {
 					);
 				}
 
-				if ( ( true === is_data_upgrade_quiz_questions_updated() ) && ( LearnDash_Settings_Section::get_section_setting( 'LearnDash_Settings_Quizzes_Builder', 'enabled' ) === 'yes' ) ) {
+				if ( ( true === learndash_is_data_upgrade_quiz_questions_updated() ) && ( LearnDash_Settings_Section::get_section_setting( 'LearnDash_Settings_Quizzes_Builder', 'enabled' ) === 'yes' ) ) {
 
 					// If we are showing a Quiz or Question we show the Quiz Questions metabox.
 					$quiz_post_types = LDLMS_Post_Types::get_post_types( 'quiz' );
-					if ( ( ! empty( $quiz_post_types ) ) && ( in_array( $this->post_type, $quiz_post_types ) ) ) {
+					if ( ( ! empty( $quiz_post_types ) ) && ( in_array( $this->post_type, $quiz_post_types, true ) ) ) {
 
 						add_meta_box(
 							'learndash_admin_quiz_navigation',
@@ -393,6 +451,24 @@ if ( ! class_exists( 'Learndash_Admin_Post_Edit' ) ) {
 			}
 		}
 
+		/**
+		 * Clear the Post oEmbed cache.
+		 *
+		 * This is mostly needed for Lessons and Topics when
+		 * using the Video Progression logic. But we are
+		 * supporting this on all LD post types.
+		 *
+		 * @since 3.1.4
+		 *
+		 * @param integer $post_id ID of Post to clear cache for.
+		 */
+		public function post_clear_oembed_cache( $post_id = 0 ) {
+			if ( ! empty( $post_id ) ) {
+				$wp_embed = new WP_Embed();
+				$wp_embed->delete_oembed_caches( $post_id );
+			}
+		}
+
 		// End of functions.
 	}
 }
@@ -402,3 +478,6 @@ require_once LEARNDASH_LMS_PLUGIN_DIR . 'includes/admin/classes-posts-edits/clas
 require_once LEARNDASH_LMS_PLUGIN_DIR . 'includes/admin/classes-posts-edits/class-learndash-admin-topic-edit.php';
 require_once LEARNDASH_LMS_PLUGIN_DIR . 'includes/admin/classes-posts-edits/class-learndash-admin-quiz-edit.php';
 require_once LEARNDASH_LMS_PLUGIN_DIR . 'includes/admin/classes-posts-edits/class-learndash-admin-question-edit.php';
+require_once LEARNDASH_LMS_PLUGIN_DIR . 'includes/admin/classes-posts-edits/class-learndash-admin-essay-edit.php';
+require_once LEARNDASH_LMS_PLUGIN_DIR . 'includes/admin/classes-posts-edits/class-learndash-admin-group-edit.php';
+require_once LEARNDASH_LMS_PLUGIN_DIR . 'includes/admin/classes-posts-edits/class-learndash-admin-assignment-edit.php';

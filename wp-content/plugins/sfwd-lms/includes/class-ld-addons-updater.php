@@ -8,6 +8,10 @@
  * @subpackage Add-on Updates
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * BitBucket API
  */
@@ -18,6 +22,16 @@ if ( ! class_exists( 'LearnDash_Addon_Updater' ) ) {
 	 * Class for handling the LearnDash Add-on updates.
 	 */
 	class LearnDash_Addon_Updater {
+		/**
+		 * Static instance variable to ensure
+		 * only one instance of class is used.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @var object $instance.
+		 */
+		protected static $instance = null;
+
 		/**
 		 * Holds the in process data. This is read in from the $option_key.
 		 *
@@ -60,7 +74,7 @@ if ( ! class_exists( 'LearnDash_Addon_Updater' ) ) {
 		 * Setting for the number of minutes to cache readme check. This
 		 * is to prevent too frequent checks again BitBucket servers.
 		 *
-		 * @var integer $$readme_cache_time_limit value in minutes.
+		 * @var integer $readme_cache_time_limit value in minutes.
 		 */
 		private $readme_cache_time_limit = 8;
 
@@ -80,6 +94,21 @@ if ( ! class_exists( 'LearnDash_Addon_Updater' ) ) {
 			add_action( 'upgrader_process_complete', array( $this, 'upgrader_process_complete_action' ), 10, 2 );
 			add_filter( 'update_plugin_complete_actions', array( $this, 'update_plugin_complete_actions' ) );
 			add_filter( 'install_plugin_complete_actions', array( $this, 'install_plugin_complete_actions' ), 10, 3 );
+
+			add_action( 'admin_notices', array( $this, 'admin_notice_upgrade_notice' ) );
+		}
+
+		/**
+		 * Get or create instance object of class.
+		 *
+		 * @since 1.0.0
+		 */
+		final public static function get_instance() {
+			if ( ! isset( static::$instance ) ) {
+				static::$instance = new self();
+			}
+
+			return static::$instance;
 		}
 
 		/**
@@ -121,7 +150,7 @@ if ( ! class_exists( 'LearnDash_Addon_Updater' ) ) {
 		 *
 		 * @since 2.5.5
 		 */
-		public function install_plugin_complete_actions( $install_actions = array(), $api, $plugin_file = '' ) {
+		public function install_plugin_complete_actions( $install_actions, $api, $plugin_file = '' ) {
 			if ( ( isset( $_GET['ld-return-addons'] ) ) && ( ! empty( $_GET['ld-return-addons'] ) ) ) {
 				// If we have the 'ld-return-addons' element this means we need to go back there only.
 				$return_url = esc_attr( $_GET['ld-return-addons'] );
@@ -130,13 +159,72 @@ if ( ! class_exists( 'LearnDash_Addon_Updater' ) ) {
 				$install_actions = array();
 
 				if ( ! empty( $plugin_file ) ) {
+					$plugin_slug = dirname( $plugin_file );
+					if ( ! empty( $plugin_slug ) ) {
+						$plugin_readme_file = $this->bb_api->get_addon_directory() . '/' . $plugin_slug . '_readme.txt';
+						if ( ( ! empty( $plugin_readme_file ) ) && ( file_exists( $plugin_readme_file ) ) ) {
+							// Update the installed plugin readme.txt.
+							$plugin_dir = trailingslashit( WP_PLUGIN_DIR ) . $plugin_slug;
+							if ( ( file_exists( $plugin_dir ) ) && ( is_writable( $plugin_dir ) ) ) {
+								$copy_ret = @copy( $plugin_readme_file, $plugin_dir . '/readme.txt' );
+							}
+						}
+					}
+
 					$install_actions['activate_plugin'] = '<a class="button button-primary" href="' . wp_nonce_url( 'plugins.php?action=activate&amp;plugin=' . urlencode( $plugin_file ), 'activate-plugin_' . $plugin_file ) . '" target="_parent">' . __( 'Activate Plugin', 'learndash' ) . '</a>';
 				}
-				$install_actions['ld-addons-page'] = '<a href="' . $return_url . '" target="_parent">'  . esc_html__( 'Return to LearnDash Add-ons Page', 'learndash' ) . '</a>';
+				$install_actions['ld-addons-page'] = '<a href="' . $return_url . '" target="_parent">' . esc_html__( 'Return to LearnDash Add-ons Page', 'learndash' ) . '</a>';
 			}
 
 			return $install_actions;
 		}
+
+		/**
+		 * Support for admin notice header for "Upgrade Notice Admin" header
+		 * from readme.txt.
+		 *
+		 * @since 3.1.4
+		 */
+		public function admin_notice_upgrade_notice() {
+			static $notices_shown = array();
+
+			$current_screen_id = get_current_screen()->id;
+			if ( 'admin_page_learndash_lms_addons' === $current_screen_id ) {
+				return;
+			}
+
+			if ( ( isset( $this->data['updates'] ) ) && ( ! empty( $this->data['updates'] ) ) ) {
+				foreach ( $this->data['updates'] as $plugin_update ) {
+					if ( isset( $notices_shown[ $plugin_update->slug ] ) ) {
+						continue;
+					}
+
+					if ( ( isset( $this->data['plugins'][ $plugin_update->slug ]['upgrade_notice_admin']['content_formatted'] ) ) && ( ! empty( $this->data['plugins'][ $plugin_update->slug ]['upgrade_notice_admin']['content_formatted'] ) ) ) {
+						/**
+						 * Filters whether to show the upgrade notice in admin banner.
+						 *
+						 * By default this will show on all pages.
+						 *
+						 * @since 3.1.4
+						 *
+						 * @param boolean $show_notice Whether to show the update notice.
+						 * @param string  $plugin_slug The slug of the plugin.
+						 */
+						if ( apply_filters( 'learndash_upgrade_notice_admin_show', true, $plugin_update->slug ) ) {
+							$notices_shown[ $plugin_update->slug ] = $plugin_update->slug;
+							?><div class="notice notice-error notice-alt is-dismissible ld-plugin-update-notice">
+							<?php
+							echo wp_kses_post( $this->data['plugins'][ $plugin_update->slug ]['upgrade_notice_admin']['content_formatted'] );
+							?>
+							</div>
+							<?php
+						}
+					}
+				}
+			}
+		}
+
+
 
 		/**
 		 * This is called from the plugin listing page. This hook lets of add supplemental information
@@ -148,9 +236,28 @@ if ( ! class_exists( 'LearnDash_Addon_Updater' ) ) {
 		 * @param object $new_plugin_metadata New meta data.
 		 */
 		public function show_upgrade_notification( $current_plugin_metadata, $new_plugin_metadata ) {
-			// check "upgrade_notice".
-			if ( ( isset( $new_plugin_metadata->upgrade_notice ) && ( strlen( trim( $new_plugin_metadata->upgrade_notice ) ) > 0 ) ) ) {
-				echo '<br /><span style="display: block; background-color: #d54e21; padding: 10px; color: #f9f9f9; margin-top: 10px">' . esc_html( $new_plugin_metadata->upgrade_notice ) . '</span>';
+			static $notice_slugs = array();
+
+			$plugin_slug = '';
+			if ( isset( $current_plugin_metadata['slug'] ) ) {
+				$plugin_slug = esc_attr( $current_plugin_metadata['slug'] );
+			}
+
+			if ( ( ! empty( $plugin_slug ) ) && ( ! in_array( $plugin_slug, $notice_slugs ) ) ) {
+				if ( ( isset( $this->data['updates'] ) ) && ( ! empty( $this->data['updates'] ) ) ) {
+					foreach ( $this->data['updates'] as $update_plugin ) {
+						if ( $update_plugin->slug !== $plugin_slug ) {
+							continue;
+						}
+
+						if ( ( isset( $this->data['plugins'][ $plugin_slug ]['upgrade_notice']['content_formatted'] ) ) && ( ! empty( $this->data['plugins'][ $plugin_slug ]['upgrade_notice']['content_formatted'] ) ) ) {
+							$notice_slugs[ $plugin_slug ] = $plugin_slug;
+
+							$plugin_readme_update_notice = str_replace( array( '<p>', '</p>' ), array( '', '<br />' ), $this->data['plugins'][ $plugin_slug ]['upgrade_notice']['content_formatted'] );
+							echo '<p class="ld-plugin-update-notice">' . wp_kses_post( $plugin_readme_update_notice );
+						}
+					}
+				}
 			}
 		}
 
@@ -171,7 +278,7 @@ if ( ! class_exists( 'LearnDash_Addon_Updater' ) ) {
 			$this->load_repositories_options();
 
 			if ( isset( $this->data['plugins'][ $args->slug ] ) ) {
-				$data = json_decode( json_encode( $this->data['plugins'][ $args->slug ] ), false );
+				$data = json_decode( wp_json_encode( $this->data['plugins'][ $args->slug ] ), false );
 
 				// We already have the obj but we update the BB download URL just in case.
 				$data->download_link = $this->bb_api->get_bitbucket_repository_download_url( $data->slug );
@@ -197,7 +304,7 @@ if ( ! class_exists( 'LearnDash_Addon_Updater' ) ) {
 			$repo_download_base_url = $this->bb_api->get_download_base_url();
 			if ( ( ! empty( $repo_download_base_url ) ) && ( strncasecmp( $repo_download_base_url, $download_url, strlen( $repo_download_base_url ) ) === 0 ) ) {
 
-				$plugin_url = str_replace( trailingslashit( $this->bb_api->get_download_base_url() ), '', $download_url );
+				$plugin_url       = str_replace( trailingslashit( $this->bb_api->get_download_base_url() ), '', $download_url );
 				$plugin_url_parts = explode( '/', $plugin_url );
 
 				if ( isset( $this->data['plugins'][ $plugin_url_parts[0] ] ) ) {
@@ -234,11 +341,13 @@ if ( ! class_exists( 'LearnDash_Addon_Updater' ) ) {
 				$corrected_source = trailingslashit( $remote_source ) . $this->_doing_install_upgrade_slug . '/';
 				if ( $source !== $corrected_source ) {
 
-					$upgrader->skin->feedback(sprintf(
-						'Renaming %s to %s&#8230;',
-						'<span class="code">' . basename( $source ) . '</span>',
-						'<span class="code">' . $this->_doing_install_upgrade_slug . '</span>'
-					));
+					$upgrader->skin->feedback(
+						sprintf(
+							'Renaming %s to %s&#8230;',
+							'<span class="code">' . basename( $source ) . '</span>',
+							'<span class="code">' . $this->_doing_install_upgrade_slug . '</span>'
+						)
+					);
 
 					if ( $wp_filesystem->move( $source, $corrected_source, true ) ) {
 						$upgrader->skin->feedback( esc_html__( 'Directory successfully renamed.', 'learndash' ) );
@@ -266,7 +375,7 @@ if ( ! class_exists( 'LearnDash_Addon_Updater' ) ) {
 		 */
 		public function upgrader_process_complete_action( $upgrader, $args = array() ) {
 			if ( ( isset( $args['plugins'] ) ) && ( ! empty( $args['plugins'] ) ) ) {
-				$all_plugins = get_plugins();
+				$all_plugins            = get_plugins();
 				$wp_installed_languages = get_available_languages();
 				if ( ! in_array( 'en_US', $wp_installed_languages ) ) {
 					$wp_installed_languages = array_merge( array( 'en_US' ), $wp_installed_languages );
@@ -279,7 +388,7 @@ if ( ! class_exists( 'LearnDash_Addon_Updater' ) ) {
 						// A little hack. For LD core and ProPanel we don't use the real slug internally.
 						if ( 'learndash-propanel' === $plugin_dir ) {
 							$plugin_dir = 'learndash-propanel-readme';
-						} else if ( 'sfwd-lms' === $plugin_dir ) {
+						} elseif ( 'sfwd-lms' === $plugin_dir ) {
 							$plugin_dir = 'learndash-core-readme';
 						}
 
@@ -294,14 +403,16 @@ if ( ! class_exists( 'LearnDash_Addon_Updater' ) ) {
 									$reply = LearnDash_Translations::install_translation( $plugin_text_domain, $locale );
 									if ( ( isset( $reply['translation_set'] ) ) && ( ! empty( $reply['translation_set'] ) ) ) {
 
-										$update_messages[ $locale ] = sprintf(
-											wp_kses_post(
-												// translators: placeholders: Translation Name, Translation Locale.
-												_x( '<h2>Updating translations for %1$s (%2$s)...</h2>', 'placeholders: Translation Name, Translation Locale', 'learndash' )
+										$update_messages[ $locale ] = '<h2>' . sprintf(
+											// translators: placeholders: Translation Name, Translation Locale.
+											esc_html_x(
+												'Updating translations for %1$s (%2$s)...',
+												'placeholders: Translation Name, Translation Locale',
+												'learndash'
 											),
 											$reply['translation_set']['english_name'],
 											$reply['translation_set']['wp_locale']
-										);
+										) . '</h2>';
 									}
 								}
 
@@ -387,23 +498,27 @@ if ( ! class_exists( 'LearnDash_Addon_Updater' ) ) {
 		 */
 		public function load_repositories_options() {
 
-			if ( isset( $_GET['repo_reset'] ) ) {
-				$this->reset_repo();
-				$admin_url = remove_query_arg( 'repo_reset' );
-				wp_redirect( $admin_url );
-				die();
-			}
-
 			if ( is_null( $this->data ) ) {
 				$this->data = get_option( $this->options_key, array() );
 				if ( ! is_array( $this->data ) ) {
 					$this->data = array();
 				}
 				if ( empty( $this->data ) ) {
-					$this->data['last_check'] = 0;
+					$this->data['last_check']   = 0;
 					$this->data['repositories'] = array();
-					$this->data['plugins'] = array();
-					$this->data['tags'] = array();
+					$this->data['plugins']      = array();
+					$this->data['tags']         = array();
+				}
+			}
+
+			if ( isset( $_GET['repo_reset'] ) ) {
+				// $this->reset_repo();
+				$this->data['repo_reset'] = 1;
+				$this->update_repositories_options();
+
+				$admin_url = remove_query_arg( 'repo_reset' );
+				if ( ! empty( $admin_url ) ) {
+					learndash_safe_redirect( $admin_url );
 				}
 			}
 
@@ -436,12 +551,18 @@ if ( ! class_exists( 'LearnDash_Addon_Updater' ) ) {
 		public function get_addon_plugins( $override_cache = false ) {
 			$this->load_repositories_options();
 			$time_current = time();
-			$time_diff = $time_current - $this->data['last_check'];
-			$time_cache = $this->repo_cache_time_limit * MINUTE_IN_SECONDS;
+			$time_diff    = $time_current - $this->data['last_check'];
+			$time_cache   = $this->repo_cache_time_limit * MINUTE_IN_SECONDS;
 
+			if ( ( ! $override_cache ) && ( isset( $this->data['repo_reset'] ) ) && ( $this->data['repo_reset'] ) ) {
+				$override_cache = true;
+
+				$this->data['repo_reset'] = 0;
+				$this->update_repositories_options();
+			}
 			if ( ( 1 == $override_cache ) || ( empty( $this->data['last_check'] ) ) || ( $time_diff > $time_cache ) ) {
 
-				$repositories = $this->bb_api->get_bitbucket_repositories();
+				$repositories = $this->bb_api->get_bitbucket_repositories( $override_cache );
 
 				if ( ! empty( $repositories ) ) {
 
@@ -513,6 +634,15 @@ if ( ! class_exists( 'LearnDash_Addon_Updater' ) ) {
 		 */
 		public function update_plugin_readme( $plugin_slug = '', $override_cache = false ) {
 			if ( ! empty( $plugin_slug ) ) {
+				/**
+				 * Option to override cache via URL parameter.
+				 *
+				 * @since 3.1.4
+				 */
+				if ( isset( $_GET['ld_debug'] ) ) {
+					$override_cache = true;
+				}
+
 				if ( ( isset( $this->data['repositories'][ $plugin_slug ] ) ) && ( ! empty( $this->data['repositories'][ $plugin_slug ] ) ) ) {
 					$bb_repo = $this->data['repositories'][ $plugin_slug ];
 
@@ -530,7 +660,7 @@ if ( ! class_exists( 'LearnDash_Addon_Updater' ) ) {
 					if ( ( ! empty( $plugin_readme ) ) && ( is_array( $plugin_readme ) ) ) {
 
 						$plugin_readme['last_check'] = time();
-						$plugin_readme['external'] = true;
+						$plugin_readme['external']   = true;
 
 						if ( ( property_exists( $bb_repo, 'slug' ) ) && ( ! empty( $bb_repo->slug ) ) ) {
 							$plugin_readme['bb_slug'] = $bb_repo->slug;
@@ -581,7 +711,7 @@ if ( ! class_exists( 'LearnDash_Addon_Updater' ) ) {
 		 */
 		public function generate_plugin_updates() {
 			$this->data['updates'] = array();
-			$all_plugins = get_plugins();
+			$all_plugins           = get_plugins();
 
 			// Then from the 'plugins' node. This lets us remove items we didn't retreive from 'repositories'.
 			if ( ! empty( $this->data['plugins'] ) ) {
@@ -596,20 +726,20 @@ if ( ! class_exists( 'LearnDash_Addon_Updater' ) ) {
 					} else {
 						$plugin_found = false;
 						foreach ( $all_plugins as $all_plugin_slug => $all_plugin_data ) {
-							if ( strncasecmp( $plugin_readme['slug'], $all_plugin_slug, strlen( $plugin_readme['slug'] ) ) === 0 ) {
+							if ( strncasecmp( $plugin_readme['slug'] . '/', $all_plugin_slug, strlen( $plugin_readme['slug'] . '/' ) ) === 0 ) {
 								$plugin_found = true;
 
-								$plugin_readme['wp_slug'] = $all_plugin_slug;
-								$plugin_readme['plugin_status'] = array();
-								$plugin_readme['plugin_status']['status'] = 'latest_installed';
-								$plugin_readme['plugin_status']['url'] = false;
+								$plugin_readme['wp_slug']                  = $all_plugin_slug;
+								$plugin_readme['plugin_status']            = array();
+								$plugin_readme['plugin_status']['status']  = 'latest_installed';
+								$plugin_readme['plugin_status']['url']     = false;
 								$plugin_readme['plugin_status']['version'] = false;
-								$plugin_readme['plugin_status']['file'] = $all_plugin_slug;
+								$plugin_readme['plugin_status']['file']    = $all_plugin_slug;
 
 								if ( version_compare( $plugin_readme['version'], $all_plugin_data['Version'], '>' ) ) {
-									$plugin_readme['plugin_status']['status'] = 'update_available';
+									$plugin_readme['plugin_status']['status']  = 'update_available';
 									$plugin_readme['plugin_status']['version'] = $plugin_readme['version'];
-									$plugin_readme['plugin_status']['file'] = $all_plugin_slug;
+									$plugin_readme['plugin_status']['file']    = $all_plugin_slug;
 									if ( current_user_can( 'update_plugins' ) ) {
 										$plugin_readme['plugin_status']['url'] = wp_nonce_url( self_admin_url( 'update.php?action=upgrade-plugin&plugin=' . $all_plugin_slug ), 'upgrade-plugin_' . $all_plugin_slug );
 										$plugin_readme['plugin_status']['url'] = add_query_arg(
@@ -619,9 +749,9 @@ if ( ! class_exists( 'LearnDash_Addon_Updater' ) ) {
 										);
 									}
 
-									$obj = new stdClass();
-									$obj->slug = $plugin_readme['slug'];
-									$obj->plugin = $all_plugin_slug;
+									$obj              = new stdClass();
+									$obj->slug        = $plugin_readme['slug'];
+									$obj->plugin      = $all_plugin_slug;
 									$obj->new_version = $plugin_readme['version'];
 
 									$obj->package = $this->bb_api->get_bitbucket_repository_download_url( $plugin_readme['slug'] );
@@ -643,8 +773,34 @@ if ( ! class_exists( 'LearnDash_Addon_Updater' ) ) {
 										$obj->banners = $plugin_readme['banners'];
 									}
 
-									if ( ( isset( $plugin_readme['upgrade_notice']['content'][ $obj->new_version ] ) ) && ( ! empty( $plugin_readme['upgrade_notice']['content'][ $obj->new_version ] ) ) ) {
-										$obj->upgrade_notice = $plugin_readme['upgrade_notice']['content'][ $obj->new_version ];
+									if ( ( isset( $plugin_readme['upgrade_notice']['content'] ) ) && ( ! empty( $plugin_readme['upgrade_notice']['content'] ) ) ) {
+										$upgrade_notice = '';
+										foreach ( $plugin_readme['upgrade_notice']['content'] as $upgrade_notice_version => $upgrade_notice_message ) {
+											if ( version_compare( $upgrade_notice_version, $all_plugin_data['Version'], '>' ) ) {
+												$upgrade_notice_message = str_replace( array( "\r\n", "\n", "\r" ), '', $upgrade_notice_message );
+												$upgrade_notice_message = str_replace( '</p><p>', '<br /><br />', $upgrade_notice_message );
+												$upgrade_notice_message = str_replace( '<p>', '', $upgrade_notice_message );
+												$upgrade_notice_message = str_replace( '</p>', '', $upgrade_notice_message );
+												$upgrade_notice        .= '<p><span class="version">' . $upgrade_notice_version . '</span>: ' . $upgrade_notice_message . '</p>';
+											}
+										}
+
+										if ( ! empty( $upgrade_notice ) ) {
+											$this->data['plugins'][ $plugin_slug ]['upgrade_notice']['content_formatted'] = $upgrade_notice;
+										}
+									}
+
+									if ( ( isset( $plugin_readme['upgrade_notice_admin']['content'] ) ) && ( ! empty( $plugin_readme['upgrade_notice_admin']['content'] ) ) ) {
+										$upgrade_notice = '';
+										foreach ( $plugin_readme['upgrade_notice_admin']['content'] as $upgrade_notice_version => $upgrade_notice_message ) {
+											if ( version_compare( $upgrade_notice_version, $all_plugin_data['Version'], '>' ) ) {
+												$upgrade_notice_message = str_replace( array( '<h4>', '</h4>' ), array( '<p class="header">', '</p>' ), $upgrade_notice_message );
+												$upgrade_notice        .= $upgrade_notice_message;
+											}
+										}
+										if ( ! empty( $upgrade_notice ) ) {
+											$this->data['plugins'][ $plugin_slug ]['upgrade_notice_admin']['content_formatted'] = $upgrade_notice_message;
+										}
 									}
 
 									$this->data['updates'][ $all_plugin_slug ] = $obj;
@@ -655,10 +811,10 @@ if ( ! class_exists( 'LearnDash_Addon_Updater' ) ) {
 
 						// We didn't find out plugin in the installed. So mark it to install.
 						if ( false === $plugin_found ) {
-							$plugin_readme['plugin_status'] = array();
-							$plugin_readme['plugin_status']['status'] = 'install';
+							$plugin_readme['plugin_status']            = array();
+							$plugin_readme['plugin_status']['status']  = 'install';
 							$plugin_readme['plugin_status']['version'] = $plugin_readme['version'];
-							$plugin_readme['plugin_status']['file'] = false;
+							$plugin_readme['plugin_status']['file']    = false;
 							if ( current_user_can( 'install_plugins' ) ) {
 								$plugin_readme['plugin_status']['url'] = wp_nonce_url( self_admin_url( 'update.php?action=install-plugin&plugin=' . $plugin_slug ), 'install-plugin_' . $plugin_slug );
 								$plugin_readme['plugin_status']['url'] = add_query_arg( 'ld-return-addons', $_SERVER['REQUEST_URI'], $plugin_readme['plugin_status']['url'] );
@@ -733,12 +889,12 @@ if ( ! class_exists( 'LearnDash_Addon_Updater' ) ) {
 			if ( ! isset( $readme['icons'] ) ) {
 				$readme['icons'] = array();
 				if ( file_exists( LEARNDASH_LMS_PLUGIN_DIR . 'assets/images-add-ons/' . $readme['slug'] . '_256x256.jpg' ) ) {
-					$readme['icons']['1x'] = LEARNDASH_LMS_PLUGIN_URL . 'assets/images-add-ons/' . $readme['slug'] . '_256x256.jpg';
-					$readme['icons']['2x'] = LEARNDASH_LMS_PLUGIN_URL . 'assets/images-add-ons/' . $readme['slug'] . '_256x256.jpg';
+					$readme['icons']['1x']      = LEARNDASH_LMS_PLUGIN_URL . 'assets/images-add-ons/' . $readme['slug'] . '_256x256.jpg';
+					$readme['icons']['2x']      = LEARNDASH_LMS_PLUGIN_URL . 'assets/images-add-ons/' . $readme['slug'] . '_256x256.jpg';
 					$readme['icons']['default'] = LEARNDASH_LMS_PLUGIN_URL . 'assets/images-add-ons/' . $readme['slug'] . '_256x256.jpg';
-				} else if ( file_exists( LEARNDASH_LMS_PLUGIN_DIR . 'assets/images-add-ons/learndash-default_256x256.jpg' ) ) {
-					$readme['icons']['1x'] = LEARNDASH_LMS_PLUGIN_URL . 'assets/images-add-ons/learndash-default_256x256.jpg';
-					$readme['icons']['2x'] = LEARNDASH_LMS_PLUGIN_URL . 'assets/images-add-ons/learndash-default_256x256.jpg';
+				} elseif ( file_exists( LEARNDASH_LMS_PLUGIN_DIR . 'assets/images-add-ons/learndash-default_256x256.jpg' ) ) {
+					$readme['icons']['1x']      = LEARNDASH_LMS_PLUGIN_URL . 'assets/images-add-ons/learndash-default_256x256.jpg';
+					$readme['icons']['2x']      = LEARNDASH_LMS_PLUGIN_URL . 'assets/images-add-ons/learndash-default_256x256.jpg';
 					$readme['icons']['default'] = LEARNDASH_LMS_PLUGIN_URL . 'assets/images-add-ons/learndash-default_256x256.jpg';
 				}
 			}
@@ -746,12 +902,12 @@ if ( ! class_exists( 'LearnDash_Addon_Updater' ) ) {
 			if ( ! isset( $readme['banners'] ) ) {
 				$readme['banners'] = array();
 				if ( file_exists( LEARNDASH_LMS_PLUGIN_DIR . 'assets/images-add-ons/' . $readme['slug'] . '_banner.jpg' ) ) {
-					$readme['banners']['low'] = LEARNDASH_LMS_PLUGIN_URL . 'assets/images-add-ons/' . $readme['slug'] . '_banner.jpg';
-					$readme['banners']['high'] = LEARNDASH_LMS_PLUGIN_URL . 'assets/images-add-ons/' . $readme['slug'] . '_banner.jpg';
+					$readme['banners']['low']     = LEARNDASH_LMS_PLUGIN_URL . 'assets/images-add-ons/' . $readme['slug'] . '_banner.jpg';
+					$readme['banners']['high']    = LEARNDASH_LMS_PLUGIN_URL . 'assets/images-add-ons/' . $readme['slug'] . '_banner.jpg';
 					$readme['banners']['default'] = LEARNDASH_LMS_PLUGIN_URL . 'assets/images-add-ons/' . $readme['slug'] . '_banner.jpg';
-				} else if ( file_exists( LEARNDASH_LMS_PLUGIN_DIR . 'assets/images-add-ons/learndash-default_banner.jpg' ) ) {
-					$readme['banners']['low'] = LEARNDASH_LMS_PLUGIN_URL . 'assets/images-add-ons/learndash-default_banner.jpg';
-					$readme['banners']['high'] = LEARNDASH_LMS_PLUGIN_URL . 'assets/images-add-ons/learndash-default_banner.jpg';
+				} elseif ( file_exists( LEARNDASH_LMS_PLUGIN_DIR . 'assets/images-add-ons/learndash-default_banner.jpg' ) ) {
+					$readme['banners']['low']     = LEARNDASH_LMS_PLUGIN_URL . 'assets/images-add-ons/learndash-default_banner.jpg';
+					$readme['banners']['high']    = LEARNDASH_LMS_PLUGIN_URL . 'assets/images-add-ons/learndash-default_banner.jpg';
 					$readme['banners']['default'] = LEARNDASH_LMS_PLUGIN_URL . 'assets/images-add-ons/learndash-default_banner.jpg';
 				}
 			}
@@ -769,13 +925,15 @@ if ( ! class_exists( 'LearnDash_Addon_Updater' ) ) {
 				$this->load_repositories_options();
 				return $this->update_plugin_readme( $plugin_slug );
 			}
-		}		
+		}
 
 		// End of functions.
 	}
 }
 
-global $LearnDash_Addon_Updater;
-add_action( 'learndash_admin_init', function() {
-	$LearnDash_Addon_Updater = new LearnDash_Addon_Updater();
-} );
+add_action(
+	'learndash_admin_init',
+	function() {
+		LearnDash_Addon_Updater::get_instance();
+	}
+);

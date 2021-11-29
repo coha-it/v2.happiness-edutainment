@@ -2,18 +2,26 @@
 /**
  * LearnDash Settings Section for Question Custom Post Type Metabox.
  *
- * @package LearnDash
- * @subpackage Settings
+ * @since 2.6.0
+ * @package LearnDash\Settings\Sections
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'LearnDash_Settings_Questions_CPT' ) ) ) {
 	/**
-	 * Class to create the settings section.
+	 * Class LearnDash Settings Section for Question Custom Post Type Metabox.
+	 *
+	 * @since 2.6.0
 	 */
 	class LearnDash_Settings_Questions_CPT extends LearnDash_Settings_Section {
 
 		/**
 		 * Protected constructor for class
+		 *
+		 * @since 2.6.0
 		 */
 		protected function __construct() {
 			// What screen ID are we showing on.
@@ -40,10 +48,8 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 
 			// Used to show the section description above the fields. Can be empty.
 			$this->settings_section_description = sprintf(
-				wp_kses_post(
-					// translators: placeholder: Quizzes.
-					_x( '<p>Control the LearnDash %s Custom Post Type Options.</p>', 'placeholder: Questions', 'learndash' )
-				),
+				// translators: placeholder: Quizzes.
+				esc_html_x( 'Control the LearnDash %s Custom Post Type Options.', 'placeholder: Questions', 'learndash' ),
 				LearnDash_Custom_Label::get_label( 'questions' )
 			);
 
@@ -52,6 +58,8 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 
 		/**
 		 * Initialize the metabox settings fields.
+		 *
+		 * @since 2.6.0
 		 */
 		public function load_settings_fields() {
 			$this->setting_option_fields = array(
@@ -67,6 +75,7 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 				),
 			);
 
+			/** This filter is documented in includes/settings/settings-metaboxes/class-ld-settings-metabox-course-access-settings.php */
 			$this->setting_option_fields = apply_filters( 'learndash_settings_fields', $this->setting_option_fields, $this->settings_section_key );
 
 			parent::load_settings_fields();

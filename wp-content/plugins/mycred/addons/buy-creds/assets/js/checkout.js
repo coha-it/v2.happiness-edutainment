@@ -19,19 +19,20 @@ jQuery(function($){
 			url      : buyCRED.ajaxurl,
 			success  : function( response ) {
 
-				console.log( response );
-				buyCREDform.slideUp(function(){
-					buyCREDform.empty().append( response ).slideDown();
-				});
+				console.log(response);
 
-			},
-			error    : function( jqXHR, textStatus, errorThrown ) {
-				console.log( textStatus );
-				console.log( errorThrown );
-				buyCREDform.slideUp(function(){
-					buyCREDform.empty().append( '<div class="padded error">' + buyCRED.error + '</div>' ).slideDown();
-				});
-				buyCREDcancel.addClass( 'on' );
+				if ( typeof response.validationFail === "undefined" ) {
+					buyCREDform.slideUp(function(){
+						buyCREDform.empty().append( response ).slideDown();
+					});
+				} 
+				else {
+					buyCREDform.slideUp(function(){
+						buyCREDform.empty().append( '<div class="padded error">' + response.errors[0] + '</div>' ).slideDown();
+					});
+					buyCREDcancel.addClass( 'on' );
+				}
+
 			}
 		});
 
@@ -108,7 +109,7 @@ console.log( formdata );
 
 				$(this).attr( 'disabled', 'disabled' ).html( buyCRED.redirecting );
 				
-				if ( $('.myCRED-buy-form').hasClass('BitPay') ) {
+				if ( $(this).hasClass('bitpay') ) {
 					window.location = buttonvalue;
 				}
 				else
@@ -143,8 +144,13 @@ console.log( formdata );
 
 			if ( buttontype == 'redirect' ) {
 
-				pageform.attr( 'action', buttonvalue );
-				pageform.submit();
+				if ( $(this).hasClass('bitpay') ) { 
+					window.location = buttonvalue;
+				}
+				else {
+					pageform.attr( 'action', buttonvalue );
+					pageform.submit();
+				}
 
 				$(this).attr( 'disabled', 'disabled' ).html( buyCRED.redirecting );
 
@@ -181,6 +187,13 @@ console.log( formdata );
 		$( '#buycred-checkout-wrapper' ).on( 'click', '.cancel a', function(e){
 
 			$( '#buycred-checkout-wrapper form .checkout-footer' ).slideUp();
+
+		});
+
+		$( document ).on( 'change', '.mycred-change-pointtypes', function(){
+			
+			var value = $(this).find('option:selected').text();
+			var label = $('.mycred-point-type').html(value);
 
 		});
 

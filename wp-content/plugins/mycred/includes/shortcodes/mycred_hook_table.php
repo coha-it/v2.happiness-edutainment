@@ -124,7 +124,7 @@ if ( ! function_exists( 'mycred_render_shortcode_hook_table' ) ) :
 				    }   
 			    }
 			    else {
-			        $limit = mycred_translate_limit_code( $limit );
+			        $limit = mycred_translate_limit_code( $limit, $id, $mycred );
 			    }
 
 				$creds = apply_filters( 'mycred_hook_table_creds', $mycred->format_creds( $prefs['creds'] ), $id, $prefs, $atts );

@@ -1,661 +1,909 @@
 <?php
+/**
+ * Handles Video Progression logic and setup.
+ *
+ * @package LearnDash\Video_Progression
+ * @since 2.4.0
+ */
 
-if (!class_exists('Learndash_Course_Video' ) ) {
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+if ( ! class_exists( 'Learndash_Course_Video' ) ) {
+	/**
+	 * Class for handling the LearnDash Video Progression.
+	 *
+	 * @since 2.4.0
+	 */
 	class Learndash_Course_Video {
-	
+
+		/**
+		 * Static instance of class.
+		 *
+		 * @var array $instance;
+		 */
 		private static $instance;
- 
+
+		/**
+		 * Array of video progress data options and default values.
+		 *
+		 * @var array $video_data;
+		 */
 		private $video_data = array(
-			'videos_found_provider' => false, 
-			'videos_found_type' => false,
-			'videos_auto_start'	=> false,
-			'videos_show_controls' => false,
-			'videos_auto_complete' => true,
-			'videos_auto_complete_delay' => 0,
+			'videos_found_provider'              => false,
+			'videos_found_type'                  => false,
+			'videos_auto_start'                  => false,
+			'videos_show_controls'               => false,
+			'videos_auto_complete'               => true,
+			'videos_auto_complete_delay'         => 0,
 			'videos_auto_complete_delay_message' => '',
-			'videos_hide_complete_button' => false,
-			'videos_shown' => false
+			'videos_hide_complete_button'        => false,
+			'videos_shown'                       => false,
+			'video_debug'                        => false,
+			'video_admin_bypass'                 => false,
+			'video_cookie_key'                   => false,
+			'video_focus_pause'                  => false,
+			'video_track_time'                   => false,
+			'video_track_expires'                => 30, // Cookie Expire Days the cookie expires. Can be partial 0.5, 1.25, etc.
+			'video_track_domain'                 => '', // Cookie Domain. Default set to WP COOKIE_DOMAIN.
+			'video_track_path'                   => '', // Cookie Path. Default set to COOKIEPATH or if Multisite SITECOOKIEPATH.
+			'course_id'                          => 0,
+			'step_id'                            => 0,
 		);
 
+		/**
+		 * User ID.
+		 *
+		 * @var int $user_id.
+		 */
+		private $user_id;
+
+		/**
+		 * Course ID.
+		 *
+		 * @var int $course_id.
+		 */
+		private $course_id;
+
+		/**
+		 * Course Step ID.
+		 *
+		 * @var int $step_id.
+		 */
+		private $step_id;
+
+		/**
+		 * Course Step Settings array.
+		 *
+		 * @var array $step_settings.
+		 */
+		private $step_settings = array();
+
+		/**
+		 * Variable to contain the final rendered video HTML element.
+		 *
+		 * @var string $video_content;
+		 */
 		private $video_content = '';
-		
-		function __construct() {
+
+		/**
+		 * LearnDash Vide Progress constructor.
+		 *
+		 * @since 2.4.0
+		 */
+		public function __construct() {
 			add_action( 'wp_footer', array( $this, 'action_wp_footer' ), 1 );
-			add_filter( 'learndash_post_args', array(  $this, 'filter_post_args' ) );
 			add_filter( 'learndash_process_mark_complete', array( $this, 'process_mark_complete' ), 99, 3 );
-			add_action( 'save_post', array( $this, 'save_post_data') );
 		}
-		
-		public static function get_instance() {
+
+		/**
+		 * Get instance.
+		 *
+		 * @since 2.4.0
+		 */
+		final public static function get_instance() {
 			if ( null === self::$instance ) {
-				self::$instance = new static();
+				self::$instance = new self();
 			}
 
 			return self::$instance;
 		}
-		
-		function filter_post_args( $post_args = array() ) {
-			if ( isset( $post_args['sfwd-lessons']['fields'] ) ) {
-				$post_args['sfwd-lessons']['fields'] = array_merge(
-					$post_args['sfwd-lessons']['fields'],
-					array(
-						'lesson_video_enabled' => array( 
-							'name' => esc_html__( 'Enable Video Progression', 'learndash' ),
-							'type' => 'checkbox', 
-							'help_text' => esc_html__( 'Check this if you want to show a video as part of the progression.', 'learndash' ),
-							'default' => 0,
-						),
-						'lesson_video_url' => array( 
-							'name' => esc_html__( 'Video URL', 'learndash' ),
-							'type' => 'text', 
-							'help_text' => sprintf( esc_html_x( 'URL to video. The video will be added above the %s content. Use the shortcode %s to position the player within content. Supported URL formats are YouTube (youtu.be, youtube.com), Vimeo (vimeo.com), Wistia (wistia.com), or Local videos. The value for this field can be a simple URL to the video, an iframe or either [video] or [embed] shortcodes.', 'placeholder: Lesson, admin URL to [ld_video] shortcode.', 'learndash' ), LearnDash_Custom_Label::get_label( 'lesson' ), '<a href="'. admin_url('admin.php?page=courses-shortcodes#shortcode_ld_video' ) .'">[ld_video]</a>' ),
-							'default' => '',
-						),
-						'lesson_video_auto_start' => array( 
-							'name' => esc_html__( 'Auto Start Video', 'learndash' ),
-							'type' => 'checkbox', 
-							'help_text' => esc_html__( 'Check this if you want the video to auto-start on page load.', 'learndash' ),
-							'default' => 0,
-						),
-						'lesson_video_show_controls' => array( 
-							'name' => esc_html__( 'Show Video Controls', 'learndash' ),
-							'type' => 'checkbox', 
-							'help_text' => esc_html__( 'Show Video Controls. By default controls are disabled. Only used for YouTube and local videos.', 'learndash' ),
-							'default' => 0,
-						),
-						'lesson_video_shown' => array(
-							'name' => esc_html__( 'When to show video', 'learndash' ),
-							'type' => 'select',
-							'initial_options' => array(	
-								'BEFORE' => esc_html__( 'Before  (default) - Video is shown before completing sub-steps', 'learndash' ),
-								'AFTER'	=> esc_html__( 'After - Video is shown after completing sub-steps', 'learndash' ),
-							),
-							'default' => 'BEFORE',
-							'help_text' => esc_html__( 'Select when to show video in relation to sub-steps.', 'learndash' )
-						),
-						'lesson_video_auto_complete' => array( 
-							'name' => sprintf( esc_html_x( 'Auto Complete %s', 'placeholder: Lesson', 'learndash' ), LearnDash_Custom_Label::get_label( 'lesson' ) ),
-							'type' => 'checkbox', 
-							'help_text' => sprintf( esc_html_x( 'Check this if you want the %s to auto-complete after the video completes.', 'placeholder: Lesson', 'learndash' ), LearnDash_Custom_Label::get_label( 'lesson' ) ),
-							'default' => 0,
-						),
-						'lesson_video_auto_complete_delay' => array( 
-							'name' => esc_html__( 'Auto Complete Delay', 'learndash' ),
-							'type' => 'number', 
-							'class' => 'small-text',
-							'min' => '0',
-							'help_text' => esc_html__( 'Time delay in second between the time the video finishes and the auto complete occurs. Example 0 no delay, 5 for five seconds.', 'learndash' ),
-							'default' => 0,
-						),
-						'lesson_video_hide_complete_button' => array( 
-							'name' => esc_html__( 'Hide Complete Button', 'learndash' ),
-							'type' => 'checkbox', 
-							'help_text' => esc_html__( 'Check this to hide the complete button.', 'learndash' ),
-							'default' => 0,
-						),
-					)
-				);				
-			}
-			
-			if ( isset( $post_args['sfwd-topic']['fields'] ) ) {
-				$post_args['sfwd-topic']['fields'] = array_merge(
-					$post_args['sfwd-topic']['fields'],
-					array(
-						'lesson_video_enabled' => array( 
-							'name' => esc_html__( 'Enable Video Progression', 'learndash' ),
-							'type' => 'checkbox', 
-							'help_text' => esc_html__( 'Check this if you want to show a video as part of the progression.', 'learndash' ),
-							'default' => 0,
-						),
-						'lesson_video_url' => array( 
-							'name' => esc_html__( 'Video URL', 'learndash' ),
-							'type' => 'text', 
-							'help_text' => sprintf( esc_html_x( 'URL to video. The video will be added above the %s content. Use the shortcode %s to position the player within content. Supported URL formats are YouTube (youtu.be, youtube.com), Vimeo (vimeo.com), Wistia (wistia.com), or Local videos. The value for this field can be a simple URL to the video, an iframe or either [video] or [embed] shortcodes.', 'placeholder: Topic, admin URL to [ld_video] shortcode.', 'learndash' ), LearnDash_Custom_Label::get_label( 'topic' ), '<a href="'. admin_url('admin.php?page=courses-shortcodes#shortcode_ld_video' ) .'">[ld_video]</a>' ),
-							'default' => '',
-						),
-						'lesson_video_auto_start' => array( 
-							'name' => esc_html__( 'Auto Start Video', 'learndash' ),
-							'type' => 'checkbox', 
-							'help_text' => esc_html__( 'Check this if you want the video to auto-start on page load.', 'learndash' ),
-							'default' => 0,
-						),
-						'lesson_video_show_controls' => array( 
-							'name' => esc_html__( 'Show Video Controls', 'learndash' ),
-							'type' => 'checkbox', 
-							'help_text' => esc_html__( 'Show Video Controls. By default controls are disabled. Only used for YouTube and local videos.', 'learndash' ),
-							'default' => 0,
-						),
-						'lesson_video_shown' => array(
-							'name' => esc_html__( 'When to show video', 'learndash' ),
-							'type' => 'select',
-							'initial_options' => array(	
-								'AFTER'	=> esc_html__( 'After (default) - Video is shown after completing sub-steps', 'learndash' ),
-								'BEFORE' => esc_html__( 'Before - Video is shown before completing sub-steps', 'learndash' ),
-							),
-							'default' => '',
-							'help_text' => esc_html__( 'Select when to show video in relation to sub-steps.', 'learndash' )
-						),
-						
-						'lesson_video_auto_complete' => array( 
-							'name' => sprintf( esc_html_x( 'Auto Complete %s', 'placeholder: Topic', 'learndash' ), LearnDash_Custom_Label::get_label( 'topic' ) ),
-							'type' => 'checkbox', 
-							'help_text' => sprintf( esc_html_x( 'Check this if you want the %s to auto-complete after the video completes.', 'placeholder: Topic', 'learndash' ), LearnDash_Custom_Label::get_label( 'topic' ) ),
-							'default' => 0,
-						),
-						'lesson_video_auto_complete_delay' => array( 
-							'name' => esc_html__( 'Auto Complete Delay', 'learndash' ),
-							'type' => 'number', 
-							'class' => 'small-text',
-							'min' => '0',
-							'help_text' => esc_html__( 'Time delay in second between the time the video finishes and the auto complete occurs. Example 0 no delay, 5 for five seconds.', 'learndash' ),
-							'default' => 0,
-						),
-						'lesson_video_hide_complete_button' => array( 
-							'name' => esc_html__( 'Hide Complete Button', 'learndash' ),
-							'type' => 'checkbox', 
-							'help_text' => esc_html__( 'Check this to hide the complete button.', 'learndash' ),
-							'default' => 0,
-						),
-					)
-				);
-			}
-			
-			return $post_args;			
-		}
-				
-		function add_video_to_content( $content = '', $post, $settings = array() ) {			
+
+		/**
+		 * Hook into the LearnDash template logic to insert the Video Progression output
+		 *
+		 * @since 2.4.3
+		 *
+		 * @param string $content  HTML content to be output to browser.
+		 * @param Object $post     WP_Post instance for Lesson or Topic.
+		 * @param array  $settings Current setting values for Post.
+		 * @return string $content.
+		 */
+		public function add_video_to_content( $content, $post, $settings = array() ) {
 			if ( is_user_logged_in() ) {
-				$user_id = get_current_user_id();
+				$this->user_id = (int) get_current_user_id();
 			} else {
-				$user_id = 0;
+				$this->user_id = 0;
 			}
-			
+
+			$this->step_id       = (int) $post->ID;
+			$this->course_id     = (int) learndash_get_course_id( $post->ID );
+			$this->step_settings = $settings;
+
+			$this->video_data['step_id']   = $this->step_id;
+			$this->video_data['course_id'] = $this->course_id;
+
+			$this->video_data['video_cookie_key'] = $this->build_video_cookie_key();
+
 			// Do we show the video. In some cases we do. But in others like when the setting is to show AFTER completing other steps then we set to false.
 			$show_video = false;
-			
+
 			// In the initial flow we do apply the video restiction logic. But then in other if the user is an admin or the student has completed the lesson
-			// we don't apply the video logic. 
+			// we don't apply the video logic.
 			$logic_video = false;
-			
-			if ( ( isset( $settings['lesson_video_enabled'] ) ) && ( $settings['lesson_video_enabled'] == 'on' ) ) {
-				if ( ( isset( $settings['lesson_video_url'] ) ) && ( !empty( $settings['lesson_video_url'] ) ) ) {
-					// Because some copy/paste can result in leading whitespace. LEARNDASH-3819
-					$settings['lesson_video_url'] = trim( $settings['lesson_video_url'] );
-					$settings['lesson_video_url'] = html_entity_decode( $settings['lesson_video_url'] );
-					
-					// Just to ensure the proper settings are available
-					if ( ( !isset( $settings['lesson_video_shown'] ) ) || ( empty( $settings['lesson_video_shown'] ) ) ) {
-						$settings['lesson_video_shown'] = 'BEFORE';
-					}
-					
-					
-					
-					$bypass_course_limits_admin_users = false;
-					if ( !empty( $user_id ) ) {
-						if ( learndash_is_admin_user( $user_id ) ) {
-							$bypass_course_limits_admin_users = LearnDash_Settings_Section::get_section_setting('LearnDash_Settings _Section_General_Admin_User', 'bypass_course_limits_admin_users' );
-							if ( $bypass_course_limits_admin_users == 'yes' ) $bypass_course_limits_admin_users = true;
-							else $bypass_course_limits_admin_users = false;
-							
-						} else {
-							$bypass_course_limits_admin_users = false;
-						}
-	
-						// For logged in users to allow an override filter. 
-						$bypass_course_limits_admin_users = apply_filters( 'learndash_prerequities_bypass', $bypass_course_limits_admin_users, $user_id, $post->ID, $post );
+
+			if ( ( isset( $this->step_settings['lesson_video_enabled'] ) ) && ( 'on' === $this->step_settings['lesson_video_enabled'] ) ) {
+				if ( ( isset( $this->step_settings['lesson_video_url'] ) ) && ( ! empty( $this->step_settings['lesson_video_url'] ) ) ) {
+					// Because some copy/paste can result in leading whitespace. LEARNDASH-3819.
+					$this->step_settings['lesson_video_url'] = trim( $this->step_settings['lesson_video_url'] );
+					$this->step_settings['lesson_video_url'] = html_entity_decode( $this->step_settings['lesson_video_url'] );
+
+					// Just to ensure the proper settings are available.
+					if ( ( ! isset( $this->step_settings['lesson_video_shown'] ) ) || ( empty( $this->step_settings['lesson_video_shown'] ) ) ) {
+						$this->step_settings['lesson_video_shown'] = 'BEFORE';
 					}
 
-					if ( !$bypass_course_limits_admin_users ) {
+					if ( ( isset( $this->step_settings['lesson_video_focus_pause'] ) ) && ( 'on' === $this->step_settings['lesson_video_focus_pause'] ) ) {
+						$this->video_data['video_focus_pause'] = true;
+					}
+					if ( ( isset( $this->step_settings['lesson_video_track_time'] ) ) && ( 'on' === $this->step_settings['lesson_video_track_time'] ) ) {
+						$this->video_data['video_track_time'] = true;
+					}
 
-						if ( $post->post_type == 'sfwd-lessons' ) {
-							$progress = learndash_get_course_progress( null, $post->ID );
-							
-							if ( ( !empty( $progress['this'] ) ) && ( $progress['this'] instanceof WP_Post ) && ( $progress['this']->completed == true ) ) {
-								// The student has completes this step so we show the video but don't apply the logic
-								$show_video = true;
+					$bypass_course_limits_admin_users = learndash_can_user_bypass( $this->user_id, 'learndash_video_progression', $post->ID, $post );
+
+					// For logged in users to allow an override filter.
+					/** This filter is documented in includes/course/ld-course-progress.php */
+					$bypass_course_limits_admin_users       = apply_filters( 'learndash_prerequities_bypass', $bypass_course_limits_admin_users, $this->user_id, $post->ID, $post );
+					$this->video_data['video_admin_bypass'] = $bypass_course_limits_admin_users;
+
+					if ( ! $bypass_course_limits_admin_users ) {
+
+						if ( 'sfwd-lessons' === $post->post_type ) {
+							$progress = learndash_get_course_progress( $this->user_id, $post->ID );
+
+							if ( ( ! empty( $progress['this'] ) ) && ( $progress['this'] instanceof WP_Post ) && ( true === (bool) $progress['this']->completed ) ) {
+								// The student has completes this step so we show the video but don't apply the logic.
+								$show_video  = true;
 								$logic_video = false;
 							} else {
-								if ( $settings['lesson_video_shown'] == 'BEFORE' ) {
-									$show_video = true;
+								if ( 'BEFORE' === $this->step_settings['lesson_video_shown'] ) {
+									$show_video  = true;
 									$logic_video = true;
-									
 
 									$topics = learndash_get_topic_list( $post->ID );
-									if ( !empty( $topics ) ) {
-										$progress = learndash_get_course_progress( null, $topics[0]->ID );
-										if ( !empty( $progress ) ) {
+									if ( ! empty( $topics ) ) {
+										$progress = learndash_get_course_progress( $this->user_id, $topics[0]->ID );
+										if ( ! empty( $progress ) ) {
 											$topics_completed = 0;
 											foreach ( $progress['posts'] as $topic ) {
-												if ( $topic->completed == true ) {
-													$topics_completed += 1;
+												if ( (int) 1 === (int) $topic->completed ) {
+													++$topics_completed;
 													break;
 												}
 											}
-											
-											if ( !empty( $topics_completed ) ) {
+
+											if ( ! empty( $topics_completed ) ) {
 												$logic_video = false;
 											}
-										} 
+										}
 									}
-								} else if ( $settings['lesson_video_shown'] == 'AFTER' ) {
+								} elseif ( 'AFTER' === $this->step_settings['lesson_video_shown'] ) {
 									if ( learndash_lesson_topics_completed( $post->ID ) ) {
 										$quizzes_completed = true;
 
-										$lesson_quizzes_list = learndash_get_lesson_quiz_list( $post->ID ); 
-										if ( !empty( $lesson_quizzes_list ) ) {
-											foreach( $lesson_quizzes_list as $quiz ) {
-												if ( $quiz['status'] != 'completed') {
+										$lesson_quizzes_list = learndash_get_lesson_quiz_list( $post->ID );
+										if ( ! empty( $lesson_quizzes_list ) ) {
+											foreach ( $lesson_quizzes_list as $quiz ) {
+												if ( 'completed' !== $quiz['status'] ) {
 													$quizzes_completed = false;
 													break;
 												}
 											}
-										} 
-										
-										if ( $quizzes_completed == true ) {
-											$show_video = true;
+										}
+
+										if ( true === $quizzes_completed ) {
+											$show_video  = true;
 											$logic_video = true;
 										}
 									} else {
-										$show_video =  false;
+										$show_video  = false;
 										$logic_video = false;
 									}
 								}
 							}
-						} else if ( $post->post_type == 'sfwd-topic' ) {
-							$progress = learndash_get_course_progress( null, $post->ID );
-							
-							if ( ( !empty( $progress['this'] ) ) && ( $progress['this'] instanceof WP_Post ) && ( $progress['this']->completed == true ) ) {
-								// The student has completes this step so we show the video but don't apply the logic
-								$show_video = true;
+						} elseif ( 'sfwd-topic' === $post->post_type ) {
+							$progress = learndash_get_course_progress( $this->user_id, $post->ID );
+
+							if ( ( ! empty( $progress['this'] ) ) && ( $progress['this'] instanceof WP_Post ) && ( true === (bool) $progress['this']->completed ) ) {
+								// The student has completes this step so we show the video but don't apply the logic.
+								$show_video  = true;
 								$logic_video = false;
 							} else {
-								if ( $settings['lesson_video_shown'] == 'BEFORE' ) {
-									$show_video = true;
+								if ( 'BEFORE' === $this->step_settings['lesson_video_shown'] ) {
+									$show_video  = true;
 									$logic_video = true;
-								} else if ( $settings['lesson_video_shown'] == 'AFTER' ) {
+								} elseif ( 'AFTER' === $this->step_settings['lesson_video_shown'] ) {
 									$quizzes_completed = true;
 
-									$lesson_quizzes_list = learndash_get_lesson_quiz_list( $post->ID ); 
-									if ( !empty( $lesson_quizzes_list ) ) {
-										foreach( $lesson_quizzes_list as $quiz ) {
-											if ( $quiz['status'] != 'completed') {
+									$lesson_quizzes_list = learndash_get_lesson_quiz_list( $post->ID );
+									if ( ! empty( $lesson_quizzes_list ) ) {
+										foreach ( $lesson_quizzes_list as $quiz ) {
+											if ( 'completed' !== $quiz['status'] ) {
 												$quizzes_completed = false;
 												break;
 											}
 										}
-									} 
-										
-									if ( $quizzes_completed == true ) {
-										$show_video = true;
+									}
+
+									if ( true === $quizzes_completed ) {
+										$show_video  = true;
 										$logic_video = true;
 									}
-									
 								} else {
-									$show_video =  false;
+									$show_video  = false;
 									$logic_video = false;
 								}
 							}
-							
-							
-							/*
-							// Lessons are always 'BEFORE'
-							$settings['lesson_video_shown'] = 'AFTER';
-							
-							$progress = learndash_get_course_progress( null, $post->ID );
-
-							if ( ! empty( $progress['this']->completed ) ) {
-								$show_video = true;
-								$logic_video = false;
-							} else {
-								// are we the first item in the list. No prev
-								if ( ( empty( $progress['prev'] ) ) && ( $progress['this']->ID == $progress['posts'][0]->ID ) ) {
-									$show_video = true;
-									$logic_video = true;
-									
-									// Should not be here.
-								} else if ( ( ! empty( $progress['prev'] ) ) && ( $progress['prev']->completed == true ) ) {
-									$show_video = true;
-									$logic_video = true;
-								}
-							}
-							*/
 						}
 					} else {
-						$progress = learndash_get_course_progress( null, $post->ID );
-
-						if ( ! empty( $progress['this']->completed ) ) {
-							//return str_replace( '[ld_video]', '', $content );
-							$show_video = true;
-							$logic_video = false;
-						}
+						$show_video  = true;
+						$logic_video = false;
 					}
-					
-					if ( $show_video == true ) {
-					
-						if ( ( isset( $settings['lesson_video_shown'] ) ) && ( !empty( $settings['lesson_video_shown'] ) ) ) {
-							$this->video_data['videos_shown'] = $settings['lesson_video_shown'];
+
+					if ( ( true === $logic_video ) && ( $this->is_video_cookie_complete( $this->video_data['video_cookie_key'] ) ) ) {
+						$logic_video = false;
+					}
+
+					if ( true === $show_video ) {
+
+						if ( ( isset( $this->step_settings['lesson_video_shown'] ) ) && ( ! empty( $this->step_settings['lesson_video_shown'] ) ) ) {
+							$this->video_data['videos_shown'] = $this->step_settings['lesson_video_shown'];
 						} else {
 							$this->video_data['videos_shown'] = 'AFTER';
 						}
 
-						if (( strpos( $settings['lesson_video_url'], 'youtu.be' ) !== false ) || ( strpos( $settings['lesson_video_url'], 'youtube.com' ) !== false )) {
+						if ( ( strpos( $this->step_settings['lesson_video_url'], 'youtu.be' ) !== false ) || ( strpos( $this->step_settings['lesson_video_url'], 'youtube.com' ) !== false ) ) {
 							$this->video_data['videos_found_provider'] = 'youtube';
-						} else if ( strpos( $settings['lesson_video_url'], 'vimeo.com' ) !== false ) {
+						} elseif ( strpos( $this->step_settings['lesson_video_url'], 'vimeo.com' ) !== false ) {
 							$this->video_data['videos_found_provider'] = 'vimeo';
-						} else if ( ( strpos( $settings['lesson_video_url'], 'wistia.com' ) !== false ) || ( strpos( $settings['lesson_video_url'], 'wistia.net' ) !== false ) ) {
+						} elseif ( ( strpos( $this->step_settings['lesson_video_url'], 'wistia.com' ) !== false ) || ( strpos( $this->step_settings['lesson_video_url'], 'wistia.net' ) !== false ) ) {
 							$this->video_data['videos_found_provider'] = 'wistia';
-						} else if ( strpos( $settings['lesson_video_url'], 'amazonaws.com' ) !== false ) {
+						} elseif ( strpos( $this->step_settings['lesson_video_url'], 'amazonaws.com' ) !== false ) {
 							$this->video_data['videos_found_provider'] = 'local';
-						} else if ( strpos( $settings['lesson_video_url'], 'vooplayer' ) !== false ) {
+						} elseif ( ( strpos( $this->step_settings['lesson_video_url'], 'vooplayer' ) !== false ) || ( strpos( $this->step_settings['lesson_video_url'], 'spotlightr.com' ) !== false ) ) {
 							$this->video_data['videos_found_provider'] = 'vooplayer';
-						} else if ( strpos( $settings['lesson_video_url'], trailingslashit( get_home_url() ) ) !== false ) {
+						} elseif ( strpos( $this->step_settings['lesson_video_url'], trailingslashit( get_home_url() ) ) !== false ) {
 							$this->video_data['videos_found_provider'] = 'local';
-						} else {
-							$this->video_data['videos_found_provider'] = apply_filters('ld_video_provider', '', $settings );
 						}
 
-						if ( ( substr( $settings['lesson_video_url'], 0, strlen('http://') ) == 'http://' ) || ( substr( $settings['lesson_video_url'], 0, strlen('https://') ) == 'https://' ) )  {
-							if ( $this->video_data['videos_found_provider'] == 'local' ) {
-								$this->video_data['videos_found_type'] = 'video_shortcode';
-								$settings['lesson_video_url'] = '[video src="'. $settings['lesson_video_url'] .'"][/video]';
-								
-							} else if ( ( $this->video_data['videos_found_provider'] == 'youtube' ) || ( $this->video_data['videos_found_provider'] == 'vimeo' ) ) {
-								$this->video_data['videos_found_type'] = 'embed_shortcode';
-								$settings['lesson_video_url'] = '[embed]'. $settings['lesson_video_url'] .'[/embed]';
-							} else if ( $this->video_data['videos_found_provider'] == 'wistia' ) {
-								$this->video_data['videos_found_type'] = 'embed_shortcode';
-								$settings['lesson_video_url'] = '[embed]'. $settings['lesson_video_url'] .'[/embed]';
-							} 
-							
-						} else if ( substr( $settings['lesson_video_url'], 0, strlen('[embed')  ) == '[embed' ) {
+						if ( empty( $this->video_data['videos_found_provider'] ) ) {
+							$home_url_domain  = wp_parse_url( get_home_url(), PHP_URL_HOST );
+							$video_url_domain = wp_parse_url( $this->step_settings['lesson_video_url'], PHP_URL_HOST );
+
+							if ( strtolower( $home_url_domain ) === strtolower( $video_url_domain ) ) {
+								$this->video_data['videos_found_provider'] = 'local';
+							}
+						}
+
+						/**
+						 * Filter to override unkown video provider.
+						 *
+						 * @since 2.4.0
+						 *
+						 * @param string $video_provider Video provider to use. May be empty.
+						 * @param array  $settings       Array of Video Progression Settings.
+						 */
+						$this->video_data['videos_found_provider'] = apply_filters( 'ld_video_provider', $this->video_data['videos_found_provider'], $this->step_settings );
+						if ( empty( $this->video_data['videos_found_provider'] ) ) {
+							return $content;
+						}
+
+						if ( ( substr( $this->step_settings['lesson_video_url'], 0, strlen( 'http://' ) ) == 'http://' ) || ( substr( $this->step_settings['lesson_video_url'], 0, strlen( 'https://' ) ) == 'https://' ) ) {
+							if ( 'local' === $this->video_data['videos_found_provider'] ) {
+								$this->video_data['videos_found_type']   = 'video_shortcode';
+								$this->step_settings['lesson_video_url'] = '[video src="' . $this->step_settings['lesson_video_url'] . '"][/video]';
+
+							} elseif ( ( 'youtube' === $this->video_data['videos_found_provider'] ) || ( 'vimeo' === $this->video_data['videos_found_provider'] ) ) {
+								$this->video_data['videos_found_type']   = 'embed_shortcode';
+								$this->step_settings['lesson_video_url'] = '[embed]' . $this->step_settings['lesson_video_url'] . '[/embed]';
+							} elseif ( 'wistia' === $this->video_data['videos_found_provider'] ) {
+								$this->video_data['videos_found_type']   = 'embed_shortcode';
+								$this->step_settings['lesson_video_url'] = '[embed]' . $this->step_settings['lesson_video_url'] . '[/embed]';
+							}
+						} elseif ( substr( $this->step_settings['lesson_video_url'], 0, strlen( '[embed' ) ) == '[embed' ) {
 							$this->video_data['videos_found_type'] = 'embed_shortcode';
-						} else if ( substr( $settings['lesson_video_url'], 0, strlen('[video')  ) == '[video' ) {
+						} elseif ( substr( $this->step_settings['lesson_video_url'], 0, strlen( '[video' ) ) == '[video' ) {
 							$this->video_data['videos_found_type'] = 'video_shortcode';
-						}  else if ( substr( $settings['lesson_video_url'], 0, strlen('<iframe')  ) == '<iframe' ) {
+						} elseif ( strpos( $this->step_settings['lesson_video_url'], '<iframe' ) !== false ) {
 							$this->video_data['videos_found_type'] = 'iframe';
 						} else {
-							if ( $this->video_data['videos_found_provider'] == 'vooplayer' ) {
-								if ( substr( $settings['lesson_video_url'], 0, strlen('[vooplayer')  ) == '[vooplayer' ) {
+							if ( 'vooplayer' === $this->video_data['videos_found_provider'] ) {
+								if ( substr( $this->step_settings['lesson_video_url'], 0, strlen( '[vooplayer' ) ) == '[vooplayer' ) {
 									$this->video_data['videos_found_type'] = 'vooplayer_shortcode';
 								} else {
 									$this->video_data['videos_found_type'] = 'iframe';
 								}
 							}
 						}
-					
-						if ( ( $this->video_data['videos_found_provider'] !== false ) && ( $this->video_data['videos_found_type'] !== false ) ) {
-							if ( $this->video_data['videos_found_provider'] == 'local' ) {
-								if ( $this->video_data['videos_found_type'] == 'video_url' ) {
-									//$this->video_content = wp_video_shortcode(
-									//	apply_filters(
-									//		'ld_video_shortcode_args', 
-									//		array(
-									//			'src' => $settings['lesson_video_url'],
-									//		),
-									//		$post->ID, $settings
-									//	)
-									//);
-								} else if ( $this->video_data['videos_found_type'] == 'embed_shortcode' ) {
+
+						if ( ( false !== $this->video_data['videos_found_provider'] ) && ( false !== $this->video_data['videos_found_type'] ) ) {
+							if ( 'local' === $this->video_data['videos_found_provider'] ) {
+								if ( 'video_url' === $this->video_data['videos_found_type'] ) {
+									// Nothing here.
+
+								} elseif ( 'embed_shortcode' === $this->video_data['videos_found_type'] ) {
 									global $wp_embed;
-									$video_content = $wp_embed->run_shortcode( $settings['lesson_video_url'] );
+									$video_content       = $wp_embed->run_shortcode( $this->step_settings['lesson_video_url'] );
 									$this->video_content = do_shortcode( $video_content );
-									
-								} else if ( $this->video_data['videos_found_type'] == 'video_shortcode' ) {
-									$this->video_content = do_shortcode( $settings['lesson_video_url'] );
-								} else if ( $this->video_data['videos_found_type'] == 'iframe' ) {
-									$this->video_content = $settings['lesson_video_url'];
+
+								} elseif ( 'video_shortcode' === $this->video_data['videos_found_type'] ) {
+									$this->video_content = do_shortcode( $this->step_settings['lesson_video_url'] );
+								} elseif ( 'iframe' === $this->video_data['videos_found_type'] ) {
+									$this->video_content = $this->step_settings['lesson_video_url'];
 								}
-							} else if ( ( $this->video_data['videos_found_provider'] == 'youtube' ) || ( $this->video_data['videos_found_provider'] == 'vimeo' ) || ( $this->video_data['videos_found_provider'] == 'wistia' ) ) {
-								//$this->video_content =  wp_oembed_get( $settings['lesson_video_url'], apply_filters( 'learndash_video_oembed_args', array(), $settings['lesson_video_url'],  $post->ID, $settings ) );
-							
-								if ( $this->video_data['videos_found_type'] == 'embed_shortcode' ) {
+							} elseif ( ( 'youtube' === $this->video_data['videos_found_provider'] ) || ( 'vimeo' === $this->video_data['videos_found_provider'] ) || ( 'wistia' === $this->video_data['videos_found_provider'] ) ) {
+								if ( 'embed_shortcode' === $this->video_data['videos_found_type'] ) {
 									global $wp_embed;
-									$this->video_content = $wp_embed->run_shortcode( $settings['lesson_video_url'] );
-								} else if ( $this->video_data['videos_found_type'] == 'video_shortcode' ) {
-									$this->video_content = do_shortcode( $settings['lesson_video_url'] );
-								} else if ( $this->video_data['videos_found_type'] == 'iframe' ) {
-									$this->video_content = $settings['lesson_video_url'];
+									$this->video_content = $wp_embed->run_shortcode( $this->step_settings['lesson_video_url'] );
+								} elseif ( 'video_shortcode' === $this->video_data['videos_found_type'] ) {
+									$this->video_content = do_shortcode( $this->step_settings['lesson_video_url'] );
+								} elseif ( 'iframe' === $this->video_data['videos_found_type'] ) {
+									$this->video_content = $this->step_settings['lesson_video_url'];
 								}
-							} else if ( $this->video_data['videos_found_provider'] == 'vooplayer' ) {
-								if ( $this->video_data['videos_found_type'] == 'vooplayer_shortcode' ) {
-									$this->video_content = do_shortcode( $settings['lesson_video_url'] );
-								} else if ( $this->video_data['videos_found_type'] == 'iframe' ) {
-									//if ( strpos( $settings['lesson_video_url'], '</script>' ) === false ) {
-									//	$settings['lesson_video_url'] = '<script src="https://codehooligans.cdn.vooplayer.com/assets/vooplayer.js"></script>' . $settings['lesson_video_url'];
-									//}
-									$this->video_content = $settings['lesson_video_url'];
+							} elseif ( 'vooplayer' === $this->video_data['videos_found_provider'] ) {
+								if ( 'vooplayer_shortcode' === $this->video_data['videos_found_type'] ) {
+									$this->video_content = do_shortcode( $this->step_settings['lesson_video_url'] );
+								} elseif ( 'iframe' === $this->video_data['videos_found_type'] ) {
+									$this->video_content = $this->step_settings['lesson_video_url'];
 								}
 							}
-															
-							if ( !empty( $this->video_content ) ) {
+
+							if ( ! empty( $this->video_content ) ) {
 								if ( $logic_video ) {
-									
-									if (( isset( $settings['lesson_video_show_controls'] ) ) && ( $settings['lesson_video_show_controls'] == 'on' )) {
+
+									if ( ( isset( $this->step_settings['lesson_video_show_controls'] ) ) && ( 'on' === $this->step_settings['lesson_video_show_controls'] ) ) {
 										$this->video_data['videos_show_controls'] = 1;
 									} else {
 										$this->video_data['videos_show_controls'] = 0;
 									}
-									
-									if (( isset( $settings['lesson_video_auto_start'] ) ) && ( $settings['lesson_video_auto_start'] == 'on' )) {
+
+									if ( ( isset( $this->step_settings['lesson_video_auto_start'] ) ) && ( 'on' === $this->step_settings['lesson_video_auto_start'] ) ) {
 										$this->video_data['videos_auto_start'] = 1;
 									} else {
 										$this->video_data['videos_auto_start'] = 0;
 									}
-									
+
 									$video_preg_pattern = '';
 
+									if ( strstr( $this->video_content, '<iframe' ) ) {
+										$video_token = 'iframe';
+									} elseif ( strstr( $this->video_content, '<video' ) ) {
+										$video_token = 'video';
+									}
 									if ( strstr( $this->video_content, ' src="' ) ) {
-										$video_preg_pattern = '/<iframe.*src=\"(.*)\".*><\/iframe>/isU';
-									} else if ( strstr( $this->video_content, " src='" ) ) {
-										$video_preg_pattern = "/<iframe.*src=\'(.*)\'.*><\/iframe>/isU";
-									} 
+										$video_preg_pattern = '/<' . $video_token . '.*src=\"(.*)\".*><\/' . $video_token . '>/isU';
+									} elseif ( strstr( $this->video_content, " src='" ) ) {
+										$video_preg_pattern = '/<' . $video_token . ".*src=\'(.*)\'.*><\/" . $video_token . '>/isU';
+									}
+
 									if ( ! empty( $video_preg_pattern ) ) {
 										preg_match( $video_preg_pattern, $this->video_content, $matches );
-										if ( ( is_array( $matches ) ) && ( isset( $matches[1] ) ) && ( !empty( $matches[1] ) ) ) {
-					
-											// Next we need to check if the video is YouTube, Vimeo, etc. so we check the matches[1]
-											if ( $this->video_data['videos_found_provider'] == 'youtube' ) {
-												$ld_video_params = apply_filters( 
-													'ld_video_params', 
-													array( 
+										if ( ( is_array( $matches ) ) && ( isset( $matches[1] ) ) && ( ! empty( $matches[1] ) ) ) {
+
+											// Next we need to check if the video is YouTube, Vimeo, etc. so we check the matches[1].
+											if ( 'youtube' === $this->video_data['videos_found_provider'] ) {
+												/**
+												 * Filters post content video parameters.
+												 *
+												 * @param array   $video_params   An array of video parameters.
+												 * @param string  $video_provider Name of the video provider.
+												 * @param string  $video_content  Video content HTML output.
+												 * @param WP_POST $post           Post object.
+												 * @param array   $settings       An array of LearnDash settings for a post.
+												 */
+												$ld_video_params = apply_filters(
+													'ld_video_params',
+													array(
 														'controls' => $this->video_data['videos_show_controls'],
 														'autoplay' => $this->video_data['videos_auto_start'],
 														'modestbranding' => 1,
 														'showinfo' => 0,
-														'rel' => 0
-													), 
-													'youtube', $this->video_content, $post, $settings 
+														'rel' => 0,
+													),
+													$this->video_data['videos_found_provider'],
+													$this->video_content,
+													$post,
+													$this->step_settings
 												);
-						
-												// Regardless of the filter we set this param because we need it!	
+
+												// Regardless of the filter we set this param because we need it!
 												$ld_video_params['enablejsapi'] = '1';
-												
-												$matches_1_new = add_query_arg( $ld_video_params, $matches[1] );
+
+												$matches_1_new       = add_query_arg( $ld_video_params, $matches[1] );
 												$this->video_content = str_replace( $matches[1], $matches_1_new, $this->video_content );
-					
-												//$this->video_content = str_replace('<iframe ', '<iframe id="ld-video-player" ', $this->video_content );
 
-											} else if ( $this->video_data['videos_found_provider'] == 'vimeo' ) {
-												
-												//$matches_1_new = add_query_arg('api', '1', $matches[1] );
-												//$return = str_replace( $matches[1], $matches_1_new, $return );
-					
-												//$return = str_replace('<iframe ', '<iframe id="ld-video-player" ', $return );
-												//$this->video_content = str_replace('<iframe ', '<iframe id="ld-video-player" ', $this->video_content );
-											} else if ( $this->video_data['videos_found_provider'] == 'wistia' ) {
+											} elseif ( 'vimeo' === $this->video_data['videos_found_provider'] ) {
 
-											} else if ( $this->video_data['videos_found_provider'] == 'local' ) {
-												//$ld_video_params = apply_filters( 
-												//	'ld_video_params', 
-												//	array( 
-												//		'controls' => $this->video_data['videos_show_controls'],
-												//	), 
-												//	'local', $this->video_content, $post, $settings 
-												//);
+												/**
+												 * Ensure for Vimeo, the video controls and auto-start cannot both be disabled.
+												 */
+												if ( ( ! $this->video_data['videos_show_controls'] ) && ( ! $this->video_data['videos_auto_start'] ) ) {
+													$this->video_data['videos_show_controls'] = true;
+												}
+
+												/** This filter is documented in includes/course/ld-course-video.php */
+												$ld_video_params = apply_filters(
+													'ld_video_params',
+													array(
+														'controls' => $this->video_data['videos_show_controls'],
+														'autoplay' => $this->video_data['videos_auto_start'],
+													),
+													$this->video_data['videos_found_provider'],
+													$this->video_content,
+													$post,
+													$this->step_settings
+												);
+
+												/**
+												 * For auto-play we also need to mute the video.
+												 * See: https://vimeo.zendesk.com/hc/en-us/articles/115004485728-Autoplaying-and-looping-embedded-videos
+												 */
+												if ( ( isset( $ld_video_params['autoplay'] ) ) && ( absint( '1' ) === absint( $ld_video_params['autoplay'] ) ) ) {
+													$ld_video_params['muted'] = 1;
+												}
+
+												// Regardless of the filter we set this param because we need it!
+												$ld_video_params['api'] = '1';
+
+												$matches_1_new       = add_query_arg( $ld_video_params, $matches[1] );
+												$this->video_content = str_replace( $matches[1], $matches_1_new, $this->video_content );
+
+											} elseif ( 'wistia' === $this->video_data['videos_found_provider'] ) {
+												/** This filter is documented in includes/course/ld-course-video.php */
+												$ld_video_params = apply_filters(
+													'ld_video_params',
+													array(),
+													$this->video_data['videos_found_provider'],
+													$this->video_content,
+													$post,
+													$this->step_settings
+												);
+												if ( ! empty( $ld_video_params ) ) {
+													$matches_1_new       = add_query_arg( $ld_video_params, $matches[1] );
+													$this->video_content = str_replace( $matches[1], $matches_1_new, $this->video_content );
+												} else {
+													$matches_1_new = $matches[1];
+												}
+
+												$url_path            = wp_parse_url( $matches_1_new, PHP_URL_PATH );
+												$url_path_parts      = explode( '/', $url_path );
+												$video_id            = $url_path_parts[ count( $url_path_parts ) - 1 ];
+												$this->video_content = str_replace( '<iframe ', '<iframe data-learndash-video-wistia-id="' . $video_id . '" ', $this->video_content );
+											} elseif ( 'vooplayer' === $this->video_data['videos_found_provider'] ) {
+												/** This filter is documented in includes/course/ld-course-video.php */
+												$ld_video_params = apply_filters(
+													'ld_video_params',
+													array(),
+													$this->video_data['videos_found_provider'],
+													$this->video_content,
+													$post,
+													$this->step_settings
+												);
+
+												if ( ! empty( $ld_video_params ) ) {
+													$matches_1_new       = add_query_arg( $ld_video_params, $matches[1] );
+													$this->video_content = str_replace( $matches[1], $matches_1_new, $this->video_content );
+												}
+											} elseif ( 'local' === $this->video_data['videos_found_provider'] ) {
+												/** This filter is documented in includes/course/ld-course-video.php */
+												$ld_video_params = apply_filters(
+													'ld_video_params',
+													array(
+														'controls' => $this->video_data['videos_show_controls'],
+													),
+													$this->video_data['videos_found_provider'],
+													$this->video_content,
+													$post,
+													$this->step_settings
+												);
+												if ( (int) true !== (int) $ld_video_params['controls'] ) {
+													$this->video_content .= '<style>.ld-video .mejs-controls { display: none !important; visibility: hidden !important;}</style>';
+												}
 											}
 										}
 									}
-									
-									$this->video_content = '<div class="ld-video" data-video-progression="true" data-video-provider="'. $this->video_data['videos_found_provider'] .'">'. $this->video_content .'</div>';
-									
-									if ( $this->video_data['videos_found_provider'] == 'local' ) {
-										if ( $this->video_data['videos_found_provider'] == 'local' ) {
-											$ld_video_params = apply_filters( 
-												'ld_video_params', 
-												array( 
-													'controls' => $this->video_data['videos_show_controls'],
-												), 
-												'local', $this->video_content, $post, $settings 
-											);
-										}
-										
-										if ( $ld_video_params['controls'] != true ) {
-											$this->video_content .="<style>.ld-video .mejs-controls { display: none !important; visibility: hidden !important;}</style>";
-										}
-									}
-									
+
 									$this->video_data['videos_auto_complete'] = false;
-									if (( isset( $settings['lesson_video_shown'] ) ) && ( $settings['lesson_video_shown'] == 'AFTER' )) {
-										if ( ( isset( $settings['lesson_video_auto_complete'] ) ) && ( $settings['lesson_video_auto_complete'] == 'on' ) ) {
+									if ( ( isset( $this->step_settings['lesson_video_shown'] ) ) && ( 'AFTER' === $this->step_settings['lesson_video_shown'] ) ) {
+										if ( ( isset( $this->step_settings['lesson_video_auto_complete'] ) ) && ( 'on' === $this->step_settings['lesson_video_auto_complete'] ) ) {
 											$this->video_data['videos_auto_complete'] = true;
-											
-											if ( ( isset( $settings['lesson_video_hide_complete_button'] ) ) &&  ( $settings['lesson_video_hide_complete_button'] == 'on' ) ) {
+
+											if ( ( isset( $this->step_settings['lesson_video_hide_complete_button'] ) ) && ( 'on' === $this->step_settings['lesson_video_hide_complete_button'] ) ) {
 												$this->video_data['videos_hide_complete_button'] = true;
 											}
-											
-											if ( isset( $settings['lesson_video_auto_complete_delay'] ) ) {
-												$this->video_data['videos_auto_complete_delay'] = intval( $settings['lesson_video_auto_complete_delay'] );
-												
-												$post_type_obj = get_post_type_object( $post->post_type );
+
+											if ( isset( $this->step_settings['lesson_video_auto_complete_delay'] ) ) {
+												$this->video_data['videos_auto_complete_delay'] = intval( $this->step_settings['lesson_video_auto_complete_delay'] );
+
+												$post_type_obj  = get_post_type_object( $post->post_type );
 												$post_type_name = $post_type_obj->labels->name;
-												$this->video_data['videos_auto_complete_delay_message'] = 
-												sprintf( wp_kses_post( _x('<p class="ld-video-delay-message">%s will auto complete in %s seconds</p>', 'placeholders: 1. Lesson or Topic label, 2. span for counter', 'learndash' ) ), $post_type_obj->labels->singular_name, '<span class="time-countdown">'. $this->video_data['videos_auto_complete_delay'] . '</span>'
-												);
+												$this->video_data['videos_auto_complete_delay_message'] =
+												'<p class="ld-video-delay-message">' . sprintf(
+													// translators: placeholders: 1. Lesson or Topic label, 2. span for counter.
+													esc_html_x( '%1$s will auto complete in %2$s seconds', 'placeholders: 1. Lesson or Topic label, 2. span for counter', 'learndash' ),
+													$post_type_obj->labels->singular_name,
+													'<span class="time-countdown">' . $this->video_data['videos_auto_complete_delay'] . '</span>'
+												) . '</p>';
 											}
 										}
 									}
-									
-								} else {
-									$this->video_data['videos_found_provider'] = false;
-
-									$this->video_content = '<div class="ld-video" data-video-progression="false">'. $this->video_content .'</div>';
-
 								}
 							}
 						}
 					}
 				}
+
+				if ( ! empty( $this->video_content ) ) {
+					if ( false !== $this->video_data['videos_found_provider'] ) {
+						if ( isset( $_GET['ld_debug'] ) ) {
+							$this->video_data['video_debug'] = true;
+						}
+
+						$video_post_url       = learndash_get_step_permalink( $post );
+						$video_post_url_parts = wp_parse_url( $video_post_url );
+
+						if ( defined( 'COOKIE_DOMAIN' ) ) {
+							$this->video_data['video_track_domain'] = COOKIE_DOMAIN;
+						} else {
+							if ( isset( $video_post_url_parts['host'] ) ) {
+								$this->video_data['video_track_domain'] = $video_post_url_parts['host'];
+							}
+						}
+
+						if ( ( is_multisite() ) && ( defined( 'SITECOOKIEPATH' ) ) ) {
+							$this->video_data['video_track_path'] = SITECOOKIEPATH;
+						} elseif ( defined( 'COOKIEPATH' ) ) {
+							$this->video_data['video_track_path'] = COOKIEPATH;
+						} else {
+							if ( isset( $video_post_url_parts['path'] ) ) {
+								$this->video_data['video_track_path'] = $video_post_url_parts['path'];
+							}
+						}
+
+						/**
+						 * Filters content video data.
+						 *
+						 * @param array $video_data An array of video data.
+						 * @param array  $settings       An array of LearnDash settings for a post.
+						 */
+						$this->video_data = apply_filters( 'learndash_lesson_video_data', $this->video_data, $this->step_settings );
+
+						// if ( $this->is_video_cookie_complete( $this->video_data['video_cookie_key'] ) ) {
+						// $logic_video = false;
+						// }
+
+						if ( true === $logic_video ) {
+							$logic_video_str = 'true';
+						} else {
+							$logic_video_str = 'false';
+						}
+
+						$this->video_content = '<div class="ld-video" data-video-progression="' . $logic_video_str . '" data-video-cookie-key="' . $this->video_data['video_cookie_key'] . '" data-video-provider="' . $this->video_data['videos_found_provider'] . '">' . $this->video_content . '</div>';
+
+						$content = SFWD_LMS::get_template(
+							'learndash_lesson_video',
+							array(
+								'content'        => $content,
+								'video_content'  => $this->video_content,
+								'video_settings' => $this->step_settings,
+								'video_data'     => $this->video_data,
+							)
+						);
+
+					} else {
+						$this->video_data['videos_found_provider'] = false;
+
+						$this->video_content = '<div class="ld-video" data-video-progression="false">' . $this->video_content . '</div>';
+					}
+				} else {
+					$content = SFWD_LMS::get_template(
+						'learndash_lesson_video',
+						array(
+							'content'        => $content,
+							'video_content'  => '',
+							'video_settings' => $this->step_settings,
+							'video_data'     => $this->video_data,
+						)
+					);
+				}
 			}
 
-			if ( !empty( $this->video_content ) ) {
-				$this->video_data = apply_filters('learndash_lesson_video_data', $this->video_data, $settings );
-			}
-
-			$content = SFWD_LMS::get_template( 
-				'learndash_lesson_video', 
-				array(
-					'content' => $content,
-					'video_content' => $this->video_content,
-					'video_settings' => $settings,
-					'video_data' => $this->video_data
-				)
-			);
-			
 			return $content;
 		}
 
-		function action_wp_footer() {
-			if ( $this->video_data['videos_found_provider'] !== false ) {
+		/**
+		 * Add JS logic to the page footer.
+		 *
+		 * @since 2.4.3
+		 */
+		public function action_wp_footer() {
+			if ( false !== $this->video_data['videos_found_provider'] ) {
 
-				wp_enqueue_script( 
-					'learndash_video_script_js', 
-					LEARNDASH_LMS_PLUGIN_URL . 'assets/js/learndash_video_script'. leardash_min_asset() .'.js', 
-					array( 'jquery' ), 
+				wp_enqueue_script(
+					'learndash_cookie_script_js',
+					LEARNDASH_LMS_PLUGIN_URL . 'assets/vendor/js-cookie/js.cookie' . learndash_min_asset() . '.js',
+					array(),
 					LEARNDASH_SCRIPT_VERSION_TOKEN,
-					true 
+					true
 				);
-				$learndash_assets_loaded['scripts']['learndash_video_script_js'] = __FUNCTION__;	
+				$learndash_assets_loaded['scripts']['learndash_cookie_script_js'] = __FUNCTION__;
 
-				//error_log('local: video_data<pre>'. print_r($this->video_data, true) .'</pre>');
-				
+				wp_enqueue_script(
+					'learndash_video_script_js',
+					LEARNDASH_LMS_PLUGIN_URL . 'assets/js/learndash_video_script' . learndash_min_asset() . '.js',
+					array( 'jquery' ),
+					LEARNDASH_SCRIPT_VERSION_TOKEN,
+					true
+				);
+				$learndash_assets_loaded['scripts']['learndash_video_script_js'] = __FUNCTION__;
+
 				wp_localize_script( 'learndash_video_script_js', 'learndash_video_data', $this->video_data );
 
-				if ( $this->video_data['videos_found_provider'] == 'youtube' ) {
-					wp_enqueue_script( 'youtube_iframe_api', 'https://www.youtube.com/iframe_api', array( 'learndash_video_script_js' ), '1.0', true );
-				} else if ( $this->video_data['videos_found_provider'] == 'vimeo' ) {
-					wp_enqueue_script( 'vimeo_iframe_api', 'https://player.vimeo.com/api/player.js', array( 'learndash_video_script_js' ), null, true );
+				if ( 'youtube' === $this->video_data['videos_found_provider'] ) {
+					wp_enqueue_script( 'youtube_iframe_api', 'https://www.youtube.com/iframe_api', array( 'learndash_video_script_js' ), LEARNDASH_SCRIPT_VERSION_TOKEN, true );
+				} elseif ( 'vimeo' === $this->video_data['videos_found_provider'] ) {
+					wp_enqueue_script( 'vimeo_iframe_api', 'https://player.vimeo.com/api/player.js', array( 'learndash_video_script_js' ), LEARNDASH_SCRIPT_VERSION_TOKEN, true );
 				}
 			}
 		}
 
-		function process_mark_complete( $process_complete = true, $post, $current_user ) {
-			if ( ( isset( $_GET['quiz_redirect'] ) ) && ( !empty( $_GET['quiz_redirect'] ) ) && ( isset( $_GET['quiz_type'] ) ) && ( $_GET['quiz_type'] == 'lesson' ) ) {
+		/**
+		 * Handle Mark Complete on Lesson or Topic with Video Progress enabled.
+		 *
+		 * @since 2.4.6
+		 *
+		 * @param bool   $process_complete Process complete.
+		 * @param Object $post             WP_Post object beiing marked complete.
+		 * @param Object $current_user     The User perforning the action.
+		 */
+		public function process_mark_complete( $process_complete, $post, $current_user ) {
+			if ( ( isset( $_GET['quiz_redirect'] ) ) && ( ! empty( $_GET['quiz_redirect'] ) ) && ( isset( $_GET['quiz_type'] ) ) && ( 'lesson' === $_GET['quiz_type'] ) ) {
 				$lesson_id = 0;
-				$quiz_id = 0;
+				$quiz_id   = 0;
 
-				if ( isset( $_GET['lesson_id'] ) ) $lesson_id = intval( $_GET['lesson_id'] );
-				if ( isset( $_GET['quiz_id'] ) ) $quiz_id = intval( $_GET['quiz_id'] );
-				
-				if ( ( !empty( $lesson_id ) ) && ( !empty( $quiz_id ) ) ) {
+				if ( isset( $_GET['lesson_id'] ) ) {
+					$lesson_id = intval( $_GET['lesson_id'] );
+				}
+				if ( isset( $_GET['quiz_id'] ) ) {
+					$quiz_id = intval( $_GET['quiz_id'] );
+				}
+
+				if ( ( ! empty( $lesson_id ) ) && ( ! empty( $quiz_id ) ) ) {
 					$lesson_settings = learndash_get_setting( $lesson_id );
-					if ( ( isset( $lesson_settings['lesson_video_enabled'] ) ) && ( $lesson_settings['lesson_video_enabled'] == 'on' ) ) {
-						if ( ( isset( $lesson_settings['lesson_video_shown'] ) ) && ( $lesson_settings['lesson_video_shown'] == 'AFTER' ) ) {
+					if ( ( isset( $lesson_settings['lesson_video_enabled'] ) ) && ( 'on' === $lesson_settings['lesson_video_enabled'] ) ) {
+						if ( ( isset( $lesson_settings['lesson_video_shown'] ) ) && ( 'AFTER' === $lesson_settings['lesson_video_shown'] ) ) {
 							$process_complete = false;
-							
+
 							add_filter( 'learndash_completion_redirect', array( $this, 'learndash_completion_redirect' ), 99 );
 						}
 					}
 				}
 			}
-			
+
 			return $process_complete;
-			
+
 		}
 
-		function learndash_completion_redirect( $link ) {
-			if ( ( isset( $_GET['quiz_redirect'] ) ) && ( !empty( $_GET['quiz_redirect'] ) ) && ( isset( $_GET['quiz_type'] ) ) && ( $_GET['quiz_type'] == 'lesson' ) ) {
+		/**
+		 * Redirect after Mark Complete is performed.
+		 *
+		 * @since 2.4.6
+		 *
+		 * @param string $link Link to redirect to after Mark Complete.
+		 */
+		public function learndash_completion_redirect( $link ) {
+			if ( ( isset( $_GET['quiz_redirect'] ) ) && ( ! empty( $_GET['quiz_redirect'] ) ) && ( isset( $_GET['quiz_type'] ) ) && ( 'lesson' === $_GET['quiz_type'] ) ) {
 				$lesson_id = 0;
-				$quiz_id = 0;
+				$quiz_id   = 0;
 
-				if ( isset( $_GET['lesson_id'] ) ) $lesson_id = intval( $_GET['lesson_id'] );
-				if ( isset( $_GET['quiz_id'] ) ) $quiz_id = intval( $_GET['quiz_id'] );
-				
-				if ( ( !empty( $lesson_id ) ) && ( !empty( $quiz_id ) ) ) {
+				if ( isset( $_GET['lesson_id'] ) ) {
+					$lesson_id = intval( $_GET['lesson_id'] );
+				}
+				if ( isset( $_GET['quiz_id'] ) ) {
+					$quiz_id = intval( $_GET['quiz_id'] );
+				}
+
+				if ( ( ! empty( $lesson_id ) ) && ( ! empty( $quiz_id ) ) ) {
 					$lesson_settings = learndash_get_setting( $lesson_id );
-					if ( ( isset( $lesson_settings['lesson_video_enabled'] ) ) && ( $lesson_settings['lesson_video_enabled'] == 'on' ) ) {
-						if ( ( isset( $lesson_settings['lesson_video_shown'] ) ) && ( $lesson_settings['lesson_video_shown'] == 'AFTER' ) ) {
-							$link = get_permalink( $lesson_id );
-							
+					if ( ( isset( $lesson_settings['lesson_video_enabled'] ) ) && ( 'on' === $lesson_settings['lesson_video_enabled'] ) ) {
+						if ( ( isset( $lesson_settings['lesson_video_shown'] ) ) && ( 'AFTER' === $lesson_settings['lesson_video_shown'] ) ) {
+							$link = learndash_get_step_permalink( $lesson_id );
+
 							remove_filter( 'learndash_completion_redirect', array( $this, 'learndash_completion_redirect' ), 99 );
 						}
 					}
 				}
 			}
-			
+
 			return $link;
-			
 		}
-		
-		function save_post_data( $post_id = 0 ) {
-			if ( !empty( $post_id ) ) {
-				if ( ( isset( $_POST['post_type'] ) ) && ( ( $_POST['post_type'] === 'sfwd-lessons') || ( $_POST['post_type'] === 'sfwd-topic') ) ) {
-					$post_type = esc_attr( $_POST['post_type'] );
-					if ( ( isset( $_POST[ $post_type . '_lesson_video_enabled'] ) ) && ( $_POST[ $post_type . '_lesson_video_enabled'] === 'on' ) ) {
-						if ( ( isset( $_POST[ $post_type . '_lesson_video_url'] ) ) && ( !empty( $_POST[ $post_type . '_lesson_video_url'] ) ) ) {
-							global $wpdb;
-							
-							$sql_str = $wpdb->prepare( "DELETE FROM " . $wpdb->postmeta ." WHERE post_id=%d AND meta_key LIKE %s", intval( $post_id ), '_oembed_%' );
-							$wpdb->query( $sql_str );
-						}
+
+		/**
+		 * Build unique video progress cookie key. This is used to track the video state
+		 * in the user's browser.
+		 *
+		 * @since 3.2.0
+		 *
+		 * @return string $cookie_key.
+		 */
+		public function build_video_cookie_key() {
+			$cookie_key = '';
+			$cookie_key = $this->get_nonce_slug();
+
+			if ( ( isset( $this->step_settings['lesson_video_url'] ) ) && ( ! empty( $this->step_settings['lesson_video_url'] ) ) ) {
+				$lesson_video_url = trim( $this->step_settings['lesson_video_url'] );
+				$lesson_video_url = html_entity_decode( $lesson_video_url );
+
+				$cookie_key .= '_' . $lesson_video_url;
+			}
+			$cookie_key = 'learndash-video-progress-' . md5( $cookie_key );
+
+			return $cookie_key;
+		}
+
+		/**
+		 * Utility function to get the nonce slug.
+		 *
+		 * @since 3.2.3
+		 */
+		protected function get_nonce_slug() {
+			return 'learndash_video_' . $this->user_id . '_' . $this->course_id . '_' . $this->step_id;
+		}
+
+		/**
+		 * Check if video cookie 'video_state' is complete.
+		 *
+		 * @since 3.2.3
+		 *
+		 * @param string $cookie_key Cookie key. See build_video_cookie_key().
+		 * @return bool true if complete.
+		 */
+		public function is_video_cookie_complete( $cookie_key = '' ) {
+			if ( ! empty( $cookie_key ) ) {
+				if ( isset( $_COOKIE[ $cookie_key ] ) ) {
+					$cookie_data = json_decode( stripslashes( $_COOKIE[ $cookie_key ] ), true );
+					if ( ( isset( $cookie_data['video_state'] ) ) && ( 'complete' === $cookie_data['video_state'] ) ) {
+						return true;
 					}
 				}
+			}
+			return false;
+		}
+
+		/**
+		 * Utility class method to allow add-hoc checks on video complete.
+		 *
+		 * @since 3.2.3
+		 *
+		 * @param int $step_id   Course Step ID.
+		 * @param int $course_id Course ID.
+		 * @param int $user_id   User ID.
+		 *
+		 * @return bool true if complete.
+		 */
+		public function check_video_complete( $step_id = 0, $course_id = 0, $user_id = 0 ) {
+			$this->step_id   = absint( $step_id );
+			$this->user_id   = absint( $user_id );
+			$this->course_id = absint( $course_id );
+
+			if ( empty( $this->step_id ) ) {
+				return;
+			}
+
+			if ( empty( $this->user_id ) ) {
+				if ( is_user_logged_in() ) {
+					$this->user_id = (int) get_current_user_id();
+				} else {
+					return;
+				}
+			}
+
+			if ( empty( $this->course_id ) ) {
+				$this->course_id = (int) learndash_get_course_id( $this->step_id );
+				if ( empty( $this->course_id ) ) {
+					return;
+				}
+			}
+
+			$this->step_settings = learndash_get_setting( $this->step_id );
+
+			$cookie_key = $this->build_video_cookie_key();
+			if ( ! empty( $cookie_key ) ) {
+				if ( $this->is_video_cookie_complete( $cookie_key ) ) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		// End of functions.
+	}
+}
+
+add_action(
+	'learndash_init',
+	function() {
+		Learndash_Course_Video::get_instance();
+	}
+);
+
+/**
+ * Utility class method to allow add-hoc checks on video complete.
+ *
+ * @since 3.2.3
+ *
+ * @param int $step_id   Course Step ID.
+ * @param int $course_id Course ID.
+ * @param int $user_id   User ID.
+ *
+ * @return bool true if complete.
+ */
+function learndash_video_complete_for_step( $step_id = 0, $course_id = 0, $user_id = 0 ) {
+	$ld_video_instance = Learndash_Course_Video::get_instance();
+	if ( $ld_video_instance ) {
+		return $ld_video_instance->check_video_complete( $step_id, $course_id, $user_id );
+	}
+
+	return false;
+}
+
+/**
+ * Delete Video Cookie for Step
+ *
+ * @since 3.2.3
+ *
+ * @param int $step_id   Course Step ID.
+ * @param int $course_id Course ID.
+ * @param int $user_id   User ID.
+ */
+function learndash_video_delete_cookie_for_step( $step_id = 0, $course_id = 0, $user_id = 0 ) {
+	$ld_video_instance = Learndash_Course_Video::get_instance();
+	if ( $ld_video_instance ) {
+		if ( $ld_video_instance->check_video_complete( $step_id, $course_id, $user_id ) ) {
+			$video_cookie_key = $ld_video_instance->build_video_cookie_key();
+			if ( ! empty( $video_cookie_key ) ) {
+				if ( isset( $_COOKIE[ $video_cookie_key ] ) ) {
+					unset( $_COOKIE[ $video_cookie_key ] );
+				}
+
+				$video_track_domain = '';
+				if ( defined( 'COOKIE_DOMAIN' ) ) {
+					$video_track_domain = COOKIE_DOMAIN;
+				}
+
+				$video_track_path = '';
+				if ( ( is_multisite() ) && ( defined( 'SITECOOKIEPATH' ) ) ) {
+					$video_track_path = SITECOOKIEPATH;
+				} elseif ( defined( 'COOKIEPATH' ) ) {
+					$video_track_path = COOKIEPATH;
+				}
+
+				// empty value and expiration one hour before.
+				$res = setcookie( $video_cookie_key, '', time() - 3600, $video_track_path, $video_track_domain );
 			}
 		}
 	}
 }
-
-
-add_action( 'learndash_init', function() {
-	Learndash_Course_Video::get_instance();
-} );
-	

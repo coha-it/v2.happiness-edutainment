@@ -361,6 +361,36 @@ if ( ! class_exists( 'myCRED_Email' ) ) :
 
 			if ( ! empty( $content ) ) {
 
+			    if ( class_exists( 'myCRED_Ranks_Module' ) ) {
+                    //rank-title
+                    if ( is_array( $event ) &&  array_key_exists( 'ref_id', $event ) ) {
+
+                        $rank = mycred_get_rank( $event['ref_id'] );
+                        
+                        if ( is_object( $rank ) ) {
+                        
+                        	$rank_title = $rank->title;
+                        	$content = str_replace( '%rank_title%', $rank_title, $content );
+                        
+                        }
+
+                    }
+
+                    //rank-image
+                    if ( is_array( $event ) &&  array_key_exists( 'ref_id', $event ) ) {
+
+                        $rank = mycred_get_rank( $event['ref_id'] );
+						
+						if ( is_object( $rank ) ) {
+
+	                        $rank_image = '<img src = '.$rank->logo_url. '>';
+	                        $content    = str_replace( '%rank_image%', $rank_image, $content );
+	                        
+	                    }
+
+                    }
+                }
+
 				$mycred  = mycred( $point_type );
 
 				if ( $this->emailnotices['use_html'] === true )
@@ -376,18 +406,74 @@ if ( ! class_exists( 'myCRED_Email' ) ) :
 				// Template tags can only be used if the email triggers for one point type only.
 				$content = str_replace( '%entry%',         $event['entry'], $content );
 				$content = $mycred->template_tags_amount( $content, $event['amount'] );
+				
 				// to display correct user names in transfer email
 				if( $event['ref']==='transfer' ){
+
+					$content = $mycred->template_tags_user( $content, $event['user_id'] );
+
+					$content = str_replace( '%user_id_o%',           '%user_id%', $content );
+					$content = str_replace( '%user_name_o%',         '%user_name%', $content );
+					$content = str_replace( '%user_name_en_o%',      '%user_name_en%', $content );
+					$content = str_replace( '%display_name_o%',      '%display_name%', $content );
+					$content = str_replace( '%user_profile_url_o%',  '%user_profile_url%', $content );
+					$content = str_replace( '%user_profile_link_o%', '%user_profile_link%', $content );
+					$content = str_replace( '%user_nicename_o%',     '%user_nicename%', $content );
+					$content = str_replace( '%user_email_o%',        '%user_email%', $content );
+					$content = str_replace( '%user_url_o%',          '%user_url%', $content );
+					$content = str_replace( '%balance_o%',           '%balance%', $content );
+					$content = str_replace( '%balance_f_o%',         '%balance_f%', $content );
+
 					$content = $mycred->template_tags_user( $content, $event['ref_id'] );
 					$content = mycred_transfer_render_message( $content, $event['data'] );
-				}elseif( $event['ref']==='woocommerce_payment' ){
+				
+				}
+				elseif( $event['ref']==='woocommerce_payment' ){
+
 					$content = str_replace( '%order_id%', $event['ref_id'], $content );
-				}else{
+				
+				}
+				else{
+				
 					$content = $mycred->template_tags_user( $content, $event['user_id'] );
+				
 				}
 
 				if ( array_key_exists( 'data', $event ) && is_array($event['data']) && ! empty( $event['data'] ) && array_key_exists( 'ref_type', $event['data'] ) && $event['data']['ref_type'] == 'post' )
 					$content = $mycred->template_tags_post( $content, $event['ref_id'] );
+
+				if ( class_exists( 'myCRED_Badge_Module' ) ) {
+                   
+                    //Badge-image
+                    if ( is_array( $event ) &&  array_key_exists( 'ref_id', $event ) ) {
+
+                        $badge = mycred_get_badge( $event['ref_id'] );
+
+                        if ( is_object( $badge ) ) {
+
+                        	$image_url = $badge->main_image_url;
+	                        $image_url = "<img src='".esc_url( $image_url )."' alt='Badge Image'>";
+	                        $content   = str_replace( '%badge_image%', $image_url, $content );
+
+                        }
+
+                    }
+
+                    //Badge-title
+                     if ( is_array( $event ) &&  array_key_exists( 'ref_id', $event ) ) {
+
+	                    $badge = mycred_get_badge( $event['ref_id'] );
+                     	
+                     	if ( is_object( $badge ) ) {
+
+	                        $title = $badge->title;
+	                        $content = str_replace( '%badge_title%', $title , $content );
+
+	                    }
+
+                    }
+
+                }
 
 				$content = str_replace( '%amount%',        $mycred->format_creds( $event['amount'] ), $content );
 				$content = str_replace( '%new_balance%',   $mycred->format_creds( $event['new'] ), $content );
@@ -400,7 +486,10 @@ if ( ! class_exists( 'myCRED_Email' ) ) :
 				$content = str_replace( '%blog_info%',     get_option( 'blogdescription' ), $content );
 				$content = str_replace( '%admin_email%',   get_option( 'admin_email' ), $content );
 
-			}
+                $content = str_replace( '%rank_title%',     get_option( 'blogname' ), $content );
+
+
+            }
 
 			return apply_filters( 'mycred_email_notice_get_body', $content, $this );
 

@@ -25,14 +25,15 @@ if ( ! class_exists( 'myCRED_buyCRED_Module' ) ) :
 					'gateway_prefs' => array()
 				),
 				'labels'      => array(
-					'menu'        => __( 'Payment Gateways', 'mycred' ),
-					'page_title'  => __( 'Payment Gateways', 'mycred' ),
-					'page_header' => __( 'Payment Gateways', 'mycred' )
+					'menu'        => __( 'buyCred Gateways', 'mycred' ),
+					'page_title'  => __( 'buyCred Gateways', 'mycred' ),
+					'page_header' => __( 'buyCred Gateways', 'mycred' )
 				),
 				'screen_id'   => MYCRED_SLUG . '-gateways',
 				'accordion'   => true,
 				'add_to_core' => true,
-				'menu_pos'    => 70
+				'menu_pos'    => 70,
+				'main_menu'   => true
 			), $type );
 
 			$this->mycred_type = MYCRED_DEFAULT_TYPE_KEY;
@@ -60,6 +61,8 @@ if ( ! class_exists( 'myCRED_buyCRED_Module' ) ) :
 
 			add_action( 'mycred_after_core_prefs',     array( $this, 'after_general_settings' ) );
 			add_filter( 'mycred_save_core_prefs',      array( $this, 'sanitize_extra_settings' ), 90, 3 );
+
+			add_action('pre_get_comments',             array( $this, 'hide_buycred_transactions' ) );
 
 		}
 
@@ -237,8 +240,25 @@ if ( ! class_exists( 'myCRED_buyCRED_Module' ) ) :
 				}
 				else {
 
-					if ( ! empty( $buycred_instance->gateway->errors ) )
+					if ( ! empty( $buycred_instance->gateway->errors ) ) {
 						$buycred_instance->checkout = false;
+
+						if ( $buycred_instance->is_ajax )
+							die( json_encode( array( 'validationFail' => true , 'errors' => $buycred_instance->gateway->errors ) ) );
+						else
+					    {
+					        foreach( $buycred_instance->gateway->errors as $error )
+					        {
+					            global $wp;
+					            echo "
+					            <script>
+					                alert('".$error."');
+					                location.replace( '".home_url( $wp->request )."' );
+					            </script>
+					            ";
+					        }
+					    }
+					}
 
 				}
 
@@ -287,7 +307,7 @@ if ( ! class_exists( 'myCRED_buyCRED_Module' ) ) :
 					'buycred-checkout',
 					'buyCRED',
 					apply_filters( 'mycred_buycred_checkout_js', array(
-						'ajaxurl'     => home_url( '/' ),
+						'ajaxurl'     => get_site_url(),
 						'token'       => wp_create_nonce( 'mycred-buy-creds' ),
 						'checkout'    => $settings['checkout'],
 						'redirecting' => esc_js( esc_attr__( 'Redirecting', 'mycred' ) ),
@@ -590,7 +610,8 @@ if ( ! class_exists( 'myCRED_buyCRED_Module' ) ) :
 					$type_id = sanitize_key( $type_id );
 					if ( ! mycred_point_type_exists( $type_id ) ) continue;
 
-					$point_types[]    = $type_id;
+					if ( isset( $setup['enabled'] ) ) 
+						$point_types[]    = $type_id;
 
 					$settings         = array();
 					$settings['min']  = sanitize_text_field( $setup['min'] );
@@ -707,6 +728,7 @@ if ( ! class_exists( 'myCRED_buyCRED_Module' ) ) :
 		/**
 		 * Payment Gateways Page
 		 * @since 0.1
+		 * @since 2.3 Added more gateways in tab `mycred_buycred_more_gateways_tab`
 		 * @version 1.2.2
 		 */
 		public function admin_page() {
@@ -718,7 +740,7 @@ if ( ! class_exists( 'myCRED_buyCRED_Module' ) ) :
 
 ?>
 <div class="wrap mycred-metabox" id="myCRED-wrap">
-	<h1><?php _e( 'Payment Gateways', 'mycred' ); ?></h1>
+	<h1><?php _e( 'buyCred Payment Gateways', 'mycred' ); ?></h1>
 <?php
 
 			// Updated settings
@@ -790,12 +812,69 @@ if ( ! class_exists( 'myCRED_buyCRED_Module' ) ) :
 				}
 			}
 
+			$more_gateways_tab = array();
+
+			$more_gateways_tab[] = array(
+				'icon'				=>	'dashicons dashicons-admin-generic static',
+				'text'				=>	'Stripe',
+				'additional_text'	=>	'Paid',
+				'url'				=>	'https://mycred.me/store/buycred-stripe/',
+				'status'			=>	'disabled',
+				'plugin'			=>	'mycred-stripe/mycred-stripe.php'
+			);
+
+			$more_gateways_tab[] = array(
+				'icon'				=>	'dashicons dashicons-admin-generic static',
+				'text'				=>	'Coinbase',
+				'additional_text'	=>	'Paid',
+				'url'				=>	'https://mycred.me/store/buycred-coinbase/',
+				'status'			=>	'disabled',
+				'plugin'			=>	'mycred-coinbase/mycred-coinbase.php'
+			);
+
+			$more_gateways_tab[] = array(
+				'icon'				=>	'dashicons dashicons-admin-generic static',
+				'text'				=>	'More Gateways',
+				'url'				=>	'https://mycred.me/product-category/buycred-gateways/',
+			);
+
+			$more_gateways_tab = apply_filters( 'mycred_buycred_more_gateways_tab', $more_gateways_tab );
+
+			if( MYCRED_SHOW_PREMIUM_ADDONS )
+			{
+				include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+
+				foreach( $more_gateways_tab as $key => $gateway )
+				{
+
+					if ( isset( $gateway['plugin'] ) && is_plugin_active( $gateway['plugin'] ) )
+						continue;
+
+					$disabled_class = ( isset( $gateway['status'] ) && $gateway['status'] == 'disabled' )  ? 'disabled-tab' : '';
+
+					$content = "
+					<h4 class='ui-accordion-header ui-corner-top ui-accordion-header-collapsed ui-corner-all ui-state-default ui-accordion-icons buycred-cashcred-more-tab-btn {$disabled_class}' data-url='{$gateway['url']}'>
+						<span class='ui-accordion-header-icon ui-icon ui-icon-triangle-1-e'></span>
+						<span class='{$gateway['icon']}'></span>
+								{$gateway['text']}";
+
+						if( array_key_exists( 'additional_text', $gateway )  && !empty( $gateway['additional_text'] ) )
+							$content .= "<span class='additional-text'>{$gateway['additional_text']}</span>";
+					
+					$content .= "</h4>
+						<div class='body' style='display:none; padding: 0px; border: none;'>
+					</div>";
+
+					echo $content;
+				}
+			}
 ?>
+
 		</div>
 
 		<?php do_action( 'mycred_after_buycreds_page', $this ); ?>
 
-		<p><?php submit_button( __( 'Update Settings', 'mycred' ), 'primary large', 'submit', false ); ?> <?php if ( MYCRED_SHOW_PREMIUM_ADDONS ) : ?><a href="https://mycred.me/product-category/buycred-gateways/" class="button button-secondary button-large" target="_blank">More Gateways</a><?php endif; ?></p>
+		<p><?php submit_button( __( 'Update Settings', 'mycred' ), 'primary large', 'submit', false ); ?></p>
 
 	</form>
 
@@ -1382,6 +1461,17 @@ jQuery(function($) {
 
 			}
 
+		}
+
+		/**
+		 * Hide Comments
+		 * @since 1.8.9
+		 * @version 1.0
+		 */
+		public function hide_buycred_transactions( $query ) {
+
+		    $query->query_vars['type__not_in'] = 'buycred';
+		    
 		}
 
 	}

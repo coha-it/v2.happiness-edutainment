@@ -5,22 +5,29 @@
  * Introduces metaboxes at Add/Edit Quiz page to be used as
  * a wrapper by the React application at front-end.
  *
+ * @since 3.0.0
  * @package LearnDash
  */
 
 namespace LearnDash\Quiz\Metaboxes;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
- * Add the metaboxes to Quiz post type.
+ * Adds the metaboxes for quiz post type.
  *
- * @return void
+ * Fires on `add_meta_boxes_sfwd-quiz` and `learndash_add_meta_boxes` hook.
+ *
+ * @since 3.0.0
  */
 function add_meta_boxes() {
 
 	$screen = get_current_screen();
 
 	if ( 'sfwd-quiz' !== get_post_type( get_the_ID() ) &&
-		'sfwd-quiz_page_quizzes-builder' !== $screen->id  ) {
+		'sfwd-quiz_page_quizzes-builder' !== $screen->id ) {
 		return;
 	}
 
@@ -31,28 +38,14 @@ function add_meta_boxes() {
 		null,
 		'side'
 	);
-
-/*
-	add_meta_box(
-		'learndash_admin_quiz_navigation',
-		sprintf(
-			// translators: placeholders: Quiz, Questions.
-			esc_html_x( '%1$s %2$s', 'placeholders: Quiz, Questions', 'learndash' ),
-			\LearnDash_Custom_Label::get_label( 'quiz' ), \LearnDash_Custom_Label::get_label( 'questions' )
-		),
-		'learndash_quiz_navigation_admin_box_content',
-		null,
-		'side'
-	);
-*/
 }
 add_action( 'add_meta_boxes_sfwd-quiz', 'LearnDash\Quiz\Metaboxes\add_meta_boxes' );
 add_action( 'learndash_add_meta_boxes', 'LearnDash\Quiz\Metaboxes\add_meta_boxes' );
 
 /**
- * Callback to render questions metabox.
+ * Prints the output for quiz navigation meta box.
  *
- * @return void
+ * @since 3.0.0
  */
 function meta_box_questions_callback() {
 	?>

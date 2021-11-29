@@ -2,18 +2,26 @@
 /**
  * LearnDash Settings Metabox for Course Access Settings.
  *
- * @package LearnDash
- * @subpackage Settings
+ * @since 3.0.0
+ * @package LearnDash\Settings\Metaboxes
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'LearnDash_Settings_Metabox_Course_Access_Settings' ) ) ) {
 	/**
-	 * Class to create the settings section.
+	 * Class LearnDash Settings Metabox for Course Access Settings.
+	 *
+	 * @since 3.0.0
 	 */
 	class LearnDash_Settings_Metabox_Course_Access_Settings extends LearnDash_Settings_Metabox {
 
 		/**
 		 * Public constructor for class
+		 *
+		 * @since 3.0.0
 		 */
 		public function __construct() {
 			// What screen ID are we showing on.
@@ -41,27 +49,41 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 			// Map internal settings field ID to legacy field ID.
 			$this->settings_fields_map = array(
 				// New fields
-				'course_access_list_enabled'        => 'course_access_list_enabled',
+				'course_access_list_enabled'              => 'course_access_list_enabled',
+
+				'course_trial_price'                      => 'course_trial_price',
+
+				'course_trial_duration_t1'                => 'course_trial_duration_t1',
+				'course_trial_duration_p1'                => 'course_trial_duration_p1',
 
 				// Legacy fields
-				'course_price_type'                 => 'course_price_type',
-				'course_price_type_paynow_price'    => 'course_price',
-				'course_price_type_subscribe_price' => 'course_price',
+				'course_price_type'                       => 'course_price_type',
+
+				'course_price_type_paynow_price'          => 'course_price',
+				'course_price_type_paynow_enrollment_url' => 'course_price_type_paynow_enrollment_url',
+
 				'course_price_type_subscribe_billing_cycle' => 'course_price_billing_cycle',
+				'course_price_type_subscribe_billing_recurring_times' => 'course_no_of_cycles',
+				'course_price_type_subscribe_price'       => 'course_price',
+				'course_price_type_subscribe_enrollment_url' => 'course_price_type_subscribe_enrollment_url',
+
+				'course_price_billing_t3'                 => 'course_price_billing_t3',
+				'course_price_billing_p3'                 => 'course_price_billing_p3',
+
 				'course_price_type_closed_custom_button_label' => 'custom_button_label',
 				'course_price_type_closed_custom_button_url' => 'custom_button_url',
-				'course_price_type_closed_price'    => 'course_price',
-				'course_prerequisite_enabled'       => 'course_prerequisite_enabled',
-				'course_prerequisite'               => 'course_prerequisite',
-				'course_prerequisite_compare'       => 'course_prerequisite_compare',
-				'course_points_enabled'             => 'course_points_enabled',
-				'course_points'                     => 'course_points',
-				'course_points_access'              => 'course_points_access',
-				'expire_access'                     => 'expire_access',
-				'expire_access_days'                => 'expire_access_days',
-				'expire_access_delete_progress'     => 'expire_access_delete_progress',
-				'course_disable_lesson_progression' => 'course_disable_lesson_progression',
-				'course_access_list'                => 'course_access_list',
+				'course_price_type_closed_price'          => 'course_price',
+
+				'course_prerequisite_enabled'             => 'course_prerequisite_enabled',
+				'course_prerequisite'                     => 'course_prerequisite',
+				'course_prerequisite_compare'             => 'course_prerequisite_compare',
+				'course_points_enabled'                   => 'course_points_enabled',
+				'course_points'                           => 'course_points',
+				'course_points_access'                    => 'course_points_access',
+				'expire_access'                           => 'expire_access',
+				'expire_access_days'                      => 'expire_access_days',
+				'expire_access_delete_progress'           => 'expire_access_delete_progress',
+				'course_access_list'                      => 'course_access_list',
 			);
 
 			parent::__construct();
@@ -70,8 +92,10 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 		/**
 		 * Add script data to array.
 		 *
-		 * @since 3.0
+		 * @since 3.0.0
+		 *
 		 * @param array $script_data Script data array to be sent out to browser.
+		 *
 		 * @return array $script_data
 		 */
 		public function learndash_admin_settings_data( $script_data = array() ) {
@@ -86,6 +110,8 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 
 		/**
 		 * Initialize the metabox settings values.
+		 *
+		 * @since 3.0.0
 		 */
 		public function load_settings_values() {
 			parent::load_settings_values();
@@ -104,12 +130,32 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 					$this->setting_option_values['course_access_list_enabled'] = '';
 				}
 
+				if ( ( ! isset( $this->setting_option_values['course_price_type'] ) ) || ( empty( $this->setting_option_values['course_price_type'] ) ) ) {
+					$this->setting_option_values['course_price_type'] = LEARNDASH_DEFAULT_COURSE_PRICE_TYPE;
+				}
+
 				if ( ! isset( $this->setting_option_values['course_price_type_paynow_price'] ) ) {
 					$this->setting_option_values['course_price_type_paynow_price'] = '';
 				}
 
+				if ( ! isset( $this->setting_option_values['course_price_type_paynow_enrollment_url'] ) ) {
+					$this->setting_option_values['course_price_type_paynow_enrollment_url'] = '';
+				}
+
 				if ( ! isset( $this->setting_option_values['course_price_type_subscribe_price'] ) ) {
 					$this->setting_option_values['course_price_type_subscribe_price'] = '';
+				}
+
+				if ( ! isset( $this->setting_option_values['course_price_type_subscribe_billing_recurring_times'] ) ) {
+					$this->setting_option_values['course_price_type_subscribe_billing_recurring_times'] = '';
+				}
+
+				if ( ! isset( $this->setting_option_values['course_trial_price'] ) ) {
+					$this->setting_option_values['course_trial_price'] = '';
+				}
+
+				if ( ! isset( $this->setting_option_values['course_price_type_subscribe_enrollment_url'] ) ) {
+					$this->setting_option_values['course_price_type_subscribe_enrollment_url'] = '';
 				}
 
 				if ( ! isset( $this->setting_option_values['course_price_type_closed_price'] ) ) {
@@ -120,16 +166,12 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 					$this->setting_option_values['course_price_type_closed_custom_button_url'] = '';
 				}
 
-				if ( ! isset( $this->setting_option_values['course_price_type'] ) ) {
-					$this->setting_option_values['course_price_type'] = 'open';
-				}
-
 				if ( ! isset( $this->setting_option_values['course_prerequisite_enabled'] ) ) {
 					$this->setting_option_values['course_prerequisite_enabled'] = '';
 				}
 
 				if ( ! isset( $this->setting_option_values['course_prerequisite'] ) ) {
-					$this->setting_option_values['course_prerequisite'] = '';
+					$this->setting_option_values['course_prerequisite'] = array();
 				}
 				if ( ! isset( $this->setting_option_values['course_prerequisite_compare'] ) ) {
 					$this->setting_option_values['course_prerequisite_compare'] = 'ANY';
@@ -155,23 +197,115 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 					$this->setting_option_values['course_price_type_closed_custom_button_label'] = '';
 				}
 			}
+
+			// Ensure all settings fields are present.
+			foreach ( $this->settings_fields_map as $_internal => $_external ) {
+				if ( ! isset( $this->setting_option_values[ $_internal ] ) ) {
+					$this->setting_option_values[ $_internal ] = '';
+				}
+			}
+
+			// Clear out the price type fields we are not using.
+			if ( 'paynow' === $this->setting_option_values['course_price_type'] ) {
+				$this->setting_option_values['course_price_type_subscribe_price']          = '';
+				$this->setting_option_values['course_price_type_subscribe_billing_cycle']  = '';
+				$this->setting_option_values['course_price_type_subscribe_enrollment_url'] = '';
+
+				$this->setting_option_values['course_price_type_closed_price']               = '';
+				$this->setting_option_values['course_price_type_closed_custom_button_label'] = '';
+				$this->setting_option_values['course_price_type_closed_custom_button_url']   = '';
+				$this->setting_option_values['course_trial_price']                           = '';
+			} elseif ( 'subscribe' === $this->setting_option_values['course_price_type'] ) {
+				$this->setting_option_values['course_price_type_paynow_price']          = '';
+				$this->setting_option_values['course_price_type_paynow_enrollment_url'] = '';
+
+				$this->setting_option_values['course_price_type_closed_price']               = '';
+				$this->setting_option_values['course_price_type_closed_custom_button_label'] = '';
+				$this->setting_option_values['course_price_type_closed_custom_button_url']   = '';
+			} elseif ( 'closed' === $this->setting_option_values['course_price_type'] ) {
+				$this->setting_option_values['course_price_type_subscribe_price']          = '';
+				$this->setting_option_values['course_price_type_subscribe_billing_cycle']  = '';
+				$this->setting_option_values['course_price_type_subscribe_enrollment_url'] = '';
+
+				$this->setting_option_values['course_price_type_paynow_price']          = '';
+				$this->setting_option_values['course_price_type_paynow_enrollment_url'] = '';
+			} else {
+				$this->setting_option_values['course_price_type_paynow_price']          = '';
+				$this->setting_option_values['course_price_type_paynow_enrollment_url'] = '';
+
+				$this->setting_option_values['course_price_type_subscribe_price']          = '';
+				$this->setting_option_values['course_price_type_subscribe_billing_cycle']  = '';
+				$this->setting_option_values['course_price_type_subscribe_enrollment_url'] = '';
+
+				$this->setting_option_values['course_price_type_closed_price']               = '';
+				$this->setting_option_values['course_price_type_closed_custom_button_label'] = '';
+				$this->setting_option_values['course_price_type_closed_custom_button_url']   = '';
+				$this->setting_option_values['course_trial_price']                           = '';
+			}
 		}
 
 		/**
 		 * Initialize the metabox settings fields.
+		 *
+		 * @since 3.0.0
 		 */
 		public function load_settings_fields() {
 			global $sfwd_lms;
 
 			$this->settings_sub_option_fields = array();
 
-			$select_course_options = $sfwd_lms->select_a_course();
+			$select_course_options                      = array();
+			$select_course_prerequisite_query_data_json = '';
+
+			/** This filter is documented in includes/class-ld-lms.php */
 			if ( ( defined( 'LEARNDASH_SELECT2_LIB' ) ) && ( true === apply_filters( 'learndash_select2_lib', LEARNDASH_SELECT2_LIB ) ) ) {
 				$select_course_options_default = sprintf(
 					// translators: placeholder: course.
-					esc_html_x( 'Search or select a %s…', 'placeholder: course', 'learndash' ),
+					esc_html_x( 'Search or select a %s', 'placeholder: course', 'learndash' ),
 					learndash_get_custom_label( 'course' )
 				);
+
+				if ( ! empty( $this->setting_option_values['course_prerequisite'] ) ) {
+					$course_query_args = array(
+						'post_type'   => learndash_get_post_type_slug( 'course' ),
+						'post_status' => 'any',
+						'numberposts' => -1,
+						'orderby'     => 'title',
+						'order'       => 'ASC',
+						'include'     => $this->setting_option_values['course_prerequisite'],
+						'exclude'     => array( get_the_ID() ),
+					);
+
+					$course_posts = get_posts( $course_query_args );
+					if ( ! empty( $course_posts ) ) {
+						foreach ( $course_posts as $course_post ) {
+							if ( ( $course_post ) && ( is_a( $course_post, 'WP_Post' ) ) && ( learndash_get_post_type_slug( 'course' ) === $course_post->post_type ) ) {
+								$select_course_options[ $course_post->ID ] = get_the_title( $course_post->ID );
+							}
+						}
+					}
+				}
+
+				/**
+				 * Filters whether the select2 is used to fetch AJAX data.
+				 *
+				 * @param boolean $learndash_select2_ajax_featch whether the select2 library is used to fetch AJAX data.
+				 */
+				if ( ( defined( 'LEARNDASH_SELECT2_LIB_AJAX_FETCH' ) ) && ( true === apply_filters( 'learndash_select2_lib_ajax_fetch', LEARNDASH_SELECT2_LIB_AJAX_FETCH ) ) ) {
+					$select_course_prerequisite_query_data_json = $this->build_settings_select2_lib_ajax_fetch_json(
+						array(
+							'query_args'       => array(
+								'post_type'    => learndash_get_post_type_slug( 'course' ),
+								'post__not_in' => array( get_the_ID() ),
+							),
+							'settings_element' => array(
+								'settings_parent_class' => get_parent_class( __CLASS__ ),
+								'settings_class'        => __CLASS__,
+								'settings_field'        => 'course_prerequisite',
+							),
+						)
+					);
+				}
 			} else {
 				$select_course_options_default = array(
 					'' => sprintf(
@@ -180,6 +314,7 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 						learndash_get_custom_label( 'course' )
 					),
 				);
+				$select_course_options         = $sfwd_lms->select_a_course();
 				if ( ( is_array( $select_course_options ) ) && ( ! empty( $select_course_options ) ) ) {
 					$select_course_options = $select_course_options_default + $select_course_options;
 				} else {
@@ -189,7 +324,7 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 			}
 
 			$this->setting_option_fields = array(
-				'course_price_type_paynow_price' => array(
+				'course_price_type_paynow_price'          => array(
 					'name'    => 'course_price_type_paynow_price',
 					'label'   => sprintf(
 						// translators: placeholder: Course.
@@ -200,6 +335,47 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 					'class'   => '-medium',
 					'value'   => $this->setting_option_values['course_price_type_paynow_price'],
 					'default' => '',
+					'rest'    => array(
+						'show_in_rest' => LearnDash_REST_API::enabled(),
+						'rest_args'    => array(
+							'schema' => array(
+								'field_key'   => 'price_type_paynow_price',
+								// translators: placeholder: Course.
+								'description' => sprintf( esc_html_x( 'Pay Now %s Price', 'placeholder: Course', 'learndash' ), LearnDash_Custom_Label::get_label( 'course' ) ),
+								'type'        => 'string',
+								'default'     => '',
+							),
+						),
+					),
+				),
+				'course_price_type_paynow_enrollment_url' => array(
+					'name'      => 'course_price_type_paynow_enrollment_url',
+					'label'     => sprintf(
+						// translators: placeholder: Course
+						esc_html_x( '%s Enrollment URL', 'placeholder: Course', 'learndash' ),
+						learndash_get_custom_label( 'course' )
+					),
+					'type'      => 'url',
+					'class'     => 'full-text',
+					'value'     => $this->setting_option_values['course_price_type_paynow_enrollment_url'],
+					'help_text' => sprintf(
+						// translators: placeholder: course
+						esc_html_x( 'Enter the URL of the page you want to redirect your enrollees after signing up for this specific %s', 'placeholder: course', 'learndash' ),
+						learndash_get_custom_label_lower( 'course' )
+					),
+					'default'   => '',
+					'rest'      => array(
+						'show_in_rest' => LearnDash_REST_API::enabled(),
+						'rest_args'    => array(
+							'schema' => array(
+								'field_key'   => 'price_type_paynow_enrollment_url',
+								// translators: placeholder: course.
+								'description' => sprintf( esc_html_x( 'Pay Now %s Enrollment URL', 'placeholder: course', 'learndash' ), learndash_get_custom_label_lower( 'course' ) ),
+								'type'        => 'string',
+								'default'     => '',
+							),
+						),
+					),
 				),
 			);
 			parent::load_settings_fields();
@@ -217,29 +393,106 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 					'class'   => '-medium',
 					'value'   => $this->setting_option_values['course_price_type_subscribe_price'],
 					'default' => '',
+					'rest'    => array(
+						'show_in_rest' => LearnDash_REST_API::enabled(),
+						'rest_args'    => array(
+							'schema' => array(
+								'field_key'   => 'price_type_subscribe_price',
+								// translators: placeholder: Course.
+								'description' => sprintf( esc_html_x( 'Subscribe %s Price', 'placeholder: Course', 'learndash' ), learndash_get_custom_label( 'course' ) ),
+								'type'        => 'string',
+								'default'     => '',
+							),
+						),
+					),
 				),
 				'course_price_type_subscribe_billing_cycle' => array(
 					'name'  => 'course_price_type_subscribe_billing_cycle',
 					'label' => esc_html__( 'Billing Cycle', 'learndash' ),
 					'type'  => 'custom',
-					'html'  => $sfwd_lms->learndash_course_price_billing_cycle_html(),
+					'html'  => learndash_billing_cycle_setting_field_html(),
+				),
+				'course_price_type_subscribe_billing_recurring_times' => array(
+					'name'      => 'course_price_type_subscribe_billing_recurring_times',
+					'label'     => esc_html__( 'Recurring Times', 'learndash' ),
+					'type'      => 'text',
+					'class'     => '-medium',
+					'value'     => $this->setting_option_values['course_price_type_subscribe_billing_recurring_times'],
+					'help_text' => esc_html__( 'How many times the billing cycle repeats. Leave empty for unlimited repeats.', 'learndash' ),
+					'default'   => '',
+				),
+				'course_trial_price'                => array(
+					'name'      => 'course_trial_price',
+					'label'     => sprintf(
+						// translators: placeholder: Course
+						esc_html_x( '%s Trial Price', 'placeholder: Course', 'learndash' ),
+						learndash_get_custom_label( 'course' )
+					),
+					'type'      => 'text',
+					'class'     => '-medium',
+					'value'     => $this->setting_option_values['course_trial_price'],
+					'help_text' => sprintf(
+						// translators: placeholder: course
+						esc_html_x( 'Enter the price for the trial period for this %s', 'placeholder: course', 'learndash' ),
+						learndash_get_custom_label( 'course' )
+					),
+					'default'   => '',
+					'rest'      => array(
+						'show_in_rest' => LearnDash_REST_API::enabled(),
+						'rest_args'    => array(
+							'schema' => array(
+								'field_key'   => 'trial_price',
+								// translators: placeholder: course.
+								'description' => sprintf( esc_html_x( '%s Trial Price', 'placeholder: course', 'learndash' ), learndash_get_custom_label( 'course' ) ),
+								'type'        => 'string',
+								'default'     => '',
+							),
+						),
+					),
+				),
+				'course_trial_duration'             => array(
+					'name'      => 'course_trial_duration',
+					'label'     => esc_html__( 'Trial Duration', 'learndash' ),
+					'type'      => 'custom',
+					'html'      => learndash_trial_duration_setting_field_html(),
+					// translators: placeholder: course
+					'help_text' => sprintf( esc_html_x( 'The length of the trial period, after the trial is over, the normal %s price billing goes into effect.', 'placeholder: course', 'learndash' ), learndash_get_custom_label_lower( 'course' ) ),
+					'default'   => '',
+				),
+				'course_price_type_subscribe_enrollment_url' => array(
+					'name'      => 'course_price_type_subscribe_enrollment_url',
+					'label'     => sprintf(
+						// translators: placeholder: Course
+						esc_html_x( '%s Enrollment URL', 'placeholder: Course', 'learndash' ),
+						learndash_get_custom_label( 'course' )
+					),
+					'type'      => 'url',
+					'class'     => 'full-text',
+					'value'     => $this->setting_option_values['course_price_type_subscribe_enrollment_url'],
+					'help_text' => sprintf(
+						// translators: placeholder: course
+						esc_html_x( 'Enter the URL of the page you want to redirect your enrollees after signing up for this specific %s', 'placeholder: course', 'learndash' ),
+						learndash_get_custom_label_lower( 'course' )
+					),
+					'default'   => '',
+					'rest'      => array(
+						'show_in_rest' => LearnDash_REST_API::enabled(),
+						'rest_args'    => array(
+							'schema' => array(
+								'field_key'   => 'price_type_subscribe_enrollment_url',
+								// translators: placeholder: course.
+								'description' => sprintf( esc_html_x( 'Subscribe %s Enrollment URL', 'placeholder: course', 'learndash' ), learndash_get_custom_label_lower( 'course' ) ),
+								'type'        => 'string',
+								'default'     => '',
+							),
+						),
+					),
 				),
 			);
 			parent::load_settings_fields();
 			$this->settings_sub_option_fields['course_price_type_subscribe_fields'] = $this->setting_option_fields;
 
 			$this->setting_option_fields = array(
-				/*
-				'course_price_type_closed_custom_button_label' => array(
-					'name' => 'course_price_type_closed_custom_button_label',
-					'label' => esc_html__( 'Label (optional)', 'learndash' ),
-					'type' => 'text',
-					'placeholder' => learndash_get_custom_label( 'button_take_this_course' ),
-					'value' => $this->setting_option_values['course_price_type_closed_custom_button_label'],
-					'help_text' => esc_html__( 'Label displayed in the Course Grid listing. Requires Course Grid add-on.', 'learndash'),
-					'default' => '',
-				),
-				*/
 				'course_price_type_closed_price' => array(
 					'name'    => 'course_price_type_closed_price',
 					'label'   => sprintf(
@@ -251,12 +504,24 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 					'class'   => '-medium',
 					'value'   => $this->setting_option_values['course_price_type_closed_price'],
 					'default' => '',
+					'rest'    => array(
+						'show_in_rest' => LearnDash_REST_API::enabled(),
+						'rest_args'    => array(
+							'schema' => array(
+								'field_key'   => 'price_type_closed_price',
+								// translators: placeholder: Course.
+								'description' => sprintf( esc_html_x( 'Closed %s Price', 'placeholder: Course', 'learndash' ), learndash_get_custom_label( 'course' ) ),
+								'type'        => 'string',
+								'default'     => '',
+							),
+						),
+					),
 				),
 				'course_price_type_closed_custom_button_url' => array(
 					'name'      => 'course_price_type_closed_custom_button_url',
 					'label'     => esc_html__( 'Button URL', 'learndash' ),
 					'type'      => 'url',
-					'class'   => 'full-text',
+					'class'     => 'full-text',
 					'value'     => $this->setting_option_values['course_price_type_closed_custom_button_url'],
 					'help_text' => sprintf(
 						// translators: placeholder: "Take this Course" button label
@@ -264,13 +529,20 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 						learndash_get_custom_label( 'button_take_this_course' )
 					),
 					'default'   => '',
+					'rest'      => array(
+						'show_in_rest' => LearnDash_REST_API::enabled(),
+						'rest_args'    => array(
+							'schema' => array(
+								'field_key'   => 'price_type_closed_custom_button_url',
+								// translators: placeholder: Course.
+								'description' => sprintf( esc_html_x( 'Closed %s Button URL', 'placeholder: Course', 'learndash' ), learndash_get_custom_label( 'course' ) ),
+								'type'        => 'string',
+								'default'     => '',
+							),
+						),
+					),
 				),
 			);
-			/*
-			if ( ! defined( 'LEARNDASH_COURSE_GRID_VERSION' ) ) {
-				unset( $this->setting_option_fields['course_price_type_closed_custom_button_label'] );
-			}
-			*/
 
 			parent::load_settings_fields();
 			$this->settings_sub_option_fields['course_price_type_closed_fields'] = $this->setting_option_fields;
@@ -281,7 +553,7 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 					'label'   => esc_html__( 'Access Mode', 'learndash' ),
 					'type'    => 'radio',
 					'value'   => $this->setting_option_values['course_price_type'],
-					'default' => 'open',
+					'default' => LEARNDASH_DEFAULT_COURSE_PRICE_TYPE,
 					'options' => array(
 						'open'      => array(
 							'label'       => esc_html__( 'Open', 'learndash' ),
@@ -328,14 +600,34 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 						'closed'    => array(
 							'label'               => esc_html__( 'Closed', 'learndash' ),
 							'description'         => sprintf(
-								// translators: placeholder: course.
-								esc_html_x( 'The %s can only be accessed through admin enrollment (manual), group enrollment, or integration (shopping cart or membership) enrollment. No enrollment button will be displayed, unless a URL is set (optional).', 'placeholder: course', 'learndash' ),
-								learndash_get_custom_label_lower( 'course' )
+								// translators: placeholder: course, group.
+								esc_html_x( 'The %1$s can only be accessed through admin enrollment (manual), %2$s enrollment, or integration (shopping cart or membership) enrollment. No enrollment button will be displayed, unless a URL is set (optional).', 'placeholder: course', 'learndash' ),
+								learndash_get_custom_label_lower( 'course' ),
+								learndash_get_custom_label_lower( 'group' )
 							),
 							'inline_fields'       => array(
 								'course_price_type_closed' => $this->settings_sub_option_fields['course_price_type_closed_fields'],
 							),
 							'inner_section_state' => ( 'closed' === $this->setting_option_values['course_price_type'] ) ? 'open' : 'closed',
+						),
+					),
+					'rest'    => array(
+						'show_in_rest' => LearnDash_REST_API::enabled(),
+						'rest_args'    => array(
+							'schema' => array(
+								'field_key'   => 'price_type',
+								// translators: placeholder: Course.
+								'description' => sprintf( esc_html_x( '%s Price Type', 'placeholder: Course', 'learndash' ), LearnDash_Custom_Label::get_label( 'course' ) ),
+								'type'        => 'string',
+								'default'     => 'open',
+								'enum'        => array(
+									'open',
+									'closed',
+									'free',
+									'buynow',
+									'subscribe',
+								),
+							),
 						),
 					),
 				),
@@ -353,6 +645,16 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 						'on' => '',
 					),
 					'child_section_state' => ( 'on' === $this->setting_option_values['course_prerequisite_enabled'] ) ? 'open' : 'closed',
+					'rest'                => array(
+						'show_in_rest' => LearnDash_REST_API::enabled(),
+						'rest_args'    => array(
+							'schema' => array(
+								'field_key' => 'prerequisite_enabled',
+								'type'      => 'boolean',
+								'default'   => false,
+							),
+						),
+					),
 				),
 				'course_prerequisite_compare'   => array(
 					'name'           => 'course_prerequisite_compare',
@@ -381,12 +683,27 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 						),
 					),
 					'parent_setting' => 'course_prerequisite_enabled',
+					'rest'           => array(
+						'show_in_rest' => LearnDash_REST_API::enabled(),
+						'rest_args'    => array(
+							'schema' => array(
+								'field_key'   => 'prerequisite_compare',
+								'description' => 'Prerequisite Compare Mode.',
+								'default'     => 'ANY',
+								'type'        => 'string',
+								'enum'        => array(
+									'ANY',
+									'ALL',
+								),
+							),
+						),
+					),
 				),
 				'course_prerequisite'           => array(
 					'name'           => 'course_prerequisite',
 					'type'           => 'multiselect',
 					'multiple'       => 'true',
-					'default'        => '',
+					'default'        => array(),
 					'value'          => $this->setting_option_values['course_prerequisite'],
 					'placeholder'    => $select_course_options_default,
 					'value_type'     => 'intval',
@@ -397,11 +714,28 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 					),
 					'parent_setting' => 'course_prerequisite_enabled',
 					'options'        => $select_course_options,
+					'attrs'          => array(
+						'data-select2-query-data' => $select_course_prerequisite_query_data_json,
+					),
+					'rest'           => array(
+						'show_in_rest' => LearnDash_REST_API::enabled(),
+						'rest_args'    => array(
+							'schema' => array(
+								'field_key'   => 'prerequisites',
+								'description' => 'Prerequisites.',
+								'default'     => array(),
+								'type'        => 'array',
+								'items'       => array(
+									'type' => 'integer',
+								),
+							),
+						),
+					),
 				),
 				'course_points_enabled'         => array(
 					'name'                => 'course_points_enabled',
 					'label'               => sprintf(
-						// translators: placeholder: Course
+						// translators: placeholder: Course.
 						esc_html_x( '%s Points', 'placeholder: Course', 'learndash' ),
 						learndash_get_custom_label( 'course' )
 					),
@@ -411,6 +745,16 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 						'on' => '',
 					),
 					'child_section_state' => ( 'on' === $this->setting_option_values['course_points_enabled'] ) ? 'open' : 'closed',
+					'rest'                => array(
+						'show_in_rest' => LearnDash_REST_API::enabled(),
+						'rest_args'    => array(
+							'schema' => array(
+								'field_key' => 'points_enabled',
+								'type'      => 'boolean',
+								'default'   => false,
+							),
+						),
+					),
 				),
 				'course_points_access'          => array(
 					'name'           => 'course_points_access',
@@ -425,7 +769,6 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 					'attrs'          => array(
 						'step'        => 'any',
 						'min'         => '0.00',
-						//'max'         => '10.00',
 						'can_decimal' => 2,
 						'can_empty'   => true,
 					),
@@ -433,6 +776,16 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 						// translators: placeholder: course.
 						esc_html_x( 'Number of points required in order to gain access to this %s.', 'placeholder: course.', 'learndash' ),
 						learndash_get_custom_label_lower( 'course' )
+					),
+					'rest'           => array(
+						'show_in_rest' => LearnDash_REST_API::enabled(),
+						'rest_args'    => array(
+							'schema' => array(
+								'field_key' => 'points_access',
+								'type'      => 'float',
+								'default'   => 0.0,
+							),
+						),
 					),
 				),
 				'course_points'                 => array(
@@ -455,9 +808,18 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 					'attrs'          => array(
 						'step'        => 'any',
 						'min'         => '0.00',
-						//'max'         => '10.00',
 						'can_decimal' => 2,
 						'can_empty'   => true,
+					),
+					'rest'           => array(
+						'show_in_rest' => LearnDash_REST_API::enabled(),
+						'rest_args'    => array(
+							'schema' => array(
+								'field_key' => 'points_amount',
+								'type'      => 'float',
+								'default'   => 0.0,
+							),
+						),
 					),
 				),
 
@@ -474,20 +836,40 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 					),
 					'value'               => $this->setting_option_values['expire_access'],
 					'child_section_state' => ( 'on' === $this->setting_option_values['expire_access'] ) ? 'open' : 'closed',
+					'rest'                => array(
+						'show_in_rest' => LearnDash_REST_API::enabled(),
+						'rest_args'    => array(
+							'schema' => array(
+								'type'    => 'boolean',
+								'default' => false,
+							),
+						),
+					),
 				),
 				'expire_access_days'            => array(
 					'name'           => 'expire_access_days',
 					'label'          => esc_html__( 'Access Period', 'learndash' ),
 					'type'           => 'number',
 					'class'          => 'small-text',
-					'min'            => '0',
 					'value'          => $this->setting_option_values['expire_access_days'],
 					'input_label'    => esc_html__( 'days', 'learndash' ),
 					'parent_setting' => 'expire_access',
+					'attrs'          => array(
+						'step' => 1,
+						'min'  => 0,
+					),
 					'help_text'      => sprintf(
 						// translators: placeholder: course.
 						esc_html_x( 'Set the number of days a user will have access to the %s from enrollment date.', 'placeholder: course.', 'learndash' ),
 						learndash_get_custom_label_lower( 'course' )
+					),
+					'rest'           => array(
+						'show_in_rest' => LearnDash_REST_API::enabled(),
+						'rest_args'    => array(
+							'schema' => array(
+								'type' => 'integer',
+							),
+						),
 					),
 				),
 				'expire_access_delete_progress' => array(
@@ -511,6 +893,15 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 						learndash_get_custom_label_lower( 'quiz' ),
 						learndash_get_custom_label_lower( 'course' )
 					),
+					'rest'           => array(
+						'show_in_rest' => LearnDash_REST_API::enabled(),
+						'rest_args'    => array(
+							'schema' => array(
+								'type'    => 'boolean',
+								'default' => false,
+							),
+						),
+					),
 				),
 				'course_access_list_enabled'    => array(
 					'name'                => 'course_access_list_enabled',
@@ -522,7 +913,7 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 					'type'                => 'checkbox-switch',
 					'options'             => array(
 						'on' => sprintf(
-							// translators: placeholder: Course
+							// translators: placeholder: Course.
 							esc_html_x( 'You can change the LD-%s enrollees by user ID (Proceed with caution)', 'placeholder: Course', 'learndash' ),
 							learndash_get_custom_label( 'course' )
 						),
@@ -555,88 +946,121 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 				),
 			);
 
-			/*
-			if ( isset( $_GET['course_access_list_meta'] ) ) {
-				$this->setting_option_fields['course_access_list_enabled']['value'] = 'on';
-				$this->setting_option_fields['course_access_list_enabled']['child_section_state'] = 'open';
-
-				$course_access_list_meta_array = learndash_get_course_users_access_from_meta( get_the_ID() );
-				if ( ! empty( $course_access_list_meta_array ) ) {
-					$course_access_list_meta_array = learndash_convert_course_access_list( $course_access_list_meta_array, true );
-				} else {
-					$course_access_list_meta_array = array();
-				}
-
-				$course_access_list_array = learndash_convert_course_access_list( $this->setting_option_values['course_access_list'], true );
-				
-				error_log('course_access_list_meta_array<pre>'. print_r($course_access_list_meta_array, true) .'</pre>');
-				error_log('course_access_list_array<pre>'. print_r($course_access_list_array, true) .'</pre>');
-				
-				$course_access_list_diff_array = array_diff( $course_access_list_meta_array, $course_access_list_array );
-				if ( ! empty( $course_access_list_diff_array ) ) {
-					$course_access_list_diff_str = learndash_convert_course_access_list( $course_access_list_diff_array );
-				} else {
-					$course_access_list_diff_str = '';
-				}
-
-				$this->setting_option_fields['course_access_list_meta'] = array(
-					'name'           => 'course_access_list_meta',
-					'label'          => esc_html__( 'Show Missing Users', 'learndash' ),
-					'type'           => 'textarea',
-					'value'          => $course_access_list_diff_str,
-					'default'        => '',
-					'parent_setting' => 'course_access_list_enabled',
-					'attrs'          => array(
-						'rows' => '2',
-						'cols' => '57',
-					),
-				);
-			} else {
-				$this->setting_option_fields['course_access_list_meta'] = array(
-					'name'           => 'course_access_list_meta',
-					'label'          => esc_html__( 'Show Missing Users', 'learndash' ),
-					'type'           => 'html',
-					'value'          => '<a href="'. add_query_arg( 'course_access_list_meta', '1' ) . '">' . esc_html( 'click to show missing users', 'learndash' ) .'</a>',
-					'parent_setting' => 'course_access_list_enabled',
-				);
-			}
-			*/
-
 			if ( false === learndash_use_legacy_course_access_list() ) {
-				unset( $this->setting_option_fields['course_access_list_enabled'] ); 
-				unset( $this->setting_option_fields['course_access_list'] ); 
+				unset( $this->setting_option_fields['course_access_list_enabled'] );
+				unset( $this->setting_option_fields['course_access_list'] );
 			}
 
+			if ( is_a( $this->_post, 'WP_Post' ) ) {
+				$course_groups = learndash_get_course_groups( $this->_post->ID, true );
+				if ( ( ! empty( $course_groups ) ) && ( 'closed' !== $this->setting_option_values['course_price_type'] ) ) {
+					$alert_message = '';
+
+					if ( 1 === count( $course_groups ) ) {
+						$alert_message = sprintf(
+							// translators: placeholders, course, groups, Group, course, groups.
+							esc_html_x( 'This %1$s is a part of a %2$s. %3$s settings will override %4$s settings for any user enrolled in the %5$s.', 'placeholders, course, group, Group, course, group.', 'learndash' ),
+							learndash_get_custom_label_lower( 'course' ),
+							learndash_get_custom_label_lower( 'group' ),
+							learndash_get_custom_label( 'group' ),
+							learndash_get_custom_label_lower( 'course' ),
+							learndash_get_custom_label_lower( 'group' )
+						);
+					} elseif ( 1 < count( $course_groups ) ) {
+						$alert_message = sprintf(
+							// translators: placeholders, course, groups, Group, course, groups.
+							esc_html_x( 'This %1$s is a part of multiple %2$s. %3$s settings will override %4$s settings for any user enrolled in the %5$s.', 'placeholders, course, groups, Group, course, groups.', 'learndash' ),
+							learndash_get_custom_label_lower( 'course' ),
+							learndash_get_custom_label_lower( 'groups' ),
+							learndash_get_custom_label( 'group' ),
+							learndash_get_custom_label_lower( 'course' ),
+							learndash_get_custom_label_lower( 'groups' )
+						);
+					}
+
+					if ( ! empty( $alert_message ) ) {
+						$this->setting_option_fields = array_merge(
+							array(
+								'course_price_type_group_alert' => array(
+									'name'       => 'course_price_type_group_alert',
+									'type'       => 'html',
+									'input_full' => true,
+									'value'      => wpautop( $alert_message ),
+									'class'      => 'ld-settings-info-banner ld-settings-info-banner-alert',
+								),
+							),
+							$this->setting_option_fields
+						);
+					}
+				}
+			}
+
+			/**
+			 * Filters learndash setting fields.
+			 *
+			 * @param array  $setting_option_fields Associative array of Setting field details like name,type,label,value.
+			 * @param string $settings_section_key Used within the Settings API to uniquely identify this section.
+			 */
 			$this->setting_option_fields = apply_filters( 'learndash_settings_fields', $this->setting_option_fields, $this->settings_metabox_key );
 
 			parent::load_settings_fields();
 		}
 
-		protected function get_save_settings_fields_map_form_post_values( $post_values = array() ) {
+		/**
+		 * Save Metabox Settings Field Map Post Values.
+		 * This function maps the external Post keys to the
+		 * internal field keys.
+		 *
+		 * @since 3.0.0
+		 *
+		 * @param array $post_values Array of post values.
+		 */
+		public function get_save_settings_fields_map_form_post_values( $post_values = array() ) {
 			$settings_fields_map = $this->settings_fields_map;
 			if ( ( isset( $post_values['course_price_type'] ) ) && ( ! empty( $post_values['course_price_type'] ) ) ) {
 				if ( 'paynow' === $post_values['course_price_type'] ) {
 					unset( $settings_fields_map['course_price_type_subscribe_price'] );
 					unset( $settings_fields_map['course_price_type_subscribe_billing_cycle'] );
+					unset( $settings_fields_map['course_price_type_subscribe_billing_recurring_times'] );
+					unset( $settings_fields_map['course_price_type_subscribe_enrollment_url'] );
+
 					unset( $settings_fields_map['course_price_type_closed_price'] );
 					unset( $settings_fields_map['course_price_type_closed_custom_button_label'] );
 					unset( $settings_fields_map['course_price_type_closed_custom_button_url'] );
+					unset( $settings_fields_map['course_trial_price'] );
+					unset( $settings_fields_map['course_trial_duration'] );
 				} elseif ( 'subscribe' === $post_values['course_price_type'] ) {
 					unset( $settings_fields_map['course_price_type_paynow_price'] );
+					unset( $settings_fields_map['course_price_type_paynow_enrollment_url'] );
+
 					unset( $settings_fields_map['course_price_type_closed_price'] );
 					unset( $settings_fields_map['course_price_type_closed_custom_button_label'] );
 					unset( $settings_fields_map['course_price_type_closed_custom_button_url'] );
 				} elseif ( 'closed' === $post_values['course_price_type'] ) {
 					unset( $settings_fields_map['course_price_type_subscribe_price'] );
 					unset( $settings_fields_map['course_price_type_subscribe_billing_cycle'] );
+					unset( $settings_fields_map['course_price_type_subscribe_billing_recurring_times'] );
 					unset( $settings_fields_map['course_price_type_paynow_price'] );
+					unset( $settings_fields_map['course_trial_price'] );
+					unset( $settings_fields_map['course_trial_duration'] );
+					unset( $settings_fields_map['course_price_type_subscribe_enrollment_url'] );
+
+					unset( $settings_fields_map['course_price_type_paynow_enrollment_url'] );
 				} else {
 					unset( $settings_fields_map['course_price_type_paynow_price'] );
+					unset( $settings_fields_map['course_price_type_paynow_enrollment_url'] );
+
 					unset( $settings_fields_map['course_price_type_subscribe_price'] );
 					unset( $settings_fields_map['course_price_type_subscribe_billing_cycle'] );
+					unset( $settings_fields_map['course_price_type_subscribe_billing_recurring_times'] );
+					unset( $settings_fields_map['course_paypal_trial_price'] );
+					unset( $settings_fields_map['course_price_type_subscribe_enrollment_url'] );
+
 					unset( $settings_fields_map['course_price_type_closed_price'] );
 					unset( $settings_fields_map['course_price_type_closed_custom_button_label'] );
 					unset( $settings_fields_map['course_price_type_closed_custom_button_url'] );
+					unset( $settings_fields_map['course_trial_price'] );
+					unset( $settings_fields_map['course_trial_duration'] );
 				}
 			}
 			return $settings_fields_map;
@@ -645,9 +1069,12 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 		/**
 		 * Filter settings values for metabox before save to database.
 		 *
-		 * @param array $settings_values Array of settings values.
+		 * @since 3.0.0
+		 *
+		 * @param array  $settings_values Array of settings values.
 		 * @param string $settings_metabox_key Metabox key.
 		 * @param string $settings_screen_id Screen ID.
+		 *
 		 * @return array $settings_values.
 		 */
 		public function filter_saved_fields( $settings_values = array(), $settings_metabox_key = '', $settings_screen_id = '' ) {
@@ -657,20 +1084,65 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 					$settings_values['course_price_type'] = '';
 				}
 
-				if ( 'paynow' === $settings_values['course_price_type'] ) {
-					$settings_values['custom_button_url']       = '';
-					$settings_values['course_price_billing_p3'] = '';
+				if ( isset( $settings_values['course_price_billing_t3'] ) ) {
 					$settings_values['course_price_billing_t3'] = '';
+				}
+				if ( ! isset( $settings_values['course_price_billing_p3'] ) ) {
+					$settings_values['course_price_billing_p3'] = 0;
+				}
+				if ( ! isset( $settings_values['course_trial_price'] ) ) {
+					$settings_values['course_trial_price'] = '';
+				}
+				if ( ! isset( $settings_values['course_trial_duration_t1'] ) ) {
+					$settings_values['course_trial_duration_t1'] = '';
+				}
+				if ( ! isset( $settings_values['course_trial_duration_p1'] ) ) {
+					$settings_values['course_trial_duration_p1'] = '';
+				}
+
+				if ( isset( $_POST['course_price_billing_t3'] ) ) {
+					$settings_values['course_price_billing_t3'] = strtoupper( esc_attr( $_POST['course_price_billing_t3'] ) );
+					$settings_values['course_price_billing_t3'] = learndash_billing_cycle_field_frequency_validate( $settings_values['course_price_billing_t3'] );
+				}
+
+				if ( isset( $_POST['course_price_billing_p3'] ) ) {
+					$settings_values['course_price_billing_p3'] = absint( $_POST['course_price_billing_p3'] );
+					$settings_values['course_price_billing_p3'] = learndash_billing_cycle_field_interval_validate( $settings_values['course_price_billing_p3'], $settings_values['course_price_billing_t3'] );
+				}
+
+				if ( isset( $_POST['course_trial_duration_t1'] ) ) {
+					$settings_values['course_trial_duration_t1'] = strtoupper( esc_attr( $_POST['course_trial_duration_t1'] ) );
+					$settings_values['course_trial_duration_t1'] = learndash_billing_cycle_field_frequency_validate( $settings_values['course_trial_duration_t1'] );
+				}
+
+				if ( isset( $_POST['course_trial_duration_p1'] ) ) {
+					$settings_values['course_trial_duration_p1'] = absint( $_POST['course_trial_duration_p1'] );
+					$settings_values['course_trial_duration_p1'] = learndash_billing_cycle_field_interval_validate( $settings_values['course_trial_duration_p1'], $settings_values['course_trial_duration_t1'] );
+				}
+
+				if ( 'paynow' === $settings_values['course_price_type'] ) {
+					$settings_values['custom_button_url']        = '';
+					$settings_values['course_price_billing_p3']  = '';
+					$settings_values['course_price_billing_t3']  = '';
+					$settings_values['course_trial_price']       = '';
+					$settings_values['course_trial_duration_t1'] = '';
+					$settings_values['course_trial_duration_p1'] = '';
 				} elseif ( 'subscribe' === $settings_values['course_price_type'] ) {
 					$settings_values['custom_button_url'] = '';
 				} elseif ( 'closed' === $settings_values['course_price_type'] ) {
-					$settings_values['course_price_billing_p3'] = '';
-					$settings_values['course_price_billing_t3'] = '';
+					$settings_values['course_price_billing_p3']  = '';
+					$settings_values['course_price_billing_t3']  = '';
+					$settings_values['course_trial_price']       = '';
+					$settings_values['course_trial_duration_t1'] = '';
+					$settings_values['course_trial_duration_p1'] = '';
 				} else {
-					$settings_values['course_price']            = '';
-					$settings_values['custom_button_url']       = '';
-					$settings_values['course_price_billing_p3'] = '';
-					$settings_values['course_price_billing_t3'] = '';
+					$settings_values['course_price']             = '';
+					$settings_values['custom_button_url']        = '';
+					$settings_values['course_price_billing_p3']  = '';
+					$settings_values['course_price_billing_t3']  = '';
+					$settings_values['course_trial_price']       = '';
+					$settings_values['course_trial_duration_t1'] = '';
+					$settings_values['course_trial_duration_p1'] = '';
 				}
 
 				/**
@@ -718,6 +1190,19 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 					}
 				}
 
+				/**
+				 * Check the URL submitted for any leading/trailing spaces and remove them
+				 */
+				if ( ( isset( $settings_values['custom_button_url'] ) ) && ! empty( $settings_values['custom_button_url'] ) ) {
+					$settings_values['custom_button_url'] = trim( urldecode( $settings_values['custom_button_url'] ) );
+				}
+
+				/**
+				 * Filters LearnDash settings save values.
+				 *
+				 * @param array  $settings_values      An array of setting save values.
+				 * @param string $settings_section_key Used within the Settings API to uniquely identify this section.
+				 */
 				$settings_values = apply_filters( 'learndash_settings_save_values', $settings_values, $this->settings_metabox_key );
 			}
 

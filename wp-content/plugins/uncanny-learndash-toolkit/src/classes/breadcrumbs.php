@@ -26,6 +26,10 @@ class Breadcrumbs extends Config implements RequiredFunctions {
 			add_shortcode( 'uo_breadcrumbs', array( __CLASS__, 'uo_breadcrumbs' ) );
 			//Disable WP SEO breadcrumbs
 			add_filter( 'wpseo_breadcrumb_output', array( __CLASS__, 'wpseo_uo_breadcrumbs' ) );
+			
+			// Enhance LD 3.x breadcrumb
+			add_filter( 'learndash_breadcrumbs', array( __CLASS__, 'uo_learndash_breadcrumbs' ) );
+			add_filter( 'learndash_breadcrumbs_keys', array( __CLASS__, 'uo_breadcrumbs_keys' ) );
 		}
 
 	}
@@ -53,6 +57,8 @@ class Breadcrumbs extends Config implements RequiredFunctions {
 	 * @return array
 	 */
 	public static function get_details() {
+		$module_id   = 'breadcrumbs';
+
 		$class_title = esc_html__( 'Breadcrumbs', 'uncanny-learndash-toolkit' );
 
 		$kb_link = 'https://www.uncannyowl.com/knowledge-base/learndash-breadcrumb-links/';
@@ -66,6 +72,7 @@ class Breadcrumbs extends Config implements RequiredFunctions {
 		$type       = 'free';
 
 		return array(
+			'id'               => $module_id,
 			'title'            => $class_title,
 			'type'             => $type,
 			'category'         => $category,
@@ -462,5 +469,67 @@ class Breadcrumbs extends Config implements RequiredFunctions {
 		}
 
 		return null;
+	}
+	
+	/**
+	 * @param $keys
+	 *
+	 * @since 3.2
+	 *
+	 * @return array
+	 */
+	public static function uo_breadcrumbs_keys( $keys ){
+		
+		$dashboard_link = '';
+		$dashboard_text      = 'Dashboard';
+		$get_dashboard_text       = self::get_settings_value( 'uncanny-breadcrumbs-dashboard-text', __CLASS__ );
+		$get_dashboard_link       = self::get_settings_value( 'uncanny-breadcrumbs-dashboard-link', __CLASS__ );
+		$get_dashboard_separator  = self::get_settings_value( 'uncanny-breadcrumbs-dashboard-separator', __CLASS__ );
+		
+		if ( strlen( trim( $get_dashboard_text ) ) ) {
+			$dashboard_text = $get_dashboard_text;
+		}
+		
+		if ( strlen( trim( $get_dashboard_link ) ) && '0' !== $get_dashboard_link ) {
+			$dashboard_link = get_permalink( $get_dashboard_link );
+		}
+		
+		if ( ! empty( $dashboard_link ) && ! empty( $dashboard_text ) ) {
+			$keys = array_merge(['dashboard'],$keys);
+		}
+		
+		return $keys;
+	}
+	
+	/**
+	 * @param $breadcrumbs
+	 *
+	 * @since 3.2
+	 *
+	 * @return array
+	 */
+	public static function uo_learndash_breadcrumbs( $breadcrumbs ){
+		$dashboard_link          = '';
+		$dashboard_text          = 'Dashboard';
+		$get_dashboard_text      = self::get_settings_value( 'uncanny-breadcrumbs-dashboard-text', __CLASS__ );
+		$get_dashboard_link      = self::get_settings_value( 'uncanny-breadcrumbs-dashboard-link', __CLASS__ );
+		$get_dashboard_separator = self::get_settings_value( 'uncanny-breadcrumbs-dashboard-separator', __CLASS__ );
+		
+		if ( strlen( trim( $get_dashboard_text ) ) ) {
+			$dashboard_text = $get_dashboard_text;
+		}
+		
+		if ( strlen( trim( $get_dashboard_link ) ) && '0' !== $get_dashboard_link ) {
+			$dashboard_link = get_permalink( $get_dashboard_link );
+		}
+		
+		if ( ! empty( $dashboard_link ) && ! empty( $dashboard_text ) ) {
+			$breadcrumbs['dashboard'] = [
+				'permalink' => $dashboard_link,
+				'title'     => $dashboard_text,
+			];
+		}
+		
+		return $breadcrumbs;
 	}
 }

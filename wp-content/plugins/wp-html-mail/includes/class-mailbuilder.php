@@ -394,9 +394,9 @@ final class Haet_Mail_Builder
             $post_type = get_post_type( $post->ID );
             if ( $post_type == 'wphtmlmail_mail' ){
                 wp_enqueue_style( 'wp-color-picker' );
-                wp_enqueue_script('haet_mailbuilder_js',  HAET_MAIL_URL.'/js/mailbuilder.js', array( 'wp-color-picker', 'jquery-ui-dialog', 'jquery-ui-sortable', 'jquery'),'2.9', true);
-                wp_enqueue_style('haet_mailbuilder_css',  HAET_MAIL_URL.'/css/mailbuilder.css', array(), '2.9');
-                wp_enqueue_style('haet_mail_admin_style',  HAET_MAIL_URL.'/css/style.css', array(), '2.9');
+                wp_enqueue_script('haet_mailbuilder_js',  HAET_MAIL_URL.'/js/mailbuilder.js', array( 'wp-color-picker', 'jquery-ui-dialog', 'jquery-ui-sortable', 'jquery'),'3.0', true);
+                wp_enqueue_style('haet_mailbuilder_css',  HAET_MAIL_URL.'/css/mailbuilder.css', array(), '3.0');
+                wp_enqueue_style('haet_mail_admin_style',  HAET_MAIL_URL.'/css/style.css', array(), '3.0');
 
                 $enqueue_data = array(
                         'translations'  =>  array(),
@@ -419,32 +419,51 @@ final class Haet_Mail_Builder
 
 
     public function get_email_post_id( $email_name ){
+        // backslash is not supported in post titles
+        $email_name = str_replace( '\\', '__', $email_name ); 
         $options = Haet_Mail()->get_options();
         if( !isset($options['email_post_ids']) )
             $options['email_post_ids'] = array();
 
-        if( !isset( $options['email_post_ids'][$email_name] ) ||  !$options['email_post_ids'][$email_name] )
+        if( !isset( $options['email_post_ids'][$email_name] ) || !$options['email_post_ids'][$email_name] )
             $options['email_post_ids'][$email_name] = $this->create_email( $email_name );
 
-        if( !get_post( $options['email_post_ids'][$email_name] ) ){
-            // just in case polylang is installed it may have returned no post because the email doesn't exist in current language
-            // so we check once again wheter it exists in other languages. 
-            // missing translations are created a few lines below
-            if( !function_exists('pll_get_post') || !pll_get_post( $options['email_post_ids'][$email_name] ) ) 
-                $options['email_post_ids'][$email_name] = $this->create_email( $email_name ); 
+        $translated_email_post_id = false;
+        if( $options['email_post_ids'][$email_name] && Haet_Mail()->multilanguage->is_multilanguage_site() ){
+            $translated_email_post_id = Haet_Mail()->multilanguage->get_email_post_id_in_current_language( $options['email_post_ids'][$email_name] );
         }
-            
+
+        // if( !get_post( $options['email_post_ids'][$email_name] ) ){
+        //     // just in case polylang is installed it may have returned no post because the email doesn't exist in current language
+        //     // so we check once again wheter it exists in other languages. 
+        //     // missing translations are created a few lines below
+        //     if( !function_exists('pll_get_post') || !pll_get_post( $options['email_post_ids'][$email_name] ) ) 
+        //         $options['email_post_ids'][$email_name] = $this->create_email( $email_name ); 
+        // }
+
+        // post ID exists but post can't be loaded
+        if( !get_post( $options['email_post_ids'][$email_name] ) 
+            && (
+                !Haet_Mail()->multilanguage->is_multilanguage_site() // just doesn't exist (language independent)
+                || !$translated_email_post_id                        // no translation exists
+                || !get_post( $translated_email_post_id ) )          // translation id exists but post does not
+            ){
+            // create the first email post in any language
+            $options['email_post_ids'][$email_name] = $this->create_email( $email_name ); 
+            $translated_email_post_id = false;
+        }
+        
 
         update_option('haet_mail_options', $options );
 
         $email_post_id = $options['email_post_ids'][$email_name];
 
-        // if WPML is in use we have a look for translations
-        if( $email_post_id && defined( 'ICL_LANGUAGE_CODE' ) ){ 
-            $translated_email_post_id = apply_filters( 'wpml_object_id',  $email_post_id, 'wphtmlmail_mail', FALSE );
-            if( !$translated_email_post_id ){
-                $translated_email_post_id = $this->create_email( $email_name );
-                
+        // create missing translations
+        if( $email_post_id && Haet_Mail()->multilanguage->is_multilanguage_site() && !$translated_email_post_id ){
+            $translated_email_post_id = $this->create_email( $email_name );
+
+            if( Haet_Mail()->multilanguage->get_multilang_plugin() === 'WPML' ){
+                // create language settings for WPML
                 $wpml_element_type = apply_filters( 'wpml_element_type', 'wphtmlmail_mail' );
                 
                 $get_language_args = array('element_id' => $email_post_id, 'element_type' => 'wphtmlmail_mail' );
@@ -459,29 +478,20 @@ final class Haet_Mail_Builder
                 );
          
                 do_action( 'wpml_set_element_language_details', $set_language_args );
-            }
-
-            return $translated_email_post_id;
-        }elseif( $email_post_id && function_exists('pll_get_post') ){ // if POLYLANG is in use we have a look for translations
-            $translated_email_post_id = pll_get_post( $email_post_id );
-            if( !$translated_email_post_id ){
-                $translated_email_post_id = $this->create_email( $email_name );
-                // set language of the attachment
+            }elseif( Haet_Mail()->multilanguage->get_multilang_plugin() === 'Polylang' ){
+                // create language settings for Polylang
                 PLL()->model->post->set_language($translated_email_post_id, pll_current_language());
                 
                 $translations = PLL()->model->post->get_translations($email_post_id);
 		        if (!$translations && $lang = PLL()->model->post->get_language($email_post_id)) {
 			        $translations[$lang->slug] = $email_post_id;
                 }
-                $translations[pll_current_language()] = $tr_id;
-                PLL()->model->post->save_translations($tr_id, $translations);
-
+                $translations[pll_current_language()] = $translated_email_post_id;
+                PLL()->model->post->save_translations($translated_email_post_id, $translations);
             }
-
-            return $translated_email_post_id;
         }
-
-        return $options['email_post_ids'][$email_name];
+        
+        return $translated_email_post_id ? $translated_email_post_id : $email_post_id;
     }
 
 
@@ -489,8 +499,10 @@ final class Haet_Mail_Builder
 
 
     private function create_email( $email_name ){
+        // backslash is not supported in post titles
+        $email_post_title = str_replace( '\\', '__', $email_name ); 
         $postarr = array(
-                'post_title'    =>  $email_name,
+                'post_title'    =>  $email_post_title,
                 'post_status'   =>  'publish',
                 'post_type'     =>  'wphtmlmail_mail'
             );
@@ -513,7 +525,7 @@ final class Haet_Mail_Builder
                 $initArray['block_formats'] = 'Headline=h1;Subheadline=h2;Paragraph=p;';
 
                 $fonts = Haet_Mail()->get_fonts();
-                $initArray['font_formats'] = "";
+                $initArray['font_formats'] = " =-;";
                 foreach ($fonts as $font => $display_name) {
                     $initArray['font_formats'] .= "$display_name=$font;";
                 }
@@ -623,6 +635,7 @@ final class Haet_Mail_Builder
         $email_id = Haet_Mail_Builder()->get_email_post_id( $email_name );
         $mailbuilder_json = get_post_meta( $email_id, 'mailbuilder_json', true );
         $mailbuilder_array = json_decode( $mailbuilder_json );
+
         if ( $mailbuilder_array != null ):
             echo '<!--mailbuilder[' . $email_name . ']-->';
             echo '<!--mailbuilder-content-start-->';

@@ -3,7 +3,7 @@
  * @package Content Aware Sidebars
  * @author Joachim Jensen <joachim@dev.institute>
  * @license GPLv3
- * @copyright 2019 by Joachim Jensen
+ * @copyright 2021 by Joachim Jensen
  */
 
 defined('ABSPATH') || exit;
@@ -13,14 +13,14 @@ class CAS_Quick_Select
     const MODULE_NAME = 'post_type';
     const NONCE = '_cas_nonce';
 
-    protected static $_theme_sidebars = array();
+    protected static $_theme_sidebars = [];
 
     public function __construct()
     {
         new CAS_Post_Type_Sidebar();
         add_action(
             'current_screen',
-            array(__CLASS__,'load_screen')
+            [__CLASS__,'load_screen']
         );
     }
 
@@ -40,7 +40,7 @@ class CAS_Quick_Select
                 return;
             }
 
-            $legacy_removal = !has_action('admin_init', array('CAS_Post_Type_Sidebar','initiate'));
+            $legacy_removal = !has_action('admin_init', ['CAS_Post_Type_Sidebar','initiate']);
 
             if ($legacy_removal) {
                 _deprecated_hook(
@@ -65,22 +65,22 @@ class CAS_Quick_Select
             if (isset($post_types[$screen->post_type]) && self::$_theme_sidebars) {
                 add_action(
                     'add_meta_boxes_'.$screen->post_type,
-                    array(__CLASS__,'create_meta_boxes')
+                    [__CLASS__,'create_meta_boxes']
                 );
                 add_action(
                     'save_post_'.$screen->post_type,
-                    array(__CLASS__,'save_post_sidebars'),
+                    [__CLASS__,'save_post_sidebars'],
                     10,
                     2
                 );
                 add_action(
                     'admin_enqueue_scripts',
-                    array(__CLASS__,'register_scripts'),
+                    [__CLASS__,'register_scripts'],
                     8
                 );
                 add_action(
                     'admin_enqueue_scripts',
-                    array(__CLASS__,'enqueue_scripts'),
+                    [__CLASS__,'enqueue_scripts'],
                     11
                 );
             }
@@ -101,10 +101,10 @@ class CAS_Quick_Select
 
         foreach ($wp_registered_sidebars as $sidebar) {
             if (!isset($cas_sidebars[$sidebar['id']])) {
-                self::$_theme_sidebars[$sidebar['id']] = array(
+                self::$_theme_sidebars[$sidebar['id']] = [
                     'label'   => $sidebar['name'],
-                    'options' => array()
-                );
+                    'options' => []
+                ];
             }
         }
     }
@@ -143,7 +143,7 @@ class CAS_Quick_Select
         }
 
         $meta_key = WPCACore::PREFIX . self::MODULE_NAME;
-        $new = isset($_POST['cas_sidebars']) ? $_POST['cas_sidebars'] : array();
+        $new = isset($_POST['cas_sidebars']) ? $_POST['cas_sidebars'] : [];
 
         $relations = self::_get_content_sidebars($post);
         $user_can_create_sidebar = current_user_can(CAS_App::CAPABILITY);
@@ -161,11 +161,11 @@ class CAS_Quick_Select
                     //check permissions here
                     if ($sidebar_id[0] == '_') {
                         if ($user_can_create_sidebar) {
-                            $id = wp_insert_post(array(
+                            $id = wp_insert_post([
                                 'post_title'  => str_replace('__', ',', substr($sidebar_id, 1)),
                                 'post_status' => CAS_App::STATUS_INACTIVE,
                                 'post_type'   => CAS_App::TYPE_SIDEBAR
-                            ));
+                            ]);
                             if ($id) {
                                 //wp_insert_post does not handle meta before WP4.4
                                 add_post_meta($id, WPCACore::PREFIX.'host', $host);
@@ -175,7 +175,7 @@ class CAS_Quick_Select
                     } else {
                         //Add post to group with other posts
                         $id = intval($sidebar_id);
-                        $condition_groups = get_posts(array(
+                        $condition_groups = get_posts([
                             'posts_per_page' => 1,
                             'meta_key'       => $meta_key,
                             'meta_value'     => $post->post_type,
@@ -183,7 +183,7 @@ class CAS_Quick_Select
                             'post_parent'    => $id,
                             'post_type'      => WPCACore::TYPE_CONDITION_GROUP,
                             'post_status'    => WPCACore::STATUS_PUBLISHED
-                        ));
+                        ]);
                         if ($condition_groups) {
                             $condition_group_id = $condition_groups[0]->ID;
                         } else {
@@ -193,7 +193,6 @@ class CAS_Quick_Select
 
                     if ($condition_group_id) {
                         add_post_meta($condition_group_id, $meta_key, $post_id);
-                        //add_post_meta($condition_group_id, $meta_key.'_direct', 1);
                     }
                 }
             }
@@ -205,9 +204,11 @@ class CAS_Quick_Select
         $host_meta = CAS_App::instance()->manager()->metadata()->get('host');
         foreach ($relations as $sidebar_id => $group_id) {
             if (isset($sidebars[CAS_App::SIDEBAR_PREFIX.$sidebar_id])) {
-                $host_id = $host_meta->get_data($sidebar_id);
-                if (!isset(self::$_theme_sidebars[$host_id])) {
-                    continue;
+                $host_ids = $host_meta->get_data($sidebar_id, false, false);
+                foreach ($host_ids as $host_id) {
+                    if (!isset(self::$_theme_sidebars[$host_id])) {
+                        continue 2;
+                    }
                 }
             }
 
@@ -240,22 +241,24 @@ class CAS_Quick_Select
         $manager = CAS_App::instance()->manager();
         $host_meta = $manager->metadata()->get('host');
         foreach ($manager->sidebars as $sidebar) {
-            $host_id = $host_meta->get_data($sidebar->ID);
-            if (isset(self::$_theme_sidebars[$host_id])) {
-                self::$_theme_sidebars[$host_id]['options'][$sidebar->ID] = array(
-                    'id'   => $sidebar->ID,
-                    'text' => $sidebar->post_title.self::sidebar_states($sidebar)
-                );
-                if (isset($post_sidebars[$sidebar->ID])) {
-                    self::$_theme_sidebars[$host_id]['options'][$sidebar->ID]['select'] = 1;
+            $host_ids = $host_meta->get_data($sidebar->ID, false, false);
+            foreach ($host_ids as $host_id) {
+                if (isset(self::$_theme_sidebars[$host_id])) {
+                    self::$_theme_sidebars[$host_id]['options'][$sidebar->ID] = [
+                        'id'   => $sidebar->ID,
+                        'text' => $sidebar->post_title.self::sidebar_states($sidebar)
+                    ];
+                    if (isset($post_sidebars[$sidebar->ID])) {
+                        self::$_theme_sidebars[$host_id]['options'][$sidebar->ID]['select'] = 1;
+                    }
                 }
             }
         }
 
         $post_type = get_post_type_object($post->post_type);
-        $content = array(
+        $content = [
             __('Author')
-        );
+        ];
         if ($post_type->hierarchical) {
             $content[] = __('Child Page', 'content-aware-sidebars');
         }
@@ -271,19 +274,19 @@ class CAS_Quick_Select
         $content[] = __('Archive Page', 'content-aware-sidebars');
 
         $path = plugin_dir_path(dirname(__FILE__)).'view/';
-        $view = WPCAView::make($path.'sidebars_quick_select.php', array(
+        $view = WPCAView::make($path.'sidebars_quick_select.php', [
             'post'     => $post,
             'sidebars' => self::$_theme_sidebars,
             'limit'    => 3,
             'content'  => $content,
             'singular' => $post_type->labels->singular_name,
             'nonce'    => wp_nonce_field(self::NONCE.$post->ID, self::NONCE, false, false)
-        ));
+        ]);
 
         add_meta_box(
             'cas-content-sidebars',
             __('Sidebars - Quick Select', 'content-aware-sidebars'),
-            array($view, 'render'),
+            [$view, 'render'],
             $post->post_type,
             'side',
             'default'
@@ -326,11 +329,11 @@ class CAS_Quick_Select
         wp_register_script(
             'select2',
             plugins_url('lib/wp-content-aware-engine/assets/js/select2.min.js', dirname(__FILE__)),
-            array('jquery'),
+            ['jquery'],
             '4.0.3',
             false
         );
-        wp_register_script('cas/sidebars/suggest', plugins_url('js/suggest-sidebars.min.js', dirname(__FILE__)), array('select2'), CAS_App::PLUGIN_VERSION, true);
+        wp_register_script('cas/sidebars/suggest', plugins_url('assets/js/suggest-sidebars.min.js', dirname(__FILE__)), ['select2'], CAS_App::PLUGIN_VERSION, true);
     }
 
     /**
@@ -346,10 +349,10 @@ class CAS_Quick_Select
         wp_enqueue_style(CAS_App::META_PREFIX.'condition-groups');
         wp_enqueue_script('cas/sidebars/suggest');
 
-        $labels = array(
+        $labels = [
             'createNew' => __('Create New', 'content-aware-sidebars'),
             'labelNew'  => __('New', 'content-aware-sidebars')
-        );
+        ];
         if (current_user_can(CAS_App::CAPABILITY)) {
             $labels['notFound'] = __('Type to Add New Sidebar', 'content-aware-sidebars');
         } else {
@@ -365,10 +368,10 @@ class CAS_Quick_Select
      */
     protected static function get_special_post_ids()
     {
-        $special_post_ids = array(
+        $special_post_ids = [
             get_option('page_on_front'),
             get_option('page_for_posts'),
-        );
+        ];
 
         if (defined('WC_VERSION')) {
             $special_post_ids[] = get_option('woocommerce_shop_page_id');
@@ -386,7 +389,7 @@ class CAS_Quick_Select
      */
     protected static function _get_content_sidebars($post)
     {
-        $sidebars = array();
+        $sidebars = [];
         if ($post) {
             global $wpdb;
             $query = $wpdb->get_results($wpdb->prepare(
@@ -396,7 +399,7 @@ class CAS_Quick_Select
 				INNER JOIN $wpdb->postmeta gm ON gm.post_id = g.ID AND gm.meta_key = '".WPCACore::PREFIX.self::MODULE_NAME."'
 				WHERE s.post_status <> 'trash'
 				AND s.post_type = '".CAS_App::TYPE_SIDEBAR."'
-				AND g.post_status = '".WPCACore::STATUS_PUBLISHED."'
+				AND g.post_status IN ('".WPCACore::STATUS_PUBLISHED."','".WPCACore::STATUS_OR."')
 				AND gm.meta_value = %d
 				ORDER BY s.post_title ASC",
                 $post->ID
@@ -422,7 +425,7 @@ class CAS_Post_Type_Sidebar
 {
     public function __construct()
     {
-        add_action('admin_init', array(__CLASS__,'initiate'));
+        add_action('admin_init', [__CLASS__,'initiate']);
     }
 
     public static function initiate()

@@ -32,30 +32,7 @@ if ( ! class_exists( 'myCRED_Transfer_Module' ) ) :
 
 			parent::__construct( 'myCRED_Transfer_Module', array(
 				'module_name' => 'transfers',
-				'defaults'    => array(
-					'types'      => array( MYCRED_DEFAULT_TYPE_KEY ),
-					'logs'       => array(
-						'sending'   => 'Transfer of %plural% to %display_name%',
-						'receiving' => 'Transfer of %plural% from %display_name%'
-					),
-					'errors'     => array(
-						'low'       => 'You do not have enough %plural% to send.',
-						'over'      => 'You have exceeded your %limit% transfer limit.'
-					),
-					'templates'  => array(
-						'login'     => '',
-						'balance'   => 'Your current balance is %balance%',
-						'limit'     => 'Your current %limit% transfer limit is %left%',
-						'button'    => 'Transfer'
-					),
-					'autofill'   => 'user_login',
-					'reload'     => 1,
-					'message'    => 0,
-					'limit'      => array(
-						'amount'    => 1000,
-						'limit'     => 'none'
-					)
-				),
+				'defaults'    => mycred_get_addon_defaults( 'transfers' ),
 				'register'    => false,
 				'add_to_core' => true
 			) );
@@ -142,7 +119,7 @@ if ( ! class_exists( 'myCRED_Transfer_Module' ) ) :
 		 * Front Footer
 		 * @filter 'mycred_transfer_messages'
 		 * @since 0.1
-		 * @version 1.2.1
+		 * @version 1.2.2
 		 */
 		public function maybe_load_script() {
 
@@ -175,9 +152,10 @@ if ( ! class_exists( 'myCRED_Transfer_Module' ) ) :
 				'error_7'   => esc_attr__( 'Insufficient Funds. Please try a lower amount.', 'mycred' ),
 				'error_8'   => esc_attr__( 'Transfer Limit exceeded.', 'mycred' ),
 				'error_9'   => esc_attr__( 'Communications error. Please try again later.', 'mycred' ),
-				'error_10'  => esc_attr__( 'The selected point type can not be transferred.', 'mycred' )
+				'error_10'  => esc_attr__( 'The selected point type can not be transferred.', 'mycred' ),
+				'error_11'  => esc_attr__( 'Selected recipient ain\'t allowed by admin.', 'mycred' ),
 			) );
-
+			
 			wp_localize_script(
 				'mycred-transfer',
 				'myCREDTransfer',
@@ -223,6 +201,8 @@ if ( ! class_exists( 'myCRED_Transfer_Module' ) ) :
 				}
 
 			}
+
+			$results = apply_filters( 'mycred_transfer_users_list' , $results, $user_id, $this->transfers['autofill'] );
 
 			wp_send_json( $results );
 

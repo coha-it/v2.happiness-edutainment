@@ -9,7 +9,7 @@ global $rpg_settingsf ;
 	global $rpg_groups;
 	global $rpg_group_last ;
 	global $rpg_roles ;
-	
+		
 	
 	?>
 	<div class="wrap">
@@ -68,22 +68,21 @@ global $rpg_settingsf ;
 	
 	
 	<table class="form-table">
-			<tr>
-			
+		<tr>		
 			<td>
-			<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
-<input type="hidden" name="cmd" value="_s-xclick">
-<input type="hidden" name="hosted_button_id" value="S6PZGWPG3HLEA">
-<input type="image" src="https://www.paypalobjects.com/en_US/GB/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal – The safer, easier way to pay online.">
-<img alt="" border="0" src="https://www.paypalobjects.com/en_GB/i/scr/pixel.gif" width="1" height="1">
-</form>
-</td><td>
-<?php _e("If you find this plugin useful, please consider donating just a couple of dollars to help me develop and maintain it. You support will be appreciated", 'bbp-private-groups'); ?>
-
-
-</td>
-</tr>
-</table>
+				<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+					<input type="hidden" name="cmd" value="_s-xclick" />
+					<input type="hidden" name="hosted_button_id" value="GEMT7XS7C8PS4" />
+					<input type="image" src="https://www.paypalobjects.com/en_US/GB/i/btn/btn_donateCC_LG.gif" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" />
+					<img alt="" border="0" src="https://www.paypal.com/en_GB/i/scr/pixel.gif" width="1" height="1" />
+				</form>
+			</td>
+			<td>
+				<?php _e('If you find this plugin useful, please consider donating just a few dollars to help me develop and maintain it. You support will be appreciated', 'bbp-style-pack'); ?>
+			</td>
+			
+		</tr>
+	</table>
 
 <?php //************************* Forum Visibility settings *************************// ?>
 
@@ -267,7 +266,9 @@ global $rpg_settingsf ;
 					</th>
 				</tr>
 				<?php 
-				$count=count ($rpg_groups) ;
+				if (!empty ($rpg_groups)) $count=count ($rpg_groups) ;
+				else $count = 1 ;
+				//a new group is added if $rpg_groups['activate_new_group'] is set, as this becomes part of the count, so it looks like we have an extra group in the count
 				if ($count==1) $count=2 ;
 				for ($i = 0 ; $i < $count ; ++$i) {
 					$g=$i+1 ;

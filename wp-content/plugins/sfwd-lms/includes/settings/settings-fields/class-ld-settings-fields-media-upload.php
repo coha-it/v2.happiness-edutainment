@@ -1,20 +1,29 @@
 <?php
 /**
- * LearnDash Settings field Media Upload.
+ * LearnDash Media Upload Settings Field.
  *
- * @package LearnDash
- * @subpackage Settings
+ * @since 3.0.0
+ * @package LearnDash\Settings\Field
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'LearnDash_Settings_Fields_Media_Upload' ) ) ) {
 
 	/**
-	 * Class to create the settings field.
+	 * Class LearnDash Media Upload Settings Field.
+	 *
+	 * @since 3.0.0
+	 * @uses LearnDash_Settings_Fields
 	 */
 	class LearnDash_Settings_Fields_Media_Upload extends LearnDash_Settings_Fields {
 
 		/**
 		 * Public constructor for class
+		 *
+		 * @since 3.0.0
 		 */
 		public function __construct() {
 			$this->field_type = 'media-upload';
@@ -25,14 +34,17 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 		/**
 		 * Function to crete the settiings field.
 		 *
-		 * @since 2.4
+		 * @since 3.0.0
 		 *
 		 * @param array $field_args An array of field arguments used to process the ouput.
 		 * @return void
 		 */
 		public function create_section_field( $field_args = array() ) {
+
+			/** This filter is documented in includes/settings/settings-fields/class-ld-settings-fields-checkbox-switch.php */
 			$field_args = apply_filters( 'learndash_settings_field', $field_args );
 
+			/** This filter is documented in includes/settings/settings-fields/class-ld-settings-fields-checkbox-switch.php */
 			$html = apply_filters( 'learndash_settings_field_html_before', '', $field_args );
 
 			if ( ( isset( $field_args['desc'] ) ) && ( ! empty( $field_args['desc'] ) ) ) {
@@ -43,7 +55,7 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 			$html .= $this->get_field_legend( $field_args );
 
 			$html .= '<div class="learndash-section-field-media-upload_wrapper" ';
-			$html .= ' id="' . $this->get_field_attribute_id( $field_args, false ) . '_wrapper" ';
+			$html .= ' id="' . esc_attr( $this->get_field_attribute_id( $field_args, false ) ) . '_wrapper" ';
 			$html .= '>';
 
 			$default_img_url = LEARNDASH_LMS_PLUGIN_URL . 'assets/images/nologo.jpg';
@@ -64,7 +76,7 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 			}
 
 			$html .= '<div class="image-preview-wrapper">';
-			$html .= '<img class="image-preview" src="' . $image_url . '" style="max-width: 100%; max-height: 200px; border: 1px dashed #ccc;" data-default="' . $default_img_url . '"/>';
+			$html .= '<img class="image-preview" src="' . esc_url( $image_url ) . '" style="max-width: 100%; max-height: 200px; border: 1px dashed #ccc;" data-default="' . esc_attr( $default_img_url ) . '"/>';
 			$html .= '</div>';
 			$html .= '<input type="button" class="button image-remove-button" title="' . esc_html__( 'remove image', 'learndash' ) . '" value="' . esc_html_x( 'X', 'placeholder: clear image', 'learndash' ) . '" />';
 			$html .= '<input type="button" class="button image-upload-button" title="' . esc_html__( 'Select/upload image', 'learndash' ) . '"  value="' . esc_html__( 'Select image', 'learndash' ) . '" />';
@@ -78,7 +90,7 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 			$html .= $this->get_field_attribute_required( $field_args );
 
 			if ( ( isset( $image_id ) ) && ( ! empty( $image_id ) ) ) {
-				$html .= ' value="' . $image_id . '" ';
+				$html .= ' value="' . esc_attr( $image_id ) . '" ';
 			} else {
 				$html .= ' value="" ';
 			}
@@ -87,15 +99,16 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 			$html .= '</div>';
 			$html .= '</fieldset>';
 
+			/** This filter is documented in includes/settings/settings-fields/class-ld-settings-fields-checkbox-switch.php */
 			$html = apply_filters( 'learndash_settings_field_html_after', $html, $field_args );
 
-			echo $html;
+			echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Need to output HTML
 		}
 
 		/**
 		 * Validate field
 		 *
-		 * @since 2.6.0
+		 * @since 3.0.0
 		 *
 		 * @param mixed  $val Value to validate.
 		 * @param string $key Key of value being validated.

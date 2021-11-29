@@ -4,168 +4,242 @@
  *
  * Used to provide proper data to Course Builder app.
  *
- * @package LearnDash
+ * @since 3.0.0
+ * @package LearnDash\Builder
  */
 
 namespace LearnDash\Admin\CourseBuilderHelpers;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
- * Provide Course Data to Builder.
+ * Gets the course data for the course builder.
  *
- * @param Object $data The data passed down to front-end.
- * @return Object
+ * @since 3.4.0
+ *
+ * @param array $data The data passed down to the front-end.
+ *
+ * @return array The data passed down to the front-end.
  */
-function get_course_data( $data ) {
+function learndash_get_course_data( $data ) {
+
+	$data['post_statuses'] = learndash_get_step_post_statuses();
+
+	if ( ( defined( 'LEARNDASH_COURSE_FUNCTIONS_LEGACY' ) ) && ( true === LEARNDASH_COURSE_FUNCTIONS_LEGACY ) ) {
+		return \learndash_get_course_data_legacy( $data );
+	}
+
 	global $pagenow, $typenow;
 
 	$output_lessons = array();
 	$output_quizzes = array();
 	$sections       = array();
 
-if ( ( 'post.php' === $pagenow ) && ( learndash_get_post_type_slug( 'course' ) === $typenow ) ) {
-		$course_id = isset( $_GET['course_id'] ) ? absint( $_GET['course_id'] ) : get_the_ID();
+	if ( ( 'post.php' === $pagenow ) && ( learndash_get_post_type_slug( 'course' ) === $typenow ) ) {
+		$course_id = get_the_ID();
 		if ( ! empty( $course_id ) ) {
 			// Get a list of lessons to loop.
-			$lessons        = learndash_get_course_lessons_list( $course_id, null, array( 'num' => 0 ) );
-			$output_lessons = [];
-			$lesson_topics  = [];
+			$lessons        = learndash_course_get_lessons(
+				$course_id,
+				array(
+					'return_type' => 'WP_Post',
+					'per_page'    => 0,
+				)
+			);
+			$output_lessons = array();
+			$lesson_topics  = array();
 
-			if ( ( is_array( $lessons ) )  && ( ! empty( $lessons ) ) ) {
+			if ( ( is_array( $lessons ) ) && ( ! empty( $lessons ) ) ) {
 				// Loop course's lessons.
-				foreach ( $lessons as $lesson ) {
-					$post          = $lesson['post'];
+				foreach ( $lessons as $lesson_post ) {
+					if ( ! is_a( $lesson_post, 'WP_Post' ) ) {
+						continue;
+					}
+
 					// Get lesson's topics.
-					$topics        = learndash_topic_dots( $post->ID, false, 'array', null, $course_id );
-					$output_topics = [];
+					$topics = learndash_course_get_topics(
+						$course_id,
+						$lesson_post->ID,
+						array(
+							'return_type' => 'WP_Post',
+							'per_page'    => 0,
+						)
+					);
 
-					if ( ( is_array( $topics ) )  && ( ! empty( $topics ) ) ) {
+					$output_topics = array();
+
+					if ( ( is_array( $topics ) ) && ( ! empty( $topics ) ) ) {
 						// Loop Topics.
-						foreach ( $topics as $topic ) {
-							// Get topic's quizzes.
-							$topic_quizzes        = learndash_get_lesson_quiz_list( $topic->ID, null, $course_id );
-							$output_topic_quizzes = [];
+						foreach ( $topics as $topic_post ) {
+							if ( ! is_a( $topic_post, 'WP_Post' ) ) {
+								continue;
+							}
 
-							if ( ( is_array( $topic_quizzes ) )  && ( ! empty( $topic_quizzes ) ) ) {
+							// Get Topic's Quizzes.
+							$topic_quizzes = learndash_course_get_quizzes(
+								$course_id,
+								$topic_post->ID,
+								array(
+									'return_type' => 'WP_Post',
+									'per_page'    => 0,
+								)
+							);
+
+							$output_topic_quizzes = array();
+
+							if ( ( is_array( $topic_quizzes ) ) && ( ! empty( $topic_quizzes ) ) ) {
 								// Loop Topic's Quizzes.
-								foreach ( $topic_quizzes as $quiz ) {
-									$quiz_post = $quiz['post'];
+								foreach ( $topic_quizzes as $quiz_post ) {
+									if ( ! is_a( $quiz_post, 'WP_Post' ) ) {
+										continue;
+									}
 
-									$output_topic_quizzes[] = [
-										'ID'         => $quiz_post->ID,
-										'expanded'   => true,
-										'post_title' => $quiz_post->post_title,
-										'type'       => $quiz_post->post_type,
-										'url'        => learndash_get_step_permalink( $quiz_post->ID, $course_id ),
-										'edit_link'  => get_edit_post_link( $quiz_post->ID, '' ),
-										'tree'       => [],
-									];
+									$output_topic_quizzes[] = array(
+										'ID'          => $quiz_post->ID,
+										'expanded'    => true,
+										'post_title'  => $quiz_post->post_title,
+										'post_status' => learndash_get_step_post_status_slug( $quiz_post ),
+										'type'        => $quiz_post->post_type,
+										'url'         => learndash_get_step_permalink( $quiz_post->ID, $course_id ),
+										'edit_link'   => get_edit_post_link( $quiz_post->ID, '' ),
+										'tree'        => array(),
+									);
 								}
 							}
 
-							$output_topics[] = [
-								'ID'         => $topic->ID,
-								'expanded'   => true,
-								'post_title' => $topic->post_title,
-								'type'       => $topic->post_type,
-								'url'        => learndash_get_step_permalink( $topic->ID, $course_id ),
-								'edit_link'  => get_edit_post_link( $topic->ID, '' ),
-								'tree'       => $output_topic_quizzes,
-							];
+							$output_topics[] = array(
+								'ID'          => $topic_post->ID,
+								'expanded'    => true,
+								'post_title'  => $topic_post->post_title,
+								'post_status' => learndash_get_step_post_status_slug( $topic_post ),
+								'type'        => $topic_post->post_type,
+								'url'         => learndash_get_step_permalink( $topic_post->ID, $course_id ),
+								'edit_link'   => get_edit_post_link( $topic_post->ID, '' ),
+								'tree'        => $output_topic_quizzes,
+							);
 						}
 					}
 
 					// Get lesson's quizzes.
-					$quizzes        = learndash_get_lesson_quiz_list( $post->ID, null, $course_id );
-					$output_quizzes = [];
-					
-					if ( ( is_array( $quizzes ) )  && ( ! empty( $quizzes ) ) ) {
-						// Loop lesson's quizzes.
-						foreach ( $quizzes as $quiz ) {
-							$quiz_post = $quiz['post'];
+					$lesson_quizzes = learndash_course_get_quizzes(
+						$course_id,
+						$lesson_post->ID,
+						array(
+							'return_type' => 'WP_Post',
+							'per_page'    => 0,
+						)
+					);
+					$output_quizzes = array();
 
-							$output_quizzes[] = [
-								'ID'         => $quiz_post->ID,
-								'expanded'   => true,
-								'post_title' => $quiz_post->post_title,
-								'type'       => $quiz_post->post_type,
-								'url'        => learndash_get_step_permalink( $quiz_post->ID, $course_id ),
-								'edit_link'  => get_edit_post_link( $quiz_post->ID, '' ),
-								'tree'       => [],
-							];
+					if ( ( is_array( $lesson_quizzes ) ) && ( ! empty( $lesson_quizzes ) ) ) {
+						// Loop lesson's quizzes.
+						foreach ( $lesson_quizzes as $quiz_post ) {
+							if ( ! is_a( $quiz_post, 'WP_Post' ) ) {
+								continue;
+							}
+
+							$output_quizzes[] = array(
+								'ID'          => $quiz_post->ID,
+								'expanded'    => true,
+								'post_title'  => $quiz_post->post_title,
+								'post_status' => learndash_get_step_post_status_slug( $quiz_post ),
+								'type'        => $quiz_post->post_type,
+								'url'         => learndash_get_step_permalink( $quiz_post->ID, $course_id ),
+								'edit_link'   => get_edit_post_link( $quiz_post->ID, '' ),
+								'tree'        => array(),
+							);
 						}
 					}
 
 					// Output lesson with child tree.
-					$output_lessons[] = [
-						'ID'         => $post->ID,
-						'expanded'   => false,
-						'post_title' => $post->post_title,
-						'type'       => $post->post_type,
-						'url'        => $lesson['permalink'],
-						'edit_link'  => get_edit_post_link( $post->ID, '' ),
-						'tree'       => array_merge( $output_topics, $output_quizzes ),
-					];
+					$output_lessons[] = array(
+						'ID'          => $lesson_post->ID,
+						'expanded'    => false,
+						'post_title'  => $lesson_post->post_title,
+						'post_status' => learndash_get_step_post_status_slug( $lesson_post ),
+						'type'        => $lesson_post->post_type,
+						'url'         => learndash_get_step_permalink( $lesson_post->ID, $course_id ),
+						'edit_link'   => get_edit_post_link( $lesson_post->ID, '' ),
+						'tree'        => array_merge( $output_topics, $output_quizzes ),
+					);
 				}
 			}
 
-			// Get a list of quizzes to loop.
-			$quizzes        = learndash_get_course_quiz_list( $course_id );
-			$output_quizzes = [];
-			
-			if ( ( is_array( $quizzes ) )  && ( ! empty( $quizzes ) ) ) {
-				// Loop course's quizzes.
-				foreach ( $quizzes as $quiz ) {
-					$post = $quiz['post'];
+			// Get a list of course (global) quizzes.
+			$global_quizzes = learndash_course_get_quizzes(
+				$course_id,
+				$course_id,
+				array(
+					'return_type' => 'WP_Post',
+					'per_page'    => 0,
+				)
+			);
+			$output_quizzes = array();
 
-					$output_quizzes[] = [
-						'ID'         => $post->ID,
-						'expanded'   => true,
-						'post_title' => $post->post_title,
-						'type'       => $post->post_type,
-						'url'        => learndash_get_step_permalink( $post->ID, $course_id ),
-						'edit_link'  => get_edit_post_link( $post->ID, '' ),
-						'tree'       => [],
-					];
+			if ( ( is_array( $global_quizzes ) ) && ( ! empty( $global_quizzes ) ) ) {
+				foreach ( $global_quizzes as $quiz_post ) {
+					if ( ! is_a( $quiz_post, 'WP_Post' ) ) {
+						continue;
+					}
+
+					$quiz_post_status = $quiz_post->post_status;
+					if ( ( 'publish' === $quiz_post->post_status ) && ( ! empty( $quiz_post->post_password ) ) ) {
+						$quiz_post_status = 'password';
+					}
+
+					$output_quizzes[] = array(
+						'ID'          => $quiz_post->ID,
+						'expanded'    => true,
+						'post_title'  => $quiz_post->post_title,
+						'post_status' => $quiz_post_status,
+						'type'        => $quiz_post->post_type,
+						'url'         => learndash_get_step_permalink( $quiz_post->ID, $course_id ),
+						'edit_link'   => get_edit_post_link( $quiz_post->ID, '' ),
+						'tree'        => array(),
+					);
 				}
 			}
 
 			// Merge sections at Outline.
 			$sections_raw = get_post_meta( $course_id, 'course_sections', true );
-			$sections     = ! empty( $sections_raw ) ? json_decode( $sections_raw ) : [];
+			$sections     = ! empty( $sections_raw ) ? json_decode( $sections_raw ) : array();
 
 			if ( ( is_array( $sections ) ) && ( ! empty( $sections ) ) ) {
 				foreach ( $sections as $section ) {
-					array_splice( $output_lessons, (int) $section->order, 0, [ $section ] );
+					if ( ! is_object( $section ) ) {
+						continue;
+					}
+
+					if ( ( ! property_exists( $section, 'ID' ) ) || ( empty( $section->ID ) ) ) {
+						continue;
+					}
+					
+					if ( ! property_exists( $section, 'order' ) ) {
+						continue;
+					}
+
+					if ( ( ! property_exists( $section, 'post_title' ) ) || ( empty( $section->post_title ) ) ) {
+						continue;
+					}
+
+					if ( ( ! property_exists( $section, 'type' ) ) || ( empty( $section->type ) ) ) {
+						continue;
+					}
+					
+					array_splice( $output_lessons, (int) $section->order, 0, array( $section ) );
 				}
 			}
 		}
 	}
 
 	// Output data.
-	$data['outline'] = [
-		'lessons' => $output_lessons,
-		'quizzes' => $output_quizzes,
+	$data['outline'] = array(
+		'lessons'  => $output_lessons,
+		'quizzes'  => $output_quizzes,
 		'sections' => $sections,
-	];
+	);
 
 	return $data;
-}
-//add_filter( 'learndash_header_data', 'LearnDash\Admin\CourseBuilderHelpers\get_course_data', 100 );
-
-/**
- * Checks if course builder should be enqueued.
- *
- * @return bool
- */
-function should_enqueue_assets() {
-	$screen        = get_current_screen();
-	$course_id     = isset( $_GET['course_id'] ) ? absint( $_GET['course_id'] ) : get_the_ID();
-
-	// Enqueue course builder assets only when required.
-	if ( ( 'post' === $screen->base && 'sfwd-courses' === get_post_type( $course_id ) ) ||
-		'sfwd-courses_page_courses-builder' === $screen->id ) {
-		return true;
-	}
-
-	return false;
 }

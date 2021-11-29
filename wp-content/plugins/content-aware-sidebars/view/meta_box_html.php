@@ -3,41 +3,44 @@
  * @package Content Aware Sidebars
  * @author Joachim Jensen <joachim@dev.institute>
  * @license GPLv3
- * @copyright 2019 by Joachim Jensen
+ * @copyright 2021 by Joachim Jensen
  */
 
 $data = CAS_App::instance()->manager()->metadata()->get('html')->get_data($post->ID, true);
 
-$data_default = array_merge(array(
+$data_default = array_merge([
     'sidebar'       => '',
     'sidebar_class' => '',
     'widget'        => '',
     'widget_class'  => 'widget %2$s',
     'title'         => '',
     'title_class'   => 'widget-title'
-), $data);
+], $data);
 
-$sidebar_opts = array(
+$sidebar_opts = [
     'div'   => 'div',
     'aside' => 'aside',
     'ul'    => 'ul'
-);
-$widget_opts = array(
+];
+$widget_opts = [
     'div'     => 'div',
     'li'      => 'li',
     'section' => 'section'
-);
-$widget_title_opts = array(
+];
+$widget_title_opts = [
     'h2' => 'h2',
     'h3' => 'h3',
-    'h4' => 'h4'
-);
+    'h4' => 'h4',
+    'h5' => 'h5',
+    'h6' => 'h6'
+];
 
 ?>
 
-<table class="form-table cas-form-table" width="100%"><tbody>
+<table class="form-table cas-form-table" role="presentation">
+    <tbody>
     <tr>
-        <td scope="row"><?php _e('Sidebar'); ?></td>
+        <th scope="row"><?php _e('Sidebar'); ?></th>
         <td>
             <label class="cae-toggle">
                 <input class="js-cas-html" type="checkbox" <?php checked(isset($data['sidebar'],$data['sidebar_class']), true); ?> data-target=".js-cas-html-sidebar" />
@@ -55,7 +58,7 @@ $widget_title_opts = array(
         </td>
     </tr>
     <tr>
-        <td scope="row"><?php _e('Widget'); ?></td>
+        <th scope="row"><?php _e('Widget'); ?></th>
         <td>
             <label class="cae-toggle">
                 <input class="js-cas-html" type="checkbox" <?php checked(isset($data['widget'],$data['widget_class']), true); ?> data-target=".js-cas-html-widget" />
@@ -73,7 +76,7 @@ $widget_title_opts = array(
         </td>
     </tr>
     <tr>
-        <td scope="row"><?php _e('Widget Title'); ?></td>
+        <th scope="row"><?php _e('Widget Title'); ?></th>
         <td>
             <label class="cae-toggle">
                 <input class="js-cas-html" type="checkbox" <?php checked(isset($data['title'],$data['title_class']), true); ?> data-target=".js-cas-html-widget-title" />
@@ -90,5 +93,6 @@ $widget_title_opts = array(
             </code>
         </td>
     </tr>
-</tbody></table>
+    </tbody>
+</table>
 <p><?php _e('By default styling will be inherited from the Target Sidebar.', 'content-aware-sidebars'); ?></p>

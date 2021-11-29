@@ -3,14 +3,18 @@
  * LearnDash Settings Page Orderview.
  *
  * @since 3.0.0
- *
- * @package LearnDash
- * @subpackage Settings
+ * @package LearnDash\Settings\Pages
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDash_Settings_Page_Overview' ) ) ) {
 	/**
-	 * Class to create the settings page.
+	 * Class LearnDash Settings Page Orderview.
+	 *
+	 * @since 3.0.0
 	 */
 	class LearnDash_Settings_Page_Overview extends LearnDash_Settings_Page {
 
@@ -19,32 +23,34 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 		 *
 		 * @var array
 		 */
-		protected $license_info = [];
+		protected $license_info = array();
 
 		/**
 		 * Announcement posts feed
 		 *
 		 * @var array
 		 */
-		protected $rss_announcements_posts = [];
+		protected $rss_announcements_posts = array();
 
 		/**
 		 * License information
 		 *
 		 * @var array
 		 */
-		protected $rss_tips_posts = [];
+		protected $rss_tips_posts = array();
 
 		/**
 		 * License information
 		 *
 		 * @var array
 		 */
-		protected $rss_sell_posts = [];
+		protected $rss_sell_posts = array();
 
 
 		/**
 		 * Public constructor for class
+		 *
+		 * @since 3.0.0
 		 */
 		public function __construct() {
 			$this->parent_menu_page_url  = 'admin.php?page=learndash_lms_overview';
@@ -72,6 +78,7 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 		 * @since 3.0.0
 		 *
 		 * @param array $submenu Submenu item to check.
+		 *
 		 * @return array $submenu
 		 */
 		public function submenu_item( $submenu ) {
@@ -95,10 +102,11 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 		/**
 		 * Filter the admin header data. We don't want to show the header panel on the Overview page.
 		 *
-		 * @since 3.0
-		 * @param array $header_data Array of header data used by the Header Panel React app.
+		 * @since 3.0.0
+		 *
+		 * @param array  $header_data Array of header data used by the Header Panel React app.
 		 * @param string $menu_key The menu key being displayed.
-		 * @param array $menu_items Array of menu/tab items.
+		 * @param array  $menu_items Array of menu/tab items.
 		 *
 		 * @return array $header_data.
 		 */
@@ -117,6 +125,8 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 		 * @since 3.0.0
 		 */
 		public function get_admin_page_title() {
+
+			/** This filter is documented in includes/settings/class-ld-settings-pages.php */
 			return apply_filters( 'learndash_admin_page_title', '<h1>' . $this->settings_page_title . '</h1>' );
 		}
 
@@ -131,7 +141,7 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 
 			wp_enqueue_style(
 				'learndash-admin-overview-page-style',
-				LEARNDASH_LMS_PLUGIN_URL . 'assets/css/learndash-admin-overview-page' . leardash_min_asset() . '.css',
+				LEARNDASH_LMS_PLUGIN_URL . 'assets/css/learndash-admin-overview-page' . learndash_min_asset() . '.css',
 				array(),
 				LEARNDASH_SCRIPT_VERSION_TOKEN
 			);
@@ -140,17 +150,17 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 
 			wp_enqueue_script(
 				'learndash-admin-overview-page-script',
-				LEARNDASH_LMS_PLUGIN_URL . 'assets/js/learndash-admin-overview-page' . leardash_min_asset() . '.js',
+				LEARNDASH_LMS_PLUGIN_URL . 'assets/js/learndash-admin-overview-page' . learndash_min_asset() . '.js',
 				array(),
 				LEARNDASH_SCRIPT_VERSION_TOKEN,
 				true
 			);
 			$learndash_assets_loaded['scripts']['learndash-admin-overview-page-script'] = __FUNCTION__;
 
-			$learndash_admin_overview_page_strings = [
+			$learndash_admin_overview_page_strings = array(
 				'mark_complete'   => esc_html__( 'Mark Complete', 'learndash' ),
 				'mark_incomplete' => esc_html__( 'Mark Incomplete', 'learndash' ),
-			];
+			);
 
 			wp_localize_script( 'learndash-admin-overview-page-script', 'LearnDashOverviewPageData', $learndash_admin_overview_page_strings );
 		}
@@ -211,22 +221,7 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 		 * @since 3.0.0
 		 */
 		public function get_feeds() {
-			include_once ABSPATH . WPINC . '/feed.php';
-
-			$rss_announcements = fetch_feed( 'https://www.learndash.com/category/learndash/feed' );
-			if ( ! is_wp_error( $rss_announcements ) ) {
-				$this->rss_announcements_posts = $rss_announcements->get_items( 0, $rss_announcements->get_item_quantity( 4 ) );
-			}
-
-			$rss_sell = fetch_feed( 'https://www.learndash.com/category/sell-online-courses/feed' );
-			if ( ! is_wp_error( $rss_sell ) ) {
-				$this->rss_sell_posts = $rss_sell->get_items( 0, $rss_sell->get_item_quantity( 4 ) );
-			}
-
-			$rss_tips = fetch_feed( 'https://www.learndash.com/category/learndash-tips/feed' );
-			if ( ! is_wp_error( $rss_tips ) ) {
-				$this->rss_tips_posts = $rss_tips->get_items( 0, $rss_tips->get_item_quantity( 4 ) );
-			}
+			include_once ABSPATH . WPINC . '/class-simplepie.php';
 		}
 
 		/**
@@ -253,8 +248,7 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 					<script>window.location.reload()</script>
 					<?php
 				} else {
-
-					/**
+					/*
 					 * @TODO : All this logic needs to be encapsulated within the ld-qutoupdate.php
 					 * code. We should not be exposing settings keys like 'nss_plugin_license_sfwd_lms'
 					 * and 'nss_plugin_license_email_sfwd_lms' spread all over the LD code.
@@ -266,24 +260,9 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 					$license = get_option( 'nss_plugin_license_sfwd_lms' );
 					$email   = get_option( 'nss_plugin_license_email_sfwd_lms' );
 
-					// Make sure there are values.
-					if ( empty( $license ) || empty( $email ) ) {
-						?>
-						<p class="notice notice-error">
-							<?php
-							echo sprintf(
-								// translators: placeholder: Link to purchase LearnDash.
-								esc_html_x( 'Please enter your email and a valid license or %s a license now.', 'placeholder: link to purchase LearnDash', 'learndash' ),
-								"<a href='http://www.learndash.com/' target='_blank' rel='noreferrer noopener'>" . esc_html__( 'buy', 'learndash' ) . '</a>'
-							);
-							?>
-						</p>
-						<?php
-					}
-
 					// Check the license.
 					if ( ! empty( $license ) && ! empty( $email ) ) {
-						$license_status = is_learndash_license_valid();
+						$license_status = learndash_is_learndash_license_valid();
 
 						if ( ! $license_status ) {
 							// Clear just to be sure.
@@ -305,7 +284,7 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 
 								// Then re-update the licens using new utility function.
 								// Plus this provides simpler true/false boolean.
-								$license_status = is_learndash_license_valid();
+								$license_status = learndash_is_learndash_license_valid();
 							}
 						}
 
@@ -317,13 +296,12 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 			}
 		}
 
-
 		/**
 		 * Utility function to maybe display the Bootcamp
 		 *
 		 * @since 3.0.0
 		 *
-		 * @param $toggle_state string Option value.
+		 * @param string $toggle_state Option value.
 		 *
 		 * @return string
 		 */
@@ -349,7 +327,7 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 			?>
 			<div class="wrap learndash-settings-page-wrap learndash-overview-page-wrap">
 				<div class="ld-bootview">
-					<h1><?php echo $this->settings_tab_title; ?></h1>
+					<h1><?php echo esc_html( $this->settings_tab_title ); ?></h1>
 
 					<div class="ld-bootcamp" style="display:<?php echo isset( $toggle_state ) ? esc_attr( $this->maybe_display_bootcamp( $toggle_state ) ) : 'block'; ?>;">
 						<div class="ld-bootcamp__widget">
@@ -360,7 +338,13 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 
 							<div class="ld-bootcamp__widget--body">
 								<div class="ld-bootcamp__accordion" role="tablist">
-									<div class="ld-bootcamp__accordion--single <?php echo is_learndash_license_valid() ? '-completed' : ''; ?>">
+									<?php
+										$ld_license_completed = learndash_is_learndash_license_valid() ? '-completed' : '';
+									if ( ! learndash_updates_enabled() ) {
+										$ld_license_completed = '-completed';
+									}
+									?>
+									<div class="ld-bootcamp__accordion--single <?php echo esc_attr( $ld_license_completed ); ?>">
 										<h3>
 											<span class="ld-bootcamp__mark-complete--toggle-indicator" aria-hidden="true"></span>
 											<button class="ld-bootcamp__accordion--toggle" type="button" aria-selected="false" aria-expanded="false" aria-controls="ld-bootcamp__accordion--content-1" role="tab">
@@ -375,13 +359,15 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 											<ul>
 												<li><?php esc_html_e( 'Your active license gives you access to product support and updates that we push out.', 'learndash' ); ?></li>
 												<li><?php esc_html_e( 'Your license details were emailed to you after purchase.', 'learndash' ); ?></li>
-												<li><?php
+												<li>
+												<?php
 												echo sprintf(
 													// translators: placeholder: Link to the license page on the LearnDash website.
 													esc_html_x( 'You can also find them listed %1$s', 'Link to the license page on the LearnDash website', 'learndash' ),
 													"<a href='https://support.learndash.com/account/' target='_blank' rel='noreferrer noopener'>" . esc_html__( 'on your account.', 'learndash' ) . '</a>'
 												);
-												?></li>
+												?>
+												</li>
 											</ul>
 
 											<?php
@@ -390,17 +376,15 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 												<div class="ld-bootcamp__license">
 													<form method="post" action="">
 													<?php
-													if ( ! is_learndash_license_valid() ) :
+													if ( ! learndash_is_learndash_license_valid() ) :
+														if ( learndash_get_license_show_notice() ) {
+															?>
+															<p class="<?php echo esc_attr( learndash_get_license_class( 'notice notice-error is-dismissible learndash-license-is-dismissible' ) ); ?>" <?php echo learndash_get_license_data_attrs(); ?>> <?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Element hardcoded in function. ?>
+															<?php echo learndash_get_license_message(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Function escapes output ?>
+															</p>
+															<?php
+														}
 														?>
-														<p class="notice notice-error is-dismissible">
-														<?php
-														echo sprintf(
-															// translators: placeholder: Link to purchase LearnDash.
-															esc_html_x( 'Please enter your email and a valid license or %s a license now.', 'placeholder: link to purchase LearnDash', 'learndash' ),
-															"<a href='http://www.learndash.com/' target='_blank' rel='noreferrer noopener'>" . esc_html__( 'buy', 'learndash' ) . '</a>'
-														);
-														?>
-														</p>
 													<?php else : ?>
 														<p class="notice notice-success is-dismissible"><?php esc_html_e( 'Your license is valid.', 'learndash' ); ?></p>
 														<?php
@@ -467,10 +451,10 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 											echo sprintf(
 												// translators: placeholder: Courses, Course.
 												esc_html_x( 'Creating %1$s with the %2$s Builder', 'placeholder: Courses, Course', 'learndash' ),
-												LearnDash_Custom_Label::get_label( 'courses' ),
-												LearnDash_Custom_Label::get_label( 'course' )
+												LearnDash_Custom_Label::get_label( 'courses' ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
+												LearnDash_Custom_Label::get_label( 'course' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
 											)
-												?>
+											?>
 											<span class="ld-bootcamp__accordion--toggle-indicator"></span>
 											</button>
 										</h3>
@@ -479,11 +463,12 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 											<p>
 											<?php
 											echo sprintf(
-												// translators: placeholder: Course.
-												esc_html_x( 'In this video we will demonstrate how you can create a course using the LearnDash %s Builder.', 'placeholder: Course.', 'learndash' ),
-												LearnDash_Custom_Label::get_label( 'course' )
+												// translators: placeholder: course, Course.
+												esc_html_x( 'In this video we will demonstrate how you can create a %1$s using the LearnDash %2$s Builder.', 'placeholder: course, Course.', 'learndash' ),
+												LearnDash_Custom_Label::get_label( 'course' ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
+												LearnDash_Custom_Label::get_label( 'course' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
 											);
-												?>
+											?>
 												</p>
 											<div class="ld-bootcamp__embed">
 													<iframe width="560" height="315" data-src="https://www.youtube.com/embed/cZ61RgRUXnw" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -497,7 +482,7 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 														echo sprintf(
 															// translators: placeholder: Course.
 															esc_html_x( '%s Builder [Article]', 'placeholder: Course', 'learndash' ),
-															LearnDash_Custom_Label::get_label( 'course' )
+															LearnDash_Custom_Label::get_label( 'course' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
 														);
 														?>
 														</a></li>
@@ -516,10 +501,10 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 											<button class="ld-bootcamp__accordion--toggle" type="button" aria-selected="false" aria-expanded="false" aria-controls="ld-bootcamp__accordion--content-4" role="tab">
 											<?php
 											echo sprintf(
-												// translators: placeholders: Lessons, Topics
+												// translators: placeholders: Lessons, Topics.
 												esc_html_x( 'Adding Content Using %1$s & %2$s', 'placeholders: Lessons, Topics', 'learndash' ),
-												LearnDash_Custom_Label::get_label( 'lessons' ),
-												LearnDash_Custom_Label::get_label( 'topics' )
+												LearnDash_Custom_Label::get_label( 'lessons' ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
+												LearnDash_Custom_Label::get_label( 'topics' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
 											);
 											?>
 											<span class="ld-bootcamp__accordion--toggle-indicator"></span>
@@ -530,11 +515,11 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 											<p>
 											<?php
 											echo sprintf(
-												// translators: placeholders: Course, Lessons, Topics
+												// translators: placeholders: Course, Lessons, Topics.
 												esc_html_x( 'Now that you have your %1$s created, it is time to start adding content via %2$s and %3$s. In this video we will show how to do this and explain the various settings.', 'placeholders: Course, Lessons, Topics', 'learndash' ),
-												LearnDash_Custom_Label::get_label( 'course' ),
-												LearnDash_Custom_Label::get_label( 'lessons' ),
-												LearnDash_Custom_Label::get_label( 'topics' )
+												LearnDash_Custom_Label::get_label( 'course' ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
+												LearnDash_Custom_Label::get_label( 'lessons' ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
+												LearnDash_Custom_Label::get_label( 'topics' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
 											);
 											?>
 											</p>
@@ -550,7 +535,7 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 														echo sprintf(
 															// translators: placeholder: Lessons.
 															esc_html_x( '%s Documentation', 'placeholder: Lessons', 'learndash' ),
-															LearnDash_Custom_Label::get_label( 'lessons' )
+															LearnDash_Custom_Label::get_label( 'lessons' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
 														);
 														?>
 														</a></li>
@@ -559,7 +544,7 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 														echo sprintf(
 															// translators: placeholder: Topics.
 															esc_html_x( '%s Documentation', 'placeholder: Topics', 'learndash' ),
-															LearnDash_Custom_Label::get_label( 'topics' )
+															LearnDash_Custom_Label::get_label( 'topics' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
 														);
 														?>
 														</a></li>
@@ -578,9 +563,9 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 											<button class="ld-bootcamp__accordion--toggle" type="button" aria-selected="false" aria-expanded="false" aria-controls="ld-bootcamp__accordion--content-5" role="tab">
 											<?php
 											echo sprintf(
-												// translators: placeholder: Quizzes
+												// translators: placeholder: Quizzes.
 												esc_html_x( 'Creating %s', 'placeholder: Quizzes', 'learndash' ),
-												LearnDash_Custom_Label::get_label( 'quizzes' )
+												LearnDash_Custom_Label::get_label( 'quizzes' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
 											);
 											?>
 											<span class="ld-bootcamp__accordion--toggle-indicator"></span>
@@ -591,14 +576,14 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 											<p>
 											<?php
 											echo sprintf(
-												// translators: placeholder: Quizzes, course, quizzes, course, Quiz, Questions
+												// translators: placeholder: Quizzes, course, quizzes, course, Quiz, Questions.
 												esc_html_x( '%1$s are a great way to check if your learners are understanding the %2$s content. You can have one or more %3$s throughout a %4$s, or you can put it at the end. In this video we demonstrate how to create a %5$s and how to add %6$s.', 'placeholder: Quizzes, course, quizzes, course, Quiz, Questions', 'learndash' ),
-												LearnDash_Custom_Label::get_label( 'quizzes' ),
-												learndash_get_custom_label_lower( 'course' ),
-												learndash_get_custom_label_lower( 'quizzes' ),
-												learndash_get_custom_label_lower( 'course' ),
-												LearnDash_Custom_Label::get_label( 'quiz' ),
-												LearnDash_Custom_Label::get_label( 'questions' )
+												LearnDash_Custom_Label::get_label( 'quizzes' ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
+												esc_html( learndash_get_custom_label_lower( 'course' ) ),
+												esc_html( learndash_get_custom_label_lower( 'quizzes' ) ),
+												esc_html( learndash_get_custom_label_lower( 'course' ) ),
+												LearnDash_Custom_Label::get_label( 'quiz' ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
+												LearnDash_Custom_Label::get_label( 'questions' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
 											);
 											?>
 											</p>
@@ -612,13 +597,15 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 												<div class="ld-bootcamp__resources">
 													<p><?php esc_html_e( 'Additional Resources:', 'learndash' ); ?></p>
 													<ul>
-														<li><a href="https://www.learndash.com/support/docs/core/quizzes/" target="_blank" rel="noopener noreferrer"><?php
+														<li><a href="https://www.learndash.com/support/docs/core/quizzes/" target="_blank" rel="noopener noreferrer">
+														<?php
 														echo sprintf(
 															// translators: placeholder: Quizzes.
 															esc_html_x( '%s Documentation', 'placeholder: Quizzes.', 'learndash' ),
-															LearnDash_Custom_Label::get_label( 'quizzes' )
+															LearnDash_Custom_Label::get_label( 'quizzes' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
 														);
-														?></a></li>
+														?>
+														</a></li>
 														<li><a href="https://www.learndash.com/support/docs/core/certificates/" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Certificate Documentation', 'learndash' ); ?></a></li>
 													</ul>
 													</div>
@@ -641,9 +628,9 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 											<p>
 											<?php
 											echo sprintf(
-												// translators: placeholder: Courses
+												// translators: placeholder: Courses.
 												esc_html_x( 'Once you have finished creating your %s it is time to configure user registration so that people can access them! In this video we explain how to create an attractive login and registration form.', 'placeholder: Courses', 'learndash' ),
-												LearnDash_Custom_Label::get_label( 'courses' )
+												LearnDash_Custom_Label::get_label( 'courses' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
 											);
 											?>
 											</p>
@@ -671,7 +658,7 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 											echo sprintf(
 												// translators: placeholder: Courses.
 												esc_html_x( 'Selling Your %s', 'placeholder: Courses.', 'learndash' ),
-												LearnDash_Custom_Label::get_label( 'courses' )
+												LearnDash_Custom_Label::get_label( 'courses' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
 											);
 											?>
 											<span class="ld-bootcamp__accordion--toggle-indicator"></span>
@@ -682,10 +669,10 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 											<p>
 											<?php
 											echo sprintf(
-												// translatord: placeholders: Courses, courses.
+												// translators: placeholders: Courses, courses.
 												esc_html_x( 'If you are selling your %1$s then you have many options available to you! In the first video we demonstrate how you can quickly start accepting payments with PayPal and Stripe. In the second video we will show you how to sell %2$s using the popular WordPress shopping cart WooCommerce.', 'placeholders: Courses, courses', 'learndash' ),
-												LearnDash_Custom_Label::get_label( 'courses' ),
-												learndash_get_custom_label_lower( 'courses' )
+												LearnDash_Custom_Label::get_label( 'courses' ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
+												esc_html( learndash_get_custom_label_lower( 'courses' ) )
 											);
 											?>
 											</p>
@@ -699,13 +686,15 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 												<div class="ld-bootcamp__resources">
 													<p><?php esc_html_e( 'Additional Resources:', 'learndash' ); ?></p>
 													<ul>
-														<li><a href="https://www.learndash.com/support/docs/core/courses/course-access/" target="_blank" rel="noopener noreferrer"><?php
+														<li><a href="https://www.learndash.com/support/docs/core/courses/course-access/" target="_blank" rel="noopener noreferrer">
+														<?php
 														echo sprintf(
 															// translators: placeholder: Course.
 															esc_html_x( '%s Access Settings [Article]', 'placeholder: Course.', 'learndash' ),
-															LearnDash_Custom_Label::get_label( 'course' )
+															LearnDash_Custom_Label::get_label( 'course' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
 														);
-														?></a></li>
+														?>
+														</a></li>
 														<li><a href="https://www.learndash.com/support/docs/core/settings/paypal-settings/" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'PayPal Settings [Article]', 'learndash' ); ?></a></li>
 														<li><a href="https://www.learndash.com/support/docs/add-ons/stripe/#" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Stripe Integration [Article]', 'learndash' ); ?></a></li>
 														<li><a href="https://www.learndash.com/support/docs/add-ons/woocommerce/" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'WooCommerce Integration [Article]', 'learndash' ); ?></a></li>
@@ -725,7 +714,7 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 											echo sprintf(
 												// translators: placeholder: Course.
 												esc_html_x( 'Creating a %s Listing', 'placeholder: Course', 'learndash' ),
-												LearnDash_Custom_Label::get_label( 'course' )
+												LearnDash_Custom_Label::get_label( 'course' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
 											);
 											?>
 											<span class="ld-bootcamp__accordion--toggle-indicator"></span>
@@ -738,9 +727,9 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 											echo sprintf(
 												// translators: placeholder: Course, Courses, Course.
 												esc_html_x( 'Your %1$s is created and you have also configured registration/login and how you will accept payment (in the event that you are selling your %2$s). It is now time to create a %3$s Listing which is easy to do using the Course Grid Add-on.', 'placeholder: Course, Courses, Course', 'learndash' ),
-												LearnDash_Custom_Label::get_label( 'course' ),
-												LearnDash_Custom_Label::get_label( 'courses' ),
-												LearnDash_Custom_Label::get_label( 'course' )
+												LearnDash_Custom_Label::get_label( 'course' ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
+												LearnDash_Custom_Label::get_label( 'courses' ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
+												LearnDash_Custom_Label::get_label( 'course' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
 											);
 											?>
 											</p>
@@ -775,7 +764,7 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 											echo sprintf(
 												// translators: placeholder: courses.
 												esc_html_x( 'The final step is to create a User Profile so that your users can instantly see which %s they have access to, their progress, performance, and earned certificates!', 'placeholder: courses', 'learndash' ),
-												learndash_get_custom_label_lower( 'courses' )
+												esc_html( learndash_get_custom_label_lower( 'courses' ) )
 											);
 											?>
 											</p>
@@ -808,9 +797,9 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 											<p>
 											<?php
 											echo sprintf(
-												// translators: placeholder: courses
+												// translators: placeholder: courses.
 												esc_html_x( 'Setting up a learning site is no small task – but you are not alone! Below are some resources available to you so that you can get the most out of your LearnDash powered %s!', 'placeholder: courses', 'learndash' ),
-												learndash_get_custom_label_lower( 'courses' )
+												esc_html( learndash_get_custom_label_lower( 'courses' ) )
 											);
 											?>
 											</p>
@@ -853,20 +842,29 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 											echo sprintf(
 												// translators: placeholder: Courses.
 												esc_html_x( 'Sell Online %s', 'placeholder: Courses', 'learndash' ),
-												LearnDash_Custom_Label::get_label( 'courses' )
+												LearnDash_Custom_Label::get_label( 'courses' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
 											);
 											?>
 											</span>
 										</h3>
 										<?php
-										if ( ! $this->rss_sell_posts ) {
-											esc_html_e( 'Something went wrong connecting to www.learndash.com. Please reload the page.', 'learndash' );
+										$rss_sell = new SimplePie();
+										$rss_sell->set_cache_location( ABSPATH . 'wp-includes' . DIRECTORY_SEPARATOR . 'SimplePie' . DIRECTORY_SEPARATOR . 'Cache' );
+										$rss_sell->set_feed_url( 'https://www.learndash.com/category/sell-online-courses/feed' );
+										$rss_sell->init();
+										$rss_sell->handle_content_type();
+										if ( ! $rss_sell->error() ) {
+											if ( is_array( $rss_sell->get_items() ) ) {
+												echo '<ul>';
+												foreach ( $rss_sell->get_items( 0, 4 ) as $rss_sell_posts ) {
+													echo '<li><a href="' . esc_url( $rss_sell_posts->get_permalink() ) . '" target="_blank" rel="noopener noreferrer">' . esc_html( $rss_sell_posts->get_title() ) . '</a></li>';
+												};
+												echo '</ul>';
+											} else {
+												esc_html_e( 'Something went wrong connecting to www.learndash.com. Please reload the page.', 'learndash' );
+											}
 										} else {
-											echo '<ul>';
-											foreach ( $this->rss_sell_posts as $sell_post ) {
-												echo '<li><a href="' . esc_url( $sell_post->get_permalink() ) . '" target="_blank" rel="noopener noreferrer">' . esc_html( $sell_post->get_title() ) . '</a></li>';
-											};
-											echo '</ul>';
+											esc_html_e( 'Something went wrong connecting to www.learndash.com. Please reload the page.', 'learndash' );
 										}
 										?>
 										<p class="ld-overview--more">
@@ -886,14 +884,23 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 										</h3>
 
 										<?php
-										if ( ! $this->rss_tips_posts ) {
-											esc_html_e( 'Something went wrong connecting to www.learndash.com. Please reload the page.', 'learndash' );
+										$rss_tips = new SimplePie();
+										$rss_tips->set_cache_location( ABSPATH . 'wp-includes' . DIRECTORY_SEPARATOR . 'SimplePie' . DIRECTORY_SEPARATOR . 'Cache' );
+										$rss_tips->set_feed_url( 'https://www.learndash.com/category/learndash-tips/feed' );
+										$rss_tips->init();
+										$rss_tips->handle_content_type();
+										if ( ! $rss_tips->error() ) {
+											if ( is_array( $rss_tips->get_items() ) ) {
+												echo '<ul>';
+												foreach ( $rss_tips->get_items( 0, 4 ) as $rss_tips_posts ) {
+													echo '<li><a href="' . esc_url( $rss_tips_posts->get_permalink() ) . '" target="_blank" rel="noopener noreferrer">' . esc_html( $rss_tips_posts->get_title() ) . '</a></li>';
+												};
+												echo '</ul>';
+											} else {
+												esc_html_e( 'Something went wrong connecting to www.learndash.com. Please reload the page.', 'learndash' );
+											}
 										} else {
-											echo '<ul>';
-											foreach ( $this->rss_tips_posts as $tip_post ) {
-												echo '<li><a href="' . esc_url( $tip_post->get_permalink() ) . '" target="_blank" rel="noopener noreferrer">' . esc_html( $tip_post->get_title() ) . '</a></li>';
-											};
-											echo '</ul>';
+											esc_html_e( 'Something went wrong connecting to www.learndash.com. Please reload the page.', 'learndash' );
 										}
 										?>
 
@@ -917,16 +924,26 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 								</h3>
 
 								<?php
-								if ( ! $this->rss_announcements_posts ) {
-									esc_html_e( 'Something went wrong connecting to www.learndash.com. Please reload the page.', 'learndash' );
+								$rss_announcements = new SimplePie();
+								$rss_announcements->set_cache_location( ABSPATH . 'wp-includes' . DIRECTORY_SEPARATOR . 'SimplePie' . DIRECTORY_SEPARATOR . 'Cache' );
+								$rss_announcements->set_feed_url( 'https://www.learndash.com/category/learndash/feed' );
+								$rss_announcements->init();
+								$rss_announcements->handle_content_type();
+								if ( ! $rss_announcements->error() ) {
+									if ( is_array( $rss_announcements->get_items() ) ) {
+										echo '<ul>';
+										foreach ( $rss_announcements->get_items( 0, 4 ) as $announcement_post ) {
+											echo '<li><a href="' . esc_url( $announcement_post->get_permalink() ) . '" target="_blank" rel="noopener noreferrer">' . esc_html( $announcement_post->get_title() ) . '</a></li>';
+										};
+										echo '</ul>';
+									} else {
+										esc_html_e( 'Something went wrong connecting to www.learndash.com. Please reload the page.', 'learndash' );
+									}
 								} else {
-									echo '<ul>';
-									foreach ( $this->rss_announcements_posts as $announcement_post ) {
-										echo '<li><a href="' . esc_url( $announcement_post->get_permalink() ) . '" target="_blank" rel="noopener noreferrer">' . esc_html( $announcement_post->get_title() ) . '</a></li>';
-									};
-									echo '</ul>';
+									esc_html_e( 'Something went wrong connecting to www.learndash.com. Please reload the page.', 'learndash' );
 								}
 								?>
+
 								<p class="ld-overview--more">
 									<a href="https://www.learndash.com/category/learndash/" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'View more', 'learndash' ); ?></a>
 								</p>
@@ -957,7 +974,7 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 											echo sprintf(
 												// translators: placeholder: Course.
 												esc_html_x( '%s Builder', 'placeholder: Course.', 'learndash' ),
-												LearnDash_Custom_Label::get_label( 'course' )
+												LearnDash_Custom_Label::get_label( 'course' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
 											);
 											?>
 											</a></li>
@@ -1004,29 +1021,17 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 											<ul>
 												<li><a href="https://www.learndash.com/support/docs/core/courses/" target="_blank" rel="noopener noreferrer">
 												<?php
-												echo sprintf(
-													// translators: placeholder: Courses.
-													esc_html_x( '%s', 'placeholder: Courses', 'learndash' ),
-													LearnDash_Custom_Label::get_label( 'courses' )
-												);
+												echo LearnDash_Custom_Label::get_label( 'courses' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
 												?>
 												</a></li>
 												<li><a href="https://www.learndash.com/support/docs/core/lessons/" target="_blank" rel="noopener noreferrer">
 												<?php
-												echo sprintf(
-													// translators: placeholder: Lessons.
-													esc_html_x( '%s', 'placeholder: Lessons', 'learndash' ),
-													LearnDash_Custom_Label::get_label( 'lessons' )
-												);
+												echo LearnDash_Custom_Label::get_label( 'lessons' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
 												?>
 												</a></li>
 												<li><a href="https://www.learndash.com/support/docs/core/quizzes/" target="_blank" rel="noopener noreferrer">
 												<?php
-												echo sprintf(
-													// translators: placeholder: Quizzes.
-													esc_html_x( '%s', 'placeholder: Quizzes', 'learndash' ),
-													LearnDash_Custom_Label::get_label( 'quizzes' )
-												);
+												echo LearnDash_Custom_Label::get_label( 'quizzes' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
 												?>
 												</a></li>
 												<li><a href="https://www.learndash.com/support/docs/core/certificates/" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Certificates', 'learndash' ); ?></a></li>
@@ -1037,7 +1042,11 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 											<ul>
 												<li><a href="https://www.learndash.com/support/docs/core/shortcodes-blocks/" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Shortcodes', 'learndash' ); ?></a></li>
 												<li><a href="https://www.learndash.com/support/docs/reporting/" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Reporting', 'learndash' ); ?></a></li>
-												<li><a href="https://www.learndash.com/support/docs/users-groups/" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Users & Groups', 'learndash' ); ?></a></li>
+												<li><a href="https://www.learndash.com/support/docs/users-groups/" target="_blank" rel="noopener noreferrer"> <?php printf( // phpcs:ignore Squiz.PHP.EmbeddedPhp.ContentBeforeOpen,Squiz.PHP.EmbeddedPhp.ContentAfterOpen
+													// translators: placeholder: Groups.
+													esc_html_x( 'Users & %s', 'placeholder: Groups', 'learndash' ),
+													learndash_get_custom_label( 'groups' )
+												); ?> </a></li> <?php // phpcs:ignore Generic.WhiteSpace.ScopeIndent.Incorrect,Squiz.PHP.EmbeddedPhp.ContentBeforeEnd,Squiz.PHP.EmbeddedPhp.ContentAfterEnd ?>
 												<li><a href="https://www.learndash.com/support/docs/add-ons/" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Add-ons', 'learndash' ); ?></a></li>
 											</ul>
 										</div>

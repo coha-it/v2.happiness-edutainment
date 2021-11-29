@@ -1,25 +1,26 @@
 <?php
 /**
- * Plugin Name: myCRED
+ * Plugin Name: myCred
  * Plugin URI: https://mycred.me
  * Description: An adaptive points management system for WordPress powered websites.
- * Version: 1.8.6
+ * Version: 2.3.2
  * Tags: point, credit, loyalty program, engagement, reward, woocommerce rewards
- * Author: myCRED
+ * Author: myCred
  * Author URI: https://mycred.me
  * Author Email: support@mycred.me
  * Requires at least: WP 4.8
- * Tested up to: WP 5.2.4
+ * Tested up to: WP 5.8.2
  * Text Domain: mycred
  * Domain Path: /lang
  * License: GPLv2 or later
  * License URI: http://www.gnu.org/licenses/gpl-2.0.html
  */
+
 if ( ! class_exists( 'myCRED_Core' ) ) :
 	final class myCRED_Core {
 
 		// Plugin Version
-		public $version             = '1.8.6';
+		public $version             = '2.3.2';
 
 		// Instnace
 		protected static $_instance = NULL;
@@ -53,14 +54,14 @@ if ( ! class_exists( 'myCRED_Core' ) ) :
 		 * @since 1.7
 		 * @version 1.0
 		 */
-		public function __clone() { _doing_it_wrong( __FUNCTION__, 'Cheatin&#8217; huh?', '1.7' ); }
+		public function __clone() { _doing_it_wrong( __FUNCTION__, 'Cheatin&#8217; huh?', '2.3.2' ); }
 
 		/**
 		 * Not allowed
 		 * @since 1.7
 		 * @version 1.0
 		 */
-		public function __wakeup() { _doing_it_wrong( __FUNCTION__, 'Cheatin&#8217; huh?', '1.7' ); }
+		public function __wakeup() { _doing_it_wrong( __FUNCTION__, 'Cheatin&#8217; huh?', '2.3.2' ); }
 
 		/**
 		 * Get
@@ -81,7 +82,7 @@ if ( ! class_exists( 'myCRED_Core' ) ) :
 			if ( ! defined( $name ) )
 				define( $name, $value );
 			elseif ( ! $definable && defined( $name ) )
-				_doing_it_wrong( 'myCRED_Core->define()', 'Could not define: ' . $name . ' as it is already defined somewhere else!', '1.7' );
+				_doing_it_wrong( 'myCRED_Core->define()', 'Could not define: ' . $name . ' as it is already defined somewhere else!', '2.2' );
 		}
 
 		/**
@@ -93,7 +94,7 @@ if ( ! class_exists( 'myCRED_Core' ) ) :
 			if ( file_exists( $required_file ) )
 				require_once $required_file;
 			else
-				_doing_it_wrong( 'myCRED_Core->file()', 'Requested file ' . $required_file . ' not found.', '1.7' );
+				_doing_it_wrong( 'myCRED_Core->file()', 'Requested file ' . $required_file . ' not found.', '2.3.2' );
 		}
 
 		/**
@@ -105,6 +106,11 @@ if ( ! class_exists( 'myCRED_Core' ) ) :
 
 			$this->define_constants();
 			$this->includes();
+
+			// Init Freemius.
+			$this->myc_fs();
+			// Signal that SDK was initiated.
+			do_action( 'myc_fs_loaded' );
 
 			// Multisite Feature: If the site is blocked from using myCRED, exit now
 			if ( mycred_is_site_blocked() ) return;
@@ -121,22 +127,6 @@ if ( ! class_exists( 'myCRED_Core' ) ) :
 				$this->wordpress();
 
 				do_action( 'mycred_ready' );
-
-			}
-
-			// We need to run the setup
-			else {
-
-				// Load translation and register assets for the setup
-				add_action( 'init',                    array( $this, 'load_plugin_textdomain' ), 10 );
-				add_action( 'init',                    array( $this, 'register_assets' ), 20 );
-				add_filter( 'mycred_maybe_install_db', '__return_false' );
-
-				// Load the setup module
-				$this->file( myCRED_INCLUDES_DIR . 'mycred-setup.php' );
-
-				$setup = new myCRED_Setup();
-				$setup->load();
 
 			}
 
@@ -158,6 +148,7 @@ if ( ! class_exists( 'myCRED_Core' ) ) :
 			$this->define( 'myCRED_VERSION',              $this->version );
 			$this->define( 'myCRED_DB_VERSION',           '1.0' );
 			$this->define( 'MYCRED_SLUG',                 'mycred' );
+			$this->define( 'MYCRED_MAIN_SLUG',            'mycred-main' );
 			$this->define( 'MYCRED_DEFAULT_LABEL',        'myCRED' );
 			$this->define( 'MYCRED_DEFAULT_TYPE_KEY',     'mycred_default' );
 			$this->define( 'MYCRED_SHOW_PREMIUM_ADDONS',  true );
@@ -182,6 +173,7 @@ if ( ! class_exists( 'myCRED_Core' ) ) :
 			$this->define( 'myCRED_INCLUDES_DIR',         myCRED_ROOT_DIR . 'includes/', false );
 			$this->define( 'myCRED_LANG_DIR',             myCRED_ROOT_DIR . 'lang/', false );
 			$this->define( 'myCRED_MODULES_DIR',          myCRED_ROOT_DIR . 'modules/', false );
+			$this->define( 'myCRED_MEMBERSHIP_DIR',	      myCRED_ROOT_DIR . 'membership/', false );
 			$this->define( 'myCRED_CLASSES_DIR',          myCRED_INCLUDES_DIR . 'classes/', false );
 			$this->define( 'myCRED_IMPORTERS_DIR',        myCRED_INCLUDES_DIR . 'importers/', false );
 			$this->define( 'myCRED_SHORTCODES_DIR',       myCRED_INCLUDES_DIR . 'shortcodes/', false );
@@ -191,10 +183,49 @@ if ( ! class_exists( 'myCRED_Core' ) ) :
 
 		}
 
+		public function myc_fs() {
+
+			global $myc_fs;
+
+			if ( ! isset( $myc_fs ) ) {
+				// Include Freemius SDK.
+				$this->file( myCRED_ROOT_DIR . '/freemius/start.php' );
+
+				$redirect_path = 'admin.php?page=mycred-settings&mycred_tour_guide=1';
+
+				if ( mycred_get_option( 'mycred_deactivated_on', false ) != false ) {
+					$redirect_path = 'admin.php?page=mycred-main';
+				}
+
+				$myc_fs = fs_dynamic_init(
+					array(
+						'id' => '6028',
+						'slug' => 'mycred',
+						'type' => 'plugin',
+						'public_key' => 'pk_344d67bf205780ac80f04a7561acb',
+						'is_premium' => false,
+						'has_addons' => false,
+						'has_paid_plans' => false,
+						'menu' => array(
+							'slug' => 'mycred',
+							'first-path' => $redirect_path,
+							'account' => false,
+							'contact' => false,
+							'support' => false,
+							'network' => true,
+						),
+					) 
+				);
+			}
+
+			return $myc_fs;
+
+		}
+
 		/**
 		 * Include Plugin Files
 		 * @since 1.7
-		 * @version 1.1
+		 * @version 1.2
 		 */
 		public function includes() {
 
@@ -216,10 +247,26 @@ if ( ! class_exists( 'myCRED_Core' ) ) :
 				$this->file( myCRED_INCLUDES_DIR . 'mycred-remote.php' );
 				$this->file( myCRED_INCLUDES_DIR . 'mycred-protect.php' );
 				$this->file( myCRED_INCLUDES_DIR . 'mycred-about.php' );
+				$this->file( myCRED_INCLUDES_DIR . 'mycred-nav-menu.php' );
+				$this->file( myCRED_INCLUDES_DIR . 'mycred-tools.php' );
+				$this->file( myCRED_INCLUDES_DIR . 'mycred-tools-bulk-assign.php' );
+
+				if( isset ( $_GET['mycred_tour_guide'] ) ){
+
+					$this->file( myCRED_INCLUDES_DIR . 'mycred-walkthrough.php' );
+					$walkthrough = new myCRED_walkthroug();
+				
+				}
 
 				// If myCRED has been setup and is ready to begin
 				if ( mycred_is_installed() ) {
 
+					// myCRED Subscription
+					$this->file( myCRED_MEMBERSHIP_DIR . 'subscription-functions.php' );
+					$this->file( myCRED_MEMBERSHIP_DIR . 'mycred-connect-membership.php' );
+					$this->file( myCRED_INCLUDES_DIR   . 'mycred-main-menu.php' );
+					$this->file( myCRED_INCLUDES_DIR   . 'mycred-addons-upgrader.php' );
+					
 					// Modules
 					$this->file( myCRED_MODULES_DIR . 'mycred-module-addons.php' );
 					$this->file( myCRED_MODULES_DIR . 'mycred-module-settings.php' );
@@ -227,7 +274,15 @@ if ( ! class_exists( 'myCRED_Core' ) ) :
 					$this->file( myCRED_MODULES_DIR . 'mycred-module-log.php' );
 					$this->file( myCRED_MODULES_DIR . 'mycred-module-export.php' );
 					$this->file( myCRED_MODULES_DIR . 'mycred-module-management.php' );
+					$this->file( myCRED_MODULES_DIR . 'mycred-module-br-social-share.php' );
+                    $this->file( myCRED_MODULES_DIR . 'mycred-module-management.php' );
 					$this->file( myCRED_MODULES_DIR . 'mycred-module-caching.php' );
+
+					//Uninstall Settings
+					$this->file( myCRED_INCLUDES_DIR . 'mycred-uninstall.php' );
+
+					//License
+					$this->file( myCRED_CLASSES_DIR . 'class.mycred-license.php' );
 
 					if ( is_multisite() ) {
 
@@ -478,7 +533,8 @@ if ( ! class_exists( 'myCRED_Core' ) ) :
 
 				// These shortcodes will not work if hooks are disabled
 				if ( MYCRED_ENABLE_HOOKS ) {
-
+					
+					$this->file( myCRED_SHORTCODES_DIR . 'mycred_referral_stats.php' );
 					$this->file( myCRED_SHORTCODES_DIR . 'mycred_affiliate_id.php' );
 					$this->file( myCRED_SHORTCODES_DIR . 'mycred_affiliate_link.php' );
 					$this->file( myCRED_SHORTCODES_DIR . 'mycred_link.php' );
@@ -561,29 +617,38 @@ if ( ! class_exists( 'myCRED_Core' ) ) :
 
 		}
 
+		
+
 		/**
 		 * Register Assets
 		 * @since 1.7
-		 * @version 1.0
+		 * @version 1.1
 		 */
 		public function register_assets() {
 
 			// Styles
-			wp_register_style( 'mycred-front',          plugins_url( 'assets/css/mycred-front.css', myCRED_THIS ),        array(), $this->version, 'all' );
-			wp_register_style( 'mycred-admin',          plugins_url( 'assets/css/mycred-admin.css', myCRED_THIS ),        array(), $this->version, 'all' );
-			wp_register_style( 'mycred-edit-balance',   plugins_url( 'assets/css/mycred-edit-balance.css', myCRED_THIS ), array(), $this->version, 'all' );
-			wp_register_style( 'mycred-edit-log',       plugins_url( 'assets/css/mycred-edit-log.css', myCRED_THIS ),     array(), $this->version, 'all' );
-			wp_register_style( 'mycred-bootstrap-grid', plugins_url( 'assets/css/bootstrap-grid.css', myCRED_THIS ),      array(), $this->version, 'all' );
-			wp_register_style( 'mycred-forms',          plugins_url( 'assets/css/mycred-forms.css', myCRED_THIS ),        array(), $this->version, 'all' );
+			wp_register_style( 'mycred-front',           plugins_url( 'assets/css/mycred-front.css', myCRED_THIS ),        array(), $this->version, 'all' );
+			wp_register_style( 'mycred-admin',           plugins_url( 'assets/css/mycred-admin.css', myCRED_THIS ),        array(), $this->version, 'all' );
+			wp_register_style( 'mycred-buttons',           plugins_url( 'assets/css/mycred-buttons.css', myCRED_THIS ),        array(), $this->version, 'all' );
+			wp_register_style( 'mycred-edit-balance',    plugins_url( 'assets/css/mycred-edit-balance.css', myCRED_THIS ), array(), $this->version, 'all' );
+			wp_register_style( 'mycred-edit-log',        plugins_url( 'assets/css/mycred-edit-log.css', myCRED_THIS ),     array(), $this->version, 'all' );
+			wp_register_style( 'mycred-bootstrap-grid',  plugins_url( 'assets/css/bootstrap-grid.css', myCRED_THIS ),      array(), $this->version, 'all' );
+			wp_register_style( 'mycred-forms',           plugins_url( 'assets/css/mycred-forms.css', myCRED_THIS ),        array(), $this->version, 'all' );
+			wp_register_style( 'mycred-select2-style',   plugins_url( 'assets/css/select2.css', myCRED_THIS ),             array(), $this->version, 'all' );
+
+			//Badge, Rank Social Share Sheets
+			wp_register_style( 'mycred-social-share-icons', plugins_url( 'assets/css/mycred-social-icons.css', myCRED_THIS ),        array(), $this->version, 'all' );
+			wp_register_style( 'mycred-social-share-style', plugins_url( 'assets/css/mycred-social-share.css', myCRED_THIS ),        array(), $this->version, 'all' );
 
 			// Scripts
-			wp_register_script( 'mycred-send-points',   plugins_url( 'assets/js/send.js', myCRED_THIS ),                 array( 'jquery' ), $this->version, true );
-			wp_register_script( 'mycred-accordion',     plugins_url( 'assets/js/mycred-accordion.js', myCRED_THIS ),     array( 'jquery', 'jquery-ui-core', 'jquery-ui-accordion' ), $this->version );
-			wp_register_script( 'jquery-numerator',     plugins_url( 'assets/libs/jquery-numerator.js', myCRED_THIS ),   array( 'jquery' ), '0.2.1' );
-			wp_register_script( 'mycred-mustache',      plugins_url( 'assets/libs/mustache.min.js', myCRED_THIS ),       array(), '2.2.1' );
-			wp_register_script( 'mycred-widgets',       plugins_url( 'assets/js/mycred-admin-widgets.js', myCRED_THIS ), array( 'jquery', 'jquery-ui-sortable', 'jquery-ui-draggable', 'jquery-ui-droppable' ), $this->version );
-			wp_register_script( 'mycred-edit-balance',  plugins_url( 'assets/js/mycred-edit-balance.js', myCRED_THIS ),  array( 'jquery', 'jquery-ui-core', 'jquery-ui-dialog', 'jquery-effects-core', 'jquery-effects-slide', 'jquery-numerator' ), $this->version );
-			wp_register_script( 'mycred-edit-log',      plugins_url( 'assets/js/mycred-edit-log.js', myCRED_THIS ),      array( 'jquery', 'jquery-ui-core', 'jquery-ui-dialog', 'jquery-effects-core', 'jquery-effects-slide', 'common' ), $this->version );
+			wp_register_script( 'mycred-send-points',    plugins_url( 'assets/js/send.js', myCRED_THIS ),                 array( 'jquery' ), $this->version, true );
+			wp_register_script( 'mycred-accordion',      plugins_url( 'assets/js/mycred-accordion.js', myCRED_THIS ),     array( 'jquery', 'jquery-ui-core', 'jquery-ui-accordion' ), $this->version );
+			wp_register_script( 'jquery-numerator',      plugins_url( 'assets/libs/jquery-numerator.js', myCRED_THIS ),   array( 'jquery' ), '0.2.1' );
+			wp_register_script( 'mycred-mustache',       plugins_url( 'assets/libs/mustache.min.js', myCRED_THIS ),       array(), '2.2.1' );
+			wp_register_script( 'mycred-widgets',        plugins_url( 'assets/js/mycred-admin-widgets.js', myCRED_THIS ), array( 'jquery', 'jquery-ui-sortable', 'jquery-ui-draggable', 'jquery-ui-droppable' ), $this->version );
+			wp_register_script( 'mycred-edit-balance',   plugins_url( 'assets/js/mycred-edit-balance.js', myCRED_THIS ),  array( 'jquery', 'jquery-ui-core', 'jquery-ui-dialog', 'jquery-effects-core', 'jquery-effects-slide', 'jquery-numerator' ), $this->version );
+			wp_register_script( 'mycred-edit-log',       plugins_url( 'assets/js/mycred-edit-log.js', myCRED_THIS ),      array( 'jquery', 'jquery-ui-core', 'jquery-ui-dialog', 'jquery-effects-core', 'jquery-effects-slide', 'common' ), $this->version );
+			wp_register_script( 'mycred-select2-script', plugins_url( 'assets/js/select2.js', myCRED_THIS ),              array( 'jquery' ), $this->version, true );
 
 			do_action( 'mycred_register_assets' );
 
@@ -651,13 +716,16 @@ if ( ! class_exists( 'myCRED_Core' ) ) :
 		 * Front Enqueue Before
 		 * Enqueues scripts and styles that must run before content is loaded.
 		 * @since 1.7
-		 * @version 1.0
+		 * @version 1.1
 		 */
 		public function enqueue_front_before() {
 
 			// Widget Style (can be disabled)
 			if ( apply_filters( 'mycred_remove_widget_css', false ) === false )
 				wp_enqueue_style( 'mycred-front' );
+
+			wp_enqueue_style( 'mycred-social-share-icons' );
+			wp_enqueue_style( 'mycred-social-share-style' );
 
 			// Let others play
 			do_action( 'mycred_front_enqueue' );
@@ -704,9 +772,12 @@ if ( ! class_exists( 'myCRED_Core' ) ) :
 		/**
 		 * Admin Enqueue
 		 * @since 1.7
-		 * @version 1.0
+		 * @version 1.2
 		 */
 		public function enqueue_admin_before() {
+
+			wp_enqueue_style( 'mycred-social-share-icons' );
+			wp_enqueue_style( 'mycred-social-share-style' );
 
 			// Let others play
 			do_action( 'mycred_admin_enqueue' );
@@ -760,18 +831,13 @@ if ( ! class_exists( 'myCRED_Core' ) ) :
 			if ( defined( 'WP_LOAD_IMPORTERS' ) )
 				$this->register_importers();
 
+			global $pagenow;
+			if ( $pagenow == 'admin.php' && isset( $_GET['page'] ) && $_GET['page'] == 'mycred-about' ) {
+				remove_all_actions( 'admin_notices' );
+			}
+
 			// Let others play
 			do_action( 'mycred_admin_init' );
-
-			// When the plugin is activated after an update, redirect to the about page
-			// Checks for the _mycred_activation_redirect transient
-			if ( get_transient( '_mycred_activation_redirect' ) === apply_filters( 'mycred_active_redirect', false ) )
-				return;
-
-			delete_transient( '_mycred_activation_redirect' );
-
-			wp_safe_redirect( add_query_arg( array( 'page' => MYCRED_SLUG . '-about' ), admin_url( 'index.php' ) ) );
-			die;
 		}
 
 		/**
@@ -847,6 +913,8 @@ if ( ! class_exists( 'myCRED_Core' ) ) :
 			if ( version_compare( $wp_version, '3.8', '<' ) )
 				$menu_icon = '';
 
+			$main_menu = new myCRED_Main_Menu( $this->modules );
+
 			// Add skeleton menus for each point type so modules can
 			// insert their content under each of these menus
 			foreach ( $this->point_types as $type_id => $title ) {
@@ -865,15 +933,6 @@ if ( ! class_exists( 'myCRED_Core' ) ) :
 				);
 
 			}
-
-			// Add about page
-			$pages[]   = add_dashboard_page(
-				sprintf( __( 'About %s', 'mycred' ), $name ),
-				sprintf( __( 'About %s', 'mycred' ), $name ),
-				'moderate_comments',
-				MYCRED_SLUG . '-about',
-				'mycred_about_page'
-			);
 
 			// Add styling to our admin screens
 			$pages = apply_filters( 'mycred_admin_pages', $pages, $mycred );
@@ -1037,9 +1096,8 @@ if ( ! class_exists( 'myCRED_Core' ) ) :
 		public function plugin_links( $actions, $plugin_file, $plugin_data, $context ) {
 
 			// Link to Setup
-			if ( ! mycred_is_installed() )
-				$actions['_setup'] = '<a href="' . admin_url( 'plugins.php?page=' . MYCRED_SLUG . '-setup' ) . '">' . __( 'Setup', 'mycred' ) . '</a>';
-			else
+			if ( !mycred_is_installed() )
+
 				$actions['_settings'] = '<a href="' . admin_url( 'admin.php?page=' . MYCRED_SLUG . '-settings' ) . '" >' . __( 'Settings', 'mycred' ) . '</a>';
 
 			ksort( $actions );

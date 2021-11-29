@@ -4,11 +4,13 @@
  *
  * @since 2.1.0
  *
- * @package LearnDash\Course
+ * @package LearnDash\Templates\Legacy\Shortcodes
  */
 
-?>
-<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 global $pagenow;
 global $course_navigation_admin_pager;
 
@@ -23,45 +25,27 @@ if ( ( isset( $course_id ) ) && ( ! empty( $course_id ) ) ) {
 	}
 
 	// Not sure why this is here.
-	//if ( !isset( $course_progress ) )
-	//	$course_progress = array();
+	// if ( !isset( $course_progress ) )
+	// $course_progress = array();
 
 
-	$widget['nonce']  = wp_create_nonce( 'ld_course_navigation_admin_pager_nonce_'. $course_id .'_'. get_current_user_id() );
-	$widget_json = htmlspecialchars( json_encode( $widget ) );
+	$widget['nonce'] = wp_create_nonce( 'ld_course_navigation_admin_pager_nonce_' . $course_id . '_' . get_current_user_id() );
+	$widget_json     = htmlspecialchars( wp_json_encode( $widget ) );
 
 	if ( ( isset( $widget['show_widget_wrapper'] ) ) && ( $widget['show_widget_wrapper'] == 'true' ) ) {
-	?>
+		?>
 		<div id="course_navigation-<?php echo $course_id; ?>" class="course_navigation" data-widget_instance="<?php echo $widget_json; ?>">
 	<?php } ?>
 
 	<div class="learndash_navigation_lesson_topics_list">
 		<?php
 		if ( ( isset( $lessons ) ) && ( ! empty( $lessons ) ) ) {
-			
-			foreach ( $lessons as $course_lesson_id => $course_lesson ) {
-				$lesson_meta = get_post_meta( $course_lesson['post']->ID, '_sfwd-lessons', true );
 
-				$current_topic_ids  = '';
-				$lesson_topics_list = learndash_topic_dots( $course_lesson['post']->ID, false, 'array', null, $course_id );
-				/*
-				if ( ! empty( $lesson_topics_list ) ) {
-					$topic_pager_args = array(
-						'course_id' => $course_id,
-						'lesson_id' => $course_lesson['post']->ID 
-					);
-					$lesson_topics_list = learndash_process_lesson_topics_pager( $lesson_topics_list, $topic_pager_args );
-				}
-				*/
-				
+			foreach ( $lessons as $course_lesson_id => $course_lesson ) {
+				$lesson_meta         = get_post_meta( $course_lesson['post']->ID, '_sfwd-lessons', true );
+				$current_topic_ids   = '';
+				$lesson_topics_list  = learndash_topic_dots( $course_lesson['post']->ID, false, 'array', $user_id, $course_id );
 				$load_lesson_quizzes = true;
-				/*
-				if ( isset( $course_pager_results[ $course_lesson['post']->ID ]['pager'] ) ) {
-					if ( $course_pager_results[ $course_lesson['post']->ID ]['pager']['paged'] < $course_pager_results[ $course_lesson['post']->ID ]['pager']['total_pages'] ) {
-						$load_lesson_quizzes = false;
-					}
-				}
-				*/
 
 				if ( true === $load_lesson_quizzes ) {
 					$lesson_quizzes_list = learndash_get_lesson_quiz_list( $course_lesson['post']->ID, $user_id, $course_id );
@@ -99,24 +83,24 @@ if ( ( isset( $course_id ) ) && ( ! empty( $course_id ) ) ) {
 								if ( ( ! empty( $lesson_topics_list ) ) || ( ! empty( $lesson_quizzes_list ) ) ) {
 									$unchecked_children_message = ' data-title-unchecked-children="' . htmlspecialchars( esc_html__( 'Set all children steps as incomplete?', 'learndash' ), ENT_QUOTES ) . '" ';
 								}
-									?>
-										<input id="learndash-mark-lesson-complete-<?php echo $course_id; ?>-<?php echo $course_lesson['post']->ID; ?>" type="checkbox" <?php checked( $course_lesson['status'], 'completed' ); ?> class="learndash-mark-lesson-complete" <?php echo $unchecked_children_message; ?> data-name="<?php echo htmlspecialchars( json_encode( $user_lesson_progress, JSON_FORCE_OBJECT ) ); ?>" /> 
+								?>
+										<input id="learndash-mark-lesson-complete-<?php echo $course_id; ?>-<?php echo $course_lesson['post']->ID; ?>" type="checkbox" <?php checked( $course_lesson['status'], 'completed' ); ?> class="learndash-mark-lesson-complete" <?php echo $unchecked_children_message; ?> data-name="<?php echo htmlspecialchars( wp_json_encode( $user_lesson_progress, JSON_FORCE_OBJECT ) ); ?>" />
 										<?php
 							}
-								?>
+							?>
 								<?php
 									$edit_url = get_edit_post_link( $course_lesson['post']->ID );
 								if ( LearnDash_Settings_Section::get_section_setting( 'LearnDash_Settings_Courses_Builder', 'shared_steps' ) == 'yes' ) {
 									$edit_url = add_query_arg( 'course_id', $course_id, $edit_url );
 								}
 								?>
-								<a href='<?php echo $edit_url; ?>'><?php //echo '('. $course_lesson['post']->ID .') '; ?><?php echo $course_lesson['post']->post_title; ?></a> 
-							</div> 
+								<a href='<?php echo esc_url( $edit_url ); ?>'><?php echo apply_filters( 'the_title', $course_lesson['post']->post_title, $course_lesson['post']->ID ); ?></a>
+							</div>
 
 							<?php
 							if ( ( ! empty( $lesson_topics_list ) ) || ( ! empty( $lesson_quizzes_list ) ) ) {
 								?>
-								<div id='learndash_topic_dots-<?php echo $course_id; ?>-<?php echo $course_lesson['post']->ID; ?>' class="flip learndash_topic_widget_list"  style='<?php echo ( strpos( $list_arrow_class, 'collapse' ) !== false ) ? 'display:none' : ''; ?>'>
+								<div id='learndash_topic_dots-<?php echo absint( $course_id ); ?>-<?php echo absint( $course_lesson['post']->ID ); ?>' class="flip learndash_topic_widget_list"  style='<?php echo ( strpos( $list_arrow_class, 'collapse' ) !== false ) ? 'display:none' : ''; ?>'>
 									<ul class="learndash-topic-list">
 									<?php
 
@@ -154,30 +138,24 @@ if ( ( isset( $course_id ) ) && ( ! empty( $course_id ) ) ) {
 														}
 
 														?>
-															<input type="checkbox" <?php echo $topic_checked; ?> id="learndash-mark-topic-complete-<?php echo $course_id; ?>-<?php echo $topic->ID; ?>" class="learndash-mark-topic-complete" <?php echo $unchecked_children_message; ?> data-name="<?php echo htmlspecialchars( json_encode( $user_topic_progress, JSON_FORCE_OBJECT ) ); ?>" />
+															<input type="checkbox" <?php echo $topic_checked; ?> id="learndash-mark-topic-complete-<?php echo $course_id; ?>-<?php echo $topic->ID; ?>" class="learndash-mark-topic-complete" <?php echo $unchecked_children_message; ?> data-name="<?php echo htmlspecialchars( wp_json_encode( $user_topic_progress, JSON_FORCE_OBJECT ) ); ?>" />
 															<?php
 													}
-														?>
+													?>
 														<?php
 														$edit_url = get_edit_post_link( $topic->ID );
 														if ( LearnDash_Settings_Section::get_section_setting( 'LearnDash_Settings_Courses_Builder', 'shared_steps' ) == 'yes' ) {
 															$edit_url = add_query_arg( 'course_id', $course_id, $edit_url );
 														}
 														?>
-															
-														<a class='<?php echo $completed_class; ?>' href='<?php echo $edit_url; ?>' title='<?php echo $topic->post_title; ?>'><span><?php //echo '('. $topic->ID .') '; ?><?php echo $topic->post_title; ?></span></a>														
-														</span>
-											
+														<a class='<?php echo $completed_class; ?>' href='<?php echo esc_url( $edit_url ); ?>' title='<?php echo esc_html( $topic->post_title ); ?>'><span><?php echo apply_filters( 'the_title', $topic->post_title, $topic->ID ); ?></span></a>	</span>
 														<?php
-														//$topic_quiz_list = learndash_get_lesson_quiz_list( $topic->ID, $user_id, $course_id );
 														if ( ! empty( $topic_quiz_list ) ) {
 															?>
-															<ul id="learndash-quiz-list-<?php echo $course_id; ?>-<?php echo $topic->ID; ?>" class="learndash-quiz-list">
+															<ul id="learndash-quiz-list-<?php echo absint( $course_id ); ?>-<?php echo absint( $topic->ID ); ?>" class="learndash-quiz-list">
 																<?php foreach ( $topic_quiz_list as $quiz ) { ?>
 																		<li class="quiz-item">
 																			<?php
-																				//if ( ( ( $pagenow == 'profile.php' ) || ( $pagenow == 'user-edit.php' ) ) && ( learndash_is_admin_user( ) ) ) {
-																				//if ( ( learndash_is_admin_user( ) ) || ( learndash_is_group_leader_user() ) ) {
 																			if ( learndash_show_user_course_complete( $user_id ) ) {
 
 																				$user_quiz_progress              = array();
@@ -197,7 +175,7 @@ if ( ( isset( $course_id ) ) && ( ! empty( $course_id ) ) ) {
 																				$unchecked_message = ' data-title-unchecked="' . htmlspecialchars( esc_html__( 'Set all parent steps as incomplete?', 'learndash' ), ENT_QUOTES ) . '" ';
 
 																				?>
-																					<input type="checkbox" <?php echo $quiz_checked; ?>class="learndash-mark-topic-quiz-complete learndash-mark-quiz-complete" <?php echo $unchecked_message; ?> data-name="<?php echo htmlspecialchars( json_encode( $user_quiz_progress, JSON_FORCE_OBJECT ) ); ?>" />
+																					<input type="checkbox" <?php echo $quiz_checked; ?>class="learndash-mark-topic-quiz-complete learndash-mark-quiz-complete" <?php echo $unchecked_message; ?> data-name="<?php echo htmlspecialchars( wp_json_encode( $user_quiz_progress, JSON_FORCE_OBJECT ) ); ?>" />
 																					<?php
 																			}
 																			?>
@@ -207,9 +185,9 @@ if ( ( isset( $course_id ) ) && ( ! empty( $course_id ) ) ) {
 																				$edit_url = add_query_arg( 'course_id', $course_id, $edit_url );
 																			}
 																			?>
-																
-																			<a href='<?php echo $edit_url; ?>' title='<?php echo $quiz['post']->post_title; ?>'><span><?php //echo '('. $quiz['post']->ID .') ' ?><?php echo $quiz['post']->post_title; ?></span></a>
-																	
+
+																			<a href='<?php echo esc_url( $edit_url ); ?>' title='<?php echo esc_html( apply_filters( 'the_title', $quiz['post']->post_title, $quiz['post']->ID ) ); ?>'><span><?php echo apply_filters( 'the_title', $quiz['post']->post_title, $quiz['post']->ID ); ?></span></a>
+
 																		</li>
 																	<?php } ?>
 																</ul>
@@ -227,8 +205,6 @@ if ( ( isset( $course_id ) ) && ( ! empty( $course_id ) ) ) {
 											?>
 												<li class="quiz-item">
 												<?php
-												//if ( ( ( $pagenow == 'profile.php' ) || ( $pagenow == 'user-edit.php' ) ) && ( learndash_is_admin_user( ) ) ) {
-												//if ( ( learndash_is_admin_user( ) ) || ( learndash_is_group_leader_user() ) ) {
 												if ( learndash_show_user_course_complete( $user_id ) ) {
 
 													$user_quiz_progress              = array();
@@ -246,7 +222,7 @@ if ( ( isset( $course_id ) ) && ( ! empty( $course_id ) ) ) {
 													}
 
 													?>
-														<input type="checkbox" <?php echo $quiz_checked; ?>class="learndash-mark-lesson-quiz-complete learndash-mark-quiz-complete" data-name="<?php echo htmlspecialchars( json_encode( $user_quiz_progress, JSON_FORCE_OBJECT ) ); ?>" />
+														<input type="checkbox" <?php echo $quiz_checked; ?> class="learndash-mark-lesson-quiz-complete learndash-mark-quiz-complete" data-name="<?php echo htmlspecialchars( wp_json_encode( $user_quiz_progress, JSON_FORCE_OBJECT ) ); ?>" />
 														<?php
 												}
 												?>
@@ -255,35 +231,20 @@ if ( ( isset( $course_id ) ) && ( ! empty( $course_id ) ) ) {
 												if ( LearnDash_Settings_Section::get_section_setting( 'LearnDash_Settings_Courses_Builder', 'shared_steps' ) == 'yes' ) {
 													$edit_url = add_query_arg( 'course_id', $course_id, $edit_url );
 												}
-													?>
-													<a href='<?php echo $edit_url; ?>' title='<?php echo $quiz['post']->post_title; ?>'><span><?php //echo '('. $quiz['post']->ID .') '; ?><?php echo $quiz['post']->post_title; ?></span></a>
+												?>
+													<a href="<?php echo esc_url( $edit_url ); ?>" title="<?php echo esc_html( apply_filters( 'the_title', $quiz['post']->post_title, $quiz['post']->ID ) ); ?>"><span><?php echo apply_filters( 'the_title', $quiz['post']->post_title, $quiz['post']->ID ); ?></span></a>
 													</li>
 													<?php
 										}
 									}
-										?>
+									?>
 										</ul>
-										<?php
-										/*
-										if ( isset( $course_pager_results[ $course_lesson['post']->ID ]['pager'] ) ) {
-											echo SFWD_LMS::get_template( 
-												'learndash_pager.php', 
-												array(
-													'pager_results' => $course_pager_results[ $course_lesson['post']->ID ]['pager'], 
-													'pager_context' => 'course_topics',
-													'href_query_arg' => 'ld-topic-page',
-													'href_val_prefix' => $course_lesson['post']->ID . '-'
-												)
-											);
-										}
-										*/
-										?>
 									</div>
 									<?php
 							}
 							?>
 						</div>
-					</div> 
+					</div>
 				<?php } ?>
 
 			<?php } ?>
@@ -307,8 +268,6 @@ if ( ( isset( $course_id ) ) && ( ! empty( $course_id ) ) ) {
 							<div class="list_lessons">
 								<div class="lesson" >
 									<?php
-										//if ( ( ( $pagenow == 'profile.php' ) || ( $pagenow == 'user-edit.php' ) ) && ( learndash_is_admin_user( ) ) ) {
-										//if ( ( learndash_is_admin_user( ) ) || ( learndash_is_group_leader_user() ) ) {
 									if ( learndash_show_user_course_complete( $user_id ) ) {
 
 										$user_quiz_progress              = array();
@@ -324,12 +283,11 @@ if ( ( isset( $course_id ) ) && ( ! empty( $course_id ) ) ) {
 											$user_quiz_progress['checked'] = false;
 										}
 										?>
-											<input type="checkbox" <?php echo $quiz_checked; ?> class="learndash-mark-quiz-complete learndash-mark-course-quiz-complete" data-name="<?php echo htmlspecialchars( json_encode( $user_quiz_progress, JSON_FORCE_OBJECT ) ); ?>" />
+											<input type="checkbox" <?php echo $quiz_checked; ?> class="learndash-mark-quiz-complete learndash-mark-course-quiz-complete" data-name="<?php echo htmlspecialchars( wp_json_encode( $user_quiz_progress, JSON_FORCE_OBJECT ) ); ?>" />
 											<?php
 									}
-										?>
-										<a href='<?php echo add_query_arg( 'course_id', $course_id, get_edit_post_link( $quiz['post']->ID ) ); ?>' title='<?php echo $quiz['post']->post_title; ?>'><?php //echo '('. $quiz['post']->ID .') '; ?><?php echo $quiz['post']->post_title; ?></a>
-					
+									?>
+										<a href="<?php echo esc_url( add_query_arg( 'course_id', $course_id, get_edit_post_link( $quiz['post']->ID ) ) ); ?>" title="<?php echo esc_html( apply_filters( 'the_title', $quiz['post']->post_title, $quiz['post']->ID ) ); ?>"><?php echo apply_filters( 'the_title', $quiz['post']->post_title, $quiz['post']->ID ); ?></a>
 									</div>
 								</div>
 							</div>
@@ -342,22 +300,22 @@ if ( ( isset( $course_id ) ) && ( ! empty( $course_id ) ) ) {
 		<?php
 		$learndash_course_navigation_admin_style = '
 		$learndash_course_navigation_admin_meta .list_arrow.expand {
-			background: url("'. LEARNDASH_LMS_PLUGIN_URL .'assets/images/gray_arrow_expand.png") no-repeat scroll 0 50% transparent;
+			background: url("' . LEARNDASH_LMS_PLUGIN_URL . 'assets/images/gray_arrow_expand.png") no-repeat scroll 0 50% transparent;
 			padding: 5px;
 		}
 
 		#learndash_course_navigation_admin_meta .list_arrow.collapse {
-			background: url("'. LEARNDASH_LMS_PLUGIN_URL .'assets/images/gray_arrow_collapse.png") no-repeat scroll 0 50% transparent;
+			background: url("' . LEARNDASH_LMS_PLUGIN_URL . 'assets/images/gray_arrow_collapse.png") no-repeat scroll 0 50% transparent;
 			padding: 5px;
 		}
 
 		#learndash_course_navigation_admin_meta .lesson_incomplete.list_arrow.collapse {
-			background: url("'. LEARNDASH_LMS_PLUGIN_URL .'assets/images/gray_arrow_collapse.png") no-repeat scroll 0 50% transparent;
+			background: url("' . LEARNDASH_LMS_PLUGIN_URL . 'assets/images/gray_arrow_collapse.png") no-repeat scroll 0 50% transparent;
 			padding: 5px;
 		}
 
 		#learndash_course_navigation_admin_meta .lesson_incomplete.list_arrow.expand {
-			background: url("'. LEARNDASH_LMS_PLUGIN_URL .'assets/images/gray_arrow_expand.png") no-repeat scroll 0 50% transparent;
+			background: url("' . LEARNDASH_LMS_PLUGIN_URL . 'assets/images/gray_arrow_expand.png") no-repeat scroll 0 50% transparent;
 			padding: 5px;
 		}
 		';
@@ -377,15 +335,15 @@ if ( ( isset( $course_id ) ) && ( ! empty( $course_id ) ) ) {
 			);
 		}
 		?>
-		<?php if ( ( $widget['current_step_id'] != 0 ) && ( $widget['current_step_id'] != $course->ID ) ) { ?> 
+		<?php if ( ( $widget['current_step_id'] != 0 ) && ( $widget['current_step_id'] != $course->ID ) ) { ?>
 			<p class="widget_course_return">
-				<?php esc_html_e( 'Return to', 'learndash' ); ?> <a href='<?php echo get_edit_post_link( $course_id ); ?>'>
-					<?php echo $course->post_title; ?>
+				<?php esc_html_e( 'Return to', 'learndash' ); ?> <a href='<?php echo esc_url( get_edit_post_link( $course_id ) ); ?>'>
+					<?php echo apply_filters( 'the_title', $course->post_title, $course->ID ); ?>
 				</a>
 			</p>
 
 		<?php } ?>
-		
+
 	<?php if ( ( isset( $widget['show_widget_wrapper'] ) ) && ( $widget['show_widget_wrapper'] == 'true' ) ) { ?>
 		</div> <!-- Closing <div id='course_navigation'> -->
 	<?php } ?>

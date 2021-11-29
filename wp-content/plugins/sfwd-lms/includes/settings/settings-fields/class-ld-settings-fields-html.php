@@ -1,19 +1,28 @@
 <?php
 /**
- * LearnDash Settings field HTML.
+ * LearnDash HTML Settings Field.
  *
- * @package LearnDash
- * @subpackage Settings
+ * @since 3.0.0
+ * @package LearnDash\Settings\Field
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'LearnDash_Settings_Fields_Html' ) ) ) {
 	/**
-	 * Class to create the settings field.
+	 * Class LearnDash HTML Settings Field.
+	 *
+	 * @since 3.0.0
+	 * @uses LearnDash_Settings_Fields
 	 */
 	class LearnDash_Settings_Fields_Html extends LearnDash_Settings_Fields {
 
 		/**
 		 * Public constructor for class
+		 *
+		 * @since 3.0.0
 		 */
 		public function __construct() {
 			$this->field_type = 'html';
@@ -24,15 +33,25 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 		/**
 		 * Function to crete the settiings field.
 		 *
-		 * @since 2.4
+		 * @since 3.0.0
 		 *
 		 * @param array $field_args An array of field arguments used to process the ouput.
+		 *
 		 * @return void
 		 */
 		public function create_section_field( $field_args = array() ) {
-			$field_args = apply_filters( 'learndash_settings_field', $field_args );
-			$html       = apply_filters( 'learndash_settings_field_html_before', '', $field_args );
 
+			/** This filter is documented in includes/settings/settings-fields/class-ld-settings-fields-checkbox-switch.php */
+			$field_args = apply_filters( 'learndash_settings_field', $field_args );
+
+			/** This filter is documented in includes/settings/settings-fields/class-ld-settings-fields-checkbox-switch.php */
+			$html = apply_filters( 'learndash_settings_field_html_before', '', $field_args );
+
+			/**
+			 * Filters setting field HTML element.
+			 *
+			 * @param string $html_element The HTML element to be used for setting field.
+			 */
 			$field_type = apply_filters( 'learndash_settings_field_element_html', 'div' );
 			$html      .= '<' . $field_type . ' ';
 			$html      .= $this->get_field_attribute_id( $field_args );
@@ -46,13 +65,13 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 
 			$html .= '</' . $field_type . '>';
 
-			echo $html;
+			echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Need to output HTML
 		}
 
 		/**
 		 * Default validation function. Should be overriden in Field subclass.
 		 *
-		 * @since 2.4
+		 * @since 3.0.0
 		 *
 		 * @param mixed  $val Value to validate.
 		 * @param string $key Key of value being validated.

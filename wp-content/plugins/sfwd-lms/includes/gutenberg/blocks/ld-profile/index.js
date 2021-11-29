@@ -16,28 +16,18 @@ import {
 /**
  * Internal block libraries
  */
-const { __, _x, sprintf } = wp.i18n;
-const {
-	registerBlockType,
-} = wp.blocks;
-
-const {
-    InspectorControls,
-} = wp.editor;
-
-const {
-	ServerSideRender,
-	PanelBody,
-	SelectControl,
-	ToggleControl,
-	TextControl
-} = wp.components;
+import { __, _x, sprintf } from '@wordpress/i18n';
+import { registerBlockType } from '@wordpress/blocks';
+import { InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, SelectControl, TextControl, ToggleControl } from '@wordpress/components';
+import ServerSideRender from '@wordpress/server-side-render';
 
 registerBlockType(
-    'learndash/ld-profile',
-    {
-        title: __( 'LearnDash Profile', 'learndash' ),
-		description: sprintf(_x("Displays user's enrolled %1$s, %2$s progress, %3$s scores, and achieved certificates.", 'placeholder: courses, course, quiz', 'learndash'), ldlms_get_custom_label('courses'), ldlms_get_custom_label('course'), ldlms_get_custom_label('quiz') ),
+	'learndash/ld-profile',
+	{
+		title: __( 'LearnDash Profile', 'learndash' ),
+		// translators: placeholders: Courses, Course, Quiz.
+		description: sprintf(_x("Displays user's enrolled %1$s, %2$s progress, %3$s scores, and achieved certificates.", 'placeholders: Courses, Course, Quiz', 'learndash'), ldlms_get_custom_label('courses'), ldlms_get_custom_label('course'), ldlms_get_custom_label('quiz') ),
 		icon: 'id-alt',
 		category: 'learndash-blocks',
 		example: {
@@ -48,28 +38,28 @@ registerBlockType(
 		supports: {
 			customClassName: false,
 		},
-        attributes: {
-            per_page: {
+		attributes: {
+			per_page: {
 				type: 'string',
 				default: '',
-            },
-            orderby: {
+			},
+			orderby: {
 				type: 'string',
 				default: 'ID'
-            },
-            order: {
+			},
+			order: {
 				type: 'string',
 				default: 'DESC'
-            },
-            course_points_user: {
+			},
+			course_points_user: {
 				type: 'boolean',
 				default: 1
-            },
-            expand_all: {
+			},
+			expand_all: {
 				type: 'boolean',
 				default: 0
-            },
-            profile_link: {
+			},
+			profile_link: {
 				type: 'boolean',
 				default: 1
 			},
@@ -98,17 +88,19 @@ registerBlockType(
 				default: 0
 			},
 		},
-        edit: function( props ) {
+		edit: function( props ) {
 			const { attributes: { per_page, orderby, order, course_points_user, expand_all, profile_link, show_header, show_search, show_quizzes, preview_user_id, preview_show, example_show },
-            	setAttributes } = props;
+				setAttributes } = props;
 
 			const inspectorControls = (
-				<InspectorControls>
+				<InspectorControls key="controls">
 					<PanelBody
 						title={ __( 'Settings', 'learndash' ) }
 					>
 						<TextControl
-							label={sprintf(_x('%s per page', 'placeholder: Lessons', 'learndash'), ldlms_get_custom_label('courses') ) }
+							// translators: placeholder: Courses.
+							label={sprintf(_x('%s per page', 'placeholder: Courses', 'learndash'), ldlms_get_custom_label('courses') ) }
+							// translators: placeholder: default per page.
 							help={sprintf(_x('Leave empty for default (%d) or 0 to show all items.', 'placeholder: default per page', 'learndash'), ldlms_get_per_page('per_page') ) }
 							value={per_page || ''}
 							type={'number'}
@@ -166,6 +158,7 @@ registerBlockType(
 							onChange={show_header => setAttributes({ show_header })}
 						/>
 						<ToggleControl
+							// translators: placeholder: Course.
 							label={sprintf(_x('Show Earned %s Points', 'placeholder: Course', 'learndash'), ldlms_get_custom_label('course') ) }
 							checked={ !!course_points_user }
 							onChange={ course_points_user => setAttributes( { course_points_user } ) }
@@ -176,11 +169,13 @@ registerBlockType(
 							onChange={ profile_link => setAttributes( { profile_link } ) }
 						/>
 						<ToggleControl
-							label={sprintf(_x('Show User Quiz Attempts', 'placeholder: Quiz', 'learndash'), ldlms_get_custom_label('quiz') ) }
+							// translators: placeholder: Quiz.
+							label={sprintf(_x('Show User %s Attempts', 'placeholder: Quiz', 'learndash'), ldlms_get_custom_label('quiz') ) }
 							checked={ !!show_quizzes }
 							onChange={ show_quizzes => setAttributes( { show_quizzes } ) }
 						/>
 						<ToggleControl
+							// translators: placeholder: Course.
 							label={sprintf(_x('Expand All %s Sections', 'placeholder: Course', 'learndash'), ldlms_get_custom_label('course'))}
 							checked={!!expand_all}
 							onChange={expand_all => setAttributes({ expand_all })}
@@ -211,6 +206,7 @@ registerBlockType(
 					return <ServerSideRender
 					block="learndash/ld-profile"
 					attributes={ attributes }
+					key="learndash/ld-profile"
 					/>
 				} else {
 					return __( '[ld_profile] shortcode output shown here', 'learndash' );
@@ -221,9 +217,9 @@ registerBlockType(
 				inspectorControls,
 				do_serverside_render( props.attributes )
 			];
-        },
+		},
 
-        save: props => {
+		save: props => {
 			// Delete preview_user_id from props to prevent it being saved.
 			delete (props.attributes.preview_user_id);
 		}

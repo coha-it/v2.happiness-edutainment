@@ -2,12 +2,12 @@
 # This file is distributed under the same license as the Plugins - Compress JPEG &amp; PNG images - Stable (latest release) package.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2019-07-16 11:04:14+0000\n"
+"PO-Revision-Date: 2021-01-23 07:10:30+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: GlotPress/2.4.0-alpha\n"
+"X-Generator: GlotPress/3.0.0-alpha.2\n"
 "Language: de\n"
 "Project-Id-Version: Plugins - Compress JPEG &amp; PNG images - Stable (latest release)\n"
 
@@ -53,6 +53,10 @@ msgstr "Wähle die zu komprimierenden Bildgrößen"
 #: src/views/settings.php:24
 msgid "Image sizes"
 msgstr "Bildgrößen"
+
+#: src/views/settings.php:18
+msgid "New image uploads"
+msgstr "Neue Bilder-Uploads"
 
 #: src/views/settings.php:12
 msgid "Tinify account"
@@ -451,8 +455,8 @@ msgstr "Neues Konto registrieren"
 msgid "Cancel"
 msgstr "Abbrechen"
 
-#: src/views/account-status-create-simple.php:24
 #: src/views/account-status-connected.php:80
+#: src/views/account-status-create-simple.php:24
 #: src/views/account-status-create-advanced.php:55
 msgid "Save"
 msgstr "Speichern"
@@ -506,7 +510,7 @@ msgstr "Bitte Konto aktivieren, um mit der Komprimierung von Bildern zu beginnen
 msgid "Please register or provide an API key to start compressing images."
 msgstr "Bitte registrieren oder einen API-Schlüssel angeben, um mit der Komprimierung von Bildern zu beginnen."
 
-#: src/class-tiny-plugin.php:389 src/class-tiny-plugin.php:434
+#: src/class-tiny-plugin.php:391 src/class-tiny-plugin.php:438
 msgid "You don't have permission to upload files."
 msgstr "Du hast keine Berechtigung, Dateien hochzuladen."
 
@@ -559,7 +563,7 @@ msgstr "Soll laut Konfiguration nicht komprimiert werden"
 msgid "Not compressed"
 msgstr "Nicht komprimiert"
 
-#: src/class-tiny-plugin.php:603
+#: src/class-tiny-plugin.php:607
 msgid "JPEG and PNG optimization"
 msgstr "JPEG- und PNG-Optimierung"
 
@@ -676,17 +680,17 @@ msgstr "Ersparnis"
 msgid "Original image"
 msgstr "Originalbild"
 
-#: src/class-tiny-plugin.php:582
+#: src/class-tiny-plugin.php:586
 msgid "Compression"
 msgstr "Komprimierung"
 
-#: src/class-tiny-plugin.php:407 src/class-tiny-plugin.php:456
-#: src/class-tiny-plugin.php:538
+#: src/class-tiny-plugin.php:409 src/class-tiny-plugin.php:460
+#: src/class-tiny-plugin.php:542
 msgid "Could not find metadata of media file."
 msgstr "Konnte Metadaten der Mediendatei nicht finden."
 
-#: src/class-tiny-plugin.php:397 src/class-tiny-plugin.php:444
-#: src/class-tiny-plugin.php:528
+#: src/class-tiny-plugin.php:399 src/class-tiny-plugin.php:448
+#: src/class-tiny-plugin.php:532
 msgid "Not a valid media file."
 msgstr "Keine gültige Mediendatei."
 
@@ -744,9 +748,9 @@ msgid "Speed up your website. Optimize your JPEG and PNG images automatically wi
 msgstr "Beschleunige deine Webseite. Optimiere deine JPEG- und PNG-Dateien automatisch mit TinyPNG."
 
 #. Plugin Name of the plugin
-#: src/class-tiny-notices.php:150 src/class-tiny-notices.php:271
-#: src/class-tiny-notices.php:281 src/class-tiny-settings.php:123
-#: src/class-tiny-settings.php:124 src/class-tiny-settings.php:415
-#: src/class-tiny-plugin.php:667 src/views/settings.php:2
+#: src/class-tiny-plugin.php:671 src/class-tiny-notices.php:150
+#: src/class-tiny-notices.php:271 src/class-tiny-notices.php:281
+#: src/class-tiny-settings.php:123 src/class-tiny-settings.php:124
+#: src/class-tiny-settings.php:415 src/views/settings.php:2
 msgid "Compress JPEG & PNG images"
 msgstr "Compress JPEG & PNG images"

@@ -61,47 +61,6 @@ if ( ! function_exists( 'mycred_user_wants_email' ) ) :
 endif;
 
 /**
- * Get Email Notice Instances
- * Returns an array of supported instances where an email can be sent by this add-on.
- * @since 1.8
- * @version 1.0
- */
-if ( ! function_exists( 'mycred_get_email_instances' ) ) :
-	function mycred_get_email_instances( $none = true ) {
-
-		$instances = array();
-
-		if ( $none ) $instances[''] = __( 'Select', 'mycred' );
-
-		$instances['any']      = __( 'users balance changes', 'mycred' );
-		$instances['positive'] = __( 'users balance increases', 'mycred' );
-		$instances['negative'] = __( 'users balance decreases', 'mycred' );
-		$instances['zero']     = __( 'users balance reaches zero', 'mycred' );
-		$instances['minus']    = __( 'users balance goes negative', 'mycred' );
-
-		if ( class_exists( 'myCRED_Badge_Module' ) ) {
-			$instances['badge_new'] = __( 'user gains a badge', 'mycred' );
-			$instances['badge_level'] = __( 'user gains a new badge level', 'mycred' );
-		}
-
-		if ( class_exists( 'myCRED_Ranks_Module' ) ) {
-			$instances['rank_up']   = __( 'user is promoted to a higher rank', 'mycred' );
-			$instances['rank_down'] = __( 'user is demoted to a lower rank', 'mycred' );
-		}
-
-		if ( class_exists( 'myCRED_Transfer_Module' ) ) {
-			$instances['transfer_out'] = __( 'user sends a transfer', 'mycred' );
-			$instances['transfer_in']  = __( 'user receives a transfer', 'mycred' );
-		}
-
-		$instances['custom']  = __( 'a custom event occurs', 'mycred' );
-
-		return apply_filters( 'mycred_email_instances', $instances );
-
-	}
-endif;
-
-/**
  * Get Email Triggers
  * Retreaves the saved email triggers for a given point type.
  * @since 1.8
@@ -121,7 +80,10 @@ if ( ! function_exists( 'mycred_get_email_triggers' ) ) :
 			'rank_up'      => array(),
 			'rank_down'    => array(),
 			'transfer_out' => array(),
-			'transfer_in'  => array()
+			'transfer_in'  => array(),
+			'cashcred_approved'   => array(),
+			'cashcred_pending'    => array(),
+			'cashcred_cancel'	=>array()
 		);
 
 		$defaults = array(
@@ -363,7 +325,7 @@ if ( ! function_exists( 'mycred_get_triggered_emails' ) ) :
 			}
 
             // check if trasfer trigger has notice id
-            if ( ! empty( $triggers['generic']['transfer_in'] ) ) {
+            if ( ! empty( $ref ) && $ref == 'transfer' && floatval( $amount ) > 0 && ! empty( $triggers['generic']['transfer_in'] ) ) {
                 foreach ( $triggers['generic']['transfer_in'] as $notice_id ) {
 
                     if ( ! in_array( $notice_id, $notices ) )
@@ -373,14 +335,13 @@ if ( ! function_exists( 'mycred_get_triggered_emails' ) ) :
             }
 
             // check if trasfer trigger has notice ids
-            if ( ! empty( $triggers['generic']['transfer_out'] ) ) {
+            if ( ! empty( $ref ) && $ref == 'transfer' && floatval( $amount ) < 0 && ! empty( $triggers['generic']['transfer_out'] ) ) {
                 foreach ( $triggers['generic']['transfer_out'] as $notice_id ) {
                     if ( ! in_array( $notice_id, $notices ) )
                         $notices[] = $notice_id;
 
                 }
             }
-
 
             // Specific instances based on reference
 			if ( ! empty( $triggers['specific'] ) && array_key_exists( $ref, $triggers['specific'] ) && ! empty( $triggers['specific'][ $ref ] ) ) {

@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitf81d5ff400b34c3bfff6f67ea030cf6f
+class ComposerStaticInit9ed2230ac70257f403e8e80f0f3a3d71
 {
     public static $prefixLengthsPsr4 = array (
         'v' => 
@@ -12,13 +12,13 @@ class ComposerStaticInitf81d5ff400b34c3bfff6f67ea030cf6f
             'voku\\helper\\' => 12,
             'voku\\CssToInlineStyles\\' => 23,
         ),
-        'T' => 
-        array (
-            'TijsVerkoyen\\CssToInlineStyles\\' => 31,
-        ),
         'S' => 
         array (
             'Symfony\\Component\\CssSelector\\' => 30,
+        ),
+        'B' => 
+        array (
+            'Barryvdh\\Composer\\' => 18,
         ),
     );
 
@@ -31,13 +31,13 @@ class ComposerStaticInitf81d5ff400b34c3bfff6f67ea030cf6f
         array (
             0 => __DIR__ . '/..' . '/voku/css-to-inline-styles/src',
         ),
-        'TijsVerkoyen\\CssToInlineStyles\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/tijsverkoyen/css-to-inline-styles/src',
-        ),
         'Symfony\\Component\\CssSelector\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/css-selector',
+        ),
+        'Barryvdh\\Composer\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/barryvdh/composer-cleanup-plugin/src',
         ),
     );
 
@@ -54,9 +54,9 @@ class ComposerStaticInitf81d5ff400b34c3bfff6f67ea030cf6f
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitf81d5ff400b34c3bfff6f67ea030cf6f::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitf81d5ff400b34c3bfff6f67ea030cf6f::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInitf81d5ff400b34c3bfff6f67ea030cf6f::$prefixesPsr0;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit9ed2230ac70257f403e8e80f0f3a3d71::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit9ed2230ac70257f403e8e80f0f3a3d71::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit9ed2230ac70257f403e8e80f0f3a3d71::$prefixesPsr0;
 
         }, null, ClassLoader::class);
     }

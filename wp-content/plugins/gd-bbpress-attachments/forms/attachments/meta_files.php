@@ -26,5 +26,3 @@ if ((d4p_bba_o("errors_visible_to_author") == 1 && $author_id == $user_ID) || (d
         echo '</ul>';
     }
 }
-
-?>

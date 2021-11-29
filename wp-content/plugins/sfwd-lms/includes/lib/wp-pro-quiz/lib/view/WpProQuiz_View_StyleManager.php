@@ -1,49 +1,53 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+// phpcs:disable WordPress.NamingConventions.ValidVariableName,WordPress.NamingConventions.ValidFunctionName,WordPress.NamingConventions.ValidHookName
 class WpProQuiz_View_StyleManager extends WpProQuiz_View_View {
-	
+
 	public function show() {
 
-?>
+		?>
 
 
 <div class="wrap">
-	<h2 style="margin-bottom: 10px;"><?php echo $this->header; ?></h2>
+	<h2 style="margin-bottom: 10px;"><?php echo wp_kses_post( $this->header ); ?></h2>
 
 	<form method="post">
 		<div id="poststuff">
 			<div class="postbox">
-				<h3 class="hndle"><?php esc_html_e('Front', 'learndash'); ?></h3>
+				<h3 class="hndle"><?php esc_html_e( 'Front', 'learndash' ); ?></h3>
 				<div class="wrap wpProQuiz_quizEdit">
 					<table class="form-table">
 						<tbody>
 							<tr>
 								<td width="50%">
-								
-								
+
+
 								</td>
 								<td>
-									
-									
-									
+
+
+
 									<div style="" class="wpProQuiz_quiz">
 		<ol class="wpProQuiz_list">
-					
-		
-					
-		
-					
-		
-					
-		
-					
-		
-					
-		
-					
-		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 				<li class="wpProQuiz_listItem" style="display: list-item;">
 				<div class="wpProQuiz_question_page">
-					Frage <span>4</span> von <span>7</span>					
+					Frage <span>4</span> von <span>7</span>
 										<span style="float:right;">1 Punkte</span>
 					<div style="clear: right;"></div>
 									</div>
@@ -53,15 +57,15 @@ class WpProQuiz_View_StyleManager extends WpProQuiz_View_View {
 						<p>Frage3</p>
 					</div>
 										<ul class="wpProQuiz_questionList">
-												
-						
-						
-												
-						
-						
-												
-						
-						
+
+
+
+
+
+
+
+
+
 										<li class="wpProQuiz_questionListItem" style="">
 							<label>
 								<input class="wpProQuiz_questionInput" type="checkbox" name="question_5_26" value="2"> Test							</label>
@@ -80,7 +84,7 @@ class WpProQuiz_View_StyleManager extends WpProQuiz_View_View {
 						<p>
 													</p>
 					</div>
-					
+
 				</div>
 				<div class="wpProQuiz_tipp" style="display: none;">
 					<h3>Tipp</h3>
@@ -91,14 +95,14 @@ class WpProQuiz_View_StyleManager extends WpProQuiz_View_View {
 				<div style="clear: both;"></div>
 			</li></ol>
 	</div>
-									
-									
-									
-									
-									
-									
-									
-									
+
+
+
+
+
+
+
+
 								</td>
 							</tr>
 						</tbody>
@@ -109,6 +113,6 @@ class WpProQuiz_View_StyleManager extends WpProQuiz_View_View {
 	</form>
 </div>
 
-<?php
+		<?php
 	}
 }

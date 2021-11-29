@@ -7,6 +7,10 @@
  * @since 2.5.9
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 if ( ( class_exists( 'LearnDash_Gutenberg_Block' ) ) && ( ! class_exists( 'LearnDash_Gutenberg_Block_Course_List' ) ) ) {
 	/**
 	 * Class for handling LearnDash Course List Block
@@ -31,6 +35,12 @@ if ( ( class_exists( 'LearnDash_Gutenberg_Block' ) ) && ( ! class_exists( 'Learn
 				),
 				'mycourses'               => array(
 					'type' => 'string',
+				),
+				'status'                  => array(
+					'type'  => 'array',
+					'items' => array(
+						'type' => 'string',
+					),
 				),
 				'show_content'            => array(
 					'type' => 'boolean',
@@ -81,10 +91,16 @@ if ( ( class_exists( 'LearnDash_Gutenberg_Block' ) ) && ( ! class_exists( 'Learn
 					'type' => 'boolean',
 				),
 				'col'                     => array(
-					'type' => 'string',
+					'type' => 'integer',
 				),
-				'example_show' => array(
+				'example_show'            => array(
 					'type' => 'boolean',
+				),
+				'price_type'              => array(
+					'type'  => 'array',
+					'items' => array(
+						'type' => 'string',
+					),
 				),
 			);
 			$this->self_closing     = true;
@@ -105,13 +121,25 @@ if ( ( class_exists( 'LearnDash_Gutenberg_Block' ) ) && ( ! class_exists( 'Learn
 		 * @return none The output is echoed.
 		 */
 		public function render_block( $attributes = array() ) {
+			$attributes = $this->preprocess_block_attributes( $attributes );
 
 			if ( is_user_logged_in() ) {
-
+				/**
+				 * Filters WordPress block content shortcode attributes.
+				 *
+				 * @param array  $attributes     An array of shortcode attributes.
+				 * @param string $shortcode_slug Slug of the shortcode.
+				 * @param string $block_slug     Slug of the gutenberg block.
+				 * @param string $content        Shortcode content.
+				 */
 				$attributes           = apply_filters( 'learndash_block_markers_shortcode_atts', $attributes, $this->shortcode_slug, $this->block_slug, '' );
 				$shortcode_params_str = $this->prepare_course_list_atts_to_param( $attributes );
 				$shortcode_params_str = '[' . $this->shortcode_slug . ' ' . $shortcode_params_str . ']';
-				$shortcode_out        = do_shortcode( $shortcode_params_str );
+
+				$shortcode_out = do_shortcode( $shortcode_params_str );
+				if ( empty( $shortcode_out ) ) {
+					$shortcode_out = '[' . $this->shortcode_slug . '] placeholder output.';
+				}
 
 				// This is mainly to protect against emty returns with the Gutenberg ServerSideRender function.
 				return $this->render_block_wrap( $shortcode_out );
@@ -133,12 +161,12 @@ if ( ( class_exists( 'LearnDash_Gutenberg_Block' ) ) && ( ! class_exists( 'Learn
 		 */
 		public function learndash_block_markers_shortcode_atts_filter( $attributes = array(), $shortcode_slug = '', $block_slug = '', $content = '' ) {
 			if ( $shortcode_slug === $this->shortcode_slug ) {
-				if ( isset( $attributes['preview_show'] ) ) {
+				if ( ( isset( $attributes['preview_show'] ) ) && ( true === $attributes['preview_show'] ) ) {
+					if ( isset( $attributes['preview_user_id'] ) ) {
+						$attributes['user_id'] = $attributes['preview_user_id'];
+						unset( $attributes['preview_user_id'] );
+					}
 					unset( $attributes['preview_show'] );
-				}
-
-				if ( isset( $attributes['preview_user_id'] ) ) {
-					unset( $attributes['preview_user_id'] );
 				}
 
 				if ( isset( $attributes['per_page'] ) ) {

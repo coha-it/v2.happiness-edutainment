@@ -30,6 +30,9 @@ if ( ! function_exists( 'mycred_render_my_rank' ) ) :
 		if ( $user_id === false ) return;
 
 		$account_object = mycred_get_account( $user_id );
+		
+		if( empty( $account_object->balance[ $ctype ]->rank ) ) return;
+		
 		$rank_object    = $account_object->balance[ $ctype ]->rank;
 
 		if ( $rank_object !== false ) {
@@ -76,7 +79,7 @@ if ( ! function_exists( 'mycred_render_my_ranks' ) ) :
 		if ( $user_id == '' && ! is_user_logged_in() ) return;
 
 		$user_id        = mycred_get_user_id( $user_id );
-		if ( $user_id === false ) return;
+		if ( $user_id == false ) return;
 
 		$account_object = mycred_get_account( $user_id );
 		$show           = array();

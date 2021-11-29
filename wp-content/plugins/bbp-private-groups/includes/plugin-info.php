@@ -59,7 +59,7 @@ function pg_plugin_info() {
 	global $rpg_topic_permissions ;
 	echo '<h3>'; _e('Plugin Information', 'bbp-private-groups'); echo'</h3>';
 	echo '<table >';
-	array_walk($sysinfo, create_function('$item1, $key', 'echo "<tr><td>$key</td><td>$item1</td></tr>";'));
+	array_walk($sysinfo, 'rpg_list_1') ;
 	?>
 	<tr>
 	</tr>
@@ -189,11 +189,20 @@ function pg_plugin_info() {
 	
 	<tr>
 	</tr>
+	</table>
+	<table>
 	<tr>
 		<th>
 			<?php echo 'Groups' ?> 
 		</th>
 	</tr>
+	<tr>
+				<td><b>Group</b></td>
+				<td><b>Name</b></td>
+				<td><b>No users in this group</b></td>
+				<td><b>Forums in tdis group</b></td>
+				</tr>
+				<tr>
 	
 	<?php
 	$count=count ($rpg_groups) ;
@@ -204,9 +213,9 @@ function pg_plugin_info() {
 				$item="rpg_groups[".$name."]" ;
 				
 				?>
-			<!-------------------------  Group  --------------------------------------------->		
-				<tr>
-					<td>
+			<!-------------------------  Group  --------------------------------------------->	
+				
+					<td valign="top">
 						<?php echo $display ;
 						if (!empty($rpg_disable_groups[$name])) {
 								echo ' <i>' ;
@@ -216,8 +225,11 @@ function pg_plugin_info() {
 						?>
 					</td>
 					
-					<td>
-						<?php _e('No. users in this group : ' , 'bbp-private-groups') ; ?>
+					<td valign="top">
+						<?php echo esc_html( $rpg_groups[$name] ) ; ?>
+					</td>
+					
+					<td valign="top">
 						<?php 
 							global $wpdb;
 							$users=$wpdb->get_col("select ID from $wpdb->users") ;
@@ -233,22 +245,15 @@ function pg_plugin_info() {
 						echo $countu ;
 						?>
 					</td>
-				</tr>
 				
-				<tr>
+								
 					<td>
-						<?php echo esc_html( $rpg_groups[$name] ) ; ?>
-					</td>
-					
-					<td>
-						<?php _e('Forums in this group :' , 'bbp-private-groups') ; ?>
-					</td>
-				</tr>
 					<?php
+					echo '<i>' ;
 						$forum = bbp_get_forum_post_type() ;
 						$forums=$wpdb->get_col("select ID from $wpdb->posts where post_type='$forum'") ;
 						$countu=0 ;
-						echo '<tr><td></td><td><i>' ;
+						
 						foreach ($forums as $forum) {
 							$meta = (array)get_post_meta( $forum, '_private_group', false );
 							foreach ($meta as $meta2) {
@@ -265,6 +270,7 @@ function pg_plugin_info() {
 		<!-------------------------  FORUMS  --------------------------------------------->	
 	<?php }
 	?>
+	</table><table>
 	<tr>
 	</tr>
 	
@@ -272,7 +278,7 @@ function pg_plugin_info() {
 		<th>
 			<?php echo 'Forums' ?> 
 		</th>
-		<th>
+		<th style="width:200px">
 			<?php echo 'Groups' ?> 
 		</th>
 		<?php if (!empty ($rpg_topic_permissions) ) echo '<th>Topic Permissions</th>' ; ?>
@@ -378,6 +384,11 @@ function pg_plugin_info() {
 	endif; 
 	
 	echo '</table>';
+	
+}
+
+function rpg_list_1 ($item1, $key) {
+	echo '<tr><td>'.$key.'</td><td>'.$item1.'</td></tr>' ;
 	
 }
 ?>

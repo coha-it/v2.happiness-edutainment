@@ -281,7 +281,7 @@ class Tiny_Plugin extends Tiny_WP_Base {
 	public function blocking_compress_on_upload( $metadata, $attachment_id ) {
 		if ( ! empty( $metadata ) ) {
 			$tiny_image = new Tiny_Image( $this->settings, $attachment_id, $metadata );
-			$result = $tiny_image->compress( $this->settings );
+			$result = $tiny_image->compress();
 			return $tiny_image->get_wp_metadata();
 		} else {
 			return $metadata;
@@ -370,7 +370,7 @@ class Tiny_Plugin extends Tiny_WP_Base {
 			$metadata = $_POST['metadata'];
 			if ( is_array( $metadata ) ) {
 				$tiny_image = new Tiny_Image( $this->settings, $attachment_id, $metadata );
-				$result = $tiny_image->compress( $this->settings );
+				$result = $tiny_image->compress();
 				// The wp_update_attachment_metadata call is thrown because the
 				// dimensions of the original image can change. This will then
 				// trigger other plugins and can result in unexpected behaviour and
@@ -415,7 +415,7 @@ class Tiny_Plugin extends Tiny_WP_Base {
 		}
 
 		$tiny_image = new Tiny_Image( $this->settings, $id, $metadata );
-		$result = $tiny_image->compress( $this->settings );
+		$result = $tiny_image->compress();
 
 		// The wp_update_attachment_metadata call is thrown because the
 		// dimensions of the original image can change. This will then
@@ -475,7 +475,7 @@ class Tiny_Plugin extends Tiny_WP_Base {
 		$size_before = $image_statistics_before['optimized_total_size'];
 
 		$tiny_image = new Tiny_Image( $this->settings, $id, $metadata );
-		$result = $tiny_image->compress( $this->settings );
+		$result = $tiny_image->compress();
 		$image_statistics = $tiny_image->get_statistics(
 			$this->settings->get_sizes(),
 			$this->settings->get_active_tinify_sizes()
@@ -604,7 +604,7 @@ class Tiny_Plugin extends Tiny_WP_Base {
 		if ( $tiny_image->file_type_allowed() ) {
 			echo '<div class="misc-pub-section tiny-compress-images">';
 			echo '<h4>';
-			esc_html_e( 'JPEG and PNG optimization', 'tiny-compress-images' );
+			esc_html_e( 'JPEG, PNG, & WebP optimization', 'tiny-compress-images' );
 			echo '</h4>';
 			echo '<div class="tiny-ajax-container">';
 			$this->render_compress_details( $tiny_image );
@@ -668,7 +668,7 @@ class Tiny_Plugin extends Tiny_WP_Base {
 
 		wp_add_dashboard_widget(
 			$this->get_prefixed_name( 'dashboard_widget' ),
-			esc_html__( 'Compress JPEG & PNG images', 'tiny-compress-images' ),
+			esc_html__( 'TinyPNG - JPEG, PNG & WebP image compression', 'tiny-compress-images' ),
 			$this->get_method( 'add_widget_view' )
 		);
 	}

@@ -1,9 +1,12 @@
 <?php
 /**
  * Template helper functions.
- * 
+ *
  * @since 2.1.0
- * 
- * @package LearnDash\Template
+ *
+ * @package LearnDash\Templates\Legacy
  */
-?>
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}

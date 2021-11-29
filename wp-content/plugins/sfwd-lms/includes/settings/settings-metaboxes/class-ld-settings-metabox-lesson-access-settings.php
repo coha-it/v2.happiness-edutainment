@@ -2,18 +2,26 @@
 /**
  * LearnDash Settings Metabox for Lesson Access Settings.
  *
- * @package LearnDash
- * @subpackage Settings
+ * @since 3.0.0
+ * @package LearnDash\Settings\Metaboxes
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'LearnDash_Settings_Metabox_Lesson_Access_Settings' ) ) ) {
 	/**
-	 * Class to create the settings section.
+	 * Class LearnDash Settings Metabox for Lesson Access Settings.
+	 *
+	 * @since 3.0.0
 	 */
 	class LearnDash_Settings_Metabox_Lesson_Access_Settings extends LearnDash_Settings_Metabox {
 
 		/**
 		 * Public constructor for class
+		 *
+		 * @since 3.0.0
 		 */
 		public function __construct() {
 			// What screen ID are we showing on.
@@ -40,21 +48,19 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 			// Map internal settings field ID to legacy field ID.
 			$this->settings_fields_map = array(
 				'lesson_schedule'             => 'lesson_schedule',
-
 				'course'                      => 'course',
 				'sample_lesson'               => 'sample_lesson',
 				'visible_after'               => 'visible_after',
 				'visible_after_specific_date' => 'visible_after_specific_date',
 			);
-			if ( 'yes' === LearnDash_Settings_Section::get_section_setting( 'LearnDash_Settings_Courses_Builder', 'shared_steps' ) ) {
-				unset( $this->settings_fields_map['course'] );
-			}
 
 			parent::__construct();
 		}
 
 		/**
 		 * Initialize the metabox settings values.
+		 *
+		 * @since 3.0.0
 		 */
 		public function load_settings_values() {
 			parent::load_settings_values();
@@ -86,23 +92,33 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 
 				if ( ! empty( $this->setting_option_values['visible_after'] ) ) {
 					$this->setting_option_values['lesson_schedule'] = 'visible_after';
-				} else if ( ! empty( $this->setting_option_values['visible_after_specific_date'] ) ) {
+				} elseif ( ! empty( $this->setting_option_values['visible_after_specific_date'] ) ) {
 					$this->setting_option_values['lesson_schedule'] = 'visible_after_specific_date';
 				} else {
 					$this->setting_option_values['lesson_schedule'] = '';
+				}
+			}
+
+			// Ensure all settings fields are present.
+			foreach ( $this->settings_fields_map as $_internal => $_external ) {
+				if ( ! isset( $this->setting_option_values[ $_internal ] ) ) {
+					$this->setting_option_values[ $_internal ] = '';
 				}
 			}
 		}
 
 		/**
 		 * Initialize the metabox settings fields.
+		 *
+		 * @since 3.0.0
 		 */
 		public function load_settings_fields() {
 			global $sfwd_lms;
 
-			$billing_cycle_html = $sfwd_lms->learndash_course_price_billing_cycle_html();
+			$select_course_options         = array();
+			$select_course_query_data_json = '';
 
-			$select_course_options = $sfwd_lms->select_a_course();
+			/** This filter is documented in includes/class-ld-lms.php */
 			if ( ( defined( 'LEARNDASH_SELECT2_LIB' ) ) && ( true === apply_filters( 'learndash_select2_lib', LEARNDASH_SELECT2_LIB ) ) ) {
 				$select_course_options_default = array(
 					'-1' => sprintf(
@@ -111,6 +127,32 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 						learndash_get_custom_label( 'course' )
 					),
 				);
+
+				if ( ! empty( $this->setting_option_values['course'] ) ) {
+					$course_post = get_post( absint( $this->setting_option_values['course'] ) );
+					if ( ( $course_post ) && ( is_a( $course_post, 'WP_Post' ) ) ) {
+						$select_course_options[ $course_post->ID ] = get_the_title( $course_post->ID );
+					}
+				}
+
+				/** This filter is includes/settings/settings-metaboxes/class-ld-settings-metabox-course-access-settings.php */
+				if ( ( defined( 'LEARNDASH_SELECT2_LIB_AJAX_FETCH' ) ) && ( true === apply_filters( 'learndash_select2_lib_ajax_fetch', LEARNDASH_SELECT2_LIB_AJAX_FETCH ) ) ) {
+					$select_course_query_data_json = $this->build_settings_select2_lib_ajax_fetch_json(
+						array(
+							'query_args'       => array(
+								'post_type' => 'sfwd-courses',
+							),
+							'settings_element' => array(
+								'settings_parent_class' => get_parent_class( __CLASS__ ),
+								'settings_class'        => __CLASS__,
+								'settings_field'        => 'course',
+							),
+						)
+					);
+				} else {
+					$select_course_options = $sfwd_lms->select_a_course();
+				}
+				$select_course_options = $select_course_options_default + $select_course_options;
 			} else {
 				$select_course_options_default = array(
 					'' => sprintf(
@@ -119,8 +161,14 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 						learndash_get_custom_label( 'course' )
 					),
 				);
+				$select_course_options         = $sfwd_lms->select_a_course();
+				if ( ( is_array( $select_course_options ) ) && ( ! empty( $select_course_options ) ) ) {
+					$select_course_options = $select_course_options_default + $select_course_options;
+				} else {
+					$select_course_options = $select_course_options_default;
+				}
+				$select_course_options_default = '';
 			}
-			$select_course_options = $select_course_options_default + $select_course_options;
 
 			$this->setting_option_fields = array(
 				'visible_after' => array(
@@ -136,6 +184,17 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 						'min'  => 0,
 					),
 					'default'     => 0,
+					'rest'        => array(
+						'show_in_rest' => LearnDash_REST_API::enabled(),
+						'rest_args'    => array(
+							'schema' => array(
+								// translators: placeholder: Lesson.
+								'description' => esc_html__( 'Visible After X day(s)', 'learndash' ),
+								'type'        => 'integer',
+								'default'     => 0,
+							),
+						),
+					),
 				),
 			);
 			parent::load_settings_fields();
@@ -149,6 +208,17 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 					'input_full' => true,
 					'type'       => 'date-entry',
 					'class'      => 'learndash-datepicker-field',
+					'rest'       => array(
+						'show_in_rest' => LearnDash_REST_API::enabled(),
+						'rest_args'    => array(
+							'schema' => array(
+								// translators: placeholder: Lesson.
+								'description' => esc_html__( 'Visible After Specific Date (YYYY-MM-DD)', 'learndash' ),
+								'type'        => 'date',
+								'default'     => '',
+							),
+						),
+					),
 				),
 			);
 			parent::load_settings_fields();
@@ -156,18 +226,32 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 
 			$this->setting_option_fields = array(
 				'course'          => array(
-					'name'      => 'course',
-					'label'     => sprintf(
-						// Translators: placeholder: Course.
+					'name'        => 'course',
+					'label'       => sprintf(
+						// translators: placeholder: Course.
 						esc_html_x( 'Associated %s', 'placeholder: Course', 'learndash' ),
 						learndash_get_custom_label( 'course' )
 					),
-					'type'      => 'select',
-					'default'   => '',
-					'value'     => $this->setting_option_values['course'],
-					'lazy_load' => true,
-					'default'   => '',
-					'options'   => $select_course_options,
+					'type'        => 'select',
+					'default'     => '',
+					'value'       => $this->setting_option_values['course'],
+					'lazy_load'   => true,
+					'options'     => $select_course_options,
+					'placeholder' => $select_course_options_default,
+					'attrs'       => array(
+						'data-ld_selector_nonce'   => wp_create_nonce( 'sfwd-courses' ),
+						'data-ld_selector_default' => '1',
+						'data-select2-query-data'  => $select_course_query_data_json,
+					),
+					'rest'        => array(
+						'show_in_rest' => LearnDash_REST_API::enabled(),
+						'rest_args'    => array(
+							'schema' => array(
+								'type'    => 'integer',
+								'default' => 0,
+							),
+						),
+					),
 				),
 				'sample_lesson'   => array(
 					'name'    => 'sample_lesson',
@@ -186,6 +270,16 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 							learndash_get_custom_label_lower( 'course' )
 						),
 						''   => '',
+					),
+					'rest'    => array(
+						'show_in_rest' => LearnDash_REST_API::enabled(),
+						'rest_args'    => array(
+							'schema' => array(
+								'field_key' => 'is_sample',
+								'type'      => 'boolean',
+								'default'   => false,
+							),
+						),
 					),
 				),
 				'lesson_schedule' => array(
@@ -223,8 +317,8 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 						'visible_after_specific_date' => array(
 							'label'               => esc_html__( 'Specific date', 'learndash' ),
 							'description'         => sprintf(
-								// translators: placeholders: lesson.
-								esc_html_x( 'The %s will be available on a specific date.', 'placeholders: lesson', 'learndash' ),
+								// translators: placeholder: lesson.
+								esc_html_x( 'The %s will be available on a specific date.', 'placeholder: lesson', 'learndash' ),
 								learndash_get_custom_label_lower( 'lesson' )
 							),
 							'inline_fields'       => array(
@@ -233,13 +327,33 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 							'inner_section_state' => ( 'visible_after_specific_date' === $this->setting_option_values['lesson_schedule'] ) ? 'open' : 'closed',
 						),
 					),
+					'rest'    => array(
+						'show_in_rest' => LearnDash_REST_API::enabled(),
+						'rest_args'    => array(
+							'schema' => array(
+								'field_key'   => 'visible_type',
+								'description' => esc_html__( 'Available Release Schedule', 'learndash' ),
+								'type'        => 'string',
+								'default'     => '',
+								'required'    => false,
+								'enum'        => array(
+									'',
+									'visible_after',
+									'visible_after_specific_date',
+								),
+							),
+						),
+					),
 				),
 			);
 
-			if ( 'yes' === LearnDash_Settings_Section::get_section_setting( 'LearnDash_Settings_Courses_Builder', 'shared_steps' ) ) {
-				unset( $this->setting_option_fields['course'] );
+			if ( ( ! defined( 'REST_REQUEST' ) ) || ( true !== REST_REQUEST ) ) {
+				if ( learndash_is_course_shared_steps_enabled() ) {
+					unset( $this->setting_option_fields['course'] );
+				}
 			}
 
+			/** This filter is documented in includes/settings/settings-metaboxes/class-ld-settings-metabox-course-access-settings.php */
 			$this->setting_option_fields = apply_filters( 'learndash_settings_fields', $this->setting_option_fields, $this->settings_metabox_key );
 
 			parent::load_settings_fields();
@@ -248,9 +362,12 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 		/**
 		 * Filter settings values for metabox before save to database.
 		 *
-		 * @param array $settings_values Array of settings values.
+		 * @since 3.0.0
+		 *
+		 * @param array  $settings_values Array of settings values.
 		 * @param string $settings_metabox_key Metabox key.
 		 * @param string $settings_screen_id Screen ID.
+		 *
 		 * @return array $settings_values.
 		 */
 		public function filter_saved_fields( $settings_values = array(), $settings_metabox_key = '', $settings_screen_id = '' ) {
@@ -277,11 +394,10 @@ if ( ( class_exists( 'LearnDash_Settings_Metabox' ) ) && ( ! class_exists( 'Lear
 					}
 				}
 
-				if ( ( ! isset( $settings_values['course'] ) ) || ( '-1' === $settings_values['course'] ) ) {
-					$settings_values['course'] = '';
-				}
-				if ( 'yes' === LearnDash_Settings_Section::get_section_setting( 'LearnDash_Settings_Courses_Builder', 'shared_steps' ) ) {
+				if ( learndash_is_course_shared_steps_enabled() ) {
 					unset( $settings_values['course'] );
+				} elseif ( ( ! isset( $settings_values['course'] ) ) || ( '-1' === $settings_values['course'] ) ) {
+					$settings_values['course'] = '';
 				}
 			}
 

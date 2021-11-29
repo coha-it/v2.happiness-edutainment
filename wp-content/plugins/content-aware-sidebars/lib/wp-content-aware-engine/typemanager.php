@@ -1,9 +1,9 @@
 <?php
 /**
- * @package WP Content Aware Engine
+ * @package wp-content-aware-engine
  * @author Joachim Jensen <joachim@dev.institute>
  * @license GPLv3
- * @copyright 2019 by Joachim Jensen
+ * @copyright 2021 by Joachim Jensen
  */
 
 defined('ABSPATH') || exit;
@@ -24,7 +24,7 @@ if (!class_exists('WPCATypeManager')) {
             parent::__construct();
             add_action(
                 'init',
-                array($this,'set_modules'),
+                [$this,'set_modules'],
                 999
             );
         }
@@ -38,7 +38,7 @@ if (!class_exists('WPCATypeManager')) {
          */
         public function add($name, $arg = '')
         {
-            parent::add(new WPCAModuleManager(), $name);
+            parent::add(new WPCAObjectManager(), $name);
         }
 
         /**
@@ -51,33 +51,57 @@ if (!class_exists('WPCATypeManager')) {
         {
             do_action('wpca/types/init', $this);
 
-            $modules = array(
-                'static'        => true,
-                'post_type'     => true,
-                'author'        => true,
-                'page_template' => true,
-                'taxonomy'      => true,
-                'date'          => true,
-                'bbpress'       => function_exists('bbp_get_version'),
-                'bp_member'     => defined('BP_VERSION'),
-                'pods'          => defined('PODS_DIR'),
-                'polylang'      => defined('POLYLANG_VERSION'),
-                'qtranslate'    => defined('QTX_VERSION'),
-                'transposh'     => defined('TRANSPOSH_PLUGIN_VER'),
-                'wpml'          => defined('ICL_SITEPRESS_VERSION')
-            );
+            $modules = [
+                'static',
+                'post_type',
+                'author',
+                'page_template',
+                'taxonomy',
+                'date',
+                'bbpress',
+                'bp_member',
+                'pods',
+                'polylang',
+                'qtranslate',
+                'translatepress',
+                'transposh',
+                'wpml'
+            ];
 
-            foreach ($modules as $name => $bool) {
-                if ($bool) {
-                    $class_name = WPCACore::CLASS_PREFIX.'Module_'.$name;
-                    $class = new $class_name();
-                    foreach ($this->get_all() as $post_type) {
-                        $post_type->add($class, $name);
-                    }
+            foreach ($modules as $name) {
+                $class_name = WPCACore::CLASS_PREFIX.'Module_'.$name;
+
+                if (!class_exists($class_name)) {
+                    continue;
+                }
+
+                $class = new $class_name();
+
+                if (!($class instanceof WPCAModule_Base) || !$class->can_enable()) {
+                    continue;
+                }
+
+                foreach ($this->get_all() as $post_type) {
+                    $post_type->add($class, $name);
                 }
             }
 
             do_action('wpca/modules/init', $this);
+
+            //initiate all modules once with backwards compatibility on can_enable()
+            $initiated = [];
+            foreach ($this->get_all() as $post_type_name => $post_type) {
+                if (!WPCACore::get_option($post_type_name, 'legacy.date_module', false)) {
+                    $post_type->remove('date');
+                }
+
+                foreach ($post_type->get_all() as $key => $module) {
+                    if (!isset($initiated[$key])) {
+                        $initiated[$key] = 1;
+                        $module->initiate();
+                    }
+                }
+            }
         }
     }
 }

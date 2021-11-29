@@ -2,22 +2,29 @@
 /**
  * LearnDash Settings Fields API.
  *
- * @package LearnDash
- * @subpackage Settings
+ * @since 3.0.0
+ * @package LearnDash\Settings\Fields
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 if ( ! class_exists( 'LearnDash_Settings_Fields' ) ) {
+
 	/**
 	 * Class to create the settings field.
+	 *
+	 * @since 3.0.0
 	 */
-	abstract class LearnDash_Settings_Fields {
+	class LearnDash_Settings_Fields {
 
 		/**
 		 * Array to hold all field type instances.
 		 *
 		 * @var array
 		 */
-		protected static $_instances = array();
+		protected static $_instances = array(); // phpcs:ignore PSR2.Classes.PropertyDeclaration.Underscore
 
 		/**
 		 * Define the field type 'text', 'select', etc. This is unique.
@@ -28,6 +35,8 @@ if ( ! class_exists( 'LearnDash_Settings_Fields' ) ) {
 
 		/**
 		 * Public constructor for class
+		 *
+		 * @since 3.0.0
 		 */
 		public function __construct() {
 		}
@@ -35,7 +44,7 @@ if ( ! class_exists( 'LearnDash_Settings_Fields' ) ) {
 		/**
 		 * Get field instance by key
 		 *
-		 * @since 2.4
+		 * @since 3.0.0
 		 *
 		 * @param string $field_key Key to unique field instance.
 		 *
@@ -47,12 +56,14 @@ if ( ! class_exists( 'LearnDash_Settings_Fields' ) ) {
 					return self::$_instances[ $field_key ];
 				}
 			}
+
+			return null;
 		}
 
 		/**
 		 * Add field instance by key
 		 *
-		 * @since 2.4
+		 * @since 3.0.0
 		 *
 		 * @param string $field_key Key to unique field instance.
 		 *
@@ -66,13 +77,15 @@ if ( ! class_exists( 'LearnDash_Settings_Fields' ) ) {
 				}
 				return self::$_instances[ $field_key ];
 			}
+
+			return null;
 		}
 
 		/**
 		 * Utility function so we are not hard coding the create/validate
 		 * member functions in various settings files.
 		 *
-		 * @since 2.4
+		 * @since 3.0.0
 		 *
 		 * @return reference to validation function.
 		 */
@@ -84,7 +97,7 @@ if ( ! class_exists( 'LearnDash_Settings_Fields' ) ) {
 		 * Utility function so we are not hard coding the create/validate
 		 * member functions in various settings files.
 		 *
-		 * @since 2.4
+		 * @since 3.0.0
 		 *
 		 * @return reference to validation function.
 		 */
@@ -96,7 +109,7 @@ if ( ! class_exists( 'LearnDash_Settings_Fields' ) ) {
 		 * Utility function so we are not hard coding the create/validate
 		 * member functions in various settings files.
 		 *
-		 * @since 3.0
+		 * @since 3.0.0
 		 *
 		 * @return reference to validation function.
 		 */
@@ -107,7 +120,7 @@ if ( ! class_exists( 'LearnDash_Settings_Fields' ) ) {
 		/**
 		 * Show all fields in section.
 		 *
-		 * @since 2.4
+		 * @since 3.0.0
 		 *
 		 * @param array $section_fields Array of fields for section.
 		 */
@@ -118,7 +131,7 @@ if ( ! class_exists( 'LearnDash_Settings_Fields' ) ) {
 				foreach ( $section_fields as $field_id => $field ) {
 					if ( ( isset( $field['args']['parent_setting'] ) ) && ( ! empty( $field['args']['parent_setting'] ) ) ) {
 						// if we have a 'parent_setting'. Then try and figure out if it was the same as the last one.
-						if ( ( empty( $parents_settings ) ) || ( ! in_array( $field['args']['parent_setting'], $parents_settings ) ) ) {
+						if ( ( empty( $parents_settings ) ) || ( ! in_array( $field['args']['parent_setting'], $parents_settings, true ) ) ) {
 							$parent_setting_slug = $field['args']['parent_setting'];
 							if ( ( isset( $section_fields[ $parent_setting_slug ]['args']['child_section_state'] ) ) && ( 'open' === $section_fields[ $parent_setting_slug ]['args']['child_section_state'] ) ) {
 								$child_setting_state = 'open';
@@ -127,11 +140,11 @@ if ( ! class_exists( 'LearnDash_Settings_Fields' ) ) {
 							}
 							$parents_settings[] = $field['args']['parent_setting'];
 
-							echo '<div class="ld-settings-sub ld-settings-sub-level-' . count( $parents_settings ) . ' ld-settings-sub-' . $field['args']['parent_setting'] . ' ld-settings-sub-state-' . $child_setting_state . '" data-parent-field="' . $field['args']['setting_option_key'] . '_' . $field['args']['parent_setting'] . '_field">';
+							echo '<div class="ld-settings-sub ld-settings-sub-level-' . count( $parents_settings ) . ' ld-settings-sub-' . esc_attr( $field['args']['parent_setting'] ) . ' ld-settings-sub-state-' . esc_attr( $child_setting_state ) . '" data-parent-field="' . esc_attr( $field['args']['setting_option_key'] ) . '_' . esc_attr( $field['args']['parent_setting'] ) . '_field">';
 						} else {
-							if ( $parents_settings[ count( $parents_settings ) - 1 ] === $field['args']['parent_setting'] ) {
+							if ( $parents_settings[ count( $parents_settings ) - 1 ] === $field['args']['parent_setting'] ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedIf
 
-							} elseif ( in_array( $field['args']['parent_setting'], $parents_settings ) ) {
+							} elseif ( in_array( $field['args']['parent_setting'], $parents_settings, true ) ) {
 								while ( ! empty( $parents_settings ) ) {
 									$p_set = $parents_settings[ count( $parents_settings ) - 1 ];
 									if ( $p_set !== $field['args']['parent_setting'] ) {
@@ -178,7 +191,7 @@ if ( ! class_exists( 'LearnDash_Settings_Fields' ) ) {
 		/**
 		 * Shows the field row
 		 *
-		 * @since 2.4
+		 * @since 3.0.0
 		 *
 		 * @param array $field Array of field settings.
 		 */
@@ -206,23 +219,35 @@ if ( ! class_exists( 'LearnDash_Settings_Fields' ) ) {
 			}
 
 			if ( ( isset( $field['args']['desc_before'] ) ) && ( ! empty( $field['args']['desc_before'] ) ) ) {
-				echo wptexturize( $field['args']['desc_before'] );
+				echo wp_kses_post( wptexturize( $field['args']['desc_before'] ) );
 			}
 			if ( ( isset( $field['args']['row_disabled'] ) ) && ( true === $field['args']['row_disabled'] ) ) {
 				$field_class .= ' learndash-row-disabled';
 			}
 
 			if ( ( isset( $field['args']['type'] ) ) && ( 'hidden' !== $field['args']['type'] ) ) {
+				/**
+				 * Filters the HTML content to be echoed before outside row settings.
+				 *
+				 * @param string $output_content Content to be echoed.
+				 * @param array  $field_arguments An array of setting field arguments.
+				 */
 				$output = apply_filters( 'learndash_settings_row_outside_before', '', $field['args'] );
 				if ( ! empty( $output ) ) {
-					echo $output;
+					echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Need to output HTML.
 				}
 				?>
-				<div id="<?php echo $field['args']['id']; ?>_field" class="sfwd_input <?php echo $field_class; ?> <?php echo $field_error_class; ?>">
+				<div id="<?php echo esc_attr( $field['args']['id'] ); ?>_field" class="sfwd_input <?php echo esc_attr( $field_class ); ?> <?php echo esc_attr( $field_error_class ); ?>">
 					<?php
+						/**
+						 * Filters the HTML content to be echoed before inside row settings.
+						 *
+						 * @param string $output_content Content to be echoed.
+						 * @param array  $field_arguments An array of setting field arguments.
+						 */
 						$output = apply_filters( 'learndash_settings_row_inside_before', '', $field['args'] );
 					if ( ! empty( $output ) ) {
-						echo $output;
+						echo $output;// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Need to output HTML.
 					};
 					?>
 					<?php
@@ -232,9 +257,15 @@ if ( ! class_exists( 'LearnDash_Settings_Fields' ) ) {
 					?>
 					<?php if ( ( ! isset( $field['args']['label_none'] ) ) || ( true !== $field['args']['label_none'] ) ) { ?>
 						<?php
+						/**
+						 * Filters the HTML content to be echoed before outside row label settings.
+						 *
+						 * @param string $output_content Content to be echoed.
+						 * @param array  $field_arguments An array of setting field arguments.
+						 */
 						$output = apply_filters( 'learndash_settings_row_label_outside_before', '', $field['args'] );
 						if ( ! empty( $output ) ) {
-							echo $output;
+							echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Need to output HTML.
 						}
 						?>
 						<span class="sfwd_option_label
@@ -242,42 +273,48 @@ if ( ! class_exists( 'LearnDash_Settings_Fields' ) ) {
 						if ( ( isset( $field['args']['label_full'] ) ) && ( true === $field['args']['label_full'] ) ) {
 							echo ' sfwd_option_label_full';
 						}
-							?>
+						?>
 							">
 							<?php
+							/**
+							 * Filters the HTML content to be echoed before inside row label settings.
+							 *
+							 * @param string $output_content Content to be echoed.
+							 * @param array  $field_arguments An array of setting field arguments.
+							 */
 								$output = apply_filters( 'learndash_settings_row_label_inside_before', '', $field['args'] );
 							if ( ! empty( $output ) ) {
-								echo $output;
+								echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Need to output HTML.
 							};
 							?>
-							<a class="sfwd_help_text_link" 
+							<a class="sfwd_help_text_link"
 								<?php if ( ( isset( $field['args']['help_text'] ) ) && ( ! empty( $field['args']['help_text'] ) ) ) { ?>
 									style="cursor:pointer;" title="<?php esc_html_e( 'Click for Help!', 'learndash' ); ?>"
-									onclick="toggleVisibility('<?php echo $field['args']['id']; ?>_tip');"
+									onclick="toggleVisibility('<?php echo esc_attr( $field['args']['id'] ); ?>_tip');"
 								<?php } ?>
 								>
-								<?php if ( ( isset( $field['args']['help_text'] ) ) && ( ! empty( $field['args']['help_text'] ) ) ) { ?>	
-									<img alt="" src="<?php echo LEARNDASH_LMS_PLUGIN_URL; ?>assets/images/question.png" />
-								<?php } ?> 
-								
+								<?php if ( ( isset( $field['args']['help_text'] ) ) && ( ! empty( $field['args']['help_text'] ) ) ) { ?>
+									<img alt="" src="<?php echo esc_url( LEARNDASH_LMS_PLUGIN_URL ); ?>assets/images/question.png" />
+								<?php } ?>
+
 								<label for="<?php echo esc_attr( $field['args']['label_for'] ); ?>" class="sfwd_label">
-														<?php
-														if ( ( isset( $field['args']['label'] ) ) && ( ! empty( $field['args']['label'] ) ) ) {
-															echo $field['args']['label'];
-														}
-														if ( isset( $field['args']['required'] ) ) {
-															?>
-															<span class="learndash_required_field"><abbr title="<?php esc_html_e( 'Required', 'learndash' ); ?>">*</abbr></span>
+								<?php
+								if ( ( isset( $field['args']['label'] ) ) && ( ! empty( $field['args']['label'] ) ) ) {
+									echo esc_html( $field['args']['label'] );
+								}
+								if ( isset( $field['args']['required'] ) ) {
+									?>
+									<span class="learndash_required_field"><abbr title="<?php esc_html_e( 'Required', 'learndash' ); ?>">*</abbr></span>
 									<?php
-														}
+								}
 								?>
 								</label>
 							</a>
 							<?php
 							if ( ( isset( $field['args']['label_description'] ) ) && ( ! empty( $field['args']['label_description'] ) ) ) {
-									?>
-								 <span class="descripton"><?php echo $field['args']['label_description']; ?></span>
-									<?php
+								?>
+								<span class="descripton"><?php echo wp_kses_post( $field['args']['label_description'] ); ?></span>
+								<?php
 							}
 
 							if ( ( isset( $field['args']['help_text'] ) ) && ( ! empty( $field['args']['help_text'] ) ) ) {
@@ -287,30 +324,48 @@ if ( ! class_exists( 'LearnDash_Settings_Fields' ) ) {
 									$help_style = ' style="display: none;" ';
 								}
 								?>
-								<div id="<?php echo $field['args']['id']; ?>_tip" class="sfwd_help_text_div" <?php echo $help_style; ?>>
-									<label class="sfwd_help_text"><?php echo $field['args']['help_text']; ?></label>
+								<div id="<?php echo esc_attr( $field['args']['id'] ); ?>_tip" class="sfwd_help_text_div" <?php echo $help_style; ?>> <?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $help_style hardcoded above. ?>
+									<label class="sfwd_help_text"><?php echo wp_kses_post( $field['args']['help_text'] ); ?></label>
 								</div>
 								<?php
 							}
 							?>
 							<?php
+								/**
+								 * Filters the HTML content to be echoed after inside row label settings.
+								 *
+								 * @param string $output_content Content to be echoed.
+								 * @param array  $field_arguments An array of setting field arguments.
+								 */
 								$output = apply_filters( 'learndash_settings_row_label_inside_after', '', $field['args'] );
 							if ( ! empty( $output ) ) {
-								echo $output;
+								echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Need to output HTML.
 							};
 							?>
 						</span>
 							<?php
+								/**
+								 * Filters the HTML content to be echoed after outside row label settings.
+								 *
+								 * @param string $output_content Content to be echoed.
+								 * @param array  $field_arguments An array of setting field arguments.
+								 */
 								$output = apply_filters( 'learndash_settings_row_label_outside_after', '', $field['args'] );
 							if ( ! empty( $output ) ) {
-								echo $output;
+								echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Need to output HTML.
 							};
 							?>
 					<?php } ?>
 					<?php
+						/**
+						 * Filters the HTML content to be echoed before outside row input settings.
+						 *
+						 * @param string $output_content Content to be echoed.
+						 * @param array  $field_arguments An array of setting field arguments.
+						 */
 						$output = apply_filters( 'learndash_settings_row_input_outside_before', '', $field['args'] );
 					if ( ! empty( $output ) ) {
-						echo $output;
+						echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Need to output HTML.
 					};
 					?>
 					<span class="sfwd_option_input
@@ -318,12 +373,18 @@ if ( ! class_exists( 'LearnDash_Settings_Fields' ) ) {
 					if ( ( isset( $field['args']['input_full'] ) ) && ( true === $field['args']['input_full'] ) ) {
 						echo ' sfwd_option_input_full';
 					}
-						?>
+					?>
 						">
 						<?php
+							/**
+							 * Filters the HTML content to be echoed before outside row label settings.
+							 *
+							 * @param string $output_content Content to be echoed.
+							 * @param array  $field_arguments An array of setting field arguments.
+							 */
 							$output = apply_filters( 'learndash_settings_row_input_inside_before', '', $field['args'] );
 						if ( ! empty( $output ) ) {
-							echo $output;
+							echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Need to output HTML.
 						}
 
 						if ( ( ! isset( $field['args']['input_show'] ) ) || ( true === $field['args']['input_show'] ) ) {
@@ -333,17 +394,28 @@ if ( ! class_exists( 'LearnDash_Settings_Fields' ) ) {
 							</div>
 							<?php
 						}
-
+						/**
+						 * Filters the HTML content to be echoed after inside row input settings.
+						 *
+						 * @param string $output_content Content to be echoed.
+						 * @param array  $field_arguments An array of setting field arguments.
+						 */
 						$output = apply_filters( 'learndash_settings_row_input_inside_after', '', $field['args'] );
 						if ( ! empty( $output ) ) {
-							echo $output;
+							echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Need to output HTML.
 						};
 						?>
 					</span>
 					<?php
+						/**
+						 * Filters the HTML content to be echoed after outside row input settings.
+						 *
+						 * @param string $output_content Content to be echoed.
+						 * @param array  $field_arguments An array of setting field arguments.
+						 */
 						$output = apply_filters( 'learndash_settings_row_input_outside_after', '<p class="ld-clear"></p>', $field['args'] );
 					if ( ! empty( $output ) ) {
-						echo $output;
+						echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Need to output HTML.
 					};
 					?>
 					<?php
@@ -351,18 +423,30 @@ if ( ! class_exists( 'LearnDash_Settings_Fields' ) ) {
 						echo '<span class="sfwd_row_description sfwd_row_description_after">' . esc_html( $field['args']['row_description_after'] ) . '</span>';
 					}
 					?>
-					
+
 					<?php
+					/**
+					 * Filters the HTML content to be echoed after inside row settings.
+					 *
+					 * @param string $output_content Content to be echoed.
+					 * @param array  $field_arguments An array of setting field arguments.
+					 */
 					$output = apply_filters( 'learndash_settings_row_inside_after', '', $field['args'] );
 					if ( ! empty( $output ) ) {
-						echo $output;
+						echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Need to output HTML.
 					}
 					?>
 				</div>
 				<?php
+				/**
+				 * Filters the HTML content to be echoed after outside row settings.
+				 *
+				 * @param string $output_content Content to be echoed.
+				 * @param array  $field_arguments An array of setting field arguments.
+				 */
 				$output = apply_filters( 'learndash_settings_row_outside_after', '', $field['args'] );
 				if ( ! empty( $output ) ) {
-					echo $output;
+					echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Need to output HTML.
 				}
 			} else {
 				if ( ( isset( $field['callback'] ) ) && ( ! empty( $field['callback'] ) ) && ( is_callable( $field['callback'] ) ) ) {
@@ -370,28 +454,28 @@ if ( ! class_exists( 'LearnDash_Settings_Fields' ) ) {
 				}
 			}
 			if ( ( isset( $field['args']['desc_after'] ) ) && ( ! empty( $field['args']['desc_after'] ) ) ) {
-				echo wptexturize( $field['args']['desc_after'] );
+				echo wp_kses_post( wptexturize( $field['args']['desc_after'] ) );
 			}
 		}
 
 		/**
 		 * Skeleton function to create the field output.
 		 *
-		 * @since 2.4
+		 * @since 3.0.0
 		 *
 		 * @param array $field_args main field args array.
 		 */
 		public function create_section_field( $field_args = array() ) {
-			return;
 		}
 
 		/**
 		 * Create the HTML output from the field args 'id' attribute.
 		 *
-		 * @since 2.4
+		 * @since 3.4.0.5
 		 *
 		 * @param array   $field_args main field args array. should contain element for 'attrs'.
 		 * @param boolean $wrap Flag to wrap field atrribute in normal output or just return value.
+		 *
 		 * @return string of HTML representation of the attrs array attributes.
 		 */
 		public function get_field_attribute_id( $field_args = array(), $wrap = true ) {
@@ -411,7 +495,7 @@ if ( ! class_exists( 'LearnDash_Settings_Fields' ) ) {
 		/**
 		 * Create the HTML output from the field args 'required' attribute.
 		 *
-		 * @since 2.4
+		 * @since 3.0.0
 		 *
 		 * @param array $field_args main field args array. should contain element for 'attrs'.
 		 *
@@ -428,9 +512,47 @@ if ( ! class_exists( 'LearnDash_Settings_Fields' ) ) {
 		}
 
 		/**
+		 * Create the HTML output from the field args 'input_label_before' attribute.
+		 *
+		 * @since 3.3.0
+		 *
+		 * @param array $field_args main field args array. should contain element for 'attrs'.
+		 *
+		 * @return string of HTML representation of the attrs array attributes.
+		 */
+		public function get_field_attribute_label_before( $field_args = array() ) {
+			$field_attribute = '';
+
+			if ( ( isset( $field_args['input_label_before'] ) ) && ( ! empty( $field_args['input_label_before'] ) ) ) {
+				$field_attribute .= $field_args['input_label_before'];
+			}
+
+			return $field_attribute;
+		}
+
+		/**
+		 * Create the HTML output from the field args 'input_mask_before' attribute.
+		 *
+		 * @since 3.3.0
+		 *
+		 * @param array $field_args main field args array.
+		 *
+		 * @return string of HTML representation of the attrs array attributes.
+		 */
+		public function get_field_attribute_mask_before( $field_args = array() ) {
+			$field_attribute = '';
+
+			if ( ( isset( $field_args['input_mask_before'] ) ) && ( ! empty( $field_args['input_mask_before'] ) ) ) {
+				$field_attribute .= ' value-input-mask-before="' . $field_args['input_mask_before'] . '" ';
+			}
+
+			return $field_attribute;
+		}
+
+		/**
 		 * Create the HTML output from the field args 'name' attribute.
 		 *
-		 * @since 2.4
+		 * @since 3.0.0
 		 *
 		 * @param array   $field_args main field args array. should contain element for 'attrs'.
 		 * @param boolean $wrap Flag to wrap field atrribute in normal output or just return value.
@@ -475,7 +597,7 @@ if ( ! class_exists( 'LearnDash_Settings_Fields' ) ) {
 		/**
 		 * Create the HTML output from the field args 'placeholder' attribute.
 		 *
-		 * @since 2.4
+		 * @since 3.0.0
 		 *
 		 * @param array $field_args main field args array. should contain element for 'attrs'.
 		 *
@@ -494,7 +616,7 @@ if ( ! class_exists( 'LearnDash_Settings_Fields' ) ) {
 		/**
 		 * Create the HTML output from the field args 'placeholder' attribute.
 		 *
-		 * @since 2.4
+		 * @since 3.0.0
 		 *
 		 * @param array   $field_args main field args array. should contain element for 'attrs'.
 		 * @param boolean $wrap Flag to wrap field atrribute in normal output or just return value.
@@ -517,7 +639,7 @@ if ( ! class_exists( 'LearnDash_Settings_Fields' ) ) {
 		/**
 		 * Create the HTML output from the field args 'legend' attribute.
 		 *
-		 * @since 2.4
+		 * @since 3.0.0
 		 *
 		 * @param array $field_args main field args array. should contain element for 'attrs'.
 		 *
@@ -538,7 +660,7 @@ if ( ! class_exists( 'LearnDash_Settings_Fields' ) ) {
 		/**
 		 * Create the HTML output from the field args 'type' attribute.
 		 *
-		 * @since 2.4
+		 * @since 3.0.0
 		 *
 		 * @param array $field_args main field args array. should contain element for 'attrs'.
 		 *
@@ -557,9 +679,10 @@ if ( ! class_exists( 'LearnDash_Settings_Fields' ) ) {
 		/**
 		 * Create the HTML output from the field args 'class' attribute.
 		 *
-		 * @since 2.4
+		 * @since 3.0.0
 		 *
 		 * @param array $field_args main field args array. should contain element for 'attrs'.
+		 * @param bool  $wrap       Whether to create a CSS class from the field args.
 		 *
 		 * @return string of HTML representation of the attrs array attributes.
 		 */
@@ -584,7 +707,7 @@ if ( ! class_exists( 'LearnDash_Settings_Fields' ) ) {
 		/**
 		 * Create the HTML output from the field args 'attrs' attribute.
 		 *
-		 * @since 2.4
+		 * @since 3.0.0
 		 *
 		 * @param array $field_args main field args array. should contain element for 'attrs'.
 		 *
@@ -606,7 +729,7 @@ if ( ! class_exists( 'LearnDash_Settings_Fields' ) ) {
 		/**
 		 * Create the HTML output from the field args 'input_label' attribute.
 		 *
-		 * @since 2.4
+		 * @since 3.0.0
 		 *
 		 * @param array $field_args main field args array. Should contain element for 'input_label'.
 		 *
@@ -622,6 +745,13 @@ if ( ! class_exists( 'LearnDash_Settings_Fields' ) ) {
 			return $field_attribute;
 		}
 
+		/**
+		 * Get Field Error Message
+		 *
+		 * @since 3.0.7
+		 *
+		 * @param array $field_args Array of field args.
+		 */
 		public function get_field_error_message( $field_args = array() ) {
 			$field_attribute = '';
 
@@ -632,6 +762,13 @@ if ( ! class_exists( 'LearnDash_Settings_Fields' ) ) {
 			return $field_attribute;
 		}
 
+		/**
+		 * Get Field Attribute Input Description
+		 *
+		 * @since 3.0.0
+		 *
+		 * @param array $field_args Array of field args.
+		 */
 		public function get_field_attribute_input_description( $field_args = array() ) {
 			$field_attribute = '';
 
@@ -642,6 +779,13 @@ if ( ! class_exists( 'LearnDash_Settings_Fields' ) ) {
 			return $field_attribute;
 		}
 
+		/**
+		 * Get Field Sub-Field Trigger
+		 *
+		 * @since 3.0.0
+		 *
+		 * @param array $field_args Array of field args.
+		 */
 		public function get_field_sub_trigger( $field_args = array() ) {
 			$field_attribute = '';
 
@@ -652,6 +796,13 @@ if ( ! class_exists( 'LearnDash_Settings_Fields' ) ) {
 			return $field_attribute;
 		}
 
+		/**
+		 * Get Field Inner-Field Trigger
+		 *
+		 * @since 3.0.0
+		 *
+		 * @param array $field_args Array of field args.
+		 */
 		public function get_field_inner_trigger( $field_args = array() ) {
 			$field_attribute = '';
 
@@ -666,7 +817,7 @@ if ( ! class_exists( 'LearnDash_Settings_Fields' ) ) {
 		/**
 		 * Default validation function. Should be overriden in Field subclass.
 		 *
-		 * @since 2.4
+		 * @since 3.0.0
 		 *
 		 * @param mixed  $val Value to validate.
 		 * @param string $key Key of value being validated.
@@ -676,71 +827,52 @@ if ( ! class_exists( 'LearnDash_Settings_Fields' ) ) {
 		 */
 		public function validate_section_field( $val, $key, $args = array() ) {
 			if ( ! empty( $val ) ) {
-				//if ( isset( $args['field']['type'] ) ) {
-				//	switch ( $args['field']['type'] ) {
-					//	case 'wpeditor':
-					//	case 'html':
-					//		//$val = wp_filter_post_kses( $val );
-					//		$val = wp_check_invalid_utf8( $val );
-					//		if ( ! empty( $val ) ) {
-					//			//$val = sanitize_post_field( $args['setting_option_key'] . '_' . $key, $val, 0, 'db' );
-					//			$val = sanitize_post_field( 'post_content', $val, 0, 'db' );
-					//		}
-					//		break;
-					//
-					//	case 'number':
-					//		$val = intval( $val );
-					//		break;
-					//
-					//  case 'checkbox-switch':
-					//	case 'radio':
-					//		if ( ( isset( $args['field']['options'] ) ) && ( ! empty( $args['field']['options'] ) ) ) {
-					//			if ( ! isset( $args['field']['options'][ $val ] ) ) {
-					//				$val = '';
-					//			}
-					//		}
-					//		break;
-					//
-					//	case 'multiselect':
-					//		if ( ( is_array( $val ) ) && ( ! empty( $val ) ) ) {
-					//			$val = array_map( $args['field']['value_type'], $val );
-					//		} else if ( ! empty( $val ) ) {
-					//			$val = call_user_func( $args['field']['value_type'], $val );
-					//		} else {
-					//			$val = '';
-					//		}
-					//		break;
-					//
-					//	default:
-					//		//$val = sanitize_text_field( $val );
-					//		if ( ! empty( $val ) ) {
-					//			$val = call_user_func( $args['field']['value_type'], $val );
-					//		}
-					//		break;
-					//}
-				//} else {
-					//$val = sanitize_text_field( $val );
-				//	if ( ! empty( $val ) ) {
 						$val = call_user_func( $args['field']['value_type'], $val );
-				//	}
-				//}
 			}
 
 			return $val;
 		}
 
 		/**
-		 * Default validation function. Should be overriden in Field subclass.
+		 * Get Settings Field Value.
 		 *
-		 * @since 2.4
+		 * @since 3.0.0
 		 *
-		 * @param mixed  $val Value to validate.
-		 * @param string $key Key of value being validated.
-		 * @param array  $args Array of field args.
+		 * @param mixed  $val       Value to validate.
+		 * @param string $key       Key of value being validated.
+		 * @param array  $args      Array of field args.
+		 * @param array  $post_args Array of post args.
 		 *
 		 * @return mixed $val validated value.
 		 */
 		public function value_section_field( $val = '', $key = '', $args = array(), $post_args = array() ) {
+			return $val;
+		}
+
+		/**
+		 * Convert Settings Field value to REST value.
+		 *
+		 * @since 3.3.0
+		 *
+		 * @param mixed           $val        Value from REST to be converted to internal value.
+		 * @param string          $key        Key field for value.
+		 * @param array           $field_args Array of field args.
+		 * @param WP_REST_Request $request    Request object.
+		 */
+		public function field_value_to_rest_value( $val, $key, $field_args, WP_REST_Request $request ) {
+			return $val;
+		}
+
+		/**
+		 * Convert REST submit value to internal Settings Field acceptable value.
+		 *
+		 * @since 3.3.0
+		 *
+		 * @param mixed  $val        Value from REST to be converted to internal value.
+		 * @param string $key        Key field for value.
+		 * @param array  $field_args Array of field args.
+		 */
+		public function rest_value_to_field_value( $val = '', $key = '', $field_args = array() ) {
 			return $val;
 		}
 	}

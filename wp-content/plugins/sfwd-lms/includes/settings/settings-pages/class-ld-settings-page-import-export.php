@@ -2,20 +2,34 @@
 /**
  * LearnDash Settings Page Import/Export.
  *
- * @since 2.5.4
- *
- * @package LearnDash
- * @subpackage Settings
+ * @since 2.6.0
+ * @package LearnDash\Settings\Pages
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDash_Settings_Page_Import_Export' ) ) ) {
 	/**
-	 * Class to create the settings page.
+	 * Class LearnDash Settings Page Import/Export.
+	 *
+	 * @since 2.6.0
 	 */
 	class LearnDash_Settings_Page_Import_Export extends LearnDash_Settings_Page {
 
+
+		/**
+		 * LearnDash Admin Import Export instance
+		 *
+		 * @var Learndash_Admin_Import_Export
+		 */
+		public $import_export = null;
+
 		/**
 		 * Public constructor for class
+		 *
+		 * @since 2.6.0
 		 */
 		public function __construct() {
 			$this->parent_menu_page_url  = 'admin.php?page=learndash_lms_import_export';
@@ -35,7 +49,7 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 		/**
 		 * Control visibility of submenu items based on lisence status
 		 *
-		 * @since 2.5.5
+		 * @since 2.6.0
 		 *
 		 * @param array $submenu Submenu item to check.
 		 * @return array $submenu
@@ -53,16 +67,18 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 		/**
 		 * Filter for page title wrapper.
 		 *
-		 * @since 2.5.5
+		 * @since 2.6.0
 		 */
 		public function get_admin_page_title() {
+
+			/** This filter is documented in includes/settings/class-ld-settings-pages.php */
 			return apply_filters( 'learndash_admin_page_title', '<h1>' . $this->settings_page_title . '</h1>' );
 		}
 
 		/**
 		 * Action function called when Add-ons page is loaded.
 		 *
-		 * @since 2.5.5
+		 * @since 2.6.0
 		 */
 		public function load_settings_page() {
 			add_thickbox();
@@ -76,7 +92,7 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 		/**
 		 * Hide the tab menu items if on add-one page.
 		 *
-		 * @since 2.5.5
+		 * @since 2.6.0
 		 *
 		 * @param array  $tab_set Tab Set.
 		 * @param string $tab_key Tab Key.
@@ -98,7 +114,7 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 		/**
 		 * Custom display function for page content.
 		 *
-		 * @since 2.5.5
+		 * @since 2.6.0
 		 */
 		public function show_settings_page() {
 
@@ -107,15 +123,27 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 
 				<?php settings_errors(); ?>
 
-				<?php do_action( 'learndash_settings_page_before_title', $this->settings_screen_id ); ?>
-				<?php echo $this->get_admin_page_title(); ?>
-				<?php do_action( 'learndash_settings_page_after_title', $this->settings_screen_id ); ?>
+				<?php
+				/** This filter is documented in includes/settings/class-ld-settings-pages.php */
+				do_action( 'learndash_settings_page_before_title', $this->settings_screen_id );
+				?>
+				<?php echo wp_kses_post( $this->get_admin_page_title() ); ?>
+				<?php
+				/** This filter is documented in includes/settings/class-ld-settings-pages.php */
+				do_action( 'learndash_settings_page_after_title', $this->settings_screen_id );
+				?>
 
-				<?php do_action( 'learndash_settings_page_before_form', $this->settings_screen_id ); ?>
+				<?php
+				/** This filter is documented in includes/settings/class-ld-settings-pages.php */
+				do_action( 'learndash_settings_page_before_form', $this->settings_screen_id );
+				?>
 
 				<?php $this->import_export->show(); ?>
 
-				<?php do_action( 'learndash_settings_page_after_form', $this->settings_screen_id ); ?>
+				<?php
+				/** This filter is documented in includes/settings/class-ld-settings-pages.php */
+				do_action( 'learndash_settings_page_after_form', $this->settings_screen_id );
+				?>
 			</div>
 			<?php
 			/**

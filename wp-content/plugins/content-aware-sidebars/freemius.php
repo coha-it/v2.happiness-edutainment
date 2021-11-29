@@ -4,7 +4,7 @@
  * @package Content Aware Sidebars
  * @author Joachim Jensen <joachim@dev.institute>
  * @license GPLv3
- * @copyright 2019 by Joachim Jensen
+ * @copyright 2021 by Joachim Jensen
  */
 defined( 'ABSPATH' ) || exit;
 // Create a helper function for easy SDK access.
@@ -15,7 +15,7 @@ function cas_fs()
     if ( !isset( $cas_fs ) ) {
         // Include Freemius SDK.
         require_once dirname( __FILE__ ) . '/lib/freemius/start.php';
-        $cas_fs = fs_dynamic_init( array(
+        $cas_fs = fs_dynamic_init( [
             'id'              => '259',
             'slug'            => 'content-aware-sidebars',
             'type'            => 'plugin',
@@ -25,14 +25,14 @@ function cas_fs()
             'has_addons'      => false,
             'has_paid_plans'  => true,
             'has_affiliation' => 'selected',
-            'menu'            => array(
+            'menu'            => [
             'slug'        => 'wpcas',
             'support'     => false,
             'contact'     => false,
             'affiliation' => false,
-        ),
+        ],
             'is_live'         => true,
-        ) );
+        ] );
     }
     
     return $cas_fs;
@@ -40,8 +40,6 @@ function cas_fs()
 
 // Init Freemius.
 cas_fs();
-// Signal that SDK was initiated.
-do_action( 'cas_fs_loaded' );
 global  $cas_fs ;
 function cas_fs_connect_message_update(
     $message,
@@ -81,6 +79,7 @@ $cas_fs->add_filter(
 );
 $cas_fs->add_filter( 'show_affiliate_program_notice', '__return_false' );
 $cas_fs->add_filter( 'plugin_icon', 'cas_fs_get_plugin_icon' );
+$cas_fs->add_filter( 'permission_extensions_default', '__return_true' );
 function cas_fs_upgrade()
 {
     global  $cas_fs ;
@@ -95,15 +94,22 @@ function cas_fs_upgrade()
 }
 
 add_action( 'admin_init', 'cas_fs_upgrade', 999 );
-function cas_fs_uninstall()
-{
-    require plugin_dir_path( __FILE__ ) . '/cas_uninstall.php';
+
+if ( !$cas_fs->can_use_premium_code() ) {
+    function cas_fs_uninstall()
+    {
+        require plugin_dir_path( __FILE__ ) . '/cas_uninstall.php';
+    }
+    
+    
+    if ( $cas_fs->is_on() ) {
+        $cas_fs->add_action( 'after_uninstall', 'cas_fs_uninstall' );
+    } elseif ( is_admin() ) {
+        //after_uninstall is only run for new users
+        register_uninstall_hook( plugin_dir_path( __FILE__ ) . 'content-aware-sidebars.php', 'cas_fs_uninstall' );
+    }
+
 }
 
-
-if ( $cas_fs->is_on() ) {
-    $cas_fs->add_action( 'after_uninstall', 'cas_fs_uninstall' );
-} elseif ( is_admin() ) {
-    //after_uninstall is only run for new users
-    register_uninstall_hook( plugin_dir_path( __FILE__ ) . 'content-aware-sidebars.php', 'cas_fs_uninstall' );
-}
+// Signal that SDK was initiated.
+do_action( 'cas_fs_loaded' );

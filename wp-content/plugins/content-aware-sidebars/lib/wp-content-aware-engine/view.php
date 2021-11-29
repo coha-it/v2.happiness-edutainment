@@ -1,9 +1,9 @@
 <?php
 /**
- * @package WP Content Aware Engine
+ * @package wp-content-aware-engine
  * @author Joachim Jensen <joachim@dev.institute>
  * @license GPLv3
- * @copyright 2019 by Joachim Jensen
+ * @copyright 2021 by Joachim Jensen
  */
 
 defined('ABSPATH') || exit;
@@ -42,7 +42,7 @@ class WPCAView
      * @param   string    $path
      * @param   array     $params
      */
-    private function __construct($path, $params = array())
+    private function __construct($path, $params = [])
     {
         $this->_path = $path;
         $this->_params = $params;
@@ -56,7 +56,7 @@ class WPCAView
      * @param   array     $params
      * @return  WPCAView
      */
-    public static function make($name, $params = array())
+    public static function make($name, $params = [])
     {
         return new self($name, $params);
     }

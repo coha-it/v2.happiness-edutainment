@@ -2,18 +2,26 @@
 /**
  * LearnDash Settings Section for Quizzes Management and Display Metabox.
  *
- * @package LearnDash
- * @subpackage Settings
+ * @since 3.0.0
+ * @package LearnDash\Settings\Sections
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'LearnDash_Settings_Quizzes_Management_Display' ) ) ) {
 	/**
-	 * Class to create the settings section.
+	 * Class LearnDash Settings Section for Quizzes Management and Display Metabox.
+	 *
+	 * @since 3.0.0
 	 */
 	class LearnDash_Settings_Quizzes_Management_Display extends LearnDash_Settings_Section {
 
 		/**
 		 * Protected constructor for class
+		 *
+		 * @since 3.0.0
 		 */
 		protected function __construct() {
 
@@ -45,7 +53,7 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 				LearnDash_Custom_Label::get_label( 'quiz' )
 			);
 
-			// Define the depreacted Class and Fields
+			// Define the depreacted Class and Fields.
 			$this->settings_deprecated = array(
 				'LearnDash_Settings_Quizzes_Builder'      => array(
 					'option_key' => 'learndash_settings_quizzes_builder',
@@ -67,12 +75,15 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 			);
 
 			add_action( 'wp_ajax_' . $this->setting_field_prefix, array( $this, 'ajax_action' ) );
+			add_filter( 'learndash_settings_field', array( $this, 'learndash_settings_field_filter' ), 1, 1 );
 
 			parent::__construct();
 		}
 
 		/**
 		 * Initialize the metabox settings values.
+		 *
+		 * @since 3.0.0
 		 */
 		public function load_settings_values() {
 			parent::load_settings_values();
@@ -84,10 +95,10 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 					$this->transition_deprecated_settings();
 				}
 
-				if ( true === is_data_upgrade_quiz_questions_updated() ) {
+				if ( true === learndash_is_data_upgrade_quiz_questions_updated() ) {
 					$this->setting_option_values['quiz_builder_enabled'] = 'yes';
 				} else {
-					$this->setting_option_values['quiz_builder_enabled'] = '';
+					$this->setting_option_values['quiz_builder_enabled']          = '';
 					$this->setting_option_values['quiz_builder_shared_questions'] = '';
 				}
 			}
@@ -117,7 +128,7 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 				$this->setting_option_values['force_shared_questions'] = '';
 			}
 
-			if ( true !== is_data_upgrade_quiz_questions_updated() ) {
+			if ( true !== learndash_is_data_upgrade_quiz_questions_updated() ) {
 				$this->setting_option_values['quiz_builder_enabled']          = '';
 				$this->setting_option_values['quiz_builder_shared_questions'] = '';
 				$this->setting_option_values['force_quiz_builder']            = '';
@@ -126,12 +137,11 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 
 			$wp_date_format      = get_option( 'date_format' );
 			$wp_time_format      = get_option( 'time_format' );
-			$wp_date_time_format = $wp_date_format . ' ' . $wp_time_format;
+			$wp_date_time_format = esc_attr( $wp_date_format ) . ' ' . esc_attr( $wp_time_format );
 
 			if ( ( ! isset( $this->setting_option_values['toplist_time_format'] ) ) || ( empty( $this->setting_option_values['toplist_time_format'] ) ) ) {
 				$this->setting_option_values['toplist_time_format'] = $wp_date_time_format;
 			}
-
 			if ( ( ! isset( $this->setting_option_values['statistics_time_format'] ) ) || ( empty( $this->setting_option_values['statistics_time_format'] ) ) ) {
 				$this->setting_option_values['statistics_time_format'] = $wp_date_time_format;
 			}
@@ -148,7 +158,54 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 		}
 
 		/**
+		 * Filter the Settings Field args.
+		 *
+		 * This function is called via the `learndash_settings_field` filter and allows
+		 * late filtering of the field args just before the display. This is a way to
+		 * defer queries etc.
+		 *
+		 * @since 3.0.0
+		 *
+		 * @param array $field_args An array of field arguments used to process the ouput.
+		 */
+		public function learndash_settings_field_filter( $field_args = array() ) {
+			if ( ( ! isset( $field_args['setting_option_key'] ) ) || ( $this->setting_option_key !== $field_args['setting_option_key'] ) ) {
+				return $field_args;
+			}
+
+			if ( ! isset( $field_args['name'] ) ) {
+				return $field_args;
+			}
+
+			if ( 'quiz_template' === $field_args['name'] ) {
+				$template_mapper = new WpProQuiz_Model_TemplateMapper();
+				$quiz_templates  = $template_mapper->fetchAll( WpProQuiz_Model_Template::TEMPLATE_TYPE_QUIZ, false );
+				if ( ( ! empty( $quiz_templates ) ) && ( is_array( $quiz_templates ) ) ) {
+					$_templates = array();
+					foreach ( $quiz_templates as $template_quiz ) {
+						$template_name = $template_quiz->getName();
+						$template_id   = $template_quiz->getTemplateId();
+
+						if ( ( ! empty( $template_name ) ) && ( ! isset( $_templates[ $template_id ] ) ) ) {
+							$_templates[ $template_id ] = esc_html( $template_name );
+						}
+					}
+					asort( $_templates );
+
+					if ( ! isset( $field_args['options'] ) ) {
+						$field_args['options'] = array();
+					}
+					$field_args['options'] += $_templates;
+				}
+			}
+
+			return $field_args;
+		}
+
+		/**
 		 * Initialize the metabox settings fields.
+		 *
+		 * @since 3.0.0
 		 */
 		public function load_settings_fields() {
 			$this->setting_option_fields = array();
@@ -156,12 +213,20 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 			if ( ( defined( 'LEARNDASH_QUIZ_BUILDER' ) ) && ( LEARNDASH_QUIZ_BUILDER === true ) ) {
 
 				$desc_before_enabled = '';
-				if ( true !== is_data_upgrade_quiz_questions_updated() ) {
+				if ( true !== learndash_is_data_upgrade_quiz_questions_updated() ) {
 					// Used to show the section description above the fields. Can be empty.
 					$desc_before_enabled = '<span class="error">' . sprintf(
 						// translators: placeholder: Link to Data Upgrade page.
-						_x( 'The Data Upgrade %s must be run to enable the following settings.', 'placeholder: Link to Data Upgrade page', 'learndash' ),
-						'<strong><a href="' . add_query_arg( 'page', 'learndash_data_upgrades', 'admin.php' ) . '">Upgrade WPProQuiz Question</a></strong>'
+						esc_html_x( 'The Data Upgrade %s must be run to enable the following settings.', 'placeholder: Link to Data Upgrade page', 'learndash' ),
+						'<strong><a href="' . add_query_arg(
+							array(
+								'page'    => 'learndash_lms_advanced',
+								'section-advanced' => 'settings_data_upgrades',
+							),
+							'admin.php'
+						) . '">' .
+						// translators: placeholder: Question.
+						sprintf( esc_html_x( 'Upgrade WPProQuiz %s', 'placeholder: Question.', 'learndash' ), learndash_get_custom_label( 'question' ) ) . '</a></strong>'
 					) . '</span>';
 				}
 
@@ -198,7 +263,7 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 								learndash_get_custom_label( 'questions' )
 							),
 							'help_text'      => sprintf(
-								// translators: placeholder: questions, Quiz
+								// translators: placeholder: questions, Quiz.
 								esc_html_x( 'Number of additional %1$s displayed in the %2$s Builder sidebar when clicking the "Load More" link.', 'placeholder: questions, Quiz', 'learndash' ),
 								learndash_get_custom_label_lower( 'questions' ),
 								learndash_get_custom_label( 'quiz' )
@@ -222,7 +287,7 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 								LearnDash_Custom_Label::get_label( 'questions' )
 							),
 							'help_text'      => sprintf(
-								// translators: placeholder: questions, quizzes, quiz
+								// translators: placeholder: questions, quizzes, quiz.
 								esc_html_x( 'Share %1$s across multiple %2$s. Progress and statistics are maintained on a per-%3$s basis.', 'placeholder: placeholder: questions, quizzes, quiz', 'learndash' ),
 								learndash_get_custom_label_lower( 'questions' ),
 								learndash_get_custom_label_lower( 'quizzes' ),
@@ -232,7 +297,7 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 							'options'        => array(
 								''    => '',
 								'yes' => sprintf(
-									// translators: placeholder: questions, quizzes
+									// translators: placeholder: questions, quizzes.
 									esc_html_x( 'All %1$s can be used across multiple %2$s', 'placeholder: questions, quizzes', 'learndash' ),
 									learndash_get_custom_label_lower( 'questions' ),
 									learndash_get_custom_label_lower( 'quizzes' )
@@ -255,7 +320,7 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 					)
 				);
 
-				if ( true !== is_data_upgrade_quiz_questions_updated() ) {
+				if ( true !== learndash_is_data_upgrade_quiz_questions_updated() ) {
 					$this->setting_option_fields['quiz_builder_enabled']['attrs'] = array(
 						'disabled' => 'disabled',
 					);
@@ -282,7 +347,7 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 			}
 
 			$time_formats_off_state_text = sprintf(
-				// translators: placeholder: Date preview, Time preview, Date format string, Time format string,
+				// translators: placeholder: Date preview, Time preview, Date format string, Time format string.
 				esc_html_x( 'Default format: %1$s %2$s  %3$s %4$s ', '', 'learndash' ),
 				date_i18n( get_option( 'date_format' ) ),
 				date_i18n( get_option( 'time_format' ) ),
@@ -322,6 +387,11 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 			$wp_date_time_format = $wp_date_format . ' ' . $wp_time_format;
 
 			$date_time_formats = array_unique(
+				/**
+				 * Filters the quiz date and time formats.
+				 *
+				 * @param array $date_time_formats An array of quiz date and time formats.
+				 */
 				apply_filters(
 					'learndash_quiz_date_time_formats',
 					array(
@@ -330,7 +400,7 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 						'Y/m/d g:i A',
 						'Y/m/d \a\t g:i A',
 						'Y/m/d \a\t g:ia',
-						__( 'M j, Y @ G:i' ),
+						__( 'M j, Y @ G:i', 'learndash' ),
 					)
 				)
 			);
@@ -347,10 +417,12 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 				}
 			}
 
-			$options['custom'] = '<span class="date-time-text format-i18n">' . esc_html__( 'Custom', 'learndash' ) . '</span><input type="text" class="-small" name="statistics_time_format_custom" id="statistics_time_format_custom" value="' . $this->setting_option_values['statistics_time_format'] . '">';
+			if ( ! in_array( $this->setting_option_values['statistics_time_format'], $date_time_formats, true ) ) {
+				$options['custom'] = '<span class="date-time-text format-i18n">' . esc_html__( 'Custom', 'learndash' ) . '</span><input type="text" class="-small" name="statistics_time_format_custom" id="statistics_time_format_custom" value="' . esc_attr( $this->setting_option_values['statistics_time_format'] ) . '">';
 
-			if ( ! in_array( $this->setting_option_values['statistics_time_format'], $date_time_formats ) ) {
 				$this->setting_option_values['statistics_time_format'] = 'custom';
+			} else {
+				$options['custom'] = '<span class="date-time-text format-i18n">' . esc_html__( 'Custom', 'learndash' ) . '</span><input type="text" class="-small" name="statistics_time_format_custom" id="statistics_time_format_custom" value="">';
 			}
 
 			$this->setting_option_fields['statistics_time_format'] = array(
@@ -364,10 +436,13 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 				'parent_setting' => 'quiz_builder_time_formats',
 			);
 
-			$options['custom'] = '<span class="date-time-text format-i18n">' . esc_html__( 'Custom', 'learndash' ) . '</span><input type="text" class="-small" name="toplist_date_format_custom" id="toplist_time_format_custom" value="' . $this->setting_option_values['toplist_time_format'] . '">';
+			if ( ! in_array( $this->setting_option_values['toplist_time_format'], $date_time_formats, true ) ) {
+				$options['custom'] = '<span class="date-time-text format-i18n">' . esc_html__( 'Custom', 'learndash' ) . '</span><input type="text" class="-small" name="toplist_date_format_custom" id="toplist_time_format_custom" value="' . esc_attr( $this->setting_option_values['toplist_time_format'] ) . '">';
 
-			if ( ! in_array( $this->setting_option_values['toplist_time_format'], $date_time_formats ) ) {
 				$this->setting_option_values['toplist_time_format'] = 'custom';
+			} else {
+				$options['custom'] = '<span class="date-time-text format-i18n">' . esc_html__( 'Custom', 'learndash' ) . '</span><input type="text" class="-small" name="toplist_date_format_custom" id="toplist_time_format_custom" value="">';
+
 			}
 
 			$this->setting_option_fields['toplist_time_format'] = array(
@@ -380,21 +455,6 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 				'options'        => $options,
 				'parent_setting' => 'quiz_builder_time_formats',
 			);
-
-
-			$template_mapper = new WpProQuiz_Model_TemplateMapper();
-			$quiz_templates  = $template_mapper->fetchAll( WpProQuiz_Model_Template::TEMPLATE_TYPE_QUIZ, false );
-			if ( ( ! empty( $quiz_templates ) ) && ( is_array( $quiz_templates ) ) ) {
-				foreach ( $quiz_templates as $template_quiz ) {
-					$template_name = $template_quiz->getName();
-					$template_id   = $template_quiz->getTemplateId();
-
-					if ( ( ! empty( $template_name ) ) && ( ! isset( $this->setting_option_values['quiz_templates'][ $template_id ] ) ) ) {
-						$this->setting_option_values['quiz_templates'][ $template_id ] = esc_html( $template_name );
-					}
-				}
-				sort( $this->setting_option_values['quiz_templates'] );
-			}
 
 			$this->setting_option_fields['quiz_template'] = array(
 				'name'        => 'quiz_template',
@@ -414,6 +474,7 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 				),
 			);
 
+			/** This filter is documented in includes/settings/settings-metaboxes/class-ld-settings-metabox-course-access-settings.php */
 			$this->setting_option_fields = apply_filters( 'learndash_settings_fields', $this->setting_option_fields, $this->settings_section_key );
 
 			parent::load_settings_fields();
@@ -422,33 +483,21 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 		/**
 		 * Intercept the WP options save logic and check that we have a valid nonce.
 		 *
-		 * @since 3.0
-		 * @param array $value Array of section fields values.
-		 * @param array $old_value Array of old values.
-		 * @param string $section_key Section option key should match $this->setting_option_key.
+		 * @since 3.0.0
+		 *
+		 * @param array  $current_values Array of section fields values.
+		 * @param array  $old_values     Array of old values.
+		 * @param string $option         Section option key should match $this->setting_option_key.
 		 */
 		public function section_pre_update_option( $current_values = '', $old_values = '', $option = '' ) {
 			if ( $option === $this->setting_option_key ) {
 				$current_values = parent::section_pre_update_option( $current_values, $old_values, $option );
 				if ( $current_values !== $old_values ) {
-					//if ( ( isset( $current_values['force_quiz_builder'] ) ) && ( 'yes' === $current_values['force_quiz_builder'] ) ) {
-					//	$current_values['quiz_builder_enabled'] = 'yes';
-					//}
-					//if ( ( isset( $current_values['force_shared_questions'] ) ) && ( 'yes' === $current_values['force_shared_questions'] ) ) {
-					//	$current_values['quiz_builder_shared_questions'] = 'yes';
-					//}
-
-					//if ( ( isset( $current_values['shared_questions'] ) ) && ( 'yes' === $current_values['shared_questions'] ) ) {
-					//	if ( ( ! isset( $current_values['quiz_builder_enabled'] ) ) || ( 'yes' !== $current_values['quiz_builder_enabled'] ) ) {
-					//		$current_values['quiz_builder_shared_questions'] = 'no';
-					//	}
-					//}
-
 					if ( ( isset( $current_values['quiz_builder_enabled'] ) ) && ( 'yes' === $current_values['quiz_builder_enabled'] ) ) {
 						$current_values['quiz_builder_per_page'] = absint( $current_values['quiz_builder_per_page'] );
 					} else {
 						$current_values['quiz_builder_shared_questions'] = '';
-						$current_values['quiz_builder_per_page'] = LEARNDASH_LMS_DEFAULT_WIDGET_PER_PAGE;
+						$current_values['quiz_builder_per_page']         = LEARNDASH_LMS_DEFAULT_WIDGET_PER_PAGE;
 					}
 
 					$wp_date_format      = get_option( 'date_format' );
@@ -457,8 +506,10 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 
 					if ( ( isset( $current_values['quiz_builder_time_formats'] ) ) && ( 'yes' === $current_values['quiz_builder_time_formats'] ) ) {
 						if ( ( isset( $current_values['statistics_time_format'] ) ) && ( 'custom' === $current_values['statistics_time_format'] ) ) {
+							// phpcs:ignore WordPress.Security.NonceVerification.Missing -- POST nonce verification takes place in parent::verify_metabox_nonce_field().
 							if ( ( isset( $_POST['statistics_time_format_custom'] ) ) && ( ! empty( $_POST['statistics_time_format_custom'] ) ) ) {
-								$current_values['statistics_time_format'] = esc_attr( $_POST['statistics_time_format_custom'] );
+								// phpcs:ignore WordPress.Security.NonceVerification.Missing
+								$current_values['statistics_time_format'] = esc_attr( stripslashes( $_POST['statistics_time_format_custom'] ) );
 							} else {
 								$current_values['statistics_time_format'] = '';
 							}
@@ -469,8 +520,10 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 						}
 
 						if ( ( isset( $current_values['toplist_time_format'] ) ) && ( 'custom' === $current_values['toplist_time_format'] ) ) {
-							if ( ( isset( $_POST['toplist_time_format_custom'] ) ) && ( ! empty( $_POST['toplist_time_format_custom'] ) ) ) {
-								$current_values['toplist_time_format'] = esc_attr( $_POST['toplist_time_format_custom'] );
+							// phpcs:ignore WordPress.Security.NonceVerification.Missing
+							if ( ( isset( $_POST['toplist_date_format_custom'] ) ) && ( ! empty( $_POST['toplist_date_format_custom'] ) ) ) {
+								// phpcs:ignore WordPress.Security.NonceVerification.Missing
+								$current_values['toplist_time_format'] = esc_attr( stripslashes( $_POST['toplist_date_format_custom'] ) );
 							} else {
 								$current_values['toplist_time_format'] = '';
 							}
@@ -492,7 +545,7 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 		/**
 		 * This function handles the AJAX actions from the browser.
 		 *
-		 * @since 2.5.9
+		 * @since 3.0.0
 		 */
 		public function ajax_action() {
 			$reply_data = array( 'status' => false );

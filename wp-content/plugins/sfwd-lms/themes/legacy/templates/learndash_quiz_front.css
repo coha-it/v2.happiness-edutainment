@@ -42,7 +42,7 @@
 	font-weight: bold ;
 }
 
-.wpProQuiz_content .wpProQuiz_questionListItem:last-child, 
+.wpProQuiz_content .wpProQuiz_questionListItem:last-child,
 .wpProQuiz_content .wpProQuiz_questionListItemLastChildIE {
 	padding: 3px ;
 	margin-bottom: 0 ;
@@ -65,13 +65,13 @@
 	width: 100%;
 }
 
-.wpProQuiz_content .wpProQuiz_list, 
-.wpProQuiz_content .wpProQuiz_listItem, 
-.wpProQuiz_content .wpProQuiz_questionList, 
-.wpProQuiz_content .wpProQuiz_sortStringList, 
-.wpProQuiz_content .wpProQuiz_sortStringList, 
-.wpProQuiz_content .wpProQuiz_maxtrixSortCriterion, 
-.wpProQuiz_content .wpProQuiz_resultsList, 
+.wpProQuiz_content .wpProQuiz_list,
+.wpProQuiz_content .wpProQuiz_listItem,
+.wpProQuiz_content .wpProQuiz_questionList,
+.wpProQuiz_content .wpProQuiz_sortStringList,
+.wpProQuiz_content .wpProQuiz_sortStringList,
+.wpProQuiz_content .wpProQuiz_maxtrixSortCriterion,
+.wpProQuiz_content .wpProQuiz_resultsList,
 .wpProQuiz_content .wpProQuiz_catOverview ol {
 	list-style: none ;
 	padding: 0 ;
@@ -167,7 +167,12 @@
 	z-index: 99999 ;
 }
 
-.wpProQuiz_content .wpProQuiz_matrixSortString, 
+.wpProQuiz_content .wpProQuiz_tipp > div p > iframe {
+	max-height: 275px;
+	width: 100%;
+}
+
+.wpProQuiz_content .wpProQuiz_matrixSortString,
 .wpProQuiz_content .wpProQuiz_matrixSortString > h3 {
 	margin-bottom: 10px ;
 	margin-top: 0 ;
@@ -240,7 +245,7 @@
 	background: transparent;
 	border: 0 ;
 	border-bottom: 1px solid ;
-	height: 1em ;
+	height: auto;
 	margin: 0 ;
 	padding: 0 4px 0 4px ;
 	color: black ;
@@ -286,6 +291,23 @@
 	margin: 20px ;
 	font-weight: bold ;
 }
+
+/* Sort question correct table listing */
+.wpProQuiz_content li.wpProQuiz_listItem .wpProQuiz_questionList_containers {
+	display: none;
+}
+.wpProQuiz_content li.wpProQuiz_listItem div.wpProQuiz_questionList_containers input[type="button"] {
+	padding: 0.15em;
+	border-radius: 5px;
+	display: inline-flex;
+	vertical-align: baseline;
+	opacity: 0.5;
+}
+.wpProQuiz_content li.wpProQuiz_listItem div.wpProQuiz_questionList_containers input.wpProQuiz_questionList_containers_view_active {
+	outline: none;
+	opacity: 1;
+}
+
 .wpProQuiz_toplistTable {
 	width: 100% ;
 	border: 1px solid #C3D1A3 ;
@@ -293,7 +315,7 @@
 	margin: 0 ;
 }
 .wpProQuiz_toplistTable caption {
-	caption-side:top ; 
+	caption-side:top ;
 	text-align: right ;
 	padding-bottom: 2px ;
 	color: gray ;
@@ -301,10 +323,10 @@
 	font-size: 11px ;
 }
 .wpProQuiz_toplistTable thead tr {
-	background: rgb(155,187,89) ; 
-	padding: 5px ; 
-	color: white ; 
-	font-weight: bold ; 
+	background: rgb(155,187,89) ;
+	padding: 5px ;
+	color: white ;
+	font-weight: bold ;
 }
 .wpProQuiz_toplistTable tbody td:FIRST-CHILD{
 	font-weight: bold ;
@@ -345,7 +367,7 @@
 	font-size: 0.8em;
 }
 .wpProQuiz_toplistTrOdd {
-	 background-color: #EBF1DE ; 
+	 background-color: #EBF1DE ;
 }
 .wpProQuiz_content .wpProQuiz_addToplist {
 	margin-top: 10px ;
@@ -354,8 +376,8 @@
 	border: 1px solid #C3D1A3 ;
 }
 .wpProQuiz_content .wpProQuiz_addToplistMessage {
-	border: 1px solid rgb(160, 160, 160) ; 
-	background-color: #FCFFB3 ; 
+	border: 1px solid rgb(160, 160, 160) ;
+	background-color: #FCFFB3 ;
 	margin-bottom: 5px ;
 	border-radius: 5px ;
 	padding: 5px ;
@@ -367,7 +389,7 @@
 	 width: 85%;
 	 border: 1px solid #C4C4C4 ;
 	 padding: 15px ;
-	 font-weight: bold ; 
+	 font-weight: bold ;
 }
 .wpProQuiz_content .wpProQuiz_resultTable table {
 	width: 100% ;
@@ -432,7 +454,7 @@
 .wpProQuiz_content .wpProQuiz_checkPage h3 {
 	margin: 10px 0 10px 0;
 }
-.wpProQuiz_content .wpProQuiz_reviewQuestion ol, .wpProQuiz_checkPage ol {
+.wpProQuiz_content .wpProQuiz_reviewQuestion ol {
 	list-style-type: none ;
 	margin: 0 ;
 	padding: 5px 12px 0 5px ;
@@ -449,7 +471,7 @@
 	visibility: hidden;
 }
 */
-.wpProQuiz_content .wpProQuiz_reviewQuestion li, .wpProQuiz_checkPage li {
+.wpProQuiz_content .wpProQuiz_reviewQuestion li {
 	float: left ;
 	margin: 0 5px 5px 0 ;
 	border: 1px solid #CFCFCF;
@@ -498,7 +520,7 @@
 	display: inline-block ;
 	margin-right: 2px ;
  }
- 
+
  .wpProQuiz_content  .wpProQuiz_reviewLegend span.wpProQuiz_AnweredColor {
 	 background-color: #6CA54C;
  }
@@ -507,22 +529,45 @@
 	 background-color: #FFB800;
  }
 
+.wpProQuiz_content .wpProQuiz_reviewLegend span.wpProQuiz_reviewQuestion_Target,
 .wpProQuiz_content  .wpProQuiz_reviewQuestion li.wpProQuiz_reviewQuestionTarget {
  	font-weight: bold;
- 	border-color: #7DB1D3 ;
+	 border-color: #7DB1D3 ;
+	 background-color: #7DB1D3 ;
  	box-shadow: 0px 0px 2px 1px #C4C4C4;
- }
+}
 
-.wpProQuiz_content  .wpProQuiz_reviewQuestion li.wpProQuiz_reviewQuestionSolved, 
+.wpProQuiz_content .wpProQuiz_reviewLegend span.wpProQuiz_reviewColor_AnswerCorrect {
+	background-color: #6CA54C;
+}
+
+.wpProQuiz_content .wpProQuiz_reviewLegend span.wpProQuiz_reviewColor_AnswerIncorrect {
+	background-color: #FFBABA;
+}
+
+.wpProQuiz_content  .wpProQuiz_reviewQuestion li.wpProQuiz_reviewQuestionSolved,
 .wpProQuiz_content .wpProQuiz_box li.wpProQuiz_reviewQuestionSolved {
  	background-color: #6CA54C;
- }
+}
 
-.wpProQuiz_content  .wpProQuiz_reviewQuestion li.wpProQuiz_reviewQuestionReview, 
+.wpProQuiz_content  .wpProQuiz_reviewQuestion li.wpProQuiz_reviewQuestionReview,
 .wpProQuiz_content .wpProQuiz_box li.wpProQuiz_reviewQuestionReview {
- 	background-color: #FFB800;	
- }
- 
+ 	background-color: #FFB800;
+}
+
+.wpProQuiz_content .wpProQuiz_reviewQuestion li.wpProQuiz_reviewQuestionSolvedCorrect,
+.wpProQuiz_content .wpProQuiz_box li.wpProQuiz_reviewQuestionSolvedCorrect {
+	background-color: #6CA54C;
+	color: #000000;
+}
+
+.wpProQuiz_content .wpProQuiz_reviewQuestion li.wpProQuiz_reviewQuestionSolvedIncorrect,
+.wpProQuiz_content .wpProQuiz_box li.wpProQuiz_reviewQuestionSolvedIncorrect {
+	background-color: #FFBABA;
+	color: #000000;
+}
+
+
 .wpProQuiz_content  .wpProQuiz_button2 {
  	border: 1px solid #DADADA ;
 	background: whiteSmoke ;
@@ -604,4 +649,16 @@
 }
 .wpProQuiz_content .wpProQuiz_forms select {
 	width: auto ;
+}
+
+.wpProQuiz_content .uploadEssayMessage {
+	width: 100%;
+}
+
+.wpProQuiz_content .uploadEssayMessage_fail {
+	color: red;
+}
+
+.wpProQuiz_content .uploadEssayMessage_success {
+	color: green;
 }

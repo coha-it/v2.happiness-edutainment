@@ -1,19 +1,28 @@
 <?php
 /**
- * LearnDash Settings field Quiz Load Templates.
+ * LearnDash Quiz Load Templates Settings Field.
  *
- * @package LearnDash
- * @subpackage Settings
+ * @since 3.0.0
+ * @package LearnDash\Settings\Field
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'LearnDash_Settings_Fields_Quiz_Templates_Load' ) ) ) {
 	/**
-	 * Class to create the settings field.
+	 * Class LearnDash Quiz Load Templates Settings Field.
+	 *
+	 * @since 3.0.0
+	 * @uses LearnDash_Settings_Fields
 	 */
 	class LearnDash_Settings_Fields_Quiz_Templates_Load extends LearnDash_Settings_Fields {
 
 		/**
 		 * Public constructor for class
+		 *
+		 * @since 3.0.0
 		 */
 		public function __construct() {
 			$this->field_type = 'quiz-templates-load';
@@ -24,18 +33,21 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 		/**
 		 * Function to crete the settiings field.
 		 *
-		 * @since 2.4
+		 * @since 3.0.0
 		 *
 		 * @param array $field_args An array of field arguments used to process the ouput.
 		 * @return void
 		 */
 		public function create_section_field( $field_args = array() ) {
+
+			/** This filter is documented in includes/settings/settings-fields/class-ld-settings-fields-checkbox-switch.php */
 			$field_args = apply_filters( 'learndash_settings_field', $field_args );
 
+			/** This filter is documented in includes/settings/settings-fields/class-ld-settings-fields-checkbox-switch.php */
 			$html = apply_filters( 'learndash_settings_field_html_before', '', $field_args );
 
 			if ( ( isset( $field_args['value'] ) ) && ( ! empty( $field_args['value'] ) ) ) {
-				$template_loaded_id = absint( $field_args['value'] ) ;
+				$template_loaded_id = absint( $field_args['value'] );
 			} else {
 				$template_loaded_id = 0;
 			}
@@ -62,19 +74,20 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 				}
 			}
 
-			/*
-			<input autocomplete="off" type="checkbox" id="learndash-quiz-access-settings_startOnlyRegisteredUser-on" name="learndash-quiz-access-settings[startOnlyRegisteredUser]" class="learndash-section-field learndash-section-field-checkbox  ld-checkbox-input" value="on">
-			
-			<select autocomplete="off" type="select" name="learndash-quiz-progress-settings[certificate]" id="learndash-quiz-progress-settings_certificate" class="learndash-section-field learndash-section-field-select select2-hidden-accessible" data-ld-select2="1" data-settings-sub-trigger="ld-settings-sub-certificate" data-settings-inner-trigger="ld-settings-inner-certificate" tabindex="-1" aria-hidden="true"><option value="-1">Search or select a certificate…</option><option value="3136" selected="selected">Cert Test</option><option value="2047">Course Certificate</option><option value="2317">Quiz Certificate</option></select>
-			*/
+			$html .= '<div class="ld-settings-info-banner ld-settings-info-banner-alert">' . wpautop(
+				sprintf(
+					// translators: placeholders: Quiz.
+					esc_html_x( 'Loading a template into this %s will replace ALL existing settings.', 'placeholders: Quiz.', 'learndash' ),
+					learndash_get_custom_label( 'quiz' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Method escapes output
+				)
+			) . '</div>';
 
+			$html .= '<div style="clear:both; margin-bottom: 20px;"></div>';
 
 			$html .= '<span class="ld-select">';
-//			$html .= '<select class="learndash-section-field-select" data-ld-select2="1" name="templateLoadId">';
 
 			$html .= '<select autocomplete="off" ';
 			$html .= $this->get_field_attribute_type( $field_args );
-			//$html .= $this->get_field_attribute_name( $field_args );
 			$html .= ' name="templateLoadId" ';
 			$html .= $this->get_field_attribute_id( $field_args );
 			$html .= $this->get_field_attribute_class( $field_args );
@@ -92,15 +105,18 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 
 			$html .= ' >';
 
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( ( isset( $_GET['post'] ) ) && ( ! empty( $_GET['post'] ) ) && ( isset( $_GET['templateLoadId'] ) ) && ( ! empty( $_GET['templateLoadId'] ) ) ) {
 				$template_url = remove_query_arg( 'templateLoadId' );
-				$template_url = add_query_arg( 'currentTab', learndash_get_post_type_slug( 'quiz' ) .'-settings', $template_url );				
-				$html        .= '<option value="' . $template_url . '">' . sprintf(
+				$template_url = add_query_arg( 'currentTab', learndash_get_post_type_slug( 'quiz' ) . '-settings', $template_url );
+				$html        .= '<option value="' . esc_url( $template_url ) . '">' . sprintf(
 					// translators: Quiz Title.
 					esc_html_x( 'Revert: %s', 'placeholder: Quiz Title', 'learndash' ),
-					get_the_title( $_GET['post'] )
+					// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+					get_the_title( intval( $_GET['post'] ) )
 				) . '</option>';
 			} else {
+				/** This filter is documented in includes/class-ld-lms.php */
 				if ( ( defined( 'LEARNDASH_SELECT2_LIB' ) ) && ( true === apply_filters( 'learndash_select2_lib', LEARNDASH_SELECT2_LIB ) ) ) {
 					$html .= '<option value="-1">' . esc_html__( 'Search or select a template…', 'learndash' ) . '</option>';
 				} else {
@@ -117,27 +133,39 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 					}
 
 					$selected = '';
-					if ( absint( $template_loaded_id) ===  absint( $template_id ) ) {
+					if ( absint( $template_loaded_id ) === absint( $template_id ) ) {
 						$selected = ' selected="selected" ';
 					}
 
-					$html .= '<option ' . $selected . ' value="' . $template_url . '">' . $template_name . '</option>';
+					$html .= '<option ' . $selected . ' value="' . esc_url( $template_url ) . '">' . esc_html( $template_name ) . '</option>';
 				}
 			}
 
 			$html .= '</select>';
 			$html .= '</span><br />';
+
+			if ( 'yes' !== LearnDash_Settings_Section::get_section_setting( 'LearnDash_Settings_Courses_Builder', 'shared_steps' ) ) {
+				$html .= '<p><label for="templateload-option-replace-course"><input type="checkbox" id="templateload-option-replace-course" name="templateLoadReplaceCourse" />' . sprintf(
+					// translators: placeholders: course, lessons, topics.
+					esc_html_x( 'Replace associated steps (%1$s, %2$s, or %3$s) with values from template.', 'placeholders: course, lessons, topics.', 'learndash' ),
+					learndash_get_custom_label_lower( 'course' ),
+					learndash_get_custom_label_lower( 'lessons' ),
+					learndash_get_custom_label_lower( 'topics' )
+				) . '</label></p>';
+			}
+
 			$html .= '<input type="submit" name="templateLoad" value="' . esc_html__( 'load template', 'learndash' ) . '" class="button-primary"></p>';
 
+			/** This filter is documented in includes/settings/settings-fields/class-ld-settings-fields-checkbox-switch.php */
 			$html = apply_filters( 'learndash_settings_field_html_after', $html, $field_args );
 
-			echo $html;
+			echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Need to output HTML
 		}
 
 		/**
 		 * Default validation function. Should be overriden in Field subclass.
 		 *
-		 * @since 2.4
+		 * @since 3.0.0
 		 *
 		 * @param mixed  $val Value to validate.
 		 * @param string $key Key of value being validated.

@@ -1,9 +1,9 @@
 <?php
 /**
- * @package WP Content Aware Engine
+ * @package wp-content-aware-engine
  * @author Joachim Jensen <joachim@dev.institute>
  * @license GPLv3
- * @copyright 2019 by Joachim Jensen
+ * @copyright 2021 by Joachim Jensen
  */
 
 defined('ABSPATH') || exit;
@@ -31,24 +31,32 @@ class WPCAModule_polylang extends WPCAModule_Base
     public function __construct()
     {
         parent::__construct('language', __('Languages', WPCA_DOMAIN));
-
         $this->query_name = 'cl';
     }
 
+    /**
+     * @inheritDoc
+     */
     public function initiate()
     {
         parent::initiate();
         add_filter(
             'pll_get_post_types',
-            array($this,'remove_sidebar_multilingual')
+            [$this,'remove_sidebar_multilingual']
         );
     }
 
     /**
-     * Determine if content is relevant
-     *
-     * @since  1.0
-     * @return boolean
+     * @inheritDoc
+     */
+    public function can_enable()
+    {
+        return defined('POLYLANG_VERSION')
+            && function_exists('pll_current_language');
+    }
+
+    /**
+     * @inheritDoc
      */
     public function in_context()
     {
@@ -56,41 +64,31 @@ class WPCAModule_polylang extends WPCAModule_Base
     }
 
     /**
-     * Get data from context
-     *
-     * @since  1.0
-     * @return array
+     * @inheritDoc
      */
     public function get_context_data()
     {
-        $data = array($this->id);
-        if (function_exists('pll_current_language')) {
-            $data[] = pll_current_language();
-        }
+        $data = [$this->id];
+        $data[] = pll_current_language();
         return $data;
     }
 
     /**
-     * Get languages
-     *
-     * @global object $polylang
-     * @since  1.0
-     * @param  array  $args
-     * @return array
+     * @inheritDoc
      */
-    protected function _get_content($args = array())
+    protected function _get_content($args = [])
     {
         global $polylang;
 
-        $langs = array();
+        $langs = [];
 
         if (isset($polylang->model) && method_exists($polylang->model, 'get_languages_list')) {
-            foreach ($polylang->model->get_languages_list(array('fields' => false)) as $lng) {
+            foreach ($polylang->model->get_languages_list(['fields' => false]) as $lng) {
                 $langs[$lng->slug] = $lng->name;
             }
         }
 
-        if (isset($args['include'])) {
+        if ($args['include']) {
             $langs = array_intersect_key($langs, array_flip($args['include']));
         }
         return $langs;

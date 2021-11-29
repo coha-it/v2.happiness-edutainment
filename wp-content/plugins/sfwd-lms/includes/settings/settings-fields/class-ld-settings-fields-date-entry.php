@@ -1,20 +1,29 @@
 <?php
 /**
- * LearnDash Settings field Date Entry.
+ * LearnDash Date Entry Settings Field.
  *
- * @package LearnDash
- * @subpackage Settings
+ * @since 3.0.0
+ * @package LearnDash\Settings\Field
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'LearnDash_Settings_Fields_Date_Entry' ) ) ) {
 
 	/**
-	 * Class to create the settings field.
+	 * Class LearnDash Date Entry Settings Field.
+	 *
+	 * @since 3.0.0
+	 * @uses LearnDash_Settings_Fields
 	 */
 	class LearnDash_Settings_Fields_Date_Entry extends LearnDash_Settings_Fields {
 
 		/**
 		 * Public constructor for class
+		 *
+		 * @since 3.0.0
 		 */
 		public function __construct() {
 			$this->field_type = 'date-entry';
@@ -25,7 +34,7 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 		/**
 		 * Function to crete the settiings field.
 		 *
-		 * @since 2.4
+		 * @since 3.0.0
 		 *
 		 * @param array $field_args An array of field arguments used to process the ouput.
 		 * @return void
@@ -33,16 +42,20 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 		public function create_section_field( $field_args = array() ) {
 			global $wp_locale;
 
+			/** This filter is documented in includes/settings/settings-fields/class-ld-settings-fields-checkbox-switch.php */
 			$field_args = apply_filters( 'learndash_settings_field', $field_args );
-			$html       = apply_filters( 'learndash_settings_field_html_before', '', $field_args );
+
+			/** This filter is documented in includes/settings/settings-fields/class-ld-settings-fields-checkbox-switch.php */
+			$html = apply_filters( 'learndash_settings_field_html_before', '', $field_args );
 
 			$date_value = '';
 			if ( isset( $field_args['value'] ) ) {
 				if ( ! empty( $field_args['value'] ) ) {
 					if ( ! is_numeric( $field_args['value'] ) ) {
-						$date_value = learndash_get_timestamp_from_date_string( $value );
+						$date_value = learndash_get_timestamp_from_date_string( $field_args['value'] );
 					} else {
 						// If we have a timestamp we assume it is GMT. So we need to convert it to local.
+						// phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
 						$value_ymd  = get_date_from_gmt( date( 'Y-m-d H:i:s', $field_args['value'] ), 'Y-m-d H:i:s' );
 						$date_value = strtotime( $value_ymd );
 					}
@@ -68,12 +81,12 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 			$field_id    = $this->get_field_attribute_id( $field_args, false );
 
 			$month_field = '<span class="screen-reader-text">' . esc_html__( 'Month', 'learndash' ) . '</span><select class="ld_date_mm ' . $field_class . '" name="' . $field_name . '[mm]" ><option value="">' . esc_html__( 'MM', 'learndash' ) . '</option>';
-			for ( $i = 1; $i < 13; $i = $i + 1 ) {
+			for ( $i = 1; $i < 13; $i++ ) {
 				$monthnum     = zeroise( $i, 2 );
 				$monthtext    = $wp_locale->get_month_abbrev( $wp_locale->get_month( $i ) );
-				$month_field .= "\t\t\t" . '<option value="' . $monthnum . '" data-text="' . $monthtext . '" ' . selected( $monthnum, $value_mm, false ) . '>';
-				/* translators: 1: month number (01, 02, etc.), 2: month abbreviation */
-				$month_field .= sprintf( esc_html_x( '%1$s-%2$s', 'placeholder: month number, month text', 'learndash' ), $monthnum, $monthtext ) . "</option>\n";
+				$month_field .= "\t\t\t" . '<option value="' . esc_attr( $monthnum ) . '" data-text="' . esc_attr( $monthtext ) . '" ' . selected( $monthnum, $value_mm, false ) . '>';
+				// translators: placeholder: month number, month text.
+				$month_field .= sprintf( esc_html_x( '%1$s-%2$s', 'placeholder: month number, month text', 'learndash' ), esc_html( $monthnum ), esc_html( $monthtext ) ) . "</option>\n";
 			}
 				$month_field .= '</select>';
 
@@ -83,8 +96,8 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 			$minute_field = '<span class="screen-reader-text">' . esc_html__( 'Minute', 'learndash' ) . '</span><input type="number" min="0" max="59" placeholder="MN" class="ld_date_mn ' . $field_class . '" name="' . $field_name . '[mn]" value="' . $value_mn . '" size="2" maxlength="2" autocomplete="off" />';
 
 			$html .= '<div class="ld_date_selector">' . sprintf(
-				// Translators: placeholders Month, Day, Year, Hour, Minute
-				esc_html__( '%1$s %2$s, %3$s @ %4$s:%5$s' ),
+				// translators: placeholders: Month Name, Day number, Year number, Hour number, Minute number.
+				esc_html__( '%1$s %2$s, %3$s @ %4$s:%5$s', 'learndash' ),
 				$month_field,
 				$day_field,
 				$year_field,
@@ -92,15 +105,16 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 				$minute_field
 			) . '</div>';
 
+			/** This filter is documented in includes/settings/settings-fields/class-ld-settings-fields-checkbox-switch.php */
 			$html = apply_filters( 'learndash_settings_field_html_after', $html, $field_args );
 
-			echo $html;
+			echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Need to output HTML
 		}
 
 		/**
 		 * Validate field
 		 *
-		 * @since 2.6.0
+		 * @since 3.0.0
 		 *
 		 * @param mixed  $val Value to validate.
 		 * @param string $key Key of value being validated.
@@ -113,56 +127,57 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 		}
 
 		/**
-		 * Default validation function. Should be overriden in Field subclass.
+		 * Get Settings Field Value
 		 *
-		 * @since 2.4
+		 * @since 3.0.0
 		 *
-		 * @param mixed  $val Value to validate.
-		 * @param string $key Key of value being validated.
-		 * @param array  $args Array of field args.
+		 * @param mixed  $val       Value to validate.
+		 * @param string $key       Key of value being validated.
+		 * @param array  $args      Array of field args.
+		 * @param array  $post_args Array of post args.
 		 *
 		 * @return mixed $val validated value.
 		 */
 		public function value_section_field( $val = '', $key = '', $args = array(), $post_args = array() ) {
 			if ( ( isset( $args['field']['type'] ) ) && ( $args['field']['type'] === $this->field_type ) ) {
 				if ( isset( $val['aa'] ) ) {
-					$val['aa'] = intval( $val['aa'] );
+					$val_aa = intval( $val['aa'] );
 				} else {
-					$val['aa'] = 0;
+					$val_aa = 0;
 				}
 
 				if ( isset( $val['mm'] ) ) {
-					$val['mm'] = intval( $val['mm'] );
+					$val_mm = intval( $val['mm'] );
 				} else {
-					$val['mm'] = 0;
+					$val_mm = 0;
 				}
 
 				if ( isset( $val['jj'] ) ) {
-					$val['jj'] = intval( $val['jj'] );
+					$val_jj = intval( $val['jj'] );
 				} else {
-					$val['jj'] = 0;
+					$val_jj = 0;
 				}
 
 				if ( isset( $val['hh'] ) ) {
-					$val['hh'] = intval( $val['hh'] );
+					$val_hh = intval( $val['hh'] );
 				} else {
-					$val['hh'] = 0;
+					$val_hh = 0;
 				}
 
 				if ( isset( $val['mn'] ) ) {
-					$val['mn'] = intval( $val['mn'] );
+					$val_mn = intval( $val['mn'] );
 				} else {
-					$val['mn'] = 0;
+					$val_mn = 0;
 				}
 
-				if ( ( ! empty( $val['aa'] ) ) && ( ! empty( $val['mm'] ) ) && ( ! empty( $val['jj'] ) ) ) {
+				if ( ( ! empty( $val_aa ) ) && ( ! empty( $val_mm ) ) && ( ! empty( $val_jj ) ) ) {
 					$date_string = sprintf(
 						'%04d-%02d-%02d %02d:%02d:00',
-						intval( $val['aa'] ),
-						intval( $val['mm'] ),
-						intval( $val['jj'] ),
-						intval( $val['hh'] ),
-						intval( $val['mn'] )
+						intval( $val_aa ),
+						intval( $val_mm ),
+						intval( $val_jj ),
+						intval( $val_hh ),
+						intval( $val_mn )
 					);
 
 					$date_string_gmt = get_gmt_from_date( $date_string, 'Y-m-d H:i:s' );

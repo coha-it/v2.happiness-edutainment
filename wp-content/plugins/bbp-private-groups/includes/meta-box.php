@@ -286,7 +286,7 @@ function private_groups_save_meta( $post_id, $post ) {
 		} // End of foreach
 		
 		//now set nonlogged in permissions
-		if ($_POST['_private_group_nonloggedin'] ) {
+		if (!empty ($_POST['_private_group_nonloggedin'] )) {
 			update_post_meta( $post_id, '_private_group_nonloggedin', $_POST['_private_group_nonloggedin'], false );
 		}
 		else //delete

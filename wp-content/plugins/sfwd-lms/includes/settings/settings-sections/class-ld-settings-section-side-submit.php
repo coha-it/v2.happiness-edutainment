@@ -1,19 +1,27 @@
 <?php
 /**
- * LearnDash Settings Page Quizzes Options.
+ * LearnDash Settings Side Submit Metabox.
  *
- * @package LearnDash
- * @subpackage Settings
+ * @since 2.6.0
+ * @package LearnDash\Settings\Sections
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'LearnDash_Settings_Section_Side_Submit' ) ) ) {
 	/**
-	 * Class to create the settings metabox.
+	 * Class LearnDash Settings Side Submit Metabox.
+	 *
+	 * @since 2.6.0
 	 */
 	class LearnDash_Settings_Section_Side_Submit extends LearnDash_Settings_Section {
 
 		/**
 		 * Public constructor for class
+		 *
+		 * @since 2.6.0
 		 *
 		 * @param array $args Array of class args.
 		 */
@@ -38,6 +46,8 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 				$this->metabox_context  = 'side';
 				$this->metabox_priority = 'high';
 
+				$this->load_options = false;
+
 				parent::__construct();
 
 				// We override the parent value set for $this->metabox_key because we want the div ID to match the details WordPress
@@ -48,6 +58,8 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 
 		/**
 		 * Primary function to show the metabox output
+		 *
+		 * @since 2.6.0
 		 */
 		public function show_meta_box() {
 
@@ -69,9 +81,12 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 			<?php
 		}
 
-		// This is a requires function
+		/**
+		 * Load settings fields
+		 *
+		 * This is a requires function.
+		 */
 		public function load_settings_fields() {
-
 		}
 	}
 }

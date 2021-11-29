@@ -1,19 +1,28 @@
 <?php
 /**
- * LearnDash Settings administration field Select with Edit and Delete.
+ * LearnDash Select with Edit and Delete Settings Field.
  *
- * @package LearnDash
- * @subpackage Settings
+ * @since 3.0.0
+ * @package LearnDash\Settings\Field
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'LearnDash_Settings_Fields_Select_Edit_Delete' ) ) ) {
 	/**
-	 * Class to create the settings field.
+	 * Class LearnDash Select with Edit and Delete Settings Field.
+	 *
+	 * @since 3.0.0
+	 * @uses LearnDash_Settings_Fields
 	 */
 	class LearnDash_Settings_Fields_Select_Edit_Delete extends LearnDash_Settings_Fields {
 
 		/**
 		 * Public constructor for class
+		 *
+		 * @since 3.0.0
 		 */
 		public function __construct() {
 			$this->field_type = 'select-edit-delete';
@@ -24,15 +33,18 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 		/**
 		 * Function to crete the settiings field.
 		 *
-		 * @since 2.4
+		 * @since 3.0.0
 		 *
 		 * @param array $field_args An array of field arguments used to process the ouput.
 		 * @return void
 		 */
 		public function create_section_field( $field_args = array() ) {
 
+			/** This filter is documented in includes/settings/settings-fields/class-ld-settings-fields-checkbox-switch.php */
 			$field_args = apply_filters( 'learndash_settings_field', $field_args );
-			$html       = apply_filters( 'learndash_settings_field_html_before', '', $field_args );
+
+			/** This filter is documented in includes/settings/settings-fields/class-ld-settings-fields-checkbox-switch.php */
+			$html = apply_filters( 'learndash_settings_field_html_before', '', $field_args );
 
 			if ( ( isset( $field_args['options'] ) ) && ( ! empty( $field_args['options'] ) ) ) {
 				$field_id_base    = $this->get_field_attribute_id( $field_args, false );
@@ -41,7 +53,7 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 				$html .= '<select ';
 				$html .= $this->get_field_attribute_type( $field_args );
 				$html .= $this->get_field_attribute_name( $field_args );
-				$html .= ' id="' . $field_id_base . '_select" ';
+				$html .= ' id="' . esc_attr( $field_id_base ) . '_select" ';
 				$html .= $this->get_field_attribute_class( $field_args );
 				$html .= $this->get_field_attribute_misc( $field_args );
 				$html .= $this->get_field_attribute_required( $field_args );
@@ -50,7 +62,7 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 				$html .= ' >';
 
 				foreach ( $field_args['options'] as $option_key => $option_label ) {
-					$html .= '<option value="' . $option_key . '" ' . selected( $option_key, $field_args['value'], false ) . '>' . $option_label . '</option>';
+					$html .= '<option value="' . esc_attr( $option_key ) . '" ' . selected( $option_key, $field_args['value'], false ) . '>' . wp_kses_post( $option_label ) . '</option>';
 				}
 				$html .= '</select>';
 
@@ -60,16 +72,16 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 					'field_nonce' => wp_create_nonce( $field_args['setting_option_key'] ),
 				);
 
-				$html .= '<input class="ajax_data" type="hidden" data-ajax="' . htmlspecialchars( json_encode( $ajax_data, JSON_FORCE_OBJECT ) ) . '" />';
+				$html .= '<input class="ajax_data" type="hidden" data-ajax="' . htmlspecialchars( wp_json_encode( $ajax_data, JSON_FORCE_OBJECT ) ) . '" />';
 
 				$html .= '<div class="ld-setting-field-sub">
-					<input disabled="disabled" type="text" value="" id="' . $field_id_base . '_input" name="' . $field_id_base . '_input" class="medium-text ld-settings-field-input" />
+					<input disabled="disabled" type="text" value="" id="' . esc_attr( $field_id_base ) . '_input" name="' . esc_attr( $field_id_base ) . '_input" class="medium-text ld-settings-field-input" />
 				</div>';
 
 				if ( ( isset( $field_args['buttons'] ) ) && ( ! empty( $field_args['buttons'] ) ) ) {
 					$html .= '<div class="ld-setting-field-sub">';
 					foreach ( $field_args['buttons'] as $button_key => $button_label ) {
-						$html .= '<input type="button" disabled="disabled" value="' . $button_label . '" class="button-secondary ld-settings-fiels-button" data-action="' . $button_key . '" />';
+						$html .= '<input type="button" disabled="disabled" value="' . esc_attr( $button_label ) . '" class="button-secondary ld-settings-fiels-button" data-action="' . esc_attr( $button_key ) . '" />';
 					}
 
 					// Add spinner field to be shown during the AJAX processing.
@@ -82,9 +94,10 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 				}
 			}
 
+			/** This filter is documented in includes/settings/settings-fields/class-ld-settings-fields-checkbox-switch.php */
 			$html = apply_filters( 'learndash_settings_field_html_after', $html, $field_args );
 
-			echo $html;
+			echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Need to output HTML
 		}
 	}
 }

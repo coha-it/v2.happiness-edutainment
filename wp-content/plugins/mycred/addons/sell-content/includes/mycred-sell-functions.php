@@ -328,6 +328,8 @@ if ( ! function_exists( 'mycred_user_paid_for_content' ) ) :
 
 		}
 
+		$last_payment = '';
+		
 		if ( ! $has_paid ) {
 
 			$last_payment = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$mycred_log_table} WHERE user_id = %d AND ref = 'buy_content' AND ref_id = %d ORDER BY time DESC LIMIT 1;", $user_id, $post_id ) );
@@ -370,6 +372,7 @@ if ( ! function_exists( 'mycred_content_purchase_has_expired' ) ) :
 		if ( $length > 0 ) {
 
 			$expiration = apply_filters( 'mycred_sell_expire_calc', absint( $length * HOUR_IN_SECONDS ), $length, $payment->user_id, $payment->ref_id );
+
 			$expiration = $expiration + $payment->time;
 
 			if ( $expiration <= current_time( 'timestamp' ) )
@@ -450,13 +453,13 @@ if ( ! function_exists( 'mycred_sell_content_payment_buttons' ) ) :
 			$buttons = array();
 
 			foreach ( $settings['type'] as $point_type ) {
-
+				
 				// Load point type
 				$mycred       = mycred( $point_type );
 				$setup        = mycred_get_option( 'mycred_sell_this_' . $point_type );
 				$price        = mycred_get_content_price( $post_id, $point_type, $user_id );
 				$status       = $setup['status'];
-
+				
 				// Manual mode
 				if ( $settings['filters'][ $post->post_type ]['by'] == 'manual' ) {
 
@@ -487,7 +490,7 @@ if ( ! function_exists( 'mycred_sell_content_payment_buttons' ) ) :
 				$result = implode( ' ', $buttons );
 
 		}
-
+	
 		// Return a string of buttons or false if user can not afford
 		return apply_filters( 'mycred_sellcontent_buttons', $result, $user_id, $post_id );
 
@@ -498,7 +501,7 @@ endif;
  * Sell Content Template
  * Parses a particular template.
  * @since 1.7
- * @version 1.0.1
+ * @version 1.0.2
  */
 if ( ! function_exists( 'mycred_sell_content_template' ) ) :
 	function mycred_sell_content_template( $template = '', $post = NULL, $type = 'mycred-sell-partial-content', $status = 'visitor' ) {
@@ -507,7 +510,41 @@ if ( ! function_exists( 'mycred_sell_content_template' ) ) :
 
 		$post_type         = get_post_type_object( $post->post_type );
 		$url               = mycred_get_permalink( $post->ID );
+		
+		if ( $status == 'mycred-sell-insufficient' ) {
+			$post        = mycred_get_post( $post->ID );
+			$settings    = mycred_sell_content_settings();
+			$prices      = array();
 
+			foreach ( $settings['type'] as $point_type ) {	
+
+				$setup  = mycred_get_option( 'mycred_sell_this_' . $point_type );
+				$status = $setup['status'];
+
+				// Point type not enabled
+				if ( $status == 'disabled' ) continue;
+				
+				$mycred = mycred( $point_type );
+				$price  = mycred_get_content_price( $post->ID, $point_type, get_current_user_id() );
+
+				// Manual mode
+				if ( $settings['filters'][ $post->post_type ]['by'] == 'manual' ) {
+
+					$suffix       = ( $point_type != MYCRED_DEFAULT_TYPE_KEY ) ? '_' . $point_type : '';
+					
+					$manual_setup = (array) mycred_get_post_meta( $post->ID, 'myCRED_sell_content' . $suffix, true );
+					
+					if ( ! empty( $manual_setup ) && array_key_exists( 'status', $manual_setup ) )
+						$status = $manual_setup['status'];
+
+				}
+
+				$prices[] = $mycred->format_creds( $price );
+			}
+
+			$template = str_replace( '%price%',implode(', ',$prices), $template );
+		}
+		
 		// Remove old tags that are no longer supported
 		$template          = str_replace( array( '%price%', '%expires%', ), '', $template );
 
@@ -868,4 +905,41 @@ if ( ! function_exists( 'mycred_get_post_type_options' ) ) :
 		return apply_filters( 'mycred_sell_post_type_options', $options, $post_type );
 
 	}
+endif;
+
+/**
+ * Render remaining time
+ * @since 2.1.1
+ * @version 1.0
+ */
+if ( ! function_exists( 'mycred_seconds_to_time' ) ) :
+	function mycred_seconds_to_time( $seconds ) {
+	    $dtF = new \DateTime('@0');
+	    $dtT = new \DateTime("@$seconds");
+	    return $dtF->diff($dtT)->format('%a days, %h hours,%i minutes ,%s Seconds');
+	}
+endif;
+
+/**
+ * Check if points enable
+ * @since 2.3
+ * @version 1.0
+ */
+if ( ! function_exists( 'mycred_sc_is_point_enable' ) ) :
+function mycred_sc_is_points_enable() 
+{
+	$point_types = mycred_get_types();
+
+	foreach( array_keys( $point_types ) as $point_type )
+	{
+		$settings = mycred_get_option( "mycred_sell_this_{$point_type}" );
+
+		if( !empty( $settings ) && $settings['status'] == 'enabled' )
+			return true;
+
+		continue;
+	}
+
+	return false;
+}
 endif;

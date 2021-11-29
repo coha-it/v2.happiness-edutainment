@@ -6,12 +6,14 @@
  *
  * @package WordPress
  * @subpackage Twenty_Twenty
- * @since 1.0.0
+ * @since Twenty Twenty 1.0
  */
 
 if ( ! class_exists( 'TwentyTwenty_Non_Latin_Languages' ) ) {
 	/**
 	 * Language handling.
+	 *
+	 * @since Twenty Twenty 1.0
 	 */
 	class TwentyTwenty_Non_Latin_Languages {
 
@@ -20,16 +22,23 @@ if ( ! class_exists( 'TwentyTwenty_Non_Latin_Languages' ) ) {
 		 *
 		 * Return CSS for non-latin language, if available, or null
 		 *
-		 * @param string $type Whether to return CSS for the "front-end", "block-editor" or "classic-editor".
+		 * @since Twenty Twenty 1.0
 		 *
+		 * @param string $type Whether to return CSS for the "front-end", "block-editor", or "classic-editor".
 		 * @return void
 		 */
 		public static function get_non_latin_css( $type = 'front-end' ) {
 
-			// Fetch users locale.
+			// Fetch site locale.
 			$locale = get_bloginfo( 'language' );
 
-			// Define fallback fonts for non-latin languages.
+			/**
+			 * Filters the fallback fonts for non-latin languages.
+			 *
+			 * @since Twenty Twenty 1.0
+			 *
+			 * @param array $font_family An array of locales and font families.
+			 */
 			$font_family = apply_filters(
 				'twentytwenty_get_localized_font_family_types',
 				array(
@@ -99,7 +108,13 @@ if ( ! class_exists( 'TwentyTwenty_Non_Latin_Languages' ) ) {
 				return;
 			}
 
-			// Define elements to apply fallback fonts to.
+			/**
+			 * Filters the elements to apply fallback fonts to.
+			 *
+			 * @since Twenty Twenty 1.0
+			 *
+			 * @param array $elements An array of elements for "front-end", "block-editor", or "classic-editor".
+			 */
 			$elements = apply_filters(
 				'twentytwenty_get_localized_font_family_elements',
 				array(

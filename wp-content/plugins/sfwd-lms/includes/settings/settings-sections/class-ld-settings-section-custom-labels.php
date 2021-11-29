@@ -2,21 +2,29 @@
 /**
  * LearnDash Settings Section for Custom Labels Metabox.
  *
- * @package LearnDash
- * @subpackage Settings
+ * @since 2.4.0
+ * @package LearnDash\Settings\Sections
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'LearnDash_Settings_Section_Custom_Labels' ) ) ) {
 	/**
-	 * Class to create the settings section.
+	 * Class LearnDash Settings Section for Custom Labels Metabox.
+	 *
+	 * @since 2.4.0
 	 */
 	class LearnDash_Settings_Section_Custom_Labels extends LearnDash_Settings_Section {
 
 		/**
 		 * Protected constructor for class
+		 *
+		 * @since 2.4.0
 		 */
 		protected function __construct() {
-			$this->settings_page_id = 'learndash_lms_settings_custom_labels';
+			$this->settings_page_id = 'learndash_lms_advanced';
 
 			// This is the 'option_name' key used in the wp_options table.
 			$this->setting_option_key = 'learndash_settings_custom_labels';
@@ -37,6 +45,8 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 
 		/**
 		 * Initialize the metabox settings values.
+		 *
+		 * @since 2.4.0
 		 */
 		public function load_settings_values() {
 			parent::load_settings_values();
@@ -56,8 +66,7 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 						}
 
 						$reload_url = remove_query_arg( array( 'action', 'ld_wpnonce' ) );
-						wp_safe_redirect( $reload_url );
-						die();
+						learndash_safe_redirect( $reload_url );
 					}
 				}
 			}
@@ -65,6 +74,8 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 
 		/**
 		 * Initialize the metabox settings fields.
+		 *
+		 * @since 2.4.0
 		 */
 		public function load_settings_fields() {
 
@@ -149,12 +160,44 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 					'value'     => isset( $this->setting_option_values['questions'] ) ? $this->setting_option_values['questions'] : '',
 					'class'     => 'regular-text',
 				),
+				'group'                         => array(
+					'name'      => 'group',
+					'type'      => 'text',
+					'label'     => esc_html__( 'Group', 'learndash' ),
+					'help_text' => esc_html__( 'Label to replace "group" (singular).', 'learndash' ),
+					'value'     => isset( $this->setting_option_values['group'] ) ? $this->setting_option_values['group'] : '',
+					'class'     => 'regular-text',
+				),
+				'groups'                        => array(
+					'name'      => 'groups',
+					'type'      => 'text',
+					'label'     => esc_html__( 'Groups', 'learndash' ),
+					'help_text' => esc_html__( 'Label to replace "groups" (plural).', 'learndash' ),
+					'value'     => isset( $this->setting_option_values['groups'] ) ? $this->setting_option_values['groups'] : '',
+					'class'     => 'regular-text',
+				),
+				'group_leader'                  => array(
+					'name'      => 'group_leader',
+					'type'      => 'text',
+					'label'     => esc_html__( 'Group Leader', 'learndash' ),
+					'help_text' => esc_html__( 'Label to rename Group Leader user role.', 'learndash' ),
+					'value'     => isset( $this->setting_option_values['group_leader'] ) ? $this->setting_option_values['group_leader'] : '',
+					'class'     => 'regular-text',
+				),
 				'button_take_this_course'       => array(
 					'name'      => 'button_take_this_course',
 					'type'      => 'text',
 					'label'     => esc_html__( 'Take this Course (Button)', 'learndash' ),
 					'help_text' => esc_html__( 'Label to replace "Take this Course" button.', 'learndash' ),
 					'value'     => isset( $this->setting_option_values['button_take_this_course'] ) ? $this->setting_option_values['button_take_this_course'] : '',
+					'class'     => 'regular-text',
+				),
+				'button_take_this_group'        => array(
+					'name'      => 'button_take_this_group',
+					'type'      => 'text',
+					'label'     => esc_html__( 'Join Group (Button)', 'learndash' ),
+					'help_text' => esc_html__( 'Label to replace "Join Group" button.', 'learndash' ),
+					'value'     => isset( $this->setting_option_values['button_take_this_group'] ) ? $this->setting_option_values['button_take_this_group'] : '',
 					'class'     => 'regular-text',
 				),
 				'button_mark_complete'          => array(
@@ -175,10 +218,51 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 				),
 			);
 			// Legacy custom labels filter.
+			/**
+			 * Filters custom labels setting fields.
+			 *
+			 * @param array $setting_option_fields Associative array of Setting field details like name,type,label,value.
+			 */
 			$this->setting_option_fields = apply_filters( 'learndash_custom_label_fields', $this->setting_option_fields );
+
+			/** This filter is documented in includes/settings/settings-metaboxes/class-ld-settings-metabox-course-access-settings.php */
 			$this->setting_option_fields = apply_filters( 'learndash_settings_fields', $this->setting_option_fields, $this->settings_section_key );
 
 			parent::load_settings_fields();
+		}
+
+		/**
+		 * Changes group_leader role display name
+		 *
+		 * @since 2.4.0
+		 *
+		 * @param array  $new_values         Array of section fields values.
+		 * @param array  $old_values         Array of old values.
+		 * @param string $setting_option_key Section option key should match $this->setting_option_key.
+		 */
+		public function section_pre_update_option( $new_values = '', $old_values = '', $setting_option_key = '' ) {
+			if ( $setting_option_key === $this->setting_option_key ) {
+				$new_values = parent::section_pre_update_option( $new_values, $old_values, $setting_option_key );
+
+				if ( ! isset( $new_values['group_leader'] ) ) {
+					$new_values['group_leader'] = '';
+				}
+
+				if ( ! isset( $old_values['group_leader'] ) ) {
+					$old_values['group_leader'] = '';
+				}
+
+				if ( $old_values['group_leader'] !== $new_values['group_leader'] ) {
+					$group_leader = get_role( 'group_leader' );
+					if ( ! is_null( $group_leader ) ) {
+						remove_role( 'group_leader' );
+						add_role( 'group_leader', $new_values['group_leader'], $group_leader->capabilities );
+					}
+				}
+			}
+
+			return $new_values;
+
 		}
 	}
 }

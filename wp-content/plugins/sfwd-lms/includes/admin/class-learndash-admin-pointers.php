@@ -1,15 +1,42 @@
 <?php
 /**
  * LearnDash Admin Pointers
+ *
+ * @since 3.0.0
+ * @package LearnDash\Admin
  */
 
-if ( ! class_exists( 'Learndash_Admin_Pointers' ) ) {
-	class Learndash_Admin_Pointers {
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
+if ( ! class_exists( 'Learndash_Admin_Pointers' ) ) {
+	/**
+	 * LearnDash Admin Pointers Class
+	 *
+	 * @since 3.0.0
+	 */
+	class Learndash_Admin_Pointers {
+		/**
+		 * Array of registered pointers
+		 *
+		 * @var array $pointers Current registered pointers.
+		 */
 		protected $pointers = array();
 
 		/**
+		 * Screen ID
+		 *
+		 * @var string
+		 */
+		public $screen_id;
+
+		/**
 		 * Register variables and start up plugin
+		 *
+		 * @since 3.0.0
+		 *
+		 * @param array $pointers Current pointers.
 		 */
 		public function __construct( $pointers = array() ) {
 			if ( get_bloginfo( 'version' ) < '3.3' ) {
@@ -21,6 +48,8 @@ if ( ! class_exists( 'Learndash_Admin_Pointers' ) ) {
 
 		/**
 		 * Add pointers to the current screen if they were not dismissed
+		 *
+		 * @since 3.0.0
 		 */
 		public function admin_enqueue_scripts() {
 			$this->register_pointers();
@@ -33,10 +62,10 @@ if ( ! class_exists( 'Learndash_Admin_Pointers' ) ) {
 			wp_enqueue_style( 'wp-pointer' );
 			wp_enqueue_script( 'wp-pointer' );
 
-			// Make sure some metaboxes can't be toggled off
+			// Make sure some metaboxes can't be toggled off.
 			wp_enqueue_script(
 				'learndash-admin-pointer-script',
-				LEARNDASH_LMS_PLUGIN_URL . 'assets/js/learndash-admin-pointers' . leardash_min_asset() . '.js',
+				LEARNDASH_LMS_PLUGIN_URL . 'assets/js/learndash-admin-pointers' . learndash_min_asset() . '.js',
 				array( 'jquery' ),
 				LEARNDASH_SCRIPT_VERSION_TOKEN,
 				true
@@ -62,10 +91,20 @@ if ( ! class_exists( 'Learndash_Admin_Pointers' ) ) {
 
 		/**
 		 * Register the available pointers for the current screen
+		 *
+		 * @since 3.0.0
 		 */
 		public function register_pointers() {
 			$this->screen_id = get_current_screen()->id;
-			$pointers        = apply_filters( 'learndash_screen_pointers', array(), $this->screen_id );
+			/**
+			 * Filters screen pointers.
+			 *
+			 * @since 3.0.0
+			 *
+			 * @param array  $pointers  An array of screen pointer data.
+			 * @param string $screen_id Current Screen id.
+			 */
+			$pointers = apply_filters( 'learndash_screen_pointers', array(), $this->screen_id );
 			if ( ( ! empty( $pointers ) ) && ( is_array( $pointers ) ) ) {
 				$screen_pointers = array();
 				foreach ( $pointers as $ptr ) {
@@ -108,6 +147,8 @@ if ( ! class_exists( 'Learndash_Admin_Pointers' ) ) {
 
 		/**
 		 * Check pointers against dismissed user pointers.
+		 *
+		 * @since 3.0.0
 		 */
 		protected function check_user_dissmissed() {
 			if ( ! $this->pointers || ! is_array( $this->pointers ) ) {
@@ -118,7 +159,7 @@ if ( ! class_exists( 'Learndash_Admin_Pointers' ) ) {
 				delete_user_meta( get_current_user_id(), 'dismissed_wp_pointers' );
 			}
 
-			// Get dismissed pointers
+			// Get dismissed pointers.
 			$get_dismissed = get_user_meta( get_current_user_id(), 'dismissed_wp_pointers', true );
 			$dismissed     = explode( ',', (string) $get_dismissed );
 
@@ -145,25 +186,27 @@ add_filter(
 	'learndash_screen_pointers',
 	function( $pointers = array(), $screen_id = '' ) {
 
-		$ld_prior_version = learndash_get_prior_installed_version();
-		if ( ( ! $ld_prior_version ) || ( 'new' === $ld_prior_version ) ) {
+		$ld_prior_version = learndash_data_upgrades_setting( 'prior_version' );
 
-			if ( ! isset( $pointers['learndash-new-install'] ) ) {
-				$pointers['learndash-new-install'] = array(
-					'id'       => 'learndash-new-install',
-					'screen'   => '',
-					'target'   => '#toplevel_page_learndash-lms .wp-menu-name',
-					'title'    => '<span id="ld-pointer-title-learndash-new-install" class="ld-pointer-title">' . esc_html__( 'First time using LearnDash?', 'learndash' ) . '</span>',
-					'content'  => '<span class="ld-pointer-content">' . sprintf(
-						// translators: placeholder: Link to Bootcamp page
-						esc_html_x( 'Go to the LearnDash %s', 'placeholder: Link to Bootcamp page', 'learndash' ),
-						'<a href="' . admin_url( 'admin.php?page=learndash_lms_overview' ) . '">' . esc_html__( 'mini-Bootcamp', 'learndash' ) . '</a>'
-					) . '</span>',
-					'position' => array(
-						'edge'  => is_rtl() ? 'right' : 'left', // top, bottom, left, right
-						'align' => 'middle', // top, bottom, left, right, middle
-					),
-				);
+		if ( learndash_is_admin_user() ) {
+			if ( 'new' === $ld_prior_version ) {
+				if ( ! isset( $pointers['learndash-new-install'] ) ) {
+					$pointers['learndash-new-install'] = array(
+						'id'       => 'learndash-new-install',
+						'screen'   => '',
+						'target'   => '#toplevel_page_learndash-lms .wp-menu-name',
+						'title'    => '<span id="ld-pointer-title-learndash-new-install" class="ld-pointer-title">' . esc_html__( 'First time using LearnDash?', 'learndash' ) . '</span>',
+						'content'  => '<span class="ld-pointer-content">' . sprintf(
+							// translators: placeholder: Link to Bootcamp page.
+							esc_html_x( 'Go to the LearnDash %s', 'placeholder: Link to Bootcamp page', 'learndash' ),
+							'<a href="' . admin_url( 'admin.php?page=learndash_lms_overview' ) . '">' . esc_html__( 'mini-Bootcamp', 'learndash' ) . '</a>'
+						) . '</span>',
+						'position' => array(
+							'edge'  => is_rtl() ? 'right' : 'left', // top, bottom, left, right.
+							'align' => 'middle', // top, bottom, left, right, middle.
+						),
+					);
+				}
 			}
 		}
 

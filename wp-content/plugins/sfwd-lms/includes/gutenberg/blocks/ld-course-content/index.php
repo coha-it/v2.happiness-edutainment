@@ -7,6 +7,10 @@
  * @since 2.5.9
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 if ( ( class_exists( 'LearnDash_Gutenberg_Block' ) ) && ( ! class_exists( 'LearnDash_Gutenberg_Block_Course_Content' ) ) ) {
 	/**
 	 * Class for handling LearnDash Course Content Block
@@ -17,29 +21,29 @@ if ( ( class_exists( 'LearnDash_Gutenberg_Block' ) ) && ( ! class_exists( 'Learn
 		 * Object constructor
 		 */
 		public function __construct() {
-			$this->shortcode_slug = 'course_content';
-			$this->block_slug = 'ld-course-content';
+			$this->shortcode_slug   = 'course_content';
+			$this->block_slug       = 'ld-course-content';
 			$this->block_attributes = array(
-				'course_id' => array(
+				'course_id'         => array(
 					'type' => 'string',
 				),
-				'per_page' => array(
+				'per_page'          => array(
 					'type' => 'string',
 				),
-				'preview_show' => array(
+				'preview_show'      => array(
 					'type' => 'boolean',
 				),
 				'preview_course_id' => array(
 					'type' => 'string',
 				),
-				'example_show' => array(
+				'example_show'      => array(
 					'type' => 'boolean',
 				),
-				'meta' => array(
+				'meta'              => array(
 					'type' => 'object',
 				),
 			);
-			$this->self_closing = true;
+			$this->self_closing     = true;
 
 			$this->init();
 		}
@@ -58,6 +62,8 @@ if ( ( class_exists( 'LearnDash_Gutenberg_Block' ) ) && ( ! class_exists( 'Learn
 		 */
 		public function render_block( $attributes = array() ) {
 
+			$attributes = $this->preprocess_block_attributes( $attributes );
+
 			$attributes_meta = array();
 			if ( isset( $attributes['meta'] ) ) {
 				$attributes_meta = $attributes['meta'];
@@ -67,7 +73,7 @@ if ( ( class_exists( 'LearnDash_Gutenberg_Block' ) ) && ( ! class_exists( 'Learn
 			if ( is_user_logged_in() ) {
 				if ( ( isset( $attributes['example_show'] ) ) && ( ! empty( $attributes['example_show'] ) ) ) {
 					$attributes['preview_course_id'] = $this->get_example_post_id( learndash_get_post_type_slug( 'course' ) );
-					$attributes['preview_show'] = 1;
+					$attributes['preview_show']      = 1;
 					unset( $attributes['example_show'] );
 				}
 
@@ -79,20 +85,27 @@ if ( ( class_exists( 'LearnDash_Gutenberg_Block' ) ) && ( ! class_exists( 'Learn
 
 				if ( ( ! isset( $attributes['course_id'] ) ) || ( empty( $attributes['course_id'] ) ) ) {
 					if ( ( ! isset( $attributes_meta['course_id'] ) ) || ( empty( $attributes_meta['course_id'] ) ) ) {
-						return $this->render_block_wrap( '<span class="learndash-block-error-message">' . sprintf(
+						return $this->render_block_wrap(
+							'<span class="learndash-block-error-message">' . sprintf(
 							// translators: placeholder: Course, Course.
-							_x( '%1$s ID is required when not used within a %2$s.', 'placeholder: Course, Course', 'learndash' ), LearnDash_Custom_Label::get_label( 'course' ), LearnDash_Custom_Label::get_label( 'course' )
-						) . '</span>' );
+								_x( '%1$s ID is required when not used within a %2$s.', 'placeholder: Course, Course', 'learndash' ),
+								LearnDash_Custom_Label::get_label( 'course' ),
+								LearnDash_Custom_Label::get_label( 'course' )
+							) . '</span>'
+						);
 					} else {
 						$attributes['course_id'] = (int) $attributes_meta['course_id'];
 					}
 				} else {
 					$course_post = get_post( (int) $attributes['course_id'] );
 					if ( ( ! is_a( $course_post, 'WP_Post' ) ) || ( 'sfwd-courses' !== $course_post->post_type ) ) {
-						return $this->render_block_wrap( '<span class="learndash-block-error-message">' . sprintf(
+						return $this->render_block_wrap(
+							'<span class="learndash-block-error-message">' . sprintf(
 							// translators: placeholder: Course.
-							_x( 'Invalid %1$s ID.', 'placeholder: Course', 'learndash' ), LearnDash_Custom_Label::get_label( 'course' )
-						) . '</span>' );
+								_x( 'Invalid %1$s ID.', 'placeholder: Course', 'learndash' ),
+								LearnDash_Custom_Label::get_label( 'course' )
+							) . '</span>'
+						);
 					}
 				}
 
@@ -113,7 +126,10 @@ if ( ( class_exists( 'LearnDash_Gutenberg_Block' ) ) && ( ! class_exists( 'Learn
 				}
 
 				$shortcode_params_str = '[' . $this->shortcode_slug . ' ' . $shortcode_params_str . ']';
-				$shortcode_out = do_shortcode( $shortcode_params_str );
+				$shortcode_out        = do_shortcode( $shortcode_params_str );
+				if ( ( empty( $shortcode_out ) ) || ( '<div class="learndash user_has_no_access" id="learndash_post_29"></div>' === $shortcode_out ) ) {
+					$shortcode_out = '[' . $this->shortcode_slug . '] placeholder output.';
+				}
 
 				return $this->render_block_wrap( $shortcode_out );
 			}

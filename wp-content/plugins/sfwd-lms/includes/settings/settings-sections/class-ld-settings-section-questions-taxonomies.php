@@ -2,18 +2,26 @@
 /**
  * LearnDash Settings Section for Question Taxonomies Metabox.
  *
- * @package LearnDash
- * @subpackage Settings
+ * @since 2.6.0
+ * @package LearnDash\Settings\Sections
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'LearnDash_Settings_Questions_Taxonomies' ) ) ) {
 	/**
-	 * Class to create the settings section.
+	 * Class LearnDash Settings Section for Question Taxonomies Metabox.
+	 *
+	 * @since 2.6.0
 	 */
 	class LearnDash_Settings_Questions_Taxonomies extends LearnDash_Settings_Section {
 
 		/**
 		 * Protected constructor for class
+		 *
+		 * @since 2.6.0
 		 */
 		protected function __construct() {
 
@@ -55,6 +63,8 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 
 		/**
 		 * Initialize the metabox settings values.
+		 *
+		 * @since 2.6.0
 		 */
 		public function load_settings_values() {
 			parent::load_settings_values();
@@ -71,10 +81,7 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 				);
 
 				// If this is a new install we want to turn off WP Post Category/Tag.
-				require_once LEARNDASH_LMS_PLUGIN_DIR . 'includes/admin/class-learndash-admin-data-upgrades.php';
-				$this->ld_admin_data_upgrades = Learndash_Admin_Data_Upgrades::get_instance();
-
-				$ld_prior_version = $this->ld_admin_data_upgrades->get_data_settings( 'prior_version' );
+				$ld_prior_version = learndash_data_upgrades_setting( 'prior_version' );
 				if ( 'new' === $ld_prior_version ) {
 					$this->setting_option_values['wp_post_category'] = 'no';
 					$this->setting_option_values['wp_post_tag']      = 'no';
@@ -95,6 +102,7 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 				)
 			);
 
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( ( is_admin() ) && ( isset( $_GET['page'] ) ) && ( 'questions-options' === $_GET['page'] ) ) {
 				$category_mapper     = new WpProQuiz_Model_CategoryMapper();
 				$question_categories = $category_mapper->fetchAll();
@@ -109,79 +117,16 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 					}
 				}
 			}
-
 		}
 
 		/**
 		 * Initialize the metabox settings fields.
+		 *
+		 * @since 2.6.0
 		 */
 		public function load_settings_fields() {
 
 			$this->setting_option_fields = array(
-				/*
-				'ld_question_category' => array(
-					'name' => 'ld_question_category',
-					'type' => 'checkbox',
-					'label' => sprintf(
-						// translators: placeholder: Question.
-                        esc_html_x( 'LearnDash %s Categories', 'placeholder: Question', 'learndash' ),
-						LearnDash_Custom_Label::get_label( 'question' )
-					),
-					'help_text' => sprintf(
-						// translators: placeholder: Question.
-						esc_html_x( 'Enable the builtin LearnDash %s Categories', 'placeholder: Question', 'learndash' ),
-						LearnDash_Custom_Label::get_label( 'question' )
-					),
-					'value' => $this->setting_option_values['ld_question_category'],
-					'options' => array(
-						'yes' => esc_html__( 'Yes', 'learndash' ),
-					),
-				),
-				*/
-				/*
-				'ld_question_tag' => array(
-					'name' => 'ld_question_tag',
-					'type' => 'checkbox',
-					'label' => sprintf(
-						// translators: placeholder: Question.
-						esc_html_x( 'LearnDash %s Tags', 'placeholder: Question', 'learndash' ),
-						LearnDash_Custom_Label::get_label( 'question' )
-					),
-					'help_text' => sprintf(
-						// translators: placeholder: Quiz.
-						esc_html_x( 'Enable the builtin LearnDash %s Tags', 'placeholder: Question', 'learndash' ),
-						LearnDash_Custom_Label::get_label( 'question' )
-					),
-					'value' => $this->setting_option_values['ld_question_tag'],
-					'options' => array(
-						'yes' => esc_html__( 'Yes', 'learndash' ),
-					),
-				),
-				*/
-				/*
-				'wp_post_category' => array(
-					'name' => 'wp_post_category',
-					'type' => 'checkbox',
-					'label' => esc_html__( 'WordPress Post Categories', 'learndash' ),
-					'help_text' => esc_html__( 'Enable the builtin WordPress Post Categories', 'learndash' ),
-					'value' => $this->setting_option_values['wp_post_category'],
-					'options' => array(
-						'yes' => esc_html__( 'Yes', 'learndash' ),
-					),
-				),
-				*/
-				/*
-				'wp_post_tag' => array(
-					'name' => 'wp_post_tag',
-					'type' => 'checkbox',
-					'label' => esc_html__( 'WordPress Post Tags', 'learndash' ),
-					'help_text' => esc_html__( 'Enable the builtin WordPress Post Tags', 'learndash' ),
-					'value' => $this->setting_option_values['wp_post_tag'],
-					'options' => array(
-						'yes' => esc_html__( 'Yes', 'learndash' ),
-					),
-				),
-				*/
 				'proquiz_question_category' => array(
 					'name'                => 'proquiz_question_category',
 					'type'                => 'checkbox-switch',
@@ -192,10 +137,9 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 					),
 					'value'               => $this->setting_option_values['proquiz_question_category'],
 					'options'             => array(
-						'yes' => esc_html__( 'Yes', 'learndash' ),
-					),
-					'options'             => array(
 						'yes' => array(
+							'label'       => esc_html__( 'Yes', 'learndash' ),
+							'description' => '',
 							'tooltip' => sprintf(
 								// translators: placeholder: Question.
 								esc_html_x( '%s categories cannot be disabled.', 'placeholder: Question', 'learndash' ),
@@ -223,15 +167,16 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 				),
 			);
 
+			/** This filter is documented in includes/settings/settings-metaboxes/class-ld-settings-metabox-course-access-settings.php */
 			$this->setting_option_fields = apply_filters( 'learndash_settings_fields', $this->setting_option_fields, $this->settings_section_key );
 
 			parent::load_settings_fields();
 		}
 
-				/**
+		/**
 		 * This function handles the AJAX actions from the browser.
 		 *
-		 * @since 2.5.9
+		 * @since 2.6.0
 		 */
 		public function ajax_action() {
 			$reply_data = array( 'status' => false );

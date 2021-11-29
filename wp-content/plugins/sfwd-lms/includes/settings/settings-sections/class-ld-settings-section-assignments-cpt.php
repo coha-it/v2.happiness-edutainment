@@ -2,18 +2,26 @@
 /**
  * LearnDash Settings Section for Assignments Custom Post Type Metabox.
  *
- * @package LearnDash
- * @subpackage Settings
+ * @since 2.6.0
+ * @package LearnDash\Settings\Sections
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'LearnDash_Settings_Assignments_CPT' ) ) ) {
 	/**
-	 * Class to create the settings section.
+	 * Class LearnDash Settings Section for Assignments Custom Post Type Metabox.
+	 *
+	 * @since 2.6.0
 	 */
 	class LearnDash_Settings_Assignments_CPT extends LearnDash_Settings_Section {
 
 		/**
 		 * Protected constructor for class
+		 *
+		 * @since 2.6.0
 		 */
 		protected function __construct() {
 
@@ -43,13 +51,13 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 
 		/**
 		 * Initialize the metabox settings values.
+		 *
+		 * @since 2.6.0
 		 */
 		public function load_settings_values() {
 			parent::load_settings_values();
 
-			$_INITIALIZE = false;
 			if ( false === $this->setting_option_values ) {
-				$_INITIALIZE                 = true;
 				$this->setting_option_values = array(
 					'exclude_from_search' => 'yes',
 					'publicly_queryable'  => 'yes',
@@ -60,6 +68,8 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 
 		/**
 		 * Initialize the metabox settings fields.
+		 *
+		 * @since 2.6.0
 		 */
 		public function load_settings_fields() {
 
@@ -96,6 +106,7 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 				),
 			);
 
+			/** This filter is documented in includes/settings/settings-metaboxes/class-ld-settings-metabox-course-access-settings.php */
 			$this->setting_option_fields = apply_filters( 'learndash_settings_fields', $this->setting_option_fields, $this->settings_section_key );
 
 			parent::load_settings_fields();

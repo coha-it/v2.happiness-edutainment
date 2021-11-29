@@ -2,18 +2,26 @@
 /**
  * LearnDash Settings Section for Courses Custom Post Type Metabox.
  *
- * @package LearnDash
- * @subpackage Settings
+ * @since 2.4.0
+ * @package LearnDash\Settings\Sections
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'LearnDash_Settings_Courses_CPT' ) ) ) {
 	/**
-	 * Class to create the settings section.
+	 * Class LearnDash Settings Section for Courses Custom Post Type Metabox.
+	 *
+	 * @since 2.4.0
 	 */
 	class LearnDash_Settings_Courses_CPT extends LearnDash_Settings_Section {
 
 		/**
 		 * Protected constructor for class
+		 *
+		 * @since 2.4.0
 		 */
 		protected function __construct() {
 
@@ -51,6 +59,8 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 
 		/**
 		 * Initialize the metabox settings values.
+		 *
+		 * @since 2.4.0
 		 */
 		public function load_settings_values() {
 			parent::load_settings_values();
@@ -85,12 +95,14 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 			}
 
 			if ( ! isset( $this->setting_option_values['supports'] ) ) {
-				$this->setting_option_values['supports'] = array( 'thumbnail','revisions' );
+				$this->setting_option_values['supports'] = array( 'thumbnail', 'revisions' );
 			}
 		}
 
 		/**
 		 * Initialize the metabox settings fields.
+		 *
+		 * @since 2.4.0
 		 */
 		public function load_settings_fields() {
 			$cpt_archive_url = home_url( LearnDash_Settings_Section::get_section_setting( 'LearnDash_Settings_Section_Permalinks', 'courses' ) );
@@ -141,7 +153,7 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 					'type'           => 'checkbox-switch',
 					'label'          => esc_html__( 'RSS/Atom Feed', 'learndash' ),
 					'help_text'      => sprintf(
-						// translators: placeholder: course
+						// translators: placeholder: course.
 						esc_html_x( 'Enables an RSS feed for all %1$s posts.', 'placeholder: course', 'learndash' ),
 						learndash_get_custom_label_lower( 'course' )
 					),
@@ -171,6 +183,7 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 				),
 			);
 
+			/** This filter is documented in includes/settings/settings-metaboxes/class-ld-settings-metabox-course-access-settings.php */
 			$this->setting_option_fields = apply_filters( 'learndash_settings_fields', $this->setting_option_fields, $this->settings_section_key );
 
 			parent::load_settings_fields();
@@ -179,10 +192,11 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 		/**
 		 * Intercept the WP options save logic and check that we have a valid nonce.
 		 *
-		 * @since 3.0
-		 * @param array $value Array of section fields values.
-		 * @param array $old_value Array of old values.
-		 * @param string $section_key Section option key should match $this->setting_option_key.
+		 * @since 2.4.0
+		 *
+		 * @param array  $new_values         Array of section fields values.
+		 * @param array  $old_values         Array of old values.
+		 * @param string $setting_option_key Section option key should match $this->setting_option_key.
 		 */
 		public function section_pre_update_option( $new_values = '', $old_values = '', $setting_option_key = '' ) {
 			if ( $setting_option_key === $this->setting_option_key ) {
@@ -208,12 +222,6 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 					if ( ( ! isset( $old_values['has_archive'] ) ) || ( $new_values['has_archive'] !== $old_values['has_archive'] ) ) {
 						learndash_setup_rewrite_flush();
 					}
-
-					//if ( in_array( 'comments', $new_values['supports'] ) ) {
-					//	learndash_update_posts_comment_status( 'sfwd-courses', 'open' );
-					//} else {
-					//	learndash_update_posts_comment_status( 'sfwd-courses', 'closed' );
-					//}
 				}
 			}
 

@@ -33,7 +33,7 @@ class MenuItemVisibility extends Config implements RequiredFunctions {
 			add_filter( 'wp_edit_nav_menu_walker', array( __CLASS__, 'edit_nav_menu_walker' ), 11 );
 
 			// Add new fields to the custom admin walker menu
-			add_action( 'wp_nav_menu_item_uo_fields', array( __CLASS__, 'custom_fields' ), 10, 4 );
+			//add_action( 'wp_nav_menu_item_uo_fields', array( __CLASS__, 'custom_fields' ), 10, 4 );
 
 			// add new fields via hook
 			add_action( 'wp_nav_menu_item_custom_fields', array( __CLASS__, 'custom_fields' ), 10, 4 );
@@ -56,15 +56,16 @@ class MenuItemVisibility extends Config implements RequiredFunctions {
 	 * @return array
 	 */
 	public static function get_details() {
-
+		$module_id         = 'menu-item-visibility';
 		$class_title       = esc_html__( 'Menu Item Visibility', 'uncanny-learndash-toolkit' );
-		$kb_link           = 'http://www.uncannyowl.com/knowledge-base/menu-item-visibility/';
+		$kb_link           = 'https://www.uncannyowl.com/knowledge-base/menu-item-visibility/';
 		$class_description = esc_html__( 'Toggles the visibility of menu items based on whether or not users are signed in to the site.', 'uncanny-learndash-toolkit' );
 		$class_icon        = '<i class="uo_icon_fa fa fa-eye-slash"></i>';
 		$category          = 'wordpress';
 		$type              = 'free';
 
 		return array(
+			'id'               => $module_id,
 			'title'            => $class_title,
 			'type'             => $type,
 			'category'         => $category,

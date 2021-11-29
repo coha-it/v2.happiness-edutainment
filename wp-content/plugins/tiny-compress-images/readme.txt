@@ -1,18 +1,18 @@
-=== Compress JPEG & PNG images ===
+=== TinyPNG - JPEG, PNG & WebP image compression ===
 Contributors: TinyPNG
 Donate link: https://tinypng.com/
-Tags: optimize, compress, shrink, resize, faster, fit, scale, improve, images, picture, pictures, photo, photos, image, tinypng, tinyjpg, jpeg, jpg, png, lossy, jpegmini, crunch, minify, smush, save, bandwidth, website, speed, performance, panda, george, wordpress app, SEO, lossy, wp compress, sitespeed, shortpixel, kraken, PageRank, cheetaho, s3
+Tags: compress images, compression, image size, page speed, performance
 Requires at least: 3.4
-Tested up to: 5.3
-Stable tag: 3.2.1
+Tested up to: 5.8
+Stable tag: 3.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Speed up your website. Optimize your JPEG and PNG images automatically with TinyPNG.
+Speed up your website. Optimize your JPEG, PNG, and WebP images automatically with TinyPNG.
 
 == Description ==
 
-Make your website faster by optimizing your JPEG and PNG images. This plugin automatically optimizes all your images by integrating with the popular image compression services TinyJPG and TinyPNG.
+Make your website faster by optimizing your JPEG, PNG, and WebP images. This plugin automatically optimizes all your images by integrating with the popular image compression services TinyJPG and TinyPNG.
 
 = Features =
 
@@ -29,7 +29,6 @@ Make your website faster by optimizing your JPEG and PNG images. This plugin aut
 * [WPML](https://wpml.org/documentation/plugins-compatibility/optimize-wordpress-images-multilingual-sites/) compatible.
 * WooCommerce compatible (see below).
 * WP Retina 2x compatible.
-* WP Offload S3 compatible.
 * See your usage on the settings page and during bulk optimization.
 * Color profiles are automatically translated to standard RGB color.
 * Convert CMYK to RGB to save more space and add compatibility.
@@ -43,11 +42,11 @@ After you upload an image to your WordPress site, each resized image is uploaded
 
 = Getting started =
 
-Install this plugin and follow the instructions to set up your account. With a regular WordPress installation you can optimize **roughly 100 images each month** for free. The exact total depends on the number of thumbnail sizes that are in use in your WordPress installation. You can change which of the generated thumbnail sizes should be optimized on the *Settings > Compress JPEG & PNG images* page. Once installed you can also switch to a [paid account](https://tinypng.com/dashboard/api) which removes the limits and allows you to optimize as many images as you like.
+Install this plugin and follow the instructions to set up your account. With a regular WordPress installation you can optimize **roughly 100 images each month** for free. The exact total depends on the number of thumbnail sizes that are in use in your WordPress installation. You can change which of the generated thumbnail sizes should be optimized on the *Settings > TinyPNG - JPEG, PNG & WebP image compression* page. Once installed you can also switch to a [paid account](https://tinypng.com/dashboard/api) which removes the limits and allows you to optimize as many images as you like.
 
 = Optimizing all your images =
 
-You can *bulk optimize* your existing JPEG and PNG images all at once by going to *Media > Bulk Optimization*. Clicking on the big button will start optimizing all unoptimized images in your media library.
+You can *bulk optimize* your existing JPEG, PNG, and WebP images all at once by going to *Media > Bulk Optimization*. Clicking on the big button will start optimizing all unoptimized images in your media library.
 
 = Multisite support =
 
@@ -70,18 +69,18 @@ Want to contribute? Check out the [Tinify Wordpress plugin on GitHub](https://gi
 = From your WordPress dashboard =
 
 1. Visit *Plugins > Add New*.
-2. Search for 'tinypng' and press the 'Install Now' button for the plugin named 'Compress JPEG & PNG images' by 'TinyPNG'.
+2. Search for 'tinypng' and press the 'Install Now' button for the plugin named 'TinyPNG - JPEG, PNG & WebP image compression' by 'TinyPNG'.
 3. Activate the plugin from your *Plugins* page.
-4. Go to the *Settings > Compress JPEG & PNG images* page and register a new account.
+4. Go to the *Settings > TinyPNG - JPEG, PNG & WebP image compression* page and register a new account.
 5. Or enter the API key you got from https://tinypng.com/developers.
 6. Go to *Media > Bulk Optimization* and optimize all your images!
 
 = From WordPress.org =
 
-1. Download the plugin named 'Compress JPEG & PNG images' by 'TinyPNG'.
+1. Download the plugin named 'TinyPNG - JPEG, PNG & WebP image compression' by 'TinyPNG'.
 2. Upload the `tiny-compress-images` directory to your `/wp-content/plugins/` directory, using your favorite method (ftp, sftp, scp, etc...)
 3. Activate the plugin from your Plugins page.
-4. Go to the *Settings > Compress JPEG & PNG images* page and register a new account.
+4. Go to the *Settings > TinyPNG - JPEG, PNG & WebP image compression* page and register a new account.
 5. Or enter the API key you got from https://tinypng.com/developers.
 6. Go to *Media > Bulk Optimization* and optimize all your images!
 
@@ -91,7 +90,7 @@ The API key can also be configured in your *wp-config.php* file. To do this you 
 
 `define( 'TINY_API_KEY', 'YOUR_API_KEY_HERE' );`
 
-Once set up you will see a message on the *Settings > Compress JPEG & PNG images* page. This will work for normal and multisite WordPress installations.
+Once set up you will see a message on the *Settings > TinyPNG - JPEG, PNG & WebP image compression* page. This will work for normal and multisite WordPress installations.
 
 == Screenshots ==
 
@@ -103,7 +102,7 @@ Once set up you will see a message on the *Settings > Compress JPEG & PNG images
 == Frequently Asked Questions ==
 
 = Q: How many images can I optimize for free? =
-A: In a default WordPress installation you can optimize around 100 images for free each month. WordPress creates different thumbnails of your images which all have to be compressed. Some plugins even add more sizes, so take a look at the *Settings > Compress JPEG & PNG images* page before you start optimization.
+A: In a default WordPress installation you can optimize around 100 images for free each month. WordPress creates different thumbnails of your images which all have to be compressed. Some plugins even add more sizes, so take a look at the *Settings > TinyPNG - JPEG, PNG & WebP image compression* page before you start optimization.
 
 = Q: How can I remove the 500 limit? =
 A: Just add your *Payment details* on your [account dashboard](https://tinypng.com/dashboard/api) to remove the limit. For a small fee the additional compressions above 500 will then be charged to your account at the end of each month.
@@ -112,7 +111,7 @@ A: Just add your *Payment details* on your [account dashboard](https://tinypng.c
 A: When you remove the plugin all your optimized images will remain optimized.
 
 = Q: I don't recall uploading 500 photos this month but my limit is already reached. How is this number calculated? =
-A: When you upload an image to your website, WordPress will create different sized versions of it (see *Settings > Compress JPEG & PNG images*). The plugin will compress each of these sizes, so when you have 100 images and 5 different sizes you will do 500 compressions.
+A: When you upload an image to your website, WordPress will create different sized versions of it (see *Settings > TinyPNG - JPEG, PNG & WebP image compression*). The plugin will compress each of these sizes, so when you have 100 images and 5 different sizes you will do 500 compressions.
 
 = Q: Is there a file size limit? =
 A: No. There are no limitations on the size of the images you want to compress.
@@ -133,6 +132,9 @@ A: Yes! After installing the plugin, go to *Media > Bulk Optimization*, and clic
 A: You can upgrade to a paid account by adding your *Payment details* on your [account dashboard](https://tinypng.com/dashboard/api). Additional compressions above 500 will then be charged at the end of each month as a one-time fee.
 
 == Changelog ==
+= 3.3 =
+* You can now optimise WebP images, in addition to JPEG and PNG.
+
 = 3.2.1 =
 * Fixed bug that caused the original version of images that started with a special character to not be compressed.
 * Updated Wordpress compatibility.

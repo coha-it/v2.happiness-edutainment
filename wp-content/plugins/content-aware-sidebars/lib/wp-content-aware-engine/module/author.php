@@ -1,9 +1,9 @@
 <?php
 /**
- * @package WP Content Aware Engine
+ * @package wp-content-aware-engine
  * @author Joachim Jensen <joachim@dev.institute>
  * @license GPLv3
- * @copyright 2019 by Joachim Jensen
+ * @copyright 2021 by Joachim Jensen
  */
 
 defined('ABSPATH') || exit;
@@ -19,10 +19,6 @@ defined('ABSPATH') || exit;
  */
 class WPCAModule_author extends WPCAModule_Base
 {
-
-    /**
-     * Constructor
-     */
     public function __construct()
     {
         parent::__construct('author', __('Authors', WPCA_DOMAIN));
@@ -32,10 +28,7 @@ class WPCAModule_author extends WPCAModule_Base
     }
 
     /**
-     * Determine if content is relevant
-     *
-     * @since  1.0
-     * @return boolean
+     * @inheritDoc
      */
     public function in_context()
     {
@@ -43,57 +36,59 @@ class WPCAModule_author extends WPCAModule_Base
     }
 
     /**
-     * Get data from context
-     *
-     * @global WP_Post $post
-     * @since  1.0
-     * @return array
+     * @inheritDoc
      */
     public function get_context_data()
     {
         global $post;
-        return array(
+        return [
             $this->id,
             (string)(is_singular() ? $post->post_author : get_query_var('author'))
-        );
+        ];
     }
 
     /**
-     * Get authors
-     *
-     * @since  1.0
-     * @param  array     $args
-     * @return array
+     * @inheritDoc
      */
-    protected function _get_content($args = array())
+    protected function parse_query_args($args)
     {
-        $args = wp_parse_args($args, array(
-            'number'  => 20,
-            'fields'  => array('ID','display_name'),
-            'orderby' => 'display_name',
-            'order'   => 'ASC',
-            'paged'   => 1,
-            'search'  => '',
-            'include' => ''
-        ));
-        $args['offset'] = ($args['paged'] - 1) * $args['number'];
-        unset($args['paged']);
-
-        if ($args['search']) {
-            $args['search'] = '*'.$args['search'].'*';
-            $args['search_columns'] = array( 'user_nicename', 'user_login', 'display_name' );
+        $new_args = [
+            'number'      => $args['limit'],
+            'offset'      => ($args['paged'] - 1) * $args['limit'],
+            'search'      => $args['search'],
+            'fields'      => ['ID','display_name'],
+            'orderby'     => 'display_name',
+            'order'       => 'ASC',
+            'include'     => $args['include'],
+            'count_total' => false,
+        ];
+        if ($new_args['search']) {
+            if (false !== strpos($new_args['search'], '@')) {
+                $new_args['search_columns'] = [ 'user_email' ];
+            } elseif (is_numeric($new_args['search'])) {
+                $new_args['search_columns'] = [ 'user_login', 'ID' ];
+            } else {
+                $new_args['search_columns'] = [ 'user_nicename', 'user_login', 'display_name' ];
+            }
+            $new_args['search'] = '*'.$new_args['search'].'*';
         }
+        return $new_args;
+    }
 
+    /**
+     * @inheritDoc
+     */
+    protected function _get_content($args = [])
+    {
         $user_query = new WP_User_Query($args);
-
-        $author_list = array();
+        $author_list = [];
 
         if ($user_query->results) {
             foreach ($user_query->get_results()  as $user) {
-                $author_list[] = array(
+                $author_list[] = [
                     'id'   => $user->ID,
                     'text' => $user->display_name
-                );
+                ];
             }
         }
         return $author_list;

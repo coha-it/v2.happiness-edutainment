@@ -3,8 +3,8 @@ Contributors: mechter
 Donate link: http://www.markusechterhoff.com/donation/
 Tags: bbpress, email, notifications, subscription, cron, wp cron, asynchronous
 Requires at least: 3.6
-Tested up to: 5.0
-Stable tag: 3.6
+Tested up to: 5.4
+Stable tag: 3.7
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -43,6 +43,8 @@ You can install and activate this plugin and it just works, but you have full co
 	bbp_subscription_disable_async( false )
 	bbp_forum_subscription_disable_async( false )
 	bbp_topic_subscription_disable_async( false )
+	bbp_forum_subscription_notify_author( false )
+	bbp_topic_subscription_notify_author( false )
 
 = Helpful Snippets =
 
@@ -83,6 +85,10 @@ If other WP emails work normally try adding `define('ALTERNATE_WP_CRON', true);`
 Yes. Add `define('DISABLE_WP_CRON', true);` to your `wp-config.php` and have a real cron job execute e.g. `wget -q -O - http://your.blog.example.com/wp-cron.php >/dev/null 2>&1`
 
 == Changelog ==
+
+= 3.7 =
+
+* added two new filters that allow for sending notifications to post authors
 
 = 3.6 =
 

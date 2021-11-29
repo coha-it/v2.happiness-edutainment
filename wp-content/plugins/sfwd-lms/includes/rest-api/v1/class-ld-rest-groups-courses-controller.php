@@ -1,21 +1,52 @@
 <?php
-if ( ( !class_exists( 'LD_REST_Groups_Courses_Controller_V1' ) ) && ( class_exists( 'LD_REST_Posts_Controller_V1' ) ) ) {
-	class LD_REST_Groups_Courses_Controller_V1 extends LD_REST_Posts_Controller_V1 {
+/**
+ * LearnDash REST API V1 Groups Courses Post Controller.
+ *
+ * @since 2.5.8
+ * @package LearnDash\REST\V1
+ */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+if ( ( ! class_exists( 'LD_REST_Groups_Courses_Controller_V1' ) ) && ( class_exists( 'LD_REST_Posts_Controller_V1' ) ) ) {
+
+	/**
+	 * Class LearnDash REST API V1 Groups Courses Post Controller.
+	 *
+	 * @since 2.5.8
+	 */
+	class LD_REST_Groups_Courses_Controller_V1 extends LD_REST_Posts_Controller_V1 { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedClassFound
+
+		/**
+		 * Supported Collection Parameters.
+		 *
+		 * @since 2.5.8
+		 *
+		 * @var array $supported_collection_params.
+		 */
 		private $supported_collection_params = array(
-			'exclude'	=> 'post__not_in',
-			'include'	=> 'post__in',
-			'offset'	=> 'offset',
-			'order'		=> 'order',
-			'orderby'	=> 'orderby',
-			'per_page'	=> 'posts_per_page',
-			'page'		=> 'paged',
-			'search'	=> 's',
-			'fields'	=> 'fields'
+			'exclude'  => 'post__not_in',
+			'include'  => 'post__in',
+			'offset'   => 'offset',
+			'order'    => 'order',
+			'orderby'  => 'orderby',
+			'per_page' => 'posts_per_page',
+			'page'     => 'paged',
+			'search'   => 's',
+			'fields'   => 'fields',
 		);
-		
+
+		/**
+		 * Public constructor for class
+		 *
+		 * @since 2.5.8
+		 *
+		 * @param string $post_type Post type.
+		 */
 		public function __construct( $post_type = '' ) {
-			$this->post_type = 'sfwd-courses';
+			$this->post_type  = 'sfwd-courses';
 			$this->taxonomies = array();
 
 			parent::__construct( $this->post_type );
@@ -23,16 +54,23 @@ if ( ( !class_exists( 'LD_REST_Groups_Courses_Controller_V1' ) ) && ( class_exis
 			$this->rest_base = LearnDash_Settings_Section::get_section_setting( 'LearnDash_Settings_Section_General_REST_API', 'groups' );
 		}
 
-	    public function register_routes() {
+		/**
+		 * Registers the routes for the objects of the controller.
+		 *
+		 * @since 2.5.8
+		 *
+		 * @see register_rest_route() in WordPress core.
+		 */
+		public function register_routes() {
 			$this->register_fields();
 
 			parent::register_routes_wpv2();
 
 			$collection_params = $this->get_collection_params();
-			$schema = $this->get_item_schema();
+			$schema            = $this->get_item_schema();
 
 			$get_item_args = array(
-				'context'  => $this->get_context_param( array( 'default' => 'view' ) ),
+				'context' => $this->get_context_param( array( 'default' => 'view' ) ),
 			);
 			if ( isset( $schema['properties']['password'] ) ) {
 				$get_item_args['password'] = array(
@@ -43,13 +81,14 @@ if ( ( !class_exists( 'LD_REST_Groups_Courses_Controller_V1' ) ) && ( class_exis
 
 			register_rest_route(
 				$this->namespace,
-				'/' . $this->rest_base . '/(?P<id>[\d]+)/courses', 
+				'/' . $this->rest_base . '/(?P<id>[\d]+)/courses',
 				array(
-					'args' => array(
+					'args'   => array(
 						'id' => array(
-							'description' => esc_html__( 'Group ID to enroll into.', 'learndash' ),
-							'required' => true,
-							'type' => 'integer',
+							// translators: group.
+							'description' => sprintf( esc_html_x( '%s ID to enroll into.', 'placeholder: group', 'learndash' ), learndash_get_custom_label( 'group' ) ),
+							'required'    => true,
+							'type'        => 'integer',
 						),
 					),
 					array(
@@ -62,13 +101,14 @@ if ( ( !class_exists( 'LD_REST_Groups_Courses_Controller_V1' ) ) && ( class_exis
 						'methods'             => WP_REST_Server::EDITABLE,
 						'callback'            => array( $this, 'update_groups_courses' ),
 						'permission_callback' => array( $this, 'update_groups_courses_permissions_check' ),
-						'args' => array(
+						'args'                => array(
 							'course_ids' => array(
-								'description' => esc_html__( 'Course IDs to enroll into Group.', 'learndash' ),
-								'required' => true,
-								'type' => 'array',
-								'items' => array(
-									'type' => 'integer'
+								// translators: course, group.
+								'description' => sprintf( esc_html_x( '%1$s IDs to enroll into %2$s.', 'placeholder: course, group', 'learndash' ), learndash_get_custom_label( 'course' ), learndash_get_custom_label_lower( 'group' ) ),
+								'required'    => true,
+								'type'        => 'array',
+								'items'       => array(
+									'type' => 'integer',
 								),
 							),
 						),
@@ -77,42 +117,125 @@ if ( ( !class_exists( 'LD_REST_Groups_Courses_Controller_V1' ) ) && ( class_exis
 						'methods'             => WP_REST_Server::DELETABLE,
 						'callback'            => array( $this, 'delete_groups_courses' ),
 						'permission_callback' => array( $this, 'delete_groups_courses_permissions_check' ),
-						'args' => array(
+						'args'                => array(
 							'course_ids' => array(
-								'description' => esc_html__( 'Course IDs to remove from Group.', 'learndash' ),
-								'required' => true,
-								'type' => 'array',
-								'items' => array(
-									'type' => 'integer'
+								// translators: course, group.
+								'description' => sprintf( esc_html_x( '%1$s IDs to remove from %2$s.', 'placeholder: course, group', 'learndash' ), learndash_get_custom_label( 'course' ), learndash_get_custom_label_lower( 'group' ) ),
+								'required'    => true,
+								'type'        => 'array',
+								'items'       => array(
+									'type' => 'integer',
 								),
 							),
 						),
 					),
+					'schema' => array( $this, 'get_schema' ),
 				)
 			);
 		}
 
-		function get_groups_courses_permissions_check( $request ) {
+		/**
+		 * Gets the group course schema.
+		 *
+		 * @since 2.5.8
+		 *
+		 * @return array
+		 */
+		public function get_schema() {
+
+			$schema = array(
+				'$schema'    => 'http://json-schema.org/draft-04/schema#',
+				'title'      => 'group-course',
+				'parent'     => 'group',
+				'type'       => 'object',
+				'properties' => array(
+					'id'         => array(
+						'description' => __( 'Unique identifier for the object.', 'learndash' ),
+						'type'        => 'integer',
+						'context'     => array( 'view', 'edit', 'embed' ),
+						'readonly'    => true,
+					),
+					'course_ids' => array(
+						// translators: course.
+						'description' => sprintf( esc_html_x( 'The %s IDs', 'placeholder: course', 'learndash' ), learndash_get_custom_label_lower( 'course' ) ),
+						'type'        => 'array',
+						'items'       => array(
+							'type' => 'integer',
+						),
+						'context'     => array( 'view', 'edit' ),
+					),
+				),
+			);
+
+			return $schema;
+		}
+
+		/**
+		 * Check Groups Courses Read Permissions.
+		 *
+		 * @since 2.5.8
+		 *
+		 * @param object $request WP_REST_Request instance.
+		 */
+		public function get_groups_courses_permissions_check( $request ) {
 			if ( learndash_is_admin_user() ) {
 				return true;
 			}
 		}
 
-		function update_groups_courses_permissions_check( $request ) {
+		/**
+		 * Check Groups Courses Update Permissions.
+		 *
+		 * @since 2.5.8
+		 *
+		 * @param object $request WP_REST_Request instance.
+		 */
+		public function update_groups_courses_permissions_check( $request ) {
 			if ( learndash_is_admin_user() ) {
 				return true;
 			}
 		}
 
-		function update_groups_courses( $request ) {
+		/**
+		 * Check Groups Courses Update Permissions.
+		 *
+		 * @since 2.5.8
+		 *
+		 * @param object $request WP_REST_Request instance.
+		 */
+		public function update_groups_courses( $request ) {
 			$group_id = $request['id'];
 			if ( empty( $group_id ) ) {
-				return new WP_Error( 'rest_post_invalid_id', esc_html__( 'Invalid group ID.', 'learndash' ) .' '. __CLASS__, array( 'status' => 404 ) );
+				return new WP_Error(
+					'rest_post_invalid_id',
+					sprintf(
+						// translators: placeholder: group.
+						esc_html_x(
+							'Invalid %s ID.',
+							'placeholder: group',
+							'learndash'
+						),
+						LearnDash_Custom_Label::get_label( 'group' )
+					),
+					array( 'status' => 404 )
+				);
 			}
 
 			$course_ids = $request['course_ids'];
 			if ( ( ! is_array( $course_ids ) ) || ( empty( $course_ids ) ) ) {
-				return new WP_Error( 'rest_post_invalid_id', esc_html__( 'Missing Course IDs.', 'learndash' ) .' '. __CLASS__, array( 'status' => 404 ) );
+				return new WP_Error(
+					'rest_post_invalid_id',
+					sprintf(
+						// translators: placeholder: course.
+						esc_html_x(
+							'Missing %s IDs.',
+							'placeholder: course',
+							'learndash'
+						),
+						LearnDash_Custom_Label::get_label( 'course' )
+					),
+					array( 'status' => 404 )
+				);
 			} else {
 				$course_ids = array_map( 'intval', $course_ids );
 			}
@@ -132,21 +255,59 @@ if ( ( !class_exists( 'LD_REST_Groups_Courses_Controller_V1' ) ) && ( class_exis
 			return $response;
 		}
 
-		function delete_groups_courses_permissions_check( $request ) {
+		/**
+		 * Check Groups Courses Delete Permissions.
+		 *
+		 * @since 2.5.8
+		 *
+		 * @param object $request WP_REST_Request instance.
+		 */
+		public function delete_groups_courses_permissions_check( $request ) {
 			if ( learndash_is_admin_user() ) {
 				return true;
 			}
 		}
 
-		function delete_groups_courses( $request ) {
+		/**
+		 * Delete Groups Courses.
+		 *
+		 * @since 2.5.8
+		 *
+		 * @param object $request WP_REST_Request instance.
+		 */
+		public function delete_groups_courses( $request ) {
 			$group_id = $request['id'];
 			if ( empty( $group_id ) ) {
-				return new WP_Error( 'rest_post_invalid_id', esc_html__( 'Invalid group ID.', 'learndash' ), array( 'status' => 404 ) );
+				return new WP_Error(
+					'rest_post_invalid_id',
+					sprintf(
+						// translators: placeholder: group.
+						esc_html_x(
+							'Invalid %s ID.',
+							'placeholder: group',
+							'learndash'
+						),
+						LearnDash_Custom_Label::get_label( 'group' )
+					),
+					array( 'status' => 404 )
+				);
 			}
 
 			$course_ids = $request['course_ids'];
-			if ( ( !is_array( $course_ids ) ) || ( empty( $course_ids ) ) ) {
-				return new WP_Error( 'rest_post_invalid_id', esc_html__( 'Missing Course ID.', 'learndash' ), array( 'status' => 404 ) );
+			if ( ( ! is_array( $course_ids ) ) || ( empty( $course_ids ) ) ) {
+				return new WP_Error(
+					'rest_post_invalid_id',
+					sprintf(
+						// translators: placeholder: course.
+						esc_html_x(
+							'Missing %s ID.',
+							'placeholder: course',
+							'learndash'
+						),
+						LearnDash_Custom_Label::get_label( 'course' )
+					),
+					array( 'status' => 404 )
+				);
 			} else {
 				$course_ids = array_map( 'intval', $course_ids );
 			}
@@ -166,16 +327,36 @@ if ( ( !class_exists( 'LD_REST_Groups_Courses_Controller_V1' ) ) && ( class_exis
 			return $response;
 		}
 
-		function get_groups_courses( $request ) {
+		/**
+		 * Get Groups Courses.
+		 *
+		 * @since 2.5.8
+		 *
+		 * @param object $request WP_REST_Request instance.
+		 */
+		public function get_groups_courses( $request ) {
 			$group_id = $request['id'];
 			if ( empty( $group_id ) ) {
-				return new WP_Error( 'rest_post_invalid_id', esc_html__( 'Invalid group ID.', 'learndash' ), array( 'status' => 404 ) );
+				return new WP_Error(
+					'rest_post_invalid_id',
+					sprintf(
+						// translators: placeholder: group.
+						esc_html_x(
+							'Invalid %s ID.',
+							'placeholder: group',
+							'learndash'
+						),
+						LearnDash_Custom_Label::get_label( 'group' )
+					),
+					array( 'status' => 404 )
+				);
 			}
 
-			if ( is_user_logged_in() )
+			if ( is_user_logged_in() ) {
 				$current_user_id = get_current_user_id();
-			else
+			} else {
 				$current_user_id = 0;
+			}
 
 				// Ensure a search string is set in case the orderby is set to 'relevance'.
 			if ( ! empty( $request['orderby'] ) && 'relevance' === $request['orderby'] && empty( $request['search'] ) ) {
@@ -231,21 +412,21 @@ if ( ( !class_exists( 'LD_REST_Groups_Courses_Controller_V1' ) ) && ( class_exis
 
 			if ( ! isset( $args['fields'] ) ) {
 				$args['fields'] = 'ids';
-			} else if ( $args['fields'] != 'ids' ) {
+			} elseif ( 'ids' != $args['fields'] ) {
 				unset( $args['fields'] );
 			}
 
 			/**
-			 * Filters the query arguments for a request.
+			 * Filters the query arguments for groups courses REST request.
 			 *
 			 * Enables adding extra arguments or setting defaults for a post collection request.
 			 *
-			 * @since 4.7.0
+			 * @since 2.5.8
 			 *
 			 * @link https://developer.wordpress.org/reference/classes/wp_query/
 			 *
-			 * @param array           $args    Key value array of query var to query value.
-			 * @param WP_REST_Request $request The request used.
+			 * @param array           $args    An array of query arguments for getting groups courses.
+			 * @param WP_REST_Request $request The REST request object.
 			 */
 			$args       = apply_filters( 'learndash_rest_groups_courses_query', $args, $request );
 			$query_args = $this->prepare_items_query( $args, $request );
@@ -258,7 +439,7 @@ if ( ( !class_exists( 'LD_REST_Groups_Courses_Controller_V1' ) ) && ( class_exis
 				add_filter( 'post_password_required', '__return_false' );
 			}
 
-			if ( ( ! isset( $args['fields'] ) ) || ( $args['fields'] == 'post' ) ) {
+			if ( ( ! isset( $args['fields'] ) ) || ( 'post' == $args['fields'] ) ) {
 				$posts = array();
 
 				foreach ( $query_result as $post ) {
@@ -325,25 +506,29 @@ if ( ( !class_exists( 'LD_REST_Groups_Courses_Controller_V1' ) ) && ( class_exis
 			return $response;
 		}
 
+		/**
+		 * Get Collection parameters
+		 *
+		 * @since 2.5.8
+		 */
 		public function get_collection_params() {
-			$query_params_default = parent::get_collection_params();
+			$query_params_default                       = parent::get_collection_params();
 			$query_params_default['context']['default'] = 'view';
 
-			$query_params = array();
+			$query_params            = array();
 			$query_params['context'] = $query_params_default['context'];
-			$query_params['fields'] = array(
-				'description' => __('Returned values.', 'learndash' ),
-				'type' => 'string',
-				'type' => 'string',
-				'default' => 'ids',
-				'enum' => array(
+			$query_params['fields']  = array(
+				'description' => __( 'Returned values.', 'learndash' ),
+				'type'        => 'string',
+				'default'     => 'ids',
+				'enum'        => array(
 					'ids',
 					'objects',
-				),				
+				),
 			);
-			foreach( $this->supported_collection_params as $external_key => $internal_key ) {
+			foreach ( $this->supported_collection_params as $external_key => $internal_key ) {
 				if ( isset( $query_params_default[ $external_key ] ) ) {
-					$query_params[$external_key] = $query_params_default[ $external_key ];
+					$query_params[ $external_key ] = $query_params_default[ $external_key ];
 				}
 			}
 			return $query_params;

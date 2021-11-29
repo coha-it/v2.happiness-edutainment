@@ -1,11 +1,21 @@
 <?php
 
-//version 1.9.2 fixed private groups forums for visibility
 
 // filter the forums so only those viewable by user are shown
 add_filter('bbp_before_has_forums_parse_args', 'private_groups_forums', 10, 2);
 // filter the sub-forums so only those viewable by user are shown
-add_filter('bbp_forum_get_subforums', 'private_groups_get_permitted_subforums', 10, 2);
+
+// call in 2.6 has an extra parameter
+add_action('plugins_loaded', 'rpg_filter_sub_forums');
+
+function rpg_filter_sub_forums () {
+	if (function_exists ('bbp_get_version')){
+		$version = bbp_get_version() ;
+		if (substr($version, 0, 3) == '2.6') add_filter('bbp_forum_get_subforums', 'private_groups_get_permitted_subforums_2', 10, 3);
+		else add_filter('bbp_forum_get_subforums', 'private_groups_get_permitted_subforums', 10, 2);
+	}
+else add_filter('bbp_forum_get_subforums', 'private_groups_get_permitted_subforums', 10, 2);
+}
 add_filter( 'bbp_before_forum_get_subforums_parse_args', 'bbp_list_private_groups_subforums' );
 //adds descriptions to the sub forums, and sends non-logged in or users who can't view to a sign-up page
 add_filter('bbp_list_forums', 'private_groups_list_forums', 10, 2 );
@@ -67,6 +77,7 @@ function private_groups_check_permitted_forums($forum_ids) {
 
 /**
  * This function filters the list of sub-forums based on the the users group
+  VERSION FOR 2.5.X
  */
 function private_groups_get_permitted_subforums($sub_forums, $args = '') {
 
@@ -118,7 +129,7 @@ function private_groups_get_permitted_subforums($sub_forums, $args = '') {
 	global $rpg_settingsf ;
 		//if make forums visible set, then show all public forums
 		if (!empty($rpg_settingsf['set_forum_visibility'])) {
-			return (array) apply_filters( 'pg_forum_get_subforums',$sub_forums, $r );
+			return (array) apply_filters( 'pg_forum_get_subforums_1',$sub_forums, $r );
 		}
 		
 	//Otherwise now we filter this list to exclude those that the user can't see either because not logged in, or forum does not allowed this group
@@ -127,6 +138,72 @@ function private_groups_get_permitted_subforums($sub_forums, $args = '') {
   
     return (array) apply_filters( 'pg_forum_get_subforums',$filtered_sub_forums, $r );
 	//}
+}
+
+/**
+ * This function filters the list of sub-forums based on the the users group
+ VERSION FOR 2.6.X
+ */
+function private_groups_get_permitted_subforums_2($sub_forums, $r, $args ) {
+
+//this code is from includes/forums/template bbp_forum_get_subforums and sets up which forums to look in based on user capabilities
+// Use passed integer as post_parent
+	if ( is_numeric( $args ) && ! empty( $args ) ) {
+		$args = array( 'post_parent' => bbp_get_forum_id( $args ) );
+	}
+
+	// Setup possible post__not_in array
+	$post_stati[] = bbp_get_public_status_id();
+
+	// Super admin get whitelisted post statuses
+	if ( bbp_is_user_keymaster() ) {
+		$post_stati = array( bbp_get_public_status_id(), bbp_get_private_status_id(), bbp_get_hidden_status_id() );
+
+	// Not a keymaster, so check caps
+	} else {
+
+		// Check if user can read private forums
+		if ( current_user_can( 'read_private_forums' ) ) {
+			$post_stati[] = bbp_get_private_status_id();
+		}
+
+		// Check if user can read hidden forums
+		if ( current_user_can( 'read_hidden_forums' ) ) {
+			$post_stati[] = bbp_get_hidden_status_id();
+		}
+	}
+
+	// Parse arguments against default values
+	$r = bbp_parse_args( $args, array(
+		'post_parent'         => 0,
+		'post_type'           => bbp_get_forum_post_type(),
+		'post_status'         => implode( ',', $post_stati ),
+		'posts_per_page'      => get_option( '_bbp_forums_per_page', 50 ),
+		'orderby'             => 'menu_order title',
+		'order'               => 'ASC',
+		'ignore_sticky_posts' => true,
+		'no_found_rows'       => true
+	), 'pg_forum_get_subforums' );
+	$r['post_parent'] = bbp_get_forum_id( $r['post_parent'] );
+
+	// Create a new query for the subforums
+	$get_posts = new WP_Query();
+
+	// No forum passed
+	$sub_forums = !empty( $r['post_parent'] ) ? $get_posts->query( $r ) : array();
+	
+	global $rpg_settingsf ;
+		//if make forums visible set, then show all public forums
+		if (!empty($rpg_settingsf['set_forum_visibility'])) {
+			return (array) apply_filters( 'pg_forum_get_subforums_3',$sub_forums, $r );
+		}
+		
+	//Otherwise now we filter this list to exclude those that the user can't see either because not logged in, or forum does not allowed this group
+
+   $filtered_sub_forums = private_groups_get_permitted_forums($sub_forums);
+  
+    return (array) apply_filters( 'pg_forum_get_subforums_2',$filtered_sub_forums, $r );
+	
 }
 
 	

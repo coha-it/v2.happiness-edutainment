@@ -47,7 +47,7 @@ if ( ! class_exists( 'myCRED_Caching_Module' ) ) :
 			}
 
 			add_action( 'mycred_update_user_balance',    array( $this, 'balance_change' ), 10, 4 );
-			add_action( 'mycred_cron_reset_key',         array( $this, 'cron_tasks' ) );
+			add_filter( 'mycred_cron_reset_key',         array( $this, 'cron_tasks' ) );
 
 			add_action( 'mycred_admin_init',             array( $this, 'module_admin_init' ) );
 
@@ -155,7 +155,7 @@ if ( ! class_exists( 'myCRED_Caching_Module' ) ) :
 		 * @since 1.8
 		 * @version 1.0
 		 */
-		public function cron_tasks() {
+		public function cron_tasks( $period ) {
 
 			if ( $this->caching['history'] == 'day' ) {
 
@@ -183,6 +183,8 @@ if ( ! class_exists( 'myCRED_Caching_Module' ) ) :
 				$wpdb->query( $wpdb->prepare( "DELETE FROM {$mycred->log_table} WHERE time < %d AND ctype = %s;", $timestamp, $this->mycred_type ) );
 
 			}
+			
+			return $period;
 
 		}
 
@@ -248,7 +250,7 @@ if ( ! class_exists( 'myCRED_Caching_Module' ) ) :
 		public function after_general_settings( $mycred = NULL ) {
 
 ?>
-<h4><span class="dashicons dashicons-admin-tools static"></span><?php _e( 'Optimization', 'mycred' ); ?></h4>
+<h4 <?php echo get_current_screen()->base != 'toplevel_page_mycred-main' ? '' : 'style="display:none"';?>><span class="dashicons dashicons-admin-tools static"></span><?php _e( 'Optimization', 'mycred' ); ?></h4>
 <div class="body" style="display:none;">
 
 	<?php if ( $this->mycred_type == MYCRED_DEFAULT_TYPE_KEY ) : ?>
@@ -346,7 +348,7 @@ if ( ! class_exists( 'myCRED_Caching_Module' ) ) :
 				$this->clear_cache( 'leaderboards' );
 			}
 
-			$new_data['caching']['autodelete']   = absint( $data['caching']['autodelete'] );
+			$new_data['caching']['autodelete']   = isset( $data['caching']['autodelete'] ) ? absint( $data['caching']['autodelete'] ) : 'off';
 
 			return $new_data;
 

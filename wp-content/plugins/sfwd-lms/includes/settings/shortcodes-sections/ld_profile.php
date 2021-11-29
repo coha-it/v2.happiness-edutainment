@@ -1,7 +1,30 @@
 <?php
-if ( ( class_exists( 'LearnDash_Shortcodes_Section' ) ) && ( ! class_exists( 'LearnDash_Shortcodes_Section_ld_profile' ) ) ) {
-	class LearnDash_Shortcodes_Section_ld_profile extends LearnDash_Shortcodes_Section {
+/**
+ * LearnDash Shortcode Section for Profile [ld_profile].
+ *
+ * @since 2.4.0
+ * @package LearnDash\Settings\Shortcodes
+ */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+if ( ( class_exists( 'LearnDash_Shortcodes_Section' ) ) && ( ! class_exists( 'LearnDash_Shortcodes_Section_ld_profile' ) ) ) {
+	/**
+	 * Class LearnDash Shortcode Section for Profile [ld_profile].
+	 *
+	 * @since 2.4.0
+	 */
+	class LearnDash_Shortcodes_Section_ld_profile extends LearnDash_Shortcodes_Section { //phpcs:ignore PEAR.NamingConventions.ValidClassName.Invalid
+
+		/**
+		 * Public constructor for class.
+		 *
+		 * @since 2.4.0
+		 *
+		 * @param array $fields_args Field Args.
+		 */
 		public function __construct( $fields_args = array() ) {
 			$this->fields_args = $fields_args;
 
@@ -15,6 +38,11 @@ if ( ( class_exists( 'LearnDash_Shortcodes_Section' ) ) && ( ! class_exists( 'Le
 			parent::__construct();
 		}
 
+		/**
+		 * Initialize the shortcode fields.
+		 *
+		 * @since 2.4.0
+		 */
 		public function init_shortcodes_section_fields() {
 			$this->shortcodes_option_fields = array(
 
@@ -57,12 +85,11 @@ if ( ( class_exists( 'LearnDash_Shortcodes_Section' ) ) && ( ! class_exists( 'Le
 					),
 				),
 
-				'show_search'       => array(
+				'show_search'        => array(
 					'id'        => $this->shortcodes_section_key . 'show_search',
 					'name'      => 'show_search',
 					'type'      => 'select',
 					'label'     => esc_html__( 'Show Search', 'learndash' ),
-					'help_text' => esc_html__( 'Show Search', 'learndash' ),
 					'value'     => 'yes',
 					'options'   => array(
 						''   => esc_html__( 'Yes', 'learndash' ),
@@ -77,7 +104,6 @@ if ( ( class_exists( 'LearnDash_Shortcodes_Section' ) ) && ( ! class_exists( 'Le
 					'type'      => 'select',
 					// translators: placeholder: Course.
 					'label'     => esc_html__( 'Show Profile Header', 'learndash' ),
-					// translators: placeholder: Course.
 					'help_text' => esc_html__( 'show_header', 'learndash' ),
 					'value'     => '',
 					'options'   => array(
@@ -115,8 +141,16 @@ if ( ( class_exists( 'LearnDash_Shortcodes_Section' ) ) && ( ! class_exists( 'Le
 					'id'        => $this->shortcodes_section_key . 'show_quizzes',
 					'name'      => 'show_quizzes',
 					'type'      => 'select',
-					'label'     => esc_html__( 'Show User Quiz Attempts', 'learndash' ),
-					'help_text' => esc_html__( 'Show User Quiz Attempts', 'learndash' ),
+					'label'     => sprintf(
+						// translators: placeholder: Quiz.
+						esc_html_x( 'Show User %s Attempts', 'placeholder: Quiz', 'learndash' ),
+						learndash_get_custom_label( 'quiz' )
+					),
+					'help_text' => sprintf(
+						// translators: placeholder: Quiz.
+						esc_html_x( 'Show User %s Attempts', 'placeholder: Quiz', 'learndash' ),
+						learndash_get_custom_label( 'quiz' )
+					),
 					'value'     => 'yes',
 					'options'   => array(
 						''   => esc_html__( 'Yes', 'learndash' ),
@@ -140,6 +174,7 @@ if ( ( class_exists( 'LearnDash_Shortcodes_Section' ) ) && ( ! class_exists( 'Le
 				),
 			);
 
+			/** This filter is documented in includes/settings/settings-metaboxes/class-ld-settings-metabox-course-access-settings.php */
 			$this->shortcodes_option_fields = apply_filters( 'learndash_settings_fields', $this->shortcodes_option_fields, $this->shortcodes_section_key );
 
 			parent::init_shortcodes_section_fields();

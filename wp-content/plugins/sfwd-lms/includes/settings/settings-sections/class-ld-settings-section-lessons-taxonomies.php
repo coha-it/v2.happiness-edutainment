@@ -2,18 +2,26 @@
 /**
  * LearnDash Settings Section for Lessons Taxonomies Metabox.
  *
- * @package LearnDash
- * @subpackage Settings
+ * @since 2.4.0
+ * @package LearnDash\Settings\Sections
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'LearnDash_Settings_Lessons_Taxonomies' ) ) ) {
 	/**
-	 * Class to create the settings section.
+	 * Class LearnDash Settings Section for Lessons Taxonomies Metabox.
+	 *
+	 * @since 2.4.0
 	 */
 	class LearnDash_Settings_Lessons_Taxonomies extends LearnDash_Settings_Section {
 
 		/**
 		 * Protected constructor for class
+		 *
+		 * @since 2.4.0
 		 */
 		protected function __construct() {
 			$this->settings_screen_id = 'sfwd-lessons_page_lessons-options';
@@ -49,6 +57,8 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 
 		/**
 		 * Initialize the metabox settings values.
+		 *
+		 * @since 2.4.0
 		 */
 		public function load_settings_values() {
 			parent::load_settings_values();
@@ -64,10 +74,8 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 				);
 
 				// If this is a new install we want to turn off WP Post Category/Tag.
-				require_once LEARNDASH_LMS_PLUGIN_DIR . 'includes/admin/class-learndash-admin-data-upgrades.php';
-				$this->ld_admin_data_upgrades = Learndash_Admin_Data_Upgrades::get_instance();
 
-				$ld_prior_version = $this->ld_admin_data_upgrades->get_data_settings( 'prior_version' );
+				$ld_prior_version = learndash_data_upgrades_setting( 'prior_version' );
 				if ( 'new' === $ld_prior_version ) {
 					$this->setting_option_values['wp_post_category'] = '';
 					$this->setting_option_values['wp_post_tag']      = '';
@@ -87,6 +95,8 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 
 		/**
 		 * Initialize the metabox settings fields.
+		 *
+		 * @since 2.4.0
 		 */
 		public function load_settings_fields() {
 
@@ -149,6 +159,7 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 				),
 			);
 
+			/** This filter is documented in includes/settings/settings-metaboxes/class-ld-settings-metabox-course-access-settings.php */
 			$this->setting_option_fields = apply_filters( 'learndash_settings_fields', $this->setting_option_fields, $this->settings_section_key );
 
 			parent::load_settings_fields();

@@ -1,15 +1,25 @@
 <?php
 
-if (!defined('ABSPATH')) exit;
+if (!defined('ABSPATH')) {
+    exit;
+}
 
-require_once(GDBBPRESSATTACHMENTS_PATH.'code/attachments/admin.php');
-
-class gdbbA_Admin {
+class GDATTAdmin {
     private $page_ids = array();
     private $admin_plugin = false;
 
     function __construct() {
         add_action('after_setup_theme', array($this, 'load'));
+    }
+
+    public static function instance() {
+        static $instance = false;
+
+        if ($instance === false) {
+            $instance = new GDATTAdmin();
+        }
+
+        return $instance;
     }
 
     public function admin_init() {
@@ -43,7 +53,7 @@ class gdbbA_Admin {
     }
 
     public function plugin_actions($links, $file) {
-        if ($file == 'gd-bbpress-attachments/gd-bbpress-attachments.php' ){
+        if ($file == 'gd-bbpress-attachments/gd-bbpress-attachments.php') {
             $settings_link = '<a href="edit.php?post_type=forum&page=gdbbpress_attachments">'.__("Settings", "gd-bbpress-attachments").'</a>';
             array_unshift($links, $settings_link);
         }
@@ -51,8 +61,8 @@ class gdbbA_Admin {
         return $links;
     }
 
-    function plugin_links($links, $file) {
-        if ($file == 'gd-bbpress-attachments/gd-bbpress-attachments.php' ){
+    public function plugin_links($links, $file) {
+        if ($file == 'gd-bbpress-attachments/gd-bbpress-attachments.php') {
             $links[] = '<a target="_blank" style="color: #cc0000; font-weight: bold;" href="https://plugins.dev4press.com/gd-bbpress-toolbox/">'.__("Upgrade to GD bbPress Toolbox Pro", "gd-bbpress-attachments").'</a>';
         }
 
@@ -88,14 +98,9 @@ class gdbbA_Admin {
     }
 
     public function menu_attachments() {
-        global $gdbbpress_attachments;
-
-        $options = $gdbbpress_attachments->o;
+        $options = GDATTCore::instance()->o;
         $_user_roles = d4p_bbpress_get_user_roles();
 
         include(GDBBPRESSATTACHMENTS_PATH.'forms/panels.php');
     }
 }
-
-global $gdbbpress_a_admin;
-$gdbbpress_a_admin = new gdbbA_Admin();

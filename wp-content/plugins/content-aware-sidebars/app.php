@@ -3,7 +3,7 @@
  * @package Content Aware Sidebars
  * @author Joachim Jensen <joachim@dev.institute>
  * @license GPLv3
- * @copyright 2019 by Joachim Jensen
+ * @copyright 2021 by Joachim Jensen
  */
 
 defined('ABSPATH') || exit;
@@ -11,7 +11,7 @@ defined('ABSPATH') || exit;
 final class CAS_App
 {
     const PLUGIN_VERSION_KEY = 'cas_db_version';
-    const PLUGIN_VERSION = '3.10.1';
+    const PLUGIN_VERSION = '3.16.2';
 
     /**
      * Prefix for sidebar id
@@ -30,6 +30,11 @@ final class CAS_App
     const STATUS_INACTIVE = 'draft';
     const STATUS_SCHEDULED = 'future';
 
+    const ACTION_REPLACE = 0;
+    const ACTION_MERGE = 1;
+    const ACTION_SHORTCODE = 2;
+    const ACTION_REPLACE_FORCED = 3;
+
     /**
      * Capability to manage sidebars
      */
@@ -45,6 +50,9 @@ final class CAS_App
      */
     const META_PREFIX = '_ca_';
 
+    /**
+     * @var CAS_Sidebar_Manager
+     */
     private $manager;
 
     /**
@@ -53,7 +61,6 @@ final class CAS_App
     private $db_updater;
 
     /**
-     * Class singleton
      * @var CAS_App
      */
     private static $_instance;
@@ -73,7 +80,7 @@ final class CAS_App
 
     public function __construct()
     {
-        $this->_manager = new CAS_Sidebar_Manager();
+        $this->manager = new CAS_Sidebar_Manager();
 
         $this->db_updater = new WP_DB_Updater(self::PLUGIN_VERSION_KEY, self::PLUGIN_VERSION, true);
 
@@ -82,6 +89,9 @@ final class CAS_App
             new CAS_Sidebar_Edit();
             new CAS_Quick_Select();
             new CAS_Admin_Screen_Widgets();
+            new CAS_Admin_Settings();
+        } else {
+            new CAS_Admin_Bar();
         }
 
         $this->add_actions();
@@ -97,9 +107,12 @@ final class CAS_App
         return $this->db_updater;
     }
 
+    /**
+     * @return CAS_Sidebar_Manager
+     */
     public function manager()
     {
-        return $this->_manager;
+        return $this->manager;
     }
 
     /**
@@ -112,23 +125,36 @@ final class CAS_App
     {
         add_action(
             'init',
-            array($this,'load_textdomain')
-        );
-        add_action(
-            'admin_bar_menu',
-            array($this,'admin_bar_menu'),
-            99
+            [$this,'load_textdomain']
         );
         add_action(
             'cas/event/deactivate',
-            array($this,'scheduled_deactivation')
+            [$this,'scheduled_deactivation']
         );
 
         if (is_admin()) {
             add_action(
                 'plugins_loaded',
-                array($this,'redirect_revision_link')
+                [$this,'redirect_revision_link']
             );
+            add_action(
+                'admin_menu',
+                [$this, 'admin_menu_upsell'],
+                999
+            );
+        }
+    }
+
+    public function admin_menu_upsell()
+    {
+        $cas_fs = cas_fs();
+        if (!$cas_fs->can_use_premium_code()) {
+            global $submenu;
+            $submenu['wpcas'][] = [
+                 __('Widget Cleaner', 'content-aware-sidebars'). ' (Pro)',
+                 CAS_App::CAPABILITY,
+                 $cas_fs->get_upgrade_url()
+            ];
         }
     }
 
@@ -144,10 +170,15 @@ final class CAS_App
             $file = plugin_basename(plugin_dir_path(__FILE__)).'/content-aware-sidebars.php';
             add_filter(
                 'plugin_action_links_'.$file,
-                array($this,'plugin_action_links'),
+                [$this,'plugin_action_links'],
                 99,
                 4
             );
+            /**
+             * gutenberg disables widgets screen without user consent,
+             * reenable by popular demand for now
+             */
+            add_filter('gutenberg_use_widgets_block_editor', '__return_false');
         }
     }
 
@@ -160,26 +191,6 @@ final class CAS_App
     public function load_textdomain()
     {
         load_plugin_textdomain('content-aware-sidebars', false, dirname(plugin_basename(__FILE__)).'/lang/');
-    }
-
-    /**
-     * Add admin bar link to create sidebars
-     *
-     * @since  3.4
-     * @param  [type]  $wp_admin_bar
-     * @return void
-     */
-    public function admin_bar_menu($wp_admin_bar)
-    {
-        $post_type = get_post_type_object(self::TYPE_SIDEBAR);
-        if (current_user_can($post_type->cap->create_posts)) {
-            $wp_admin_bar->add_menu(array(
-                'parent' => 'new-content',
-                'id'     => self::BASE_SCREEN,
-                'title'  => $post_type->labels->singular_name,
-                'href'   => admin_url('admin.php?page=wpcas-edit')
-            ));
-        }
     }
 
     /**
@@ -196,9 +207,9 @@ final class CAS_App
     {
         global $cas_fs;
 
-        $new_actions = array();
+        $new_actions = [];
 
-        $new_actions['docs'] = '<a href="https://dev.institute/docs/content-aware-sidebars/?utm_source=plugin&utm_medium=referral&utm_content=plugin-list&utm_campaign=cas" target="_blank">'.__('Docs & FAQ', 'content-aware-sidebars').'</a>';
+        $new_actions['docs'] = '<a href="https://dev.institute/docs/content-aware-sidebars/?utm_source=plugin&utm_medium=referral&utm_content=plugin-list&utm_campaign=cas" target="_blank" rel="noopener">'.__('Docs & FAQ', 'content-aware-sidebars').'</a>';
         $new_actions['support'] = '<a href="'.esc_url($cas_fs->contact_url()).'">'.__('Premium Support', 'content-aware-sidebars').'</a>';
 
         if (!$cas_fs->has_active_valid_license()) {
@@ -219,10 +230,10 @@ final class CAS_App
      */
     public function scheduled_deactivation($post_id)
     {
-        $success = wp_update_post(array(
+        $success = wp_update_post([
             'ID'          => $post_id,
             'post_status' => self::STATUS_INACTIVE
-        ));
+        ]);
         if ($success) {
             delete_post_meta($post_id, self::META_PREFIX.'deactivate_time');
         }

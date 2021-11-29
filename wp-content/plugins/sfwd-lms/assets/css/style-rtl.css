@@ -17,7 +17,8 @@ min-width:30%;
 background-color: Red; color: white; padding: 10px 5px;
 }
 .cert_shortcode_parm_list{
-margin: 20px 50px;
+margin: 20px 30px;
+list-style: initial;
 }
 
 .column-sno {width: 50px;}
@@ -162,12 +163,6 @@ margin: 20px 50px;
 	margin-right: 40px;
 }
 
-.fixed .column-course {
-	width: 15%;
-}
-.fixed .column-shortcode {
-	width: 150px;
-}
 #sfwd-quiz_quiz_pro_html input[name="form_delete"], 
 #sfwd-quiz_quiz_pro_html a.form_move {
 	font-size: 12px;
@@ -237,11 +232,62 @@ margin: 20px 50px;
     text-align: center;
 }
 
+body.post-type-sfwd-lessons .column-course,
+
+body.post-type-sfwd-topic .column-course,
+body.post-type-sfwd-topic .column-lesson,
+
+body.post-type-sfwd-quiz .column-course,
+body.post-type-sfwd-quiz .column-lesson,
+
+body.post-type-sfwd-question .column-quiz {
+	min-width: 10%;
+}
+
+body.post-type-sfwd-quiz .column-shortcode {
+	width: 150px;
+}
+
+body.post-type-sfwd-question .column-question_type {
+	width: 10%;
+}
+
+body.post-type-sfwd-question .column-question_points {
+	width: 6%;
+}
+
+body.post-type-sfwd-essays .column-approval_status,
+body.post-type-sfwd-assignment .column-approval_status {
+	width: 10%;
+}
+
+body.edit-php.post-type-sfwd-essays .column-approval_status .ld-approval-status,
+body.edit-php.post-type-sfwd-essays .column-approval_status .ld-approval-points,
+body.edit-php.post-type-sfwd-assignment .column-approval_status .ld-approval-status,
+body.edit-php.post-type-sfwd-assignment .column-approval_status .ld-approval-points {
+	margin-bottom: 3px;
+}
+
+body.post-type-sfwd-essays .column-approval_status .ld-approval-points input[type="number"],
+body.edit-php.post-type-sfwd-assignment .column-approval_status .ld-approval-points input[type="number"] {
+	line-height: 1 !important; 
+	min-height: 20px !important;
+}
+
+body.post-type-sfwd-essays .column-approval_status .ld-approval-action button.essay_approve_single,
+body.edit-php.post-type-sfwd-assignment .column-approval_status .ld-approval-action button.assignment_approve_single {
+	padding: 3px 5px;
+	background: #f1f1f1;
+	border-color: #016087;
+	color: #016087;
+	border-width: 1px;
+}
 
 body.post-type-sfwd-courses .column-categories,
 body.post-type-sfwd-courses .column-tags,
 body.post-type-sfwd-courses .column-taxonomy-ld_course_category, 
-body.post-type-sfwd-courses .column-taxonomy-ld_course_tag, 
+body.post-type-sfwd-courses .column-taxonomy-ld_course_tag,
+body.post-type-sfwd-courses .column-price_type,
 
 body.post-type-sfwd-lessons .column-categories,
 body.post-type-sfwd-lessons .column-tags,
@@ -251,10 +297,25 @@ body.post-type-sfwd-lessons .column-taxonomy-ld_lesson_tag,
 body.post-type-sfwd-topic .column-categories,
 body.post-type-sfwd-topic .column-tags,
 body.post-type-sfwd-topic .column-taxonomy-ld_topic_category, 
-body.post-type-sfwd-topic .column-taxonomy-ld_topic_tag {
-	width: 10%;
-}
+body.post-type-sfwd-topic .column-taxonomy-ld_topic_tag,
 
+body.post-type-sfwd-quiz .column-categories,
+body.post-type-sfwd-quiz .column-tags,
+body.post-type-sfwd-quiz .column-taxonomy-ld_quiz_category, 
+body.post-type-sfwd-quiz .column-taxonomy-ld_quiz_tag,
+
+body.post-type-sfwd-question .column-proquiz_question_category,
+
+body.post-type-sfwd-certificates .column-certificate_groups_courses_quizzes,
+
+body.post-type-groups .column-categories,
+body.post-type-groups .column-tags,
+body.post-type-groups .column-taxonomy-ld_group_category, 
+body.post-type-groups .column-taxonomy-ld_group_tag,
+body.post-type-groups .column-groups_courses_users,
+body.post-type-groups .column-price_type {
+	width: 8%;
+}
 
 /* CSS style for the post type editor showing the drip date. Replaces date picker */
 .sfwd .ld_date_selector select {

@@ -2,13 +2,19 @@
 /**
  * LearnDash Settings Section for Support WordPress Themes Metabox.
  *
- * @package LearnDash
- * @subpackage Settings
+ * @since 3.1.0
+ * @package LearnDash\Settings\Sections
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'LearnDash_Settings_Section_Support_WordPress_Themes' ) ) ) {
 	/**
-	 * Class to create the settings section.
+	 * Class LearnDash Settings Section for Support WordPress Themes Metabox.
+	 *
+	 * @since 3.1.0
 	 */
 	class LearnDash_Settings_Section_Support_WordPress_Themes extends LearnDash_Settings_Section {
 
@@ -21,6 +27,8 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 
 		/**
 		 * Protected constructor for class
+		 *
+		 * @since 3.1.0
 		 */
 		protected function __construct() {
 			$this->settings_page_id = 'learndash_support';
@@ -28,14 +36,13 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 			// This is the 'option_name' key used in the wp_options table.
 			$this->setting_option_key = 'wp_active_theme';
 
-			// This is the HTML form field prefix used.
-			//$this->setting_field_prefix = 'learndash_settings_paypal';
-
 			// Used within the Settings API to uniquely identify this section.
 			$this->settings_section_key = 'settings_support_wp_active_theme';
 
 			// Section label/header.
 			$this->settings_section_label = esc_html__( 'WordPress Active Theme', 'learndash' );
+
+			$this->load_options = false;
 
 			add_filter( 'learndash_support_sections_init', array( $this, 'learndash_support_sections_init' ) );
 			add_action( 'learndash_section_fields_before', array( $this, 'show_support_section' ), 30, 2 );
@@ -43,18 +50,23 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 			parent::__construct();
 		}
 
+		/**
+		 * Support Sections Init
+		 *
+		 * @since 3.1.0
+		 *
+		 * @param array $support_sections Support sections array
+		 */
 		public function learndash_support_sections_init( $support_sections = array() ) {
 			global $wpdb, $wp_version, $wp_rewrite;
 			global $sfwd_lms;
-
-			$ABSPATH_tmp = str_replace( '\\', '/', ABSPATH );
 
 			/************************************************************************************************
 			 * WordPress Active Theme.
 			 ************************************************************************************************/
 			if ( ! isset( $support_sections[ $this->setting_option_key ] ) ) {
-				$this->settings_set           = array();
-				
+				$this->settings_set = array();
+
 				$this->settings_set['header'] = array(
 					'html' => $this->settings_section_label,
 					'text' => $this->settings_section_label,
@@ -101,12 +113,22 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 						'value_html' => $theme_value_html,
 					);
 				}
+
+				/** This filter is documented in includes/settings/settings-sections/class-ld-settings-section-support-database-tables.php */
 				$support_sections[ $this->setting_option_key ] = apply_filters( 'learndash_support_section', $this->settings_set, $this->setting_option_key );
 			}
 
 			return $support_sections;
 		}
 
+		/**
+		 * Show Support Section
+		 *
+		 * @since 3.1.0
+		 *
+		 * @param string $settings_section_key Section Key
+		 * @param string $settings_screen_id   Screen ID
+		 */
 		public function show_support_section( $settings_section_key = '', $settings_screen_id = '' ) {
 			if ( $settings_section_key === $this->settings_section_key ) {
 				$support_page_instance = LearnDash_Settings_Page::get_page_instance( 'LearnDash_Settings_Page_Support' );

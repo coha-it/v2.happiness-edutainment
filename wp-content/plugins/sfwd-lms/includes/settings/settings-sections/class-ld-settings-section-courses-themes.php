@@ -2,19 +2,33 @@
 /**
  * LearnDash Settings Section for Course Themes Metabox.
  *
- * @package LearnDash
- * @subpackage Settings
+ * @since 3.0.0
+ * @package LearnDash\Settings\Sections
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'LearnDash_Settings_Courses_Themes' ) ) ) {
 	/**
-	 * Class to create the settings section.
+	 * Class LearnDash Settings Section for Course Themes Metabox.
+	 *
+	 * @since 3.0.0
 	 */
 	class LearnDash_Settings_Courses_Themes extends LearnDash_Settings_Section {
 
+		/**
+		 * List of themes
+		 *
+		 * @var array
+		 */
 		private $themes_list = array();
+
 		/**
 		 * Protected constructor for class
+		 *
+		 * @since 3.0.0
 		 */
 		protected function __construct() {
 
@@ -33,7 +47,7 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 			// Section label/header.
 			$this->settings_section_label = esc_html__( 'Design & Content Elements', 'learndash' );
 
-			// Used to show the section description above the fields. Can be empty
+			// Used to show the section description above the fields. Can be empty.
 			$this->settings_section_description = esc_html__( 'Alter the look and feel of your Learning Management System', 'learndash' );
 
 			add_action( 'learndash_section_fields_after', array( $this, 'learndash_section_fields_after' ), 10, 2 );
@@ -43,6 +57,8 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 
 		/**
 		 * Initialize the metabox settings values.
+		 *
+		 * @since 3.0.0
 		 */
 		public function load_settings_values() {
 			parent::load_settings_values();
@@ -55,8 +71,8 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 			}
 
 			if ( ( ! isset( $this->setting_option_values['active_theme'] ) ) || ( empty( $this->setting_option_values['active_theme'] ) ) ) {
-				$ld_prior_version = learndash_get_prior_installed_version();
-				if ( ( ! $ld_prior_version ) || ( 'new' === $ld_prior_version ) ) {
+				$ld_prior_version = learndash_data_upgrades_setting( 'prior_version' );
+				if ( 'new' === $ld_prior_version ) {
 					$this->setting_option_values['active_theme'] = LEARNDASH_DEFAULT_THEME;
 				} else {
 					$this->setting_option_values['active_theme'] = LEARNDASH_LEGACY_THEME;
@@ -66,6 +82,8 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 
 		/**
 		 * Initialize the metabox settings fields.
+		 *
+		 * @since 3.0.0
 		 */
 		public function load_settings_fields() {
 			$this->setting_option_fields = array(
@@ -79,12 +97,21 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 				),
 			);
 
+			/** This filter is documented in includes/settings/settings-metaboxes/class-ld-settings-metabox-course-access-settings.php */
 			$this->setting_option_fields = apply_filters( 'learndash_settings_fields', $this->setting_option_fields, $this->settings_section_key );
 
 			parent::load_settings_fields();
 		}
 
-		public function learndash_section_fields_after( $settings_section_key = '', $settings_screen_id ) {
+		/**
+		 * Section Fields After
+		 *
+		 * @since 3.0.0
+		 *
+		 * @param string $settings_section_key Section Key.
+		 * @param string $settings_screen_id   Screen ID.
+		 */
+		public function learndash_section_fields_after( $settings_section_key, $settings_screen_id ) {
 			if ( $settings_section_key === $this->settings_section_key ) {
 
 				$themes = LearnDash_Theme_Register::get_themes();
@@ -104,7 +131,8 @@ if ( ( class_exists( 'LearnDash_Settings_Section' ) ) && ( ! class_exists( 'Lear
 									if ( $active_theme_key === $theme_instance->get_theme_key() ) {
 										$theme_state = 'open';
 									}
-									echo '<div id="learndash_theme_settings_section_' . $theme_instance->get_theme_key() . '" class="ld-theme-settings-section ld-theme-settings-section-' . $theme_instance->get_theme_key() . ' ld-theme-settings-section-state-' . $theme_state . '">';
+									echo '<div id="learndash_theme_settings_section_' . esc_attr( $theme_instance->get_theme_key() ) . '" class="ld-theme-settings-section ld-theme-settings-section-' . esc_attr( $theme_instance->get_theme_key() ) . ' ld-theme-settings-section-state-' . esc_attr( $theme_state ) . '">';
+									$section_instance->show_settings_section_nonce_field();
 									$this->show_settings_section_fields( $section_instance->settings_page_id, $section_key );
 									echo '</div>';
 								}

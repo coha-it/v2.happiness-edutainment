@@ -16,28 +16,17 @@
 /**
  * Internal block libraries
  */
-const { __, _x, sprintf } = wp.i18n;
-const {
-	registerBlockType,
-} = wp.blocks;
-
-const {
-    InspectorControls,
-} = wp.editor;
-
-const {
-	ServerSideRender,
-	PanelBody,
-	SelectControl,
-	ToggleControl,
-	TextControl
-} = wp.components;
+import { __ } from '@wordpress/i18n';
+import { registerBlockType } from '@wordpress/blocks';
+import { InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, SelectControl, TextControl, ToggleControl } from '@wordpress/components';
+import ServerSideRender from '@wordpress/server-side-render';
 
 registerBlockType(
-    'learndash/ld-login',
-    {
-		title: _x('LearnDash Login', 'learndash'),
-		description: __('This shortcode adds the login button on any page', 'learndash'),
+	'learndash/ld-login',
+	{
+		title: __('LearnDash Login', 'learndash'),
+		description: __('This block adds the login button on any page', 'learndash'),
 		icon: 'admin-network',
 		category: 'learndash-blocks',
 		example: {
@@ -48,7 +37,7 @@ registerBlockType(
 		supports: {
 			customClassName: false,
 		},
-        attributes: {
+		attributes: {
 			login_url: {
 				type: 'string',
 				default: '',
@@ -60,11 +49,11 @@ registerBlockType(
 			login_placement: {
 				type: 'string',
 				default: '',
-			},			
+			},
 			login_button: {
 				type: 'string',
 				default: '',
-            },
+			},
 
 			logout_url: {
 				type: 'string',
@@ -95,9 +84,9 @@ registerBlockType(
 				default: 0
 			},
 		},
-        edit: function( props ) {
+		edit: function( props ) {
 			const { attributes: { login_url, login_label, login_placement, login_button, logout_url, logout_label, logout_placement, logout_button, preview_show, preview_action, example_show },
-            	setAttributes } = props;
+				setAttributes } = props;
 
 			const panelbody_login = (
 				<PanelBody
@@ -244,7 +233,7 @@ registerBlockType(
 
 
 			const inspectorControls = (
-				<InspectorControls>
+				<InspectorControls key="controls">
 					{ panelbody_login }
 					{ panelbody_logout }
 					{ panel_preview }
@@ -256,6 +245,7 @@ registerBlockType(
 					return <ServerSideRender
 					block="learndash/ld-login"
 					attributes={ attributes }
+					key="learndash/ld-login"
 					/>
 				} else {
 					return __( '[learndash_login] shortcode output shown here', 'learndash' );
@@ -266,9 +256,9 @@ registerBlockType(
 				inspectorControls,
 				do_serverside_render( props.attributes )
 			];
-        },
+		},
 
-        save: props => {
+		save: props => {
 			// Delete meta from props to prevent it being saved.
 			delete (props.attributes.meta);
 

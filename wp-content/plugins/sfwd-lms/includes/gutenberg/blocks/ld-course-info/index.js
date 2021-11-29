@@ -16,29 +16,19 @@ import {
 /**
  * Internal block libraries
  */
-const { __, _x, sprintf } = wp.i18n;
-const {
-	registerBlockType,
-} = wp.blocks;
-
-const {
-    InspectorControls,
-} = wp.editor;
-
-const {
-	ServerSideRender,
-	PanelBody,
-	RangeControl,
-	SelectControl,
-	ToggleControl,
-	TextControl
-} = wp.components;
+import { __, _x, sprintf} from '@wordpress/i18n';
+import { registerBlockType } from '@wordpress/blocks';
+import { InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, SelectControl, TextControl, ToggleControl } from '@wordpress/components';
+import ServerSideRender from '@wordpress/server-side-render';
 
 registerBlockType(
-    'learndash/ld-course-info',
-    {
+	'learndash/ld-course-info',
+	{
+		// translators: placeholder: Course.
 		title: sprintf(_x('LearnDash %s Info [ld_course_info]', 'placeholder: Course', 'learndash'), ldlms_get_custom_label('course')),
-		description: sprintf(_x('This block shows the %s and progress for the user.', 'placeholders: courses', 'learndash'), ldlms_get_custom_label('course') ),
+		// translators: placeholder: Courses.
+		description: sprintf(_x('This block shows the %s and progress for the user.', 'placeholders: Courses', 'learndash'), ldlms_get_custom_label('course') ),
 		icon: 'analytics',
 		category: 'learndash-blocks',
 		example: {
@@ -49,7 +39,7 @@ registerBlockType(
 		supports: {
 			customClassName: false,
 		},
-        attributes: {
+		attributes: {
 			user_id: {
 				type: 'string',
 				default: 0,
@@ -65,15 +55,15 @@ registerBlockType(
 			registered_num: {
 				type: 'string',
 				default: '',
-            },
+			},
 			registered_orderby: {
 				type: 'string',
 				default: 'ID'
-            },
+			},
 			registered_order: {
 				type: 'string',
 				default: 'ASC'
-            },
+			},
 			progress_show: {
 				type: 'boolean',
 				default: true
@@ -122,9 +112,9 @@ registerBlockType(
 				type: 'object',
 			}
 		},
-        edit: function( props ) {
+		edit: function( props ) {
 			const { attributes: { user_id, registered_show, registered_show_thumbnail, registered_num, registered_orderby, registered_order, progress_show, progress_num, progress_orderby, progress_order, quiz_show, quiz_num, quiz_orderby, quiz_order, preview_user_id, preview_show },
-            	setAttributes } = props;
+				setAttributes } = props;
 
 
 			const panelbody_header = (
@@ -139,16 +129,19 @@ registerBlockType(
 					/>
 
 					<ToggleControl
+						// translators: placeholder: Courses.
 						label={sprintf(_x('Show Registered %s', 'placeholder: Courses', 'learndash'), ldlms_get_custom_label('courses') ) }
 						checked={!!registered_show}
 						onChange={registered_show => setAttributes({ registered_show })}
 					/>
 					<ToggleControl
-						label={sprintf(_x('Show %s Progess', 'placeholder: Course', 'learndash'), ldlms_get_custom_label('course') ) }
+						// translators: placeholder: Course.
+						label={sprintf(_x('Show %s Progress', 'placeholder: Course', 'learndash'), ldlms_get_custom_label('course') ) }
 						checked={!!progress_show}
 						onChange={progress_show => setAttributes({ progress_show })}
 					/>
 					<ToggleControl
+						// translators: placeholder: Quiz.
 						label={sprintf(_x('Show %s Attempts', 'placeholder: Quiz', 'learndash'), ldlms_get_custom_label('quiz'))}
 						checked={!!quiz_show}
 						onChange={quiz_show => setAttributes({ quiz_show })}
@@ -160,6 +153,7 @@ registerBlockType(
 			if ( registered_show === true ) {
 				panelbody_registered = (
 					<PanelBody
+						// translators: placeholder: Courses.
 						title={sprintf(_x('Registered %s', 'placeholder: Courses', 'learndash'), ldlms_get_custom_label('courses') ) }
 						initialOpen={false}
 					>
@@ -170,6 +164,7 @@ registerBlockType(
 						/>
 						<TextControl
 							label={__('per page', 'learndash')}
+							// translators: placeholder: default per page.
 							help={sprintf(_x('Leave empty for default (%d) or 0 to show all items.', 'placeholder: default per page', 'learndash'), ldlms_get_per_page('per_page'))}
 							value={registered_num || ''}
 							min={0}
@@ -224,11 +219,13 @@ registerBlockType(
 			if (progress_show === true) {
 				panelbody_progress = (
 					<PanelBody
+						// translators: placeholder: Course.
 						title={sprintf(_x('%s Progress', 'placeholder: Course', 'learndash'), ldlms_get_custom_label('course') ) }
 						initialOpen={false}
 					>
 						<TextControl
 							label={__('per page', 'learndash')}
+							// translators: placeholder: default per page.
 							help={sprintf(_x('Leave empty for default (%d) or 0 to show all items.', 'placeholder: default per page', 'learndash'), ldlms_get_per_page('progress_num' ) ) }
 							value={progress_num || ''}
 							min={0}
@@ -283,11 +280,13 @@ registerBlockType(
 			if ( quiz_show === true ) {
 				panelbody_quiz = (
 					<PanelBody
+						// translators: placeholder: Quiz.
 						title={sprintf(_x('%s Attempts', 'placeholder: Quiz', 'learndash'), ldlms_get_custom_label('quiz') ) }
 						initialOpen={false}
 					>
 						<TextControl
 							label={__('per page', 'learndash')}
+							// translators: placeholder: default per page.
 							help={sprintf(_x('Leave empty for default (%d) or 0 to show all items.', 'placeholder: default per page', 'learndash'), ldlms_get_per_page('quiz_num') ) }
 							value={quiz_num || ''}
 							min={0}
@@ -342,7 +341,7 @@ registerBlockType(
 			}
 
 			const inspectorControls = (
-				<InspectorControls>
+				<InspectorControls key="controls">
 					{ panelbody_header }
 					{ panelbody_registered }
 					{ panelbody_progress }
@@ -373,6 +372,7 @@ registerBlockType(
 					return <ServerSideRender
 					block="learndash/ld-course-info"
 					attributes={ attributes }
+					key="learndash/ld-course-info"
 					/>
 				} else {
 					return __( '[ld_course_info] shortcode output shown here', 'learndash' );
@@ -383,9 +383,9 @@ registerBlockType(
 				inspectorControls,
 				do_serverside_render( props.attributes )
 			];
-        },
+		},
 
-        save: props => {
+		save: props => {
 			// Delete meta from props to prevent it being saved.
 			delete (props.attributes.meta);
 

@@ -1,34 +1,70 @@
 <?php
-if ( ( !class_exists( 'LD_REST_Courses_Users_Controller_V1' ) ) && ( class_exists( 'LD_REST_Users_Controller_V1' ) ) ) {
-	class LD_REST_Courses_Users_Controller_V1 extends LD_REST_Users_Controller_V1 {
-		
+/**
+ * LearnDash REST API V1 Courses Users Post Controller.
+ *
+ * @since 2.5.8
+ * @package LearnDash\REST\V1
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+if ( ( ! class_exists( 'LD_REST_Courses_Users_Controller_V1' ) ) && ( class_exists( 'LD_REST_Users_Controller_V1' ) ) ) {
+
+	/**
+	 * Class LearnDash REST API V1 Courses Users Post Controller.
+	 *
+	 * @since 2.5.8
+	 */
+	class LD_REST_Courses_Users_Controller_V1 extends LD_REST_Users_Controller_V1 { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedClassFound
+
+		/**
+		 * Supported Collection Parameters.
+		 *
+		 * @since 2.5.8
+		 *
+		 * @var array $supported_collection_params.
+		 */
 		private $supported_collection_params = array(
 			'exclude'  => 'exclude',
 			'include'  => 'include',
-			'offset'	=> 'offset',
+			'offset'   => 'offset',
 			'order'    => 'order',
-			'page'		=> 'paged',
+			'page'     => 'paged',
 			'per_page' => 'number',
 			'search'   => 'search',
 			'roles'    => 'role__in',
 			'slug'     => 'nicename__in',
 		);
 
-		public function __construct( ) {
-			
-			parent::__construct( );
-			$this->namespace = LEARNDASH_REST_API_NAMESPACE .'/'. $this->version;
-			$this->rest_base = LearnDash_Settings_Section::get_section_setting('LearnDash_Settings_Section_General_REST_API', 'sfwd-courses' );
+		/**
+		 * Public constructor for class
+		 *
+		 * @since 2.5.8
+		 */
+		public function __construct() {
+
+			parent::__construct();
+			$this->namespace = LEARNDASH_REST_API_NAMESPACE . '/' . $this->version;
+			$this->rest_base = LearnDash_Settings_Section::get_section_setting( 'LearnDash_Settings_Section_General_REST_API', 'sfwd-courses' );
 		}
-		
-	    public function register_routes() {
+
+		/**
+		 * Registers the routes for the objects of the controller.
+		 *
+		 * @since 2.5.8
+		 *
+		 * @see register_rest_route() in WordPress core.
+		 */
+		public function register_routes() {
 			$this->meta = new WP_REST_User_Meta_Fields();
 
 			$collection_params = $this->get_collection_params();
-			$schema = $this->get_item_schema();
-			
+			$schema            = $this->get_item_schema();
+
 			$get_item_args = array(
-				'context'  => $this->get_context_param( array( 'default' => 'view' ) ),
+				'context' => $this->get_context_param( array( 'default' => 'view' ) ),
 			);
 			if ( isset( $schema['properties']['password'] ) ) {
 				$get_item_args['password'] = array(
@@ -36,16 +72,17 @@ if ( ( !class_exists( 'LD_REST_Courses_Users_Controller_V1' ) ) && ( class_exist
 					'type'        => 'string',
 				);
 			}
-			
-			register_rest_route( 
-				$this->namespace, 
-				'/' . $this->rest_base . '/(?P<id>[\d]+)/users', 
+
+			register_rest_route(
+				$this->namespace,
+				'/' . $this->rest_base . '/(?P<id>[\d]+)/users',
 				array(
-					'args' => array(
+					'args'   => array(
 						'id' => array(
-							'description' => esc_html__( 'Course ID.', 'learndash' ),
-    							'required' => true,
-							'type' => 'integer',
+							// translators: course.
+							'description' => sprintf( esc_html_x( '%s ID.', 'placeholder: course', 'learndash' ), learndash_get_custom_label( 'course' ) ),
+							'required'    => true,
+							'type'        => 'integer',
 						),
 					),
 					array(
@@ -54,17 +91,18 @@ if ( ( !class_exists( 'LD_REST_Courses_Users_Controller_V1' ) ) && ( class_exist
 						'permission_callback' => array( $this, 'get_courses_users_permissions_check' ),
 						'args'                => $this->get_collection_params(),
 					),
-                    array(
-                        'methods'             => WP_REST_Server::EDITABLE,
-                        'callback'            => array( $this, 'update_courses_users' ),
-                        'permission_callback' => array( $this, 'update_courses_users_permissions_check' ),
-						'args' => array(
+					array(
+						'methods'             => WP_REST_Server::EDITABLE,
+						'callback'            => array( $this, 'update_courses_users' ),
+						'permission_callback' => array( $this, 'update_courses_users_permissions_check' ),
+						'args'                => array(
 							'user_ids' => array(
-								'description' => esc_html__( 'User IDs to enroll into Course. Limit 50 per request.', 'learndash' ),
-								'required' => true,
-								'type' => 'array',
-								'items' => array(
-									'type' => 'integer'
+								// translators: course.
+								'description' => sprintf( esc_html_x( 'User IDs to enroll into %s. Limit 50 per request.', 'placeholder: course', 'learndash' ), learndash_get_custom_label_lower( 'course' ) ),
+								'required'    => true,
+								'type'        => 'array',
+								'items'       => array(
+									'type' => 'integer',
 								),
 							),
 						),
@@ -73,110 +111,225 @@ if ( ( !class_exists( 'LD_REST_Courses_Users_Controller_V1' ) ) && ( class_exist
 						'methods'             => WP_REST_Server::DELETABLE,
 						'callback'            => array( $this, 'delete_courses_users' ),
 						'permission_callback' => array( $this, 'delete_courses_users_permissions_check' ),
-						'args' => array(
+						'args'                => array(
 							'user_ids' => array(
-								'description' => esc_html__( 'User IDs to remove from Group. Limit 50 per request.', 'learndash' ),
-	    						'required' => true,
-								'type' => 'array',
-								'items' => array(
-									'type' => 'integer'
+								// translators: group.
+								'description' => sprintf( esc_html_x( 'User IDs to remove from %s. Limit 50 per request.', 'placeholder: group', 'learndash' ), learndash_get_custom_label_lower( 'group' ) ),
+								'required'    => true,
+								'type'        => 'array',
+								'items'       => array(
+									'type' => 'integer',
 								),
 							),
 						),
 					),
-				) 
+					'schema' => array( $this, 'get_schema' ),
+				)
 			);
-	    }
-		
-		
-		function update_courses_users_permissions_check( $request ) {
-			if ( learndash_is_admin_user( ) ) {
+		}
+
+		/**
+		 * Gets the course users schema.
+		 *
+		 * @since 2.5.8
+		 *
+		 * @return array
+		 */
+		public function get_schema() {
+
+			$schema = array(
+				'$schema'    => 'http://json-schema.org/draft-04/schema#',
+				'title'      => 'course-user',
+				'parent'     => 'course',
+				'type'       => 'object',
+				'properties' => array(
+					'id'       => array(
+						'description' => __( 'Unique identifier for the object.', 'learndash' ),
+						'type'        => 'integer',
+						'context'     => array( 'view', 'edit', 'embed' ),
+						'readonly'    => true,
+					),
+					'user_ids' => array(
+						'description' => __( 'The user IDs. Limit 50 per request.', 'learndash' ),
+						'type'        => 'array',
+						'items'       => array(
+							'type' => 'integer',
+						),
+						'context'     => array( 'view', 'edit' ),
+					),
+				),
+			);
+
+			return $schema;
+		}
+
+		/**
+		 * Check Courses Users Update Permissions.
+		 *
+		 * @since 2.5.8
+		 *
+		 * @param object $request WP_REST_Request instance.
+		 */
+		public function update_courses_users_permissions_check( $request ) {
+			if ( learndash_is_admin_user() ) {
 				return true;
 			}
 		}
 
-		function delete_courses_users_permissions_check( $request ) {
-			if ( learndash_is_admin_user( ) ) {
+		/**
+		 * Check Courses Users Delete Permissions.
+		 *
+		 * @since 2.5.8
+		 *
+		 * @param object $request WP_REST_Request instance.
+		 */
+		public function delete_courses_users_permissions_check( $request ) {
+			if ( learndash_is_admin_user() ) {
 				return true;
 			}
 		}
 
-		function get_courses_users_permissions_check( $request ) {
-			if ( learndash_is_admin_user( ) ) {
+		/**
+		 * Check Courses Users Read Permissions.
+		 *
+		 * @since 2.5.8
+		 *
+		 * @param object $request WP_REST_Request instance.
+		 */
+		public function get_courses_users_permissions_check( $request ) {
+			if ( learndash_is_admin_user() ) {
 				return true;
 			}
 		}
 
-		function update_courses_users( $request ) {
+		/**
+		 * Update Courses Users.
+		 *
+		 * @since 2.5.8
+		 *
+		 * @param object $request WP_REST_Request instance.
+		 */
+		public function update_courses_users( $request ) {
 			$course_id = $request['id'];
 			if ( empty( $course_id ) ) {
-				return new WP_Error( 'rest_post_invalid_id', esc_html__( 'Invalid Course ID.', 'learndash' ), array( 'status' => 404 ) );
+				return new WP_Error(
+					'rest_post_invalid_id',
+					sprintf(
+						// translators: placeholder: course.
+						esc_html_x(
+							'Invalid %s ID.',
+							'placeholder: course',
+							'learndash'
+						),
+						LearnDash_Custom_Label::get_label( 'course' )
+					),
+					array( 'status' => 404 )
+				);
 			}
 
 			$user_ids = $request['user_ids'];
-			if ( ( !is_array( $user_ids ) ) || ( empty( $user_ids ) ) ) {
+			if ( ( ! is_array( $user_ids ) ) || ( empty( $user_ids ) ) ) {
 				return new WP_Error( 'rest_post_invalid_id', esc_html__( 'Missing User IDs.', 'learndash' ), array( 'status' => 404 ) );
 			} else {
 				$user_ids = array_map( 'intval', $user_ids );
 			}
 
-			foreach( $user_ids as $user_id ) {
+			foreach ( $user_ids as $user_id ) {
 				ld_update_course_access( $user_id, $course_id );
 			}
 
-			$data = array( );
+			$data = array();
 
-			// Create the response object
+			// Create the response object.
 			$response = rest_ensure_response( $data );
 
-			// Add a custom status code
+			// Add a custom status code.
 			$response->set_status( 200 );
 
 			return $response;
 		}
 
-		function delete_courses_users( $request ) {
+		/**
+		 * Delete Courses Users.
+		 *
+		 * @since 2.5.8
+		 *
+		 * @param object $request WP_REST_Request instance.
+		 */
+		public function delete_courses_users( $request ) {
 			$course_id = $request['id'];
 			if ( empty( $course_id ) ) {
-				return new WP_Error( 'rest_post_invalid_id', esc_html__( 'Invalid Course ID.', 'learndash' ), array( 'status' => 404 ) );
+				return new WP_Error(
+					'rest_post_invalid_id',
+					sprintf(
+						// translators: placeholder: course.
+						esc_html_x(
+							'Invalid %s ID.',
+							'placeholder: course',
+							'learndash'
+						),
+						LearnDash_Custom_Label::get_label( 'course' )
+					),
+					array( 'status' => 404 )
+				);
 			}
 
 			$user_ids = $request['user_ids'];
-			if ( ( !is_array( $user_ids ) ) || ( empty( $user_ids ) ) ) {
+			if ( ( ! is_array( $user_ids ) ) || ( empty( $user_ids ) ) ) {
 				return new WP_Error( 'rest_post_invalid_id', esc_html__( 'Missing User IDs.', 'learndash' ), array( 'status' => 404 ) );
 			} else {
 				$user_ids = array_map( 'intval', $user_ids );
 			}
 
-			foreach( $user_ids as $user_id ) {
+			foreach ( $user_ids as $user_id ) {
 				ld_update_course_access( $user_id, $course_id, true );
 			}
 
-			$data = array( );
+			$data = array();
 
-			// Create the response object
+			// Create the response object.
 			$response = rest_ensure_response( $data );
 
-			// Add a custom status code
+			// Add a custom status code.
 			$response->set_status( 200 );
 
 			return $response;
 		}
 
+		/**
+		 * Get Courses Users.
+		 *
+		 * @since 2.5.8
+		 *
+		 * @param object $request WP_REST_Request instance.
+		 */
 		public function get_courses_users( $request ) {
 
 			$course_id = $request['id'];
 			if ( empty( $course_id ) ) {
-				return new WP_Error( 'rest_post_invalid_id', esc_html__( 'Invalid Course ID.', 'learndash' ), array( 'status' => 404 ) );
+				return new WP_Error(
+					'rest_post_invalid_id',
+					sprintf(
+						// translators: placeholder: course.
+						esc_html_x(
+							'Invalid %s ID.',
+							'placeholder: course',
+							'learndash'
+						),
+						LearnDash_Custom_Label::get_label( 'course' )
+					),
+					array( 'status' => 404 )
+				);
 			}
 
-			if ( is_user_logged_in() )
+			if ( is_user_logged_in() ) {
 				$current_user_id = get_current_user_id();
-			else
+			} else {
 				$current_user_id = 0;
+			}
 
 			// Retrieve the list of registered collection query parameters.
-			$registered = $this->get_collection_params();	
+			$registered = $this->get_collection_params();
 
 			$prepared_args = array();
 
@@ -218,7 +371,7 @@ if ( ( !class_exists( 'LD_REST_Courses_Users_Controller_V1' ) ) && ( class_exist
 
 			$course_users_query = learndash_get_users_for_course( $course_id, array(), $exclude_admin );
 			if ( $course_users_query instanceof WP_User_Query ) {
-				$course_user_ids = $course_users_query->get_results();
+				$course_user_ids          = $course_users_query->get_results();
 				$prepared_args['include'] = $course_user_ids;
 			} else {
 				$prepared_args['include'] = array( 0 );
@@ -229,18 +382,18 @@ if ( ( !class_exists( 'LD_REST_Courses_Users_Controller_V1' ) ) && ( class_exist
 			}
 
 			if ( ! isset( $prepared_args['fields'] ) ) {
-				$prepared_args['fields'] = array('ID');
-			} 
+				$prepared_args['fields'] = array( 'ID' );
+			}
 
 			/**
-			 * Filters WP_User_Query arguments when querying users via the REST API.
+			 * Filters `WP_User_Query` arguments when querying course users via the REST API.
 			 *
 			 * @link https://developer.wordpress.org/reference/classes/wp_user_query/
 			 *
-			 * @since 4.7.0
+			 * @since 2.5.8
 			 *
-			 * @param array           $prepared_args Array of arguments for WP_User_Query.
-			 * @param WP_REST_Request $request       The current request.
+			 * @param array           $prepared_args An array of arguments for WP_User_Query.
+			 * @param WP_REST_Request $request       The REST request object.
 			 */
 			$prepared_args = apply_filters( 'learndash_rest_courses_users_query', $prepared_args, $request );
 
@@ -301,22 +454,26 @@ if ( ( !class_exists( 'LD_REST_Courses_Users_Controller_V1' ) ) && ( class_exist
 			return $response;
 		}
 
+		/**
+		 * Get Collection parameters
+		 *
+		 * @since 2.5.8
+		 */
 		public function get_collection_params() {
 			$query_params_default = parent::get_collection_params();
 
 			$query_params_default['context']['default'] = 'view';
 
-			$query_params = array();
+			$query_params            = array();
 			$query_params['context'] = $query_params_default['context'];
-			$query_params['fields'] = array(
+			$query_params['fields']  = array(
 				'description' => __( 'Returned values.', 'learndash' ),
-				'type' => 'string',
-				'type' => 'string',
-				'default' => 'ids',
-				'enum' => array(
+				'type'        => 'string',
+				'default'     => 'ids',
+				'enum'        => array(
 					'ids',
 					'objects',
-				),				
+				),
 			);
 			foreach ( $this->supported_collection_params as $external_key => $internal_key ) {
 				if ( isset( $query_params_default[ $external_key ] ) ) {
@@ -327,6 +484,6 @@ if ( ( !class_exists( 'LD_REST_Courses_Users_Controller_V1' ) ) && ( class_exist
 
 		}
 
-		// End of functions
+		// End of functions.
 	}
 }

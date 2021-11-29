@@ -1,19 +1,28 @@
 <?php
 /**
- * LearnDash Settings administration field Input and Select.
+ * LearnDash Input and Select Settings Field.
  *
- * @package LearnDash
- * @subpackage Settings
+ * @since 3.0.0
+ * @package LearnDash\Settings\Field
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'LearnDash_Settings_Fields_Input_Select' ) ) ) {
 	/**
-	 * Class to create the settings field.
+	 * Class LearnDash Input and Select Settings Field.
+	 *
+	 * @since 3.0.0
+	 * @uses LearnDash_Settings_Fields
 	 */
 	class LearnDash_Settings_Fields_Input_Select extends LearnDash_Settings_Fields {
 
 		/**
 		 * Public constructor for class
+		 *
+		 * @since 3.0.0
 		 */
 		public function __construct() {
 			$this->field_type = 'input-select';
@@ -24,14 +33,19 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 		/**
 		 * Function to crete the settiings field.
 		 *
-		 * @since 2.4
+		 * @since 3.0.0
 		 *
 		 * @param array $field_args An array of field arguments used to process the ouput.
+		 *
 		 * @return void
 		 */
 		public function create_section_field( $field_args = array() ) {
+
+			/** This filter is documented in includes/settings/settings-fields/class-ld-settings-fields-checkbox-switch.php */
 			$field_args = apply_filters( 'learndash_settings_field', $field_args );
-			$html       = apply_filters( 'learndash_settings_field_html_before', '', $field_args );
+
+			/** This filter is documented in includes/settings/settings-fields/class-ld-settings-fields-checkbox-switch.php */
+			$html = apply_filters( 'learndash_settings_field_html_before', '', $field_args );
 
 			$html .= '<input autocomplete="off" ';
 			$html .= $this->get_field_attribute_type( $field_args );
@@ -43,7 +57,7 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 			$html .= $this->get_field_attribute_required( $field_args );
 
 			if ( isset( $field_args['value'] ) ) {
-				$html .= ' value="' . $field_args['value'] . '" ';
+				$html .= ' value="' . esc_attr( $field_args['value'] ) . '" ';
 			} else {
 				$html .= ' value="" ';
 			}
@@ -62,15 +76,16 @@ if ( ( class_exists( 'LearnDash_Settings_Fields' ) ) && ( ! class_exists( 'Learn
 				$html .= ' >';
 
 				foreach ( $field_args['options'] as $option_key => $option_label ) {
-					$html .= '<option value="' . $option_key . '" ' . selected( $option_key, $field_args['value'], false ) . '>' . $option_label . '</option>';
+					$html .= '<option value="' . esc_attr( $option_key ) . '" ' . selected( $option_key, $field_args['value'], false ) . '>' . wp_kses_post( $option_label ) . '</option>';
 				}
 				$html .= '</select>';
 				$html .= '</span>';
 			}
 
+			/** This filter is documented in includes/settings/settings-fields/class-ld-settings-fields-checkbox-switch.php */
 			$html = apply_filters( 'learndash_settings_field_html_after', $html, $field_args );
 
-			echo $html;
+			echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Need to output HTML
 		}
 	}
 }

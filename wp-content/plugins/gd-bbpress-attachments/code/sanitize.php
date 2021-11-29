@@ -1,11 +1,13 @@
 <?php
 
-if (!defined('ABSPATH')) exit;
+if (!defined('ABSPATH')) {
+    exit;
+}
 
 if (!function_exists('d4p_sanitize_key_expanded')) {
     function d4p_sanitize_key_expanded($key) {
         $key = strtolower($key);
-	$key = preg_replace('/[^a-z0-9._\-]/', '', $key);
+        $key = preg_replace('/[^a-z0-9._\-]/', '', $key);
 
         return $key;
     }

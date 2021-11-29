@@ -7,6 +7,10 @@
  * @since 2.5.9
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 if ( ( class_exists( 'LearnDash_Gutenberg_Block' ) ) && ( ! class_exists( 'LearnDash_Gutenberg_Block_Group' ) ) ) {
 	/**
 	 * Class for handling LearnDash Group Block
@@ -18,21 +22,21 @@ if ( ( class_exists( 'LearnDash_Gutenberg_Block' ) ) && ( ! class_exists( 'Learn
 		 */
 		public function __construct() {
 			$this->shortcode_slug = 'ld_group';
-			$this->block_slug = 'ld-group';
-			$this->self_closing = false;
+			$this->block_slug     = 'ld-group';
+			$this->self_closing   = false;
 
 			$this->block_attributes = array(
 				'group_id' => array(
 					'type' => 'string',
 				),
-				'user_id' => array(
+				'user_id'  => array(
 					'type' => 'string',
 				),
-				'autop' => array(
+				'autop'    => array(
 					'type' => 'boolean',
 				),
 			);
-			
+
 			$this->init();
 		}
 	}

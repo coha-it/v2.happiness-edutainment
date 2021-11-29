@@ -2,19 +2,32 @@
 /**
  * LearnDash Settings Page Translations.
  *
- * @package LearnDash
- * @subpackage Settings
+ * @since 2.5.2
+ * @package LearnDash\Settings\Pages
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDash_Settings_Page_Translations' ) ) ) {
 	/**
-	 * Class to create the settings page.
+	 * Class LearnDash Settings Page Translations.
+	 *
+	 * @since 2.5.2
 	 */
 	class LearnDash_Settings_Page_Translations extends LearnDash_Settings_Page {
+		/**
+		 * Option key
+		 *
+		 * @var string
+		 */
 		private $ld_options_key = 'ld-translatation-message';
 
 		/**
 		 * Public constructor for class
+		 *
+		 * @since 2.5.2
 		 */
 		public function __construct() {
 			$this->parent_menu_page_url  = 'admin.php?page=learndash_lms_settings';
@@ -30,13 +43,15 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 
 		/**
 		 * On load function to load resources needed to page functionality.
+		 *
+		 * @since 2.5.2
 		 */
 		public function load_settings_page() {
 			global $learndash_assets_loaded;
 
 			wp_enqueue_style(
 				'learndash-admin-settings-page-translations-style',
-				LEARNDASH_LMS_PLUGIN_URL . 'assets/css/learndash-admin-settings-page-translations' . leardash_min_asset() . '.css',
+				LEARNDASH_LMS_PLUGIN_URL . 'assets/css/learndash-admin-settings-page-translations' . learndash_min_asset() . '.css',
 				array(),
 				LEARNDASH_SCRIPT_VERSION_TOKEN
 			);
@@ -45,7 +60,7 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 
 			wp_enqueue_script(
 				'learndash-admin-settings-page-translations-script',
-				LEARNDASH_LMS_PLUGIN_URL . 'assets/js/learndash-admin-settings-page-translations' . leardash_min_asset() . '.js',
+				LEARNDASH_LMS_PLUGIN_URL . 'assets/js/learndash-admin-settings-page-translations' . learndash_min_asset() . '.js',
 				array( 'jquery' ),
 				LEARNDASH_SCRIPT_VERSION_TOKEN,
 				true
@@ -60,11 +75,23 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 
 		/**
 		 * Show translation status message before title.
+		 *
+		 * @since 2.5.2
 		 */
 		public function settings_page_before_title() {
 			$this->handle_translation_message();
 		}
 
+		/**
+		 * Class utility function to return the form wrapper. Supports
+		 * the beginning <form> an ending </form>.
+		 *
+		 * @since 2.5.2
+		 *
+		 * @param boolean $start Flag to indicate if showing start or end of form.
+		 *
+		 * @return string form HTML.
+		 */
 		public function get_admin_page_form( $start = true ) {
 			if ( true === $start ) {
 				return '';
@@ -73,17 +100,22 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 			}
 		}
 
+		/**
+		 * Handle Translation Message
+		 *
+		 * @since 2.5.2
+		 */
 		public function handle_translation_message() {
 			$reply = get_option( $this->ld_options_key, array() );
 			if ( ! empty( $reply ) ) {
-				// Delete the option we don't need anymore
+				// Delete the option we don't need anymore.
 				delete_option( $this->ld_options_key );
 
 				if ( ( isset( $reply['status'] ) ) && ( isset( $reply['message'] ) ) ) {
 					if ( true === $reply['status'] ) {
 						?>
-						<div class="notice notice-success is-dismissible"> 
-							<?php echo $reply['message']; ?>
+						<div class="notice notice-success is-dismissible">
+							<?php echo wp_kses_post( $reply['message'] ); ?>
 							<button type="button" class="notice-dismiss">
 								<span class="screen-reader-text"><?php esc_html_e( 'Dismiss this notice.', 'learndash' ); ?></span>
 							</button>
@@ -91,8 +123,8 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 						<?php
 					} else {
 						?>
-						<div class="notice notice-error is-dismissible"> 
-							<?php echo $reply['message']; ?>
+						<div class="notice notice-error is-dismissible">
+							<?php echo wp_kses_post( $reply['message'] ); ?>
 							<button type="button" class="notice-dismiss">
 								<span class="screen-reader-text"><?php esc_html_e( 'Dismiss this notice.', 'learndash' ); ?></span>
 							</button>
@@ -103,35 +135,60 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 			}
 		}
 
+		/**
+		 * Handle Translation Actions
+		 *
+		 * @since 2.5.2
+		 */
 		public function handle_translation_actions() {
-			if ( isset( $_GET['action'] ) ) {
-				$action = esc_attr( $_GET['action'] );
+			if ( isset( $_GET['action'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				$action = esc_attr( $_GET['action'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			}
 
-			if ( isset( $_GET['project'] ) ) {
-				$project = esc_attr( $_GET['project'] );
+			if ( isset( $_GET['project'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				$project = esc_attr( $_GET['project'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			} else {
 				$project = '';
 			}
 
-			if ( isset( $_GET['locale'] ) ) {
-				$locale = esc_attr( $_GET['locale'] );
+			if ( isset( $_GET['locale'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				$locale = esc_attr( $_GET['locale'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			} else {
 				$locale = '';
 			}
 
-			if ( isset( $_GET['ld-translation-nonce'] ) ) {
-				$nonce = esc_attr( $_GET['ld-translation-nonce'] );
+			if ( isset( $_GET['ld-translation-nonce'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				$nonce = esc_attr( $_GET['ld-translation-nonce'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			} else {
 				$nonce = '';
 			}
 
 			if ( ! empty( $action ) ) {
 				switch ( $action ) {
+					case 'pot_download':
+						if ( ( ! empty( $project ) ) && ( ! empty( $nonce ) ) ) {
+							if ( wp_verify_nonce( $nonce, 'ld-translation-' . $action . '-' . $project ) ) {
+								if ( learndash_updates_enabled() ) {
+									$reply = LearnDash_Translations::download_pot_file( $project );
+								}
+							}
+						}
+						break;
+
+					case 'po_download':
+						if ( ( ! empty( $project ) ) && ( ! empty( $locale ) ) && ( ! empty( $nonce ) ) ) {
+							if ( wp_verify_nonce( $nonce, 'ld-translation-' . $action . '-' . $project . '-' . $locale ) ) {
+								$reply = LearnDash_Translations::download_po_file( $project, $locale );
+							}
+						}
+						break;
+
 					case 'install':
 						if ( ( ! empty( $project ) ) && ( ! empty( $locale ) ) && ( ! empty( $nonce ) ) ) {
 							if ( wp_verify_nonce( $nonce, 'ld-translation-' . $action . '-' . $project . '-' . $locale ) ) {
-								$reply = LearnDash_Translations::install_translation( $project, $locale );
+								if ( learndash_updates_enabled() ) {
+									$reply = LearnDash_Translations::install_translation( $project, $locale );
+								}
 							}
 						}
 						break;
@@ -139,7 +196,9 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 					case 'update':
 						if ( ( ! empty( $project ) ) && ( ! empty( $locale ) ) && ( ! empty( $nonce ) ) ) {
 							if ( wp_verify_nonce( $nonce, 'ld-translation-' . $action . '-' . $project . '-' . $locale ) ) {
-								$reply = LearnDash_Translations::update_translation( $project, $locale );
+								if ( learndash_updates_enabled() ) {
+									$reply = LearnDash_Translations::update_translation( $project, $locale );
+								}
 							}
 						}
 						break;
@@ -154,7 +213,9 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 
 					case 'refresh':
 						if ( wp_verify_nonce( $nonce, 'ld-translation-' . $action ) ) {
-							$reply = LearnDash_Translations::refresh_translations();
+							if ( learndash_updates_enabled() ) {
+								$reply = LearnDash_Translations::refresh_translations();
+							}
 						}
 						break;
 
@@ -168,7 +229,7 @@ if ( ( class_exists( 'LearnDash_Settings_Page' ) ) && ( ! class_exists( 'LearnDa
 
 				$redirect_url = remove_query_arg( array( 'action', 'project', 'locale', 'ld-translation-nonce' ) );
 				if ( ! empty( $redirect_url ) ) {
-					wp_safe_redirect( $redirect_url );
+					learndash_safe_redirect( $redirect_url );
 				}
 			}
 		}

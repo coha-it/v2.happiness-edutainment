@@ -10,29 +10,35 @@ if ( ! defined( 'myCRED_VERSION' ) ) exit;
 if ( ! class_exists( 'myCRED_Badge' ) ) :
 	class myCRED_Badge extends myCRED_Object {
 
-		public $post_id          = false;
+		public $post_id            = false;
 
-		public $title            = '';
-		public $earnedby         = 0;
-		public $manual           = false;
+		public $title              = '';
+		public $earnedby           = 0;
+		public $manual             = false;
+		public $open_badge         = false;
 
-		public $levels           = array();
-		public $main_image       = false;
+		public $levels             = array();
+		public $main_image         = false;
 
-		public $level            = false;
-		public $level_id         = false;
-		public $level_label      = false;
-		public $level_image      = false;
+		public $level              = false;
+		public $level_id           = false;
+		public $level_label        = false;
+		public $level_image        = false;
 
-		public $image_width      = false;
-		public $image_height     = false;
+		public $image_width        = false;
+		public $image_height       = false;
 
-		public $references       = array();
-		public $point_types      = array();
-		protected $user_meta_key = '';
+		public $references         = array();
+		public $point_types        = array();
+		protected $user_meta_key   = '';
 
-		public $user_id          = false;
-		public $current_level    = false;
+		public $user_id            = false;
+		public $current_level      = false;
+
+		public $main_image_url     = false;
+		public $congratulation_msg = '';
+		public $align              = 'mycred_align_left';
+		public $layout             = 'mycred_layout_left';
 
 		/**
 		 * Construct
@@ -98,13 +104,30 @@ if ( ! class_exists( 'myCRED_Badge' ) ) :
 			if ( absint( mycred_get_post_meta( $this->post_id, 'manual_badge', true ) ) === 1 )
 				$this->manual = true;
 
+			// Indicate open badge
+			if ( absint( mycred_get_post_meta( $this->post_id, 'open_badge', true ) ) === 1 ) {
+ 
+				$badge_setting = mycred_get_addon_settings( 'badges' );
+
+				if ( isset( $badge_setting['open_badge'] ) && $badge_setting['open_badge'] === 1 ) {
+					
+					$this->open_badge = true;
+
+				}
+			
+			}
+
 			// If we requested a particular level
 			if ( $level_id !== NULL )
 				$this->level = $this->get_level( $level_id );
 
 			// Get images
-			$this->main_image  = $this->get_image( 'main' );
-			$this->level_image = $this->get_image( $level_id );
+			$this->main_image         = $this->get_image( 'main' );
+			$this->main_image_url     = $this->get_image_url( 'main' );
+			$this->level_image        = $this->get_image( $level_id );
+			$this->congratulation_msg = mycred_get_post_meta( $this->post_id, 'congratulation_msg', true );
+			$this->align 			  = mycred_get_post_meta( $this->post_id, 'mycred_badge_align', true );
+			$this->layout             = mycred_get_post_meta( $this->post_id, 'mycred_layout_check', true );
 
 		}
 
@@ -218,7 +241,7 @@ if ( ! class_exists( 'myCRED_Badge' ) ) :
 				return absint( $mycred_current_account->badge_ids[ $this->post_id ] );
 
 			$current_level = mycred_get_user_meta( $user_id, $this->user_meta_key, '', true );
-			$current_level = ( ! empty( $current_level ) ) ? absint( $current_level ) : false;
+			$current_level = ( ! empty( $current_level ) || $current_level === '0' ) ? absint( $current_level ) : false;
 
 			return $current_level;
 
@@ -256,6 +279,9 @@ if ( ! class_exists( 'myCRED_Badge' ) ) :
 						$having = 'SUM(creds)';
 
 					$query  = $wpdb->get_var( $wpdb->prepare( "SELECT {$having} FROM {$mycred_log_table} WHERE ctype = %s AND ref = %s AND user_id = %d;", $requirement['type'], $requirement['reference'], $user_id ) );
+
+					$query  = apply_filters( 'mycred_badge_requirement', $query, $requirement_id, $requirement, $having, $user_id );
+
 					if ( $query === NULL ) $query = 0;
 
 					$results[ $requirement['reference'] ] = $query;
@@ -325,6 +351,7 @@ if ( ! class_exists( 'myCRED_Badge' ) ) :
 		/**
 		 * Assign Badge to User
 		 * @since 1.0
+		 * @since 2.3 Added functions `mycred_update_user_meta`, `mycred_get_user_meta` with `mycred_badge_ids`
 		 * @version 1.0
 		 */
 		public function assign( $user_id = false, $level_id = 0 ) {
@@ -349,19 +376,38 @@ if ( ! class_exists( 'myCRED_Badge' ) ) :
 				$this->current_level = $new_level;
 			}
 
-			$new_level = apply_filters( 'mycred_badge_user_value', $new_level, $user_id, $this->post_id );
-			mycred_update_user_meta( $user_id, $this->user_meta_key, '', $new_level );
+			$execute = apply_filters( 'mycred_badge_assign', true, $user_id, $new_level, $this );
 
-			// Need to update counter with new assignments
-			if ( $new_level == 0 ) {
+			if ( $execute ) {
+				
+				$new_level = apply_filters( 'mycred_badge_user_value', $new_level, $user_id, $this->post_id );
 
-				$this->earnedby ++;
+				mycred_update_user_meta( $user_id, $this->user_meta_key, '', $new_level );
+				mycred_update_user_meta( $user_id, $this->user_meta_key, '_issued_on', time() );
+				
+				$badge_ids = mycred_get_user_meta( $user_id, 'mycred_badge_ids', '', true );
+				 
+				if ( ! empty( $badge_ids ) && is_array( $badge_ids ) )
+					$badge_ids[ $this->post_id ] = 0;
+				else
+					$badge_ids = array( $this->post_id => 0 );
+				
+				mycred_update_user_meta( $user_id, 'mycred_badge_ids', '', $badge_ids );
 
-				mycred_update_post_meta( $this->post_id, 'total-users-with-badge', $this->earnedby );
+				// Need to update counter with new assignments
+				if ( $new_level == 0 ) {
+
+					$this->earnedby ++;
+
+					mycred_update_post_meta( $this->post_id, 'total-users-with-badge', $this->earnedby );
+
+				}
+
+				$this->payout_reward( $previous_level, $new_level );
+				
+				do_action( 'mycred_after_badge_assign', $user_id, $this->post_id, $new_level );
 
 			}
-
-			$this->payout_reward( $previous_level, $new_level );
 
 			return true;
 
@@ -389,7 +435,7 @@ if ( ! class_exists( 'myCRED_Badge' ) ) :
 
 					if( $exec ) {
 
-						$mycred->add_to_log(
+						$mycred->add_creds(
 							'badge_reward',
 							$this->user_id,
 							$reward['amount'],
@@ -398,8 +444,6 @@ if ( ! class_exists( 'myCRED_Badge' ) ) :
 							0,
 							$reward['type']
 						);
-
-						$mycred->update_users_balance( $this->user_id, $reward['amount'], $reward['type'] );
 
 						do_action( 'mycred_badge_rewardes', $this->user_id, $previous_level, $new_level, $reward, $this );
 
@@ -427,7 +471,7 @@ if ( ! class_exists( 'myCRED_Badge' ) ) :
 
 						if( $exec ) {
 
-							$mycred->add_to_log(
+							$mycred->add_creds(
 								'badge_reward',
 								$this->user_id,
 								$reward['amount'],
@@ -436,8 +480,6 @@ if ( ! class_exists( 'myCRED_Badge' ) ) :
 								$i,
 								$reward['type']
 							);
-
-							$mycred->update_users_balance( $this->user_id, $reward['amount'], $reward['type'] );
 
 							do_action( 'mycred_badge_rewardes', $this->user_id, $previous_level, $new_level, $reward, $this );
 
@@ -596,6 +638,9 @@ if ( ! class_exists( 'myCRED_Badge' ) ) :
 
 					mycred_update_post_meta( $this->post_id, 'total-users-with-badge', $this->earnedby );
 
+					//Updating issued_on
+                    mycred_update_user_meta( $row->user_id, $this->user_meta_key, '_issued_on', time() );
+
 				}
 
 			}
@@ -607,6 +652,7 @@ if ( ! class_exists( 'myCRED_Badge' ) ) :
 		/**
 		 * Divest Badge from user
 		 * @since 1.0
+		 * @since 2.3 Added functions `mycred_update_user_meta` with `mycred_badge_ids`
 		 * @version 1.0
 		 */
 		public function divest( $user_id = false ) {
@@ -614,11 +660,17 @@ if ( ! class_exists( 'myCRED_Badge' ) ) :
 			if ( $user_id === false || absint( $user_id ) === 0 ) return false;
 
 			mycred_delete_user_meta( $user_id, $this->user_meta_key );
+			mycred_delete_user_meta( $user_id, $this->user_meta_key . '_issued_on' );
+			$usermeta = mycred_get_user_meta( $user_id, 'mycred_badge_ids', '', true );
+
+			if ( isset( $usermeta[$this->post_id] ) )
+				unset( $usermeta[$this->post_id] );
 
 			$this->earnedby --;
 			if ( $this->earnedby < 0 ) $this->earnedby = 0;
 
 			mycred_update_post_meta( $this->post_id, 'total-users-with-badge', $this->earnedby );
+			mycred_update_user_meta( $user_id, 'mycred_badge_ids', '', $usermeta );
 
 			return true;
 
@@ -685,6 +737,29 @@ if ( ! class_exists( 'myCRED_Badge' ) ) :
 			$image_identification = false;
 
 			$level = 'none';
+			if ( $image != 'main' && is_numeric( $image ) ) {
+
+				$level = $image;
+
+			}
+
+			$image_url    = $this->get_image_url( $image );
+
+			$image_width  = ( $this->image_width !== false ) ? ' width="' . esc_attr( $this->image_width ) . '"' : '';
+			$image_height = ( $this->image_height !== false ) ? ' height="' . esc_attr( $this->image_height ) . '"' : '';
+
+			if ( ! $image_url ) return false;
+
+			$html         = '<img src="' . esc_url( $image_url ) . '" class="' . MYCRED_SLUG . '-badge-image badge-level' . esc_attr( $level ) . '" title="' . esc_attr( $this->title ) . '" alt="' . esc_attr( $this->title ) . '"' . $image_width . $image_height . ' />';
+
+			return apply_filters( 'mycred_badge_image', $html, $image, $this );
+
+		}
+
+		public function get_image_url( $image = NULL ) {
+
+			$image_identification = false;
+
 			if ( $image === 'main' )
 				$image_identification = mycred_get_post_meta( $this->post_id, 'main_image', true );
 
@@ -693,23 +768,53 @@ if ( ! class_exists( 'myCRED_Badge' ) ) :
 				$image_identification = $this->levels[ $image ]['image_url'];
 				if ( $this->levels[ $image ]['attachment_id'] > 0 ) {
 					$image_identification = $this->levels[ $image ]['attachment_id'];
-					$level                = $image;
 				}
 
 			}
 
 			if ( $image_identification === false || strlen( $image_identification ) == 0 ) return false;
 
-			$image_url    = $image_identification;
+			$image_url = $image_identification;
+
 			if ( is_numeric( $image_identification ) &&  strpos( '://', (string) $image_identification ) === false )
-				$image_url = wp_get_attachment_url( $image_identification );
+				$image_url = mycred_get_attachment_url( $image_identification );
 
-			$image_width  = ( $this->image_width !== false ) ? ' width="' . esc_attr( $this->image_width ) . '"' : '';
-			$image_height = ( $this->image_height !== false ) ? ' height="' . esc_attr( $this->image_height ) . '"' : '';
+			return apply_filters( 'mycred_badge_image_url', $image_url, $image, $this );
 
-			$html         = '<img src="' . esc_url( $image_url ) . '" class="' . MYCRED_SLUG . '-badge-image badge-level' . esc_attr( $level ) . '" title="' . esc_attr( $this->title ) . '" alt="' . esc_attr( $this->title ) . '"' . $image_width . $image_height . ' />';
+		}
 
-			return apply_filters( 'mycred_badge_image', $html, $image, $this );
+		public function get_earned_image( $user_id ) {
+
+			$image_url = $this->main_image_url;
+
+			if ( $this->open_badge && $this->user_has_badge( $user_id ) ) {
+
+				$wp_upload_dirs = wp_upload_dir();
+				$basedir = trailingslashit( $wp_upload_dirs[ 'basedir' ] );
+				$baseurl = trailingslashit( $wp_upload_dirs[ 'baseurl' ] );
+
+				$folderName = apply_filters( 'mycred_open_badge_folder', 'open_badges' );
+
+				$open_badge_directory = $basedir . $folderName;
+
+				$open_badge_directory = trailingslashit( $open_badge_directory );
+
+				$badge_id = $this->post_id;
+
+				$filename = "badge-{$badge_id}-{$user_id}.png";
+				
+				if ( ! file_exists( $open_badge_directory . $filename ) ) {
+
+					$mycred_Open_Badge = new mycred_Open_Badge();
+					$mycred_Open_Badge->bake_users_image( $user_id, $badge_id );
+
+				}
+
+				$image_url = trailingslashit( $baseurl . $folderName ) . $filename;
+
+			}
+
+			return $image_url;
 
 		}
 

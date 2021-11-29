@@ -1,19 +1,19 @@
 === GD bbPress Attachments ===
 Contributors: GDragoN
 Donate link: https://plugins.dev4press.com/gd-bbpress-attachments/
-Version: 3.2
+Version: 4.3
 Tags: dev4press, bbpress, attachments, upload, media library, forum, topic, reply, limit, meta
-Requires at least: 4.7
-Requires PHP: 5.6
-Tested up to: 5.2
+Requires at least: 5.1
+Requires PHP: 7.0
+Tested up to: 5.9
 Stable tag: trunk
-License: GPLv2 or later
-License URI: http://www.gnu.org/licenses/gpl-2.0.html
+License: GPLv3 or later
+License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
 Implements attachments upload to the topics and replies in bbPress plugin through media library and add additional forum based controls.
 
 == Description ==
-GD bbPress Attachments is an easy to use plugin for WordPress and bbPress for implementing files upload for bbPress Forums topics and replies. You can control file sizes from the main plugin settings panel, or you can change some attachments settings for each forum individually. Currently included features:
+GD bbPress Attachments is an easy-to-use plugin for WordPress and bbPress for implementing files upload for bbPress Forums topics and replies. You can control file sizes from the main plugin settings panel, or you can change some attachments settings for each forum individually. Currently, included features:
 
 * Attachments are handled through WordPress media library. 
 * Limit the number of files to upload at once.
@@ -24,28 +24,28 @@ GD bbPress Attachments is an easy to use plugin for WordPress and bbPress for im
 * Display uploaded images as thumbnails.
 * Control thumbnail size.
 * Control thumbnail CLASS and REL attributes.
-* Upload errors can be logged .
+* Upload errors can be logged.
 * Post author and administrators can see errors.
 * Administration: attachments count for topics and replies.
 * Administration: metabox for settings override for forums.
 * Administration: metabox with attachments list and errors for topics and replies.
 
 = bbPress Plugin Versions =
-GD bbPress Attachments 3.0 supports bbPress 2.5 or newer. Older bbPress are no longer supported!
-
-= BuddyPress Support =
-GD bbPress Attachments 3.0 is tested with BuddyPress 3.0 using bbPress for Groups forums. Make sure you enable JavaScript and CSS Settings Always Include option in the plugin settings.
+GD bbPress Attachments 4.3 supports bbPress 2.6.2 or newer. Older bbPress versions are no longer supported!
 
 = More free Dev4Press plugins for bbPress =
+* [GD Forum Manager](https://wordpress.org/plugins/gd-forum-manager-for-bbpress/) - quick and bulk forums and topics edit
+* [GD Members Directory](https://wordpress.org/plugins/gd-members-directory-for-bbpress/) - add new page with list of all forum members
+* [GD Power Search](https://wordpress.org/plugins/gd-power-search-for-bbpress/) - add advanced search to the bbPress topics
 * [GD bbPress Tools](https://wordpress.org/plugins/gd-bbpress-tools/) - various expansion tools for forums
 * [GD Topic Polls](https://wordpress.org/plugins/gd-topic-polls/) - add polls to the bbPress topics
-* [GD Power Search](https://wordpress.org/plugins/gd-power-search-for-bbpress/) - add advanced search to the bbPress topics
 
 = Upgrade to GD bbPress Toolbox Pro =
 Pro version contains many more great features:
 
 * Enhanced attachments features
 * Limit file types attachments upload
+* Add custom file types for upload
 * BBCodes editor toolbar
 * Report topics and replies
 * Say thanks to forum members
@@ -62,32 +62,26 @@ Pro version contains many more great features:
 * Forum based settings overrides
 * Improved BuddyPress support
 * 40 BBCodes (including Hide and Spoiler)
-* 19 Topics Views
-* 8 additional widgets
+* 19 more Topics Views
+* 9 additional widgets
 * Many great tweaks
 * And much, much more
 
 With more features on the roadmap exclusively for Pro version.
 
-* More information about [GD bbPress Toolbox Pro](https://plugins.dev4press.com/gd-bbpress-toolbox/)
-* Compare [Free vs. Pro Plugin](https://plugins.dev4press.com/gd-bbpress-toolbox/articles/toolbox-pro-vs-free-plugins/)
-
-= Premium dev4Press.com plugins for bbPress =
-* [GD bbPress Toolbox Pro](https://plugins.dev4press.com/gd-bbpress-toolbox/) - collection of features for bbPress
-* [GD Quantum Theme Pro](https://plugins.dev4press.com/gd-quantum-theme-for-bbpress/) - add new theme package to bbPress
-* [GD Power Search Pro](https://plugins.dev4press.com/gd-power-search-for-bbpress/) - add advanced search to the bbPress topics
-* [GD Topic Polls Pro](https://plugins.dev4press.com/gd-topic-polls/) - add polls to the bbPress topics
-* [GD Topic Prefix Pro](https://plugins.dev4press.com/gd-topic-prefix/) - add customizable bbPress topic prefixes
+* More information about [GD bbPress Toolbox Pro](https://plugins.dev4press.com/gd-bbpress-toolbox/?utm_source=wporg&utm_medium=link&utm_campaign=gd-bbpress-attachments)
+* Compare [Free vs. Pro Plugin](https://plugins.dev4press.com/gd-bbpress-toolbox/articles/toolbox-pro-vs-free-plugins/?utm_source=wporg&utm_medium=link&utm_campaign=gd-bbpress-attachments)
+* More Premium plugins for bbPress [bbPress Plugins Club](https://bbpress.dev4press.com/?utm_source=wporg&utm_medium=link&utm_campaign=gd-bbpress-attachments)
 
 == Installation ==
 = General Requirements =
-* PHP: 5.6 or newer
+* PHP: 7.0 or newer
 
 = WordPress Requirements =
-* WordPress: 4.7 or newer
+* WordPress: 5.1 or newer
 
 = bbPress Requirements =
-* bbPress Plugin: 2.5 or newer
+* bbPress Plugin: 2.6.2 or newer
 
 = Basic Installation =
 * Plugin folder in the WordPress plugins folder must be `gd-bbpress-attachments`
@@ -102,20 +96,61 @@ Open the Forums menu, and you will see Attachments item there. This will open a 
 All attachments uploads are handled by the WordPress Media Library, and plugin uses native WordPress upload functions. When the file is uploaded it will be available through Media Library. Consult WordPress documentation about Media Library requirements.
 
 = Will this plugin work with standalone bbPress installation? =
-No. This plugin requires the plugin versions of bbPress 2.5 or higher.
+No. This plugin requires the plugin versions of bbPress 2.6.2 or higher.
 
-= Does this plugin work with bbPress plugin used as sitewide forums for BuddyPress plugin? =
-Yes. But, make sure to enable 'Always Include' option for JavaScript and CSS.
+= Does this plugin work with bbPress and BuddyPress groups? =
+GD bbPress Attachments 4.2 is tested with BuddyPress 6.0 using bbPress for Groups forums. Make sure you enable JavaScript and CSS Settings Always Include option in the plugin settings.
 
 = What are the common problems that can prevent upload to work? =
 In some cases, it can happen that jQuery is not included on the page, even so, the bbPress requires it to be loaded. That can happen if something else is unloading jQuery. If the jQuery is not present, the upload will not work.
 Another common issue is that WordPress Media Library upload is not working. If that is not set up, attachments upload can't work.
 
 == Upgrade Notice ==
-= 3.2 =
-Various updates, improvements and fixes.
+= 4.3 =
+Various updates and improvements.
 
 == Changelog ==
+= 4.3 (2021.10.05) =
+* New system requirements: WordPress 5.1 or newer
+* Improvements to the plugin readme file
+* Few more minor updates
+
+= 4.2 (2021.01.30) =
+* New system requirements: PHP 7.0 or newer
+* New system requirements: WordPress 5.0 or newer
+* New system requirements: bbPress 2.6.2 or newer
+* Improvements to the rendering attachments code
+* Various minor updates and improvements
+
+= 4.1 (2020.07.23) =
+* New rendering method for attachments list
+* New classes added to the attachments OL wrappers
+* Trigger topic/reply edit revision when attachment is added
+* Improvements to the attachments' layout styling
+* Improvements to the attachments icons styling
+* Improvements to the plugin readme file
+* Fixed some issues when showing attachments list on small screens
+* Fixed some styling issues with various themes
+
+= 4.0.1 (2020.05.13) =
+* Improvements to the plugin readme file
+* Few minor updates to the frontend CSS code
+* Fixed few more typos
+
+= 4.0 (2020.05.08) =
+* New fieldset used to wrap attachments upload control
+* New replacement function to determine valid forum id
+* New confirmation dialog for deleting and detaching files
+* New reorganized plugin code and the way it is loaded and run
+* New completely rewritten JavaScript for attachments handling
+* New rewritten loading of JavaScript and CSS files
+* New fully reorganized CSS now written using SCSS
+* New loading JavaScript and CSS minified or normal
+* New error icon added to the list of errors
+* Replaced icon for the attachment in the topics list
+* Removed obsolete form encoding attribute settings
+* Fixed issue with the topic and reply edit pages
+
 = 3.2 (2019.09.02) =
 * Show KB or MB file size limit depending on the size
 * Removed all outdated translations

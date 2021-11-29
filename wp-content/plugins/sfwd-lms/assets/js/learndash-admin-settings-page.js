@@ -1,14 +1,11 @@
-jQuery(document).ready(function() {
+if ((typeof learndash_admin_settings_data !== 'undefined') && (typeof learndash_admin_settings_data.json !== 'undefined')) {
+	learndash_admin_settings_data = learndash_admin_settings_data.json.replace(/&quot;/g, '"');
+	learndash_admin_settings_data = jQuery.parseJSON(learndash_admin_settings_data);
+} else {
+	learndash_admin_settings_data = {};
+}
 
-	//console.log('wp[%o]', wp);
-	//console.log('isRtl[%o]', isRtl);
-
-	if ((typeof learndash_admin_settings_data !== 'undefined') && (typeof learndash_admin_settings_data.json !== 'undefined')) {
-		learndash_admin_settings_data = learndash_admin_settings_data.json.replace(/&quot;/g, '"');
-		learndash_admin_settings_data = jQuery.parseJSON(learndash_admin_settings_data);
-	} else {
-		learndash_admin_settings_data = {};
-	}
+jQuery( function() {
 
 	learndash_course_edit_page_billing_cycle_javascript();
 
@@ -17,7 +14,9 @@ jQuery(document).ready(function() {
 			var parent_ld_select = jQuery(item).parent('span.ld-select');
 			if (typeof parent_ld_select !== 'undefined') {
 				jQuery(parent_ld_select).addClass('ld-select2');
-			} 
+			}
+
+			var select2_args = learndash_get_base_select2_args();
 
 			var placeholder = jQuery(item).attr('placeholder');
 			if ((typeof placeholder === 'undefined') || (placeholder === '')) {
@@ -26,15 +25,101 @@ jQuery(document).ready(function() {
 			if ((typeof placeholder === 'undefined') || (placeholder === '')) {
 				placeholder = 'Select an option';
 			}
+			select2_args.placeholder = placeholder;
 
-			jQuery(item).select2({
-				placeholder: placeholder,
-				width: 'resolve',
-				dir: (window.isRtl) ? 'rtl' : '',
-				dropdownAutoWidth: true
-			});
+			select2_args.ajax = learndash_settings_select2_ajax(item);
+			jQuery(item).select2(select2_args);
 		});
 	}
+
+	if (jQuery('body.edit-php .tablenav.top select[data-ld-select2="1"], body.users-php .tablenav.top select[data-ld-select2="1"]').length) {
+		jQuery('body.edit-php .tablenav.top select[data-ld-select2="1"], body.users-php .tablenav.top select[data-ld-select2="1"]').each(function (idx, item) {
+			var select2_args = learndash_get_base_select2_args();
+
+			var placeholder = jQuery(item).attr('placeholder');
+			if ((typeof placeholder === 'undefined') || (placeholder === '')) {
+				placeholder = jQuery("option[value='']", item).text();
+			}
+			if ((typeof placeholder === 'undefined') || (placeholder === '')) {
+				placeholder = 'Select an option';
+			}
+			select2_args.placeholder = placeholder;
+
+			select2_args.ajax = learndash_listing_select2_ajax(item);
+			jQuery(item).select2(select2_args);
+		});
+	}
+
+	/**
+	 * Populate Select2 dropdowns with data
+	 *
+	 * @param action
+	 * @returns {{url, dataType: string, method: string, delay: number, data: data, processResults: processResults}}
+	 */
+	function learndash_listing_select2_ajax(el) {
+		var listing_nonce = jQuery('#ld-listing-nonce').data('ld-listing-nonce');
+		if ((typeof listing_nonce === 'undefined') || (listing_nonce === '')) {
+			return null;
+		}
+
+		var selector_query_data = jQuery(el).data('ld-selector-query-data');
+		if ((typeof selector_query_data === 'undefined') || (selector_query_data === '')) {
+			return null;
+		}
+
+		if ((typeof selector_query_data['selector_key'] === 'undefined') || (selector_query_data['selector_key'] === '')) {
+			return null;
+		}
+
+		// Trigger change when the selector is cleared.
+		jQuery(el).on('select2:unselect', function (e) {
+			jQuery(el).trigger('change');
+		});
+
+		return {
+			url: learndash_admin_settings_data.ajaxurl,
+			dataType: 'json',
+			method: 'post',
+			delay: 1500,
+			cache: true,
+			data: function (params) {
+				var query_data = {};
+				query_data['selector_key'] = selector_query_data['selector_key'];
+				query_data['selector_filters'] = {};
+
+				// We need to get the values from our related filters.
+				if (typeof selector_query_data['selector_filters'] !== 'undefined') {
+					jQuery.each(selector_query_data['selector_filters'], function (idx, selector_filter) {
+						if (selector_filter !== '') {
+							if (jQuery('body.edit-php .tablenav.top select[data-ld-selector-nonce="' + selector_filter + '"], body.users-php .tablenav.top select[data-ld-selector-nonce="' + selector_filter + '"]').length) {
+								var selector_filter_value = jQuery('body.edit-php .tablenav.top select[data-ld-selector-nonce="' + selector_filter + '"], body.users-php .tablenav.top select[data-ld-selector-nonce="' + selector_filter + '"]').val();
+								query_data['selector_filters'][selector_filter] = selector_filter_value;
+							}
+						}
+					});
+				}
+
+				return {
+					'action': 'learndash_listing_select2_query',
+					'listing_nonce': listing_nonce,
+					'query_data': query_data || '',
+					'search': params.term || '',
+					'page': params.page || 1,
+				};
+			},
+			processResults: function (response, params) {
+				params.page = params.page || 1;
+
+				return {
+					results: response.items,
+					pagination: {
+						more: (params.page < response.total_pages)
+					}
+				};
+			},
+		}
+	}
+
 
 	/**
 	 * Handle color picker settings fields.
@@ -51,10 +136,10 @@ jQuery(document).ready(function() {
 			var item_spinner = jQuery(item).find('.spinner');
 			item_spinner.css( 'float', 'none' );
 
-			jQuery( item ).find( 'select' ).change( function( e ) {
-				
+			jQuery( item ).find( 'select' ).on( 'change', function( e ) {
+
 				var select_val = jQuery( item ).find( 'select' ).val();
-				
+
 				// Hide any previous update message.
 				jQuery( item ).find( '.message' ).hide();
 
@@ -70,7 +155,7 @@ jQuery(document).ready(function() {
 				}
 			});
 
-			jQuery( item ).find( 'input[type="button"]' ).click( function ( e ) {
+			jQuery( item ).find( 'input[type="button"]' ).on( 'click', function ( e ) {
 				var field_action = jQuery( e.currentTarget ).data( 'action' );
 				var field_value = jQuery( item ).find( 'select' ).val();
 				var updated_text = jQuery( item ).find( 'input[type="text"]' ).val();
@@ -82,7 +167,7 @@ jQuery(document).ready(function() {
 					post_data['field_text'] = updated_text;
 
 					item_spinner.css('visibility', 'visible');
-				
+
 					jQuery.ajax({
 						type: 'POST',
 						url: ajaxurl,
@@ -124,7 +209,7 @@ jQuery(document).ready(function() {
 			var media_upload_field = jQuery(item).find('.learndash-section-field-media-upload');
 			var media_preview_field = jQuery(item).find('img.image-preview');
 
-			jQuery(item).find('input[type="button"].image-upload-button').click(function (e) {
+			jQuery(item).find('input[type="button"].image-upload-button').on( 'click', function (e) {
 				e.preventDefault();
 				var file_frame;
 
@@ -133,7 +218,7 @@ jQuery(document).ready(function() {
 					// Open frame
 					file_frame.open();
 					return;
-				} 
+				}
 
 				// Create the media frame.
 				file_frame = wp.media.frames.file_frame = wp.media({
@@ -158,7 +243,7 @@ jQuery(document).ready(function() {
 				file_frame.open();
 			});
 
-			jQuery(item).find('input[type="button"].image-remove-button').click(function (e) {
+			jQuery(item).find('input[type="button"].image-remove-button').on( 'click', function (e) {
 				e.preventDefault();
 				jQuery(media_upload_field).val('');
 				var default_image_url = jQuery(media_preview_field).data('default');
@@ -181,29 +266,29 @@ jQuery(document).ready(function() {
 	/**
 	 * On the Lesson Settings metabox. If it contains no items we remove the metabox.
 	 */
-	
+
 	if (!jQuery('body.post-type-sfwd-lessons #sfwd-lessons.postbox .inside .sfwd_input').length) {
 		jQuery('body.post-type-sfwd-lessons #sfwd-lessons.postbox').remove();
 	}
-	
+
 	/**
 	 * On the Lesson Settings metabox. If it contains no items we remove the metabox.
 	 */
-	
+
 	if (!jQuery('body.post-type-sfwd-topic #sfwd-topic.postbox .inside .sfwd_input').length) {
 		jQuery('body.post-type-sfwd-topic #sfwd-topic.postbox').remove();
 	}
-	
+
 	/**
 	 * On the Quiz Settings metabox. If it contains no items we remove the metabox.
 	 */
-	
-	if (!jQuery('body.post-type-sfwd-topic #sfwd-quiz.postbox .inside .sfwd_input').length) {
-		jQuery('body.post-type-sfwd-topic #sfwd-quiz.postbox').hide();
+
+	if (!jQuery('body.post-type-sfwd-quiz #sfwd-quiz.postbox .inside .sfwd_input').length) {
+		jQuery('body.post-type-sfwd-quiz #sfwd-quiz.postbox').remove();
 	}
-	
+
 	/**
-	 * For the checkbox-switch can have dual labels. One for the 'on' state and one for the 
+	 * For the checkbox-switch can have dual labels. One for the 'on' state and one for the
 	 * 'off' state. This piece of code hooks into the change early event and swaps the labels.
 	 */
 	jQuery('.sfwd_options').on('ld_setting_switch_changed_early', function (event) {
@@ -226,13 +311,13 @@ jQuery(document).ready(function() {
  	*/
 	if (jQuery('.sfwd_options input.learndash-section-field-checkbox-switch').length) {
 		jQuery('.sfwd_options input.learndash-section-field-checkbox-switch').each(function (idx, item) {
-			
-			jQuery(item).click(function (e) {
+
+			jQuery(item).on( 'click', function (e) {
 				checked_state = 'unchecked';
 				if (jQuery(e.currentTarget).is(':checked') ) {
 					checked_state = 'checked';
 				}
-				
+
 				var trigger_data = {
 					'type': 'ld_setting_switch_changed_early',
 					'element': e.currentTarget,
@@ -255,18 +340,18 @@ jQuery(document).ready(function() {
 							jQuery('.sfwd_options .' + settings_sub_trigger_class).addClass('ld-settings-sub-state-open');
 
 							jQuery('.sfwd_options').trigger({
-								type: trigger_data['type'], 
+								type: trigger_data['type'],
 								ld_trigger_data: trigger_data
 							});
 						});
-						
+
 					} else {
 						jQuery('.sfwd_options .' + settings_sub_trigger_class).slideUp(400, function () {
 							jQuery('.sfwd_options .' + settings_sub_trigger_class).addClass('ld-settings-sub-state-closed');
 							jQuery('.sfwd_options .' + settings_sub_trigger_class).removeClass('ld-settings-sub-state-open');
 
-							jQuery('.sfwd_options').trigger({ 
-								type: trigger_data['type'], 
+							jQuery('.sfwd_options').trigger({
+								type: trigger_data['type'],
 								ld_trigger_data: trigger_data
 							});
 						});
@@ -310,7 +395,7 @@ jQuery(document).ready(function() {
  	*/
 	if (jQuery('.sfwd_options select.learndash-section-field-select').length) {
 		jQuery('.sfwd_options select.learndash-section-field-select').each(function (idx, item) {
-			jQuery(item).change(function (e) {
+			jQuery(item).on( 'change', function (e) {
 
 				var select_val = jQuery(e.currentTarget).val();
 				if ((typeof select_val === 'undefined') || ('-1' == select_val)) {
@@ -322,12 +407,12 @@ jQuery(document).ready(function() {
 					'state': 'open',
 					'value': select_val
 				}
-				
+
 				var settings_sub_trigger_class = jQuery(e.currentTarget).data('settings-sub-trigger');
 				if ((typeof settings_sub_trigger_class !== 'undefined') && ('' !== settings_sub_trigger_class )) {
 					trigger_data['class'] = settings_inner_trigger_class;
 					trigger_data['type'] = 'ld_setting_select_sub_changed_early';
-					
+
 					if ( jQuery('.sfwd_options .' + settings_sub_trigger_class).length ) {
 						trigger_data['state'] = 'closed';
 
@@ -370,7 +455,7 @@ jQuery(document).ready(function() {
 						}
 					}
 				}
-				
+
 
 				var settings_inner_trigger_class = jQuery(e.currentTarget).data('settings-inner-trigger');
 				if ((typeof settings_inner_trigger_class !== 'undefined') && ('' !== settings_inner_trigger_class)) {
@@ -383,7 +468,7 @@ jQuery(document).ready(function() {
 							jQuery(item).slideUp('fast', function () {
 								jQuery(item).removeClass('ld-settings-inner-state-open');
 								jQuery(item).addClass('ld-settings-inner-state-closed');
-								
+
 								trigger_data['type'] = 'ld_setting_switch_sub_changed_late';
 								trigger_data['state'] = 'closed';
 
@@ -391,7 +476,7 @@ jQuery(document).ready(function() {
 									type: 'ld_setting_select_changed_early',
 									ld_trigger_data: trigger_data
 								});
-								
+
 							});
 						});
 					}
@@ -399,7 +484,7 @@ jQuery(document).ready(function() {
 					settings_inner_trigger_class = settings_inner_trigger_class + '_' + select_val;
 
 					if (jQuery('.sfwd_options .' + settings_inner_trigger_class).length) {
-						
+
 						trigger_data['type'] = 'ld_setting_switch_inner_changed_early';
 						trigger_data['state'] = 'open';
 
@@ -407,7 +492,7 @@ jQuery(document).ready(function() {
 							type: trigger_data['type'],
 							ld_trigger_data: trigger_data
 						});
-						
+
 						trigger_data['type'] = 'ld_setting_switch_inner_changed_late';
 						jQuery('.sfwd_options .' + settings_inner_trigger_class).slideDown(500, function () {
 							jQuery('.sfwd_options .' + settings_inner_trigger_class).removeClass('ld-settings-inner-state-closed');
@@ -426,13 +511,13 @@ jQuery(document).ready(function() {
 			});
 		});
 	}
-	
+
 	/**
 	 * Handle Settings fields radio open/close state change logic.
   	*/
 	if (jQuery('.sfwd_options input.learndash-section-field-radio').length) {
 		jQuery('.sfwd_options input.learndash-section-field-radio').each(function (idx, item) {
-			jQuery(item).click(function (e) {
+			jQuery(item).on( 'click', function (e) {
 
 				// First we need to close any open items
 				var parent_fieldset = jQuery(e.currentTarget).parents('fieldset')[0];
@@ -475,7 +560,7 @@ jQuery(document).ready(function() {
 					});
 
 					trigger_data['type'] = 'ld_setting_radio_inner_changed_later';
-					if ('checked' === checked_state) {	
+					if ('checked' === checked_state) {
 						jQuery('.sfwd_options .' + settings_sub_trigger_class).slideDown(500, function () {
 							jQuery('.sfwd_options .' + settings_sub_trigger_class).removeClass('ld-settings-inner-state-closed');
 							jQuery('.sfwd_options .' + settings_sub_trigger_class).addClass('ld-settings-inner-state-open');
@@ -489,7 +574,7 @@ jQuery(document).ready(function() {
 						jQuery('.sfwd_options .' + settings_sub_trigger_class).slideUp(400, function () {
 							jQuery('.sfwd_options .' + settings_sub_trigger_class).removeClass('ld-settings-inner-state-open');
 							jQuery('.sfwd_options .' + settings_sub_trigger_class).addClass('ld-settings-inner-state-closed');
-							
+
 							jQuery('.sfwd_options').trigger({
 								type: trigger_data['type'],
 								ld_trigger_data: trigger_data
@@ -509,14 +594,14 @@ jQuery(document).ready(function() {
 	/*
 	if (jQuery('.sfwd_options .ld-settings-sub-advanced a.ld-settings-sub-advanced-trigger').length) {
 		jQuery('.sfwd_options .ld-settings-sub-advanced a.ld-settings-sub-advanced-trigger').each(function (idx, item) {
-			jQuery(item).click(function (e) {
+			jQuery(item).on( 'click', function (e) {
 				var parent_div = jQuery(e.currentTarget).parent('div.ld-settings-sub-advanced');
 				if (parent_div !== undefined) {
 					var advanced_inner = jQuery('div.ld-settings-sub-advanced-inner', parent_div);
 					if (advanced_inner !== undefined) {
 						jQuery(advanced_inner).slideToggle(500, function () {
 						});
-					} 
+					}
 				}
 			});
 		});
@@ -528,7 +613,7 @@ jQuery(document).ready(function() {
 	 */
 	if (jQuery('.sfwd_options #resultList li .expand-arrow').length) {
 		jQuery('.sfwd_options #resultList li .expand-arrow').each(function (idx, item) {
-			jQuery(item).click(function (e) {
+			jQuery(item).on( 'click', function (e) {
 				var parent_li = jQuery(e.currentTarget).parents('li');
 				if (parent_li !== undefined) {
 					var div_resultEditor = jQuery('.resultEditor', parent_li);
@@ -613,9 +698,17 @@ jQuery(document).ready(function() {
 	/**
 	 * Handle the Lessons selector on the Topic edit screen when the Course selector is changed.
 	 */
-	jQuery("body.post-type-sfwd-topic .sfwd_options select#learndash-topic-access-settings_course").change(function () {
-		if (window['sfwd_topic_lesson'] == undefined)
+
+	jQuery("body.post-type-sfwd-topic .sfwd_options select#learndash-topic-access-settings_course").on( 'change', function () {
+		if (window['sfwd_topic_lesson'] == undefined) {
 			window['sfwd_topic_lesson'] = jQuery("body.post-type-sfwd-topic .sfwd_options select#learndash-topic-access-settings_lesson").val();
+		}
+
+		var course_val = jQuery("body.post-type-sfwd-topic .sfwd_options select#learndash-topic-access-settings_course").val();
+		if ((typeof course_val === 'undefined') || (course_val === null) || (course_val === '')) {
+			jQuery("body.post-type-sfwd-topic .sfwd_options select#learndash-topic-access-settings_lesson").html('');
+			return null;
+		}
 
 		var data = {
 			'action': 'select_a_lesson',
@@ -623,36 +716,43 @@ jQuery(document).ready(function() {
 		};
 
 		if ( jQuery("body.post-type-sfwd-topic .sfwd_options select#learndash-topic-access-settings_lesson").length ) {
-
-			var lesson_selector_nonce = jQuery("body.post-type-sfwd-topic .sfwd_options select#learndash-topic-access-settings_lesson").data('ld_selector_nonce');
-			if (typeof lesson_selector_nonce !== 'undefined') {
-				data.ld_selector_nonce = lesson_selector_nonce;
+			if (window['sfwd_topic_lesson'] != '') {
+				var lesson_selector_nonce = jQuery("body.post-type-sfwd-topic .sfwd_options select#learndash-topic-access-settings_lesson").data('ld_selector_nonce');
+				if (typeof lesson_selector_nonce !== 'undefined') {
+					data.ld_selector_nonce = lesson_selector_nonce;
+				}
+				var lesson_selector_default = jQuery("body.post-type-sfwd-topic .sfwd_options select#learndash-topic-access-settings_lesson").data('ld_selector_default');
+				if (typeof lesson_selector_default !== 'undefined') {
+					data.ld_selector_default = lesson_selector_default;
+				}
+				jQuery.post(ajaxurl, data, function (json) {
+					window['response'] = json;
+					html = ''; //'<option value="0">' + sfwd_data.select_a_lesson_lang + '</option>';
+					jQuery.each(json.opt, function (i, opt) {
+						if (opt.key != '' && opt.key != '0') {
+							selected = (opt.key == window['sfwd_topic_lesson']) ? 'selected=selected' : '';
+							html += "<option value='" + opt.key + "' " + selected + ">" + opt.value + "</option>";
+						}
+					});
+					jQuery("body.post-type-sfwd-topic .sfwd_options select#learndash-topic-access-settings_lesson").html(html);
+				}, "json");
 			}
-			var lesson_selector_default = jQuery("body.post-type-sfwd-topic .sfwd_options select#learndash-topic-access-settings_lesson").data('ld_selector_default');
-			if (typeof lesson_selector_default !== 'undefined') {
-				data.ld_selector_default = lesson_selector_default;
-			}
-			jQuery.post(ajaxurl, data, function (json) {
-				window['response'] = json;
-				html = ''; //'<option value="0">' + sfwd_data.select_a_lesson_lang + '</option>';
-				jQuery.each(json.opt, function (i, opt) {
-					if (opt.key != '' && opt.key != '0') {
-						selected = (opt.key == window['sfwd_topic_lesson']) ? 'selected=selected' : '';
-						html += "<option value='" + opt.key + "' " + selected + ">" + opt.value + "</option>";
-					}
-				});
-				jQuery("body.post-type-sfwd-topic .sfwd_options select#learndash-topic-access-settings_lesson").html(html);
-			}, "json");
 		}
 	});
 
 	/**
 	 * Handle the Lessons selector on the Topic edit screen when the Course selector is changed.
 	 */
-	jQuery("body.post-type-sfwd-quiz .sfwd_options select#learndash-quiz-access-settings_course").change(function () {
-		if (window['sfwd_quiz_lesson'] == undefined)
+	jQuery("body.post-type-sfwd-quiz .sfwd_options select#learndash-quiz-access-settings_course").on( 'change', function () {
+		if (window['sfwd_quiz_lesson'] == undefined) {
 			window['sfwd_quiz_lesson'] = jQuery("body.post-type-sfwd-quiz .sfwd_options select#learndash-quiz-access-settings_lesson").val();
+		}
 
+		var course_val = jQuery("body.post-type-sfwd-quiz .sfwd_options select#learndash-quiz-access-settings_course").val();
+		if ((typeof course_val === 'undefined') || (course_val === null) || (course_val === '')) {
+			jQuery("body.post-type-sfwd-quiz .sfwd_options select#learndash-quiz-access-settings_lesson").html('');
+			return null;
+		}
 		var data = {
 			'action': 'select_a_lesson_or_topic',
 			'course_id': jQuery(this).val()
@@ -663,7 +763,7 @@ jQuery(document).ready(function() {
 			if (typeof lesson_selector_nonce !== 'undefined') {
 				data.ld_selector_nonce = lesson_selector_nonce;
 			}
-			
+
 			var lesson_selector_default = jQuery("body.post-type-sfwd-quiz .sfwd_options select#learndash-quiz-access-settings_lesson").data('ld_selector_default');
 			if (typeof lesson_selector_default !== 'undefined') {
 				data.ld_selector_default = lesson_selector_default;
@@ -682,30 +782,34 @@ jQuery(document).ready(function() {
 		}
 	});
 
+
 	/**
 	 * Handle the Quiz Run Once Cookie Selector.
 	 */
 	if ( jQuery('select#learndash-quiz-progress-settings_quizRunOnceType').length ) {
-		jQuery('select#learndash-quiz-progress-settings_quizRunOnceType').change(function () {
+		jQuery('select#learndash-quiz-progress-settings_quizRunOnceType').on( 'change', function () {
 			var select_val = jQuery(this).val();
-			
-			// If value is '2' for Logged in users only then no cookie is used. 
+
+			// Always hide this.
+			jQuery('#learndash-quiz-progress-settings_quizRunOnceCookie_field').hide();
+
+			// If value is '2' for Logged in users only then no cookie is used.
 			// So hide the cookie field.
 			if (select_val == 2) {
-				jQuery('#learndash-quiz-progress-settings_quizRunOnceCookie_field').hide();
+				jQuery('#learndash-quiz-progress-settings_quiz_reset_cookies_field').hide();
 			} else {
-				jQuery('#learndash-quiz-progress-settings_quizRunOnceCookie_field').show();
+				jQuery('#learndash-quiz-progress-settings_quiz_reset_cookies_field').show();
 			}
 		});
 		jQuery('select#learndash-quiz-progress-settings_quizRunOnceType').change();
 	}
-	
+
 	/**
 	 * Handle Settings Themes select state change logic.
  	*/
 	if (jQuery('.sfwd_options select#learndash_settings_courses_themes_active_theme').length) {
 		jQuery('.sfwd_options select#learndash_settings_courses_themes_active_theme').each(function (idx, item) {
-			jQuery(item).change(function (e) {
+			jQuery(item).on( 'change', function (e) {
 				var select_theme_val = jQuery(e.currentTarget).val();
 
 				jQuery('.sfwd_options .ld-theme-settings-section-state-open').slideUp(500, function () {
@@ -729,10 +833,26 @@ jQuery(document).ready(function() {
 	 * Handle the Template load button on the Quiz / Questions edit metabox.
 	 */
 	if (jQuery('.sfwd_options input[name="templateLoad"]').length) {
-		jQuery('.sfwd_options input[name="templateLoad"]').click(function () {
+		// Hide the Load Template section if there are no options. Other than the default message.
+		if ( jQuery('.sfwd_options select[name="templateLoadId"] option').length < 2 ) {
+			var template_load_settings_row = jQuery('.sfwd_options input[name="templateLoad"]').parents('.sfwd_input');
+			if (typeof template_load_settings_row !== 'undefined') {
+				jQuery(template_load_settings_row).hide();
+			}
+		}
+
+		jQuery('.sfwd_options input[name="templateLoad"]').on( 'click', function () {
 			if (jQuery('.sfwd_options select[name="templateLoadId"]').length) {
 				var template_load_url = jQuery('.sfwd_options select[name="templateLoadId"]').val();
-				if (template_load_url != '') {
+				if (( template_load_url != '') && (template_load_url != '-1') ) {
+					if (jQuery('.sfwd_options input[name="templateLoadReplaceCourse"]').length) {
+						if (jQuery('.sfwd_options input[name="templateLoadReplaceCourse"]').checked) {
+							var template_course = jQuery('.sfwd_options input[name="templateLoadReplaceCourse"]').val();
+							if ( ( typeof template_course !== 'undefined' )&& ( '' !== template_course ) ) {
+								template_load_url = template_load_url + '&templateLoadReplaceCourse=' + template_course;
+							}
+						}
+					}
 					window.location.href = template_load_url;
 				}
 			}
@@ -763,7 +883,7 @@ jQuery(document).ready(function() {
 			if (typeof input_config['input_step'] === 'undefined') {
 				input_config['input_step'] = '';
 			}
-			
+
 			input_config["can_decimal"] = input_field.attr("can_decimal");
 			if ( ( typeof input_config["can_decimal"] !== "undefined") && ( '' !== input_config['can_decimal'] ) ) {
 				if ( "true" === input_config["can_decimal"] ) {
@@ -785,7 +905,7 @@ jQuery(document).ready(function() {
       		} else {
 				input_config["can_empty"] = false;
 			}
-			
+
 			if ( ( "" === input_config["input_step"] ) && ( "" === input_config["input_min"] ) && ( "" === input_config["input_max"] ) ) {
             	return false;
 			}
@@ -815,7 +935,7 @@ jQuery(document).ready(function() {
 				   input_config['input_step'] = parseInt( input_config['input_step'] );
 			   }
             }
-			
+
 			input_field.data("input-config", input_config);
 		}
 
@@ -824,25 +944,39 @@ jQuery(document).ready(function() {
 
 	var learndash_settings_fields_errors = {};
 
-	function learndash_set_input_error( target, invalid ) {
-		if (jQuery(target).length) {
-			//if (typenow !== 'undefined') {
-			//	console.log('typenow[%o]', typenow);
-			//}
-			
+	function learndash_set_input_error( target, invalid, error_key ) {
+		if ((jQuery(target).length) && ("undefined" !== typeof target.type)) {
+
+			var target_type = target.type;
   			var input_wrapper = jQuery(target).parents(".sfwd_input");
   			if ("undefined" !== typeof input_wrapper) {
 				var input_id = jQuery(input_wrapper).attr('id');
 
+				var error_message = '';
 				if ( invalid === true ) {
+					if ("undefined" !== typeof error_key) {
+						if ("undefined" !== typeof learndash_admin_settings_data['settings_fields_errors']) {
+							if ("undefined" !== typeof learndash_admin_settings_data['settings_fields_errors'][target_type]) {
+								if ("undefined" !== typeof learndash_admin_settings_data['settings_fields_errors'][target_type][error_key]) {
+									error_message = learndash_admin_settings_data['settings_fields_errors'][target_type][error_key];
+								}
+							}
+						}
+					}
+
 					if ( "undefined" === typeof learndash_settings_fields_errors[input_id] ) {
 						var input_label = jQuery('.sfwd_option_label label', input_wrapper).html();
 						if ("undefined" !== typeof input_label) {
+
+							learndash_settings_fields_errors[input_id] = input_label.trim();
+
 							var input_error = jQuery(target).next(".learndash-section-field-error").html();
 							if ("undefined" !== typeof input_error) {
-								learndash_settings_fields_errors[input_id] = input_label.trim() + " - " + input_error;
-							} else {
-								learndash_settings_fields_errors[input_id] = input_label.trim();
+								learndash_settings_fields_errors[input_id] += " - " + input_error;
+							}
+
+							if (error_message ) {
+								learndash_settings_fields_errors[input_id] += " : " + error_message;
 							}
 						}
 					}
@@ -867,7 +1001,7 @@ jQuery(document).ready(function() {
 			if ("undefined" === typeof learndash_admin_settings_data['admin_notice_settings_fields_errors_container'] ) {
 				return;
 			}
-			
+
 			jQuery( learndash_admin_settings_data['admin_notice_settings_fields_errors_container'] ).insertAfter("hr.wp-header-end");
 		}
 
@@ -876,7 +1010,7 @@ jQuery(document).ready(function() {
 			var object_keys = Object.keys(learndash_settings_fields_errors);
 
 			var error_field_list = '';
-			for (var i = 0; i < object_keys.length; i++) { 
+			for (var i = 0; i < object_keys.length; i++) {
 				var object_key = object_keys[i];
 				var error_field_label = learndash_settings_fields_errors[object_key];
 				if ( '' !== error_field_label ) {
@@ -888,71 +1022,17 @@ jQuery(document).ready(function() {
 			//	error_field_list = "<p><ul>" + error_field_list + '</ul></p>';
 			//}
 			jQuery("ul.errors-list", notice_el).html(error_field_list);
-			if (object_keys.length > 0 ) {				
+			if (object_keys.length > 0 ) {
         		notice_el.show();
       		} else {
         		notice_el.hide();
       		}
-		}		
+		}
 	}
 
 
 	if (jQuery('.sfwd_options input[type="number"]').length) {
 		jQuery('.sfwd_options input[type="number"]').each(function (idx, item) {
-			jQuery(item).on( 'keypress', function (e) {
-				var input_config = learndash_get_input_config(jQuery(e.currentTarget));
-				if ( false === input_config ) {
-					return;
-				}
-				var charCode = e.which ? e.which : e.keyCode;
-				var input_value_new = String.fromCharCode(charCode);
-				var input_value_current = e.currentTarget.valueAsNumber;
-		
-				if (input_value_new === '.') {
-					if ("undefined" === typeof input_value_current || isNaN(input_value_current)) {
-						learndash_set_input_error(e.currentTarget, true);
-						e.preventDefault();
-						return false;
-					}
-					
-					if ( input_config["can_decimal"] === false ) {
-						e.preventDefault();
-						return false;
-					} else {
-						learndash_set_input_error(e.currentTarget, false);
-						return true;
-					}
-				}
-
-				if ( input_value_new === '-') {
-					if ( ( "undefined" !== typeof input_config['input_min'] ) && ( input_config['input_min'] !== '' ) && ( input_config['input_min'] < 0 ) ) {
-						return true;
-					} else {
-						e.preventDefault();
-						return false;
-					}
-				}
-
-				if ( ( "undefined" !== typeof input_config["input_max"] ) && ( '' !== input_config["input_max"] ) && ( input_value_current > input_config["input_max"] ) ) {
-					learndash_set_input_error(e.currentTarget, true);
-					e.preventDefault();
-					return false;
-				}
-					
-				if ( ( "undefined" !== typeof input_config['input_min'] ) && ( '' !== input_config['input_min'] ) && ( input_value_current < input_config['input_min'] ) ) {
-					learndash_set_input_error(e.currentTarget, true);
-					e.preventDefault();
-					return false;
-				}
-
-				if (charCode < 48 || charCode > 57) {
-					e.preventDefault();
-					return false;
-				} 
-		
-				learndash_set_input_error(e.currentTarget, false);
-				return true;
-			});
 
 			jQuery(item).on("invalid", function(e) {
 		        if (jQuery(e.currentTarget).length) {
@@ -962,7 +1042,7 @@ jQuery(document).ready(function() {
               		e.preventDefault();
             	}
       		});
-			
+
 			jQuery(item).on("input", function(e) {
         		if (jQuery(e.currentTarget).length) {
 					var input_config = learndash_get_input_config(jQuery(e.currentTarget));
@@ -970,38 +1050,41 @@ jQuery(document).ready(function() {
 						return;
 					}
 
-					var input_value_current = e.currentTarget.valueAsNumber;					
+					var input_value_current = e.currentTarget.valueAsNumber;
+
 					if ( "undefined" === typeof input_value_current ) {
-        				learndash_set_input_error(e.currentTarget, true);
+						learndash_set_input_error(e.currentTarget, true, 'invalid');
         				return false;
 					}
 
 					if ( ( input_config['can_empty'] ) && ( isNaN( input_value_current) ) ) {
-						learndash_set_input_error(e.currentTarget, false);
+						learndash_set_input_error(e.currentTarget, false, 'invalid');
             			return true;
 					} else if (isNaN(input_value_current)) {
-						learndash_set_input_error(e.currentTarget, true);
+						learndash_set_input_error(e.currentTarget, true, 'empty');
             			return false;
 					}
-				   
+
 					if ( "undefined" !== typeof input_config["input_max"] && "" !== input_config["input_max"] && input_value_current > input_config["input_max"] ) {
-						learndash_set_input_error(e.currentTarget, true);
+						learndash_set_input_error(e.currentTarget, true, 'maximum');
 						return false;
 					}
-					
+
 					if ( ( "undefined" !== typeof input_config['input_min'] ) && ( '' !== input_config['input_min'] ) && ( input_value_current < input_config['input_min'] ) ) {
-						learndash_set_input_error(e.currentTarget, true);
+						learndash_set_input_error(e.currentTarget, true, 'minimum');
               			return false;
 					}
 
-					if ( ( "undefined" !== typeof input_config['can_decimal'] ) && ( false !== input_config['can_decimal'] ) ) {
-						input_value_current_split = input_value_current.toString().split(".");
-						if ( input_value_current_split.length > 1 ) {
-							if ( input_value_current_split[1].length > input_config['can_decimal'] ) {
-								var input_value_current_fixed = input_value_current.toFixed(input_config["can_decimal"]);
-								if (input_value_current_fixed !== input_value_current) {
-									jQuery(e.currentTarget).val(input_value_current_fixed);
-								}
+					input_value_current_split = input_value_current.toString().split(".");
+
+					if ( input_value_current_split.length > 1 ) {
+						if (!input_config['can_decimal']) {
+							learndash_set_input_error(e.currentTarget, true, 'decimal');
+							return false;
+						} else if (input_value_current_split[1].length > input_config['can_decimal']) {
+							var input_value_current_fixed = input_value_current.toFixed(input_config["can_decimal"]);
+							if (input_value_current_fixed !== input_value_current) {
+								jQuery(e.currentTarget).val(input_value_current_fixed);
 							}
 						}
 					}
@@ -1013,7 +1096,7 @@ jQuery(document).ready(function() {
 	}
 
 
-	jQuery('form#ld_data_remove_form').submit( function( event ) {
+	jQuery('form#ld_data_remove_form').on( 'submit', function( event ) {
 		var ld_data_remove_verify = jQuery('input#ld_data_remove_verify').val();
 		var ld_data_remove_confirm = jQuery('input#ld_data_remove_verify').data('confirm');
 
@@ -1027,7 +1110,7 @@ jQuery(document).ready(function() {
 			event.preventDefault();
 			return;
 		}
-		
+
 		if (!confirm(ld_data_remove_confirm ) ) {
 			event.preventDefault();
 			return;
@@ -1036,54 +1119,238 @@ jQuery(document).ready(function() {
 	});
 });
 
-function learndash_course_edit_page_billing_cycle_javascript() {
-	var selector = jQuery('body.post-type-sfwd-courses .sfwd_options select[name=course_price_billing_t3]');
-	var parent = selector.parent();
-	var billing_cycle = selector.val();
-
-	function build_notice(message) {
-		return '<div id="sfwd-courses_course_price_billing_cycle_instructions"><label class="sfwd_help_text">' + message + '</label></div>';
-	}
-
-	function output_message() {
-		switch (billing_cycle) {
-			case "D":
-				message = sfwd_data.valid_recurring_paypal_day_range;
-				parent.append(build_notice(message));
-				break;
-			case "W":
-				message = sfwd_data.valid_recurring_paypal_week_range;
-				parent.append(build_notice(message));
-				break;
-			case "M":
-				message = sfwd_data.valid_recurring_paypal_month_range;
-				parent.append(build_notice(message));
-				break;
-			case "Y":
-				message = sfwd_data.valid_recurring_paypal_year_range;
-				parent.append(build_notice(message));
-			default:
-				break;
+/**
+ * Change the notice type for LD plugins in the listing that have the '.ld-plugin-update-notice' class.
+ *
+ * The readme.txt section 'Update Notice' if provided will contain critical update information and so
+ * we change the notice type from warning to error.
+ *
+ * @since 3.1.4.
+ */
+if (jQuery('body.plugins-php table.wp-list-table.plugins .ld-plugin-update-notice').length) {
+	jQuery('body.plugins-php table.wp-list-table.plugins .ld-plugin-update-notice').each(function (idx, item) {
+		var parent_notice_wrapper = jQuery(item).parents( '.update-message.notice-warning');
+		if ('undefined' !== typeof parent_notice_wrapper) {
+			jQuery(parent_notice_wrapper).removeClass('notice-warning');
+			jQuery(parent_notice_wrapper).addClass('notice-error');
 		}
-	}
-	output_message();
-
-	selector.change(function (e) {
-		billing_cycle = selector.val();
-		jQuery("#sfwd-courses_course_price_billing_cycle_instructions").remove();
-		output_message(billing_cycle);
 	});
+}
+
+/**
+ * Handle the dimissable license notice. Sends trigger to server to store for 24 hours.
+ */
+if (jQuery('.learndash-updates-disabled-dismissible').length) {
+	jQuery('.learndash-updates-disabled-dismissible').on('click', '.notice-dismiss', function (event, el) {
+		var nonce = jQuery(event.currentTarget).parent('.learndash-updates-disabled-dismissible').data('notice-dismiss-nonce');
+		post_data = {
+			'action': 'learndash_license_notice_dismissed',
+			'learndash_license_notice_dismissed_nonce': nonce
+		}
+
+		jQuery.ajax({
+			type: 'POST',
+			url: ajaxurl,
+			dataType: 'json',
+			cache: false,
+			data: post_data,
+			error: function (jqXHR, textStatus, errorThrown) {
+			},
+			success: function (reply_data) {
+			}
+		});
+	});
+}
+
+/**
+ * Handle the dimissable license notice. Sends trigger to server to store for 24 hours.
+ */
+if (jQuery('.ld-plugin-other-plugins-notice').length) {
+	jQuery('.ld-plugin-other-plugins-notice').on('click', '.notice-dismiss', function (event, el) {
+		var nonce = jQuery(event.currentTarget).parent('.ld-plugin-other-plugins-notice').data('notice-dismiss-nonce');
+		post_data = {
+			'action': 'learndash_other_plugins_notice_dismissed',
+			'learndash_other_plugins_notice_dismissed_nonce': nonce
+		}
+		jQuery.ajax({
+			type: 'POST',
+			url: ajaxurl,
+			dataType: 'json',
+			cache: false,
+			data: post_data,
+			error: function (jqXHR, textStatus, errorThrown) {
+			},
+			success: function (reply_data) {
+			}
+		});
+	});
+}
+
+
+function learndash_course_edit_page_billing_cycle_javascript() {
+
+	if ( jQuery('.sfwd_options select[name=course_price_billing_t3]').length) {
+		var selector = jQuery('.sfwd_options select[name=course_price_billing_t3]');
+	} else if(jQuery('.sfwd_options select[name=group_price_billing_t3]').length) {
+		var selector = jQuery('.sfwd_options select[name=group_price_billing_t3]');
+	}
+
+	if ('undefined' !== typeof selector) {
+		var parent = selector.parent();
+		var billing_cycle = selector.val();
+
+		function build_notice(message) {
+			return '<div id="learndash_price_billing_cycle_instructions"><label class="sfwd_help_text">' + message + '</label></div>';
+		}
+
+		function output_message() {
+			switch (billing_cycle) {
+				case "D":
+					message   = sfwd_data.valid_recurring_paypal_day_range;
+					max_value = sfwd_data.valid_recurring_paypal_day_max;
+					break;
+
+				case "W":
+					message   = sfwd_data.valid_recurring_paypal_week_range;
+					max_value = sfwd_data.valid_recurring_paypal_week_max;
+					break;
+
+				case "M":
+					message   = sfwd_data.valid_recurring_paypal_month_range;
+					max_value = sfwd_data.valid_recurring_paypal_month_max;
+					break;
+
+				case "Y":
+					message   = sfwd_data.valid_recurring_paypal_year_range;
+					max_value = sfwd_data.valid_recurring_paypal_year_max;
+					break;
+
+				default:
+					message   = '';
+					max_value = 0;
+					break;
+			}
+			parent.append(build_notice(message));
+
+			const billing_input = parent.find( 'input[name="course_price_billing_p3"');
+			if ( billing_input.val() > max_value ) {
+				billing_input.val(max_value);
+			}
+			billing_input.prop('max', max_value);
+		}
+
+		output_message();
+
+		selector.on( 'change', function (e) {
+			billing_cycle = selector.val();
+			jQuery("#learndash_price_billing_cycle_instructions").remove();
+			output_message(billing_cycle);
+		});
+	}
+
+	if ( jQuery( 'table.learndash-settings-table-sortable').length) {
+		jQuery( 'table.learndash-settings-table-sortable tbody').sortable();
+	}
 };
 
-/** 
- * Trigger resize on load to trigger the resizing of 
+function learndash_get_base_select2_args() {
+	return {
+		theme: 'learndash',
+		ajax: null,
+		allowClear: true,
+		width: 'resolve',
+		dir: (window.isRtl) ? 'rtl' : '',
+		dropdownAutoWidth: true,
+		language: {
+			loadingMore: function () {
+				if (typeof learndash_admin_settings_data['selec2_language']['loadingMore'] !== 'undefined') {
+					return learndash_admin_settings_data['selec2_language']['loadingMore'];
+				}
+				return 'Loading more results…';
+			},
+			noResults: function () {
+				if (typeof learndash_admin_settings_data['selec2_language']['noResults'] !== 'undefined') {
+					return learndash_admin_settings_data['selec2_language']['noResults'];
+				}
+				return 'No results found';
+			},
+			searching: function () {
+				if (typeof learndash_admin_settings_data['selec2_language']['searching'] !== 'undefined') {
+					return learndash_admin_settings_data['selec2_language']['searching'];
+				}
+				return 'Searching…';
+			},
+			removeAllItems: function () {
+				if (typeof learndash_admin_settings_data['selec2_language']['removeAllItems'] !== 'undefined') {
+					return learndash_admin_settings_data['selec2_language']['removeAllItems'];
+				}
+				return 'Remove all items';
+			},
+			removeItem: function () {
+				if (typeof learndash_admin_settings_data['selec2_language']['removeItem'] !== 'undefined') {
+					return learndash_admin_settings_data['selec2_language']['removeItem'];
+				}
+				return 'Remove item';
+			}
+		}
+		//escapeMarkup: function (markup) { return markup; }
+	};
+}
+
+/**
+ * Populate Select2 dropdowns with data
+ *
+ * @param action
+ * @returns {{url, dataType: string, method: string, delay: number, data: data, processResults: processResults}}
+ */
+function learndash_settings_select2_ajax(el) {
+	var query_data = jQuery(el).data('select2-query-data');
+
+	if ((typeof query_data === 'undefined') || (query_data === '')) {
+		return null;
+	}
+
+	// Trigger change when the selector is cleared.
+	jQuery(el).on('select2:unselect', function (e) {
+		jQuery(el).trigger('change');
+	});
+
+	return {
+		url: learndash_admin_settings_data.ajaxurl,
+		dataType: 'json',
+		method: 'post',
+		delay: 1500,
+		cache: true,
+		data: function (params) {
+			return {
+				'action': 'learndash_settings_select2_query',
+				'query_data': query_data || '',
+				'search': params.term || '',
+				'page': params.page || 1,
+			};
+		},
+		processResults: function (response, params) {
+			params.page = params.page || 1;
+
+			return {
+				results: response.items,
+				pagination: {
+					more: (params.page < response.total_pages)
+				}
+			};
+		},
+	}
+}
+
+/**
+ * Trigger resize on load to trigger the resizing of
  * .sfwd_options .ld-settings-sub elements.
  */
 /*
 jQuery(window).load(function () {
 	setTimeout(function () {
 		jQuery(window).trigger('resize');
-	}, 1000); 	
+	}, 1000);
 });
 */
 

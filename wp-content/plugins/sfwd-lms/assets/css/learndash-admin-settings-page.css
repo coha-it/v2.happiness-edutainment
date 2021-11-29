@@ -40,7 +40,7 @@ span.learndash-description {
   text-align: left;
 }
 
-.sfwd_options .ld-settings-sub-level-1 .sfwd_input { 
+.sfwd_options .ld-settings-sub-level-1 .sfwd_input {
   margin-left: 10px;
   padding-left: 10px;
   position: relative;
@@ -464,6 +464,21 @@ span.learndash-description {
   width: 100%;
 }
 
+.sfwd_options span.learndash_settings_field_text_prefix.-medium {
+  width: 75%;
+  display: inline-block;
+  padding-top: 0px;
+  padding-bottom: 0px;
+  color: rgba(51,51,51,.5);
+}
+
+.sfwd_options span.learndash_settings_field_text_prefix input[type="text"] {
+  width: max-content;
+  border: 0px;
+  padding-left: 0px;
+  padding-bottom: 8px;
+}
+
 /* Select CSS */
 
 .sfwd_options .ld-select {
@@ -498,11 +513,11 @@ span.learndash-description {
   border: none;
 }
 
-.select2-container--default .select2-selection--single .select2-selection__rendered {
+.select2-container--learndash .select2-selection--single .select2-selection__rendered {
     color: #72777c !important;
 }
 
-.select2-container--default .select2-results__option--highlighted[aria-selected] {
+.select2-container--learndash .select2-results__option--highlighted[aria-selected] {
     background-color: #11a0d2  !important;
 }
 
@@ -532,7 +547,7 @@ width: 100% !important;
 
 .sfwd_options .ld-select select {
   -moz-appearance: none;
-  -webkit-appearance: textarea;
+  -webkit-appearance: inherit;
   appearance: none;
   background: none;
   border: 0;
@@ -541,7 +556,8 @@ width: 100% !important;
   margin: 0;
   padding: 5px 10px;
   width: 100%;
-  width: 110% \9;
+  max-width: 100%;
+  /* width: 110% \9; */
   z-index: 2;
 }
 
@@ -559,9 +575,10 @@ width: 100% !important;
 
 .sfwd_options .ld-select select option {
   border: 0;
+  width: 100%;
 }
 
-.sfwd_options .ld-select2 .select2-container {
+.sfwd_options .ld-select2 .select2-container--learndash {
     width: 100% !important;
     max-width: 450px;
     height: 100%;
@@ -573,27 +590,27 @@ width: 100% !important;
   padding-bottom: 5px;
 }
 */
-.sfwd_options .ld-select2 .select2-container--default .select2-selection--single {
+.sfwd_options .ld-select2 .select2-container--learndash .select2-selection--single {
   padding-top: 3px;
   padding-bottom: 3px;
   height: 100%;
   border: 0px;
 }
 
-.sfwd_options .ld-select2 .select2-container--default .select2-selection--single .select2-selection__arrow {
+.sfwd_options .ld-select2 .select2-container--learndash .select2-selection--single .select2-selection__arrow {
   height: 100%;
 }
 /*
-.sfwd_options .ld-select2 .select2-container--default .select2-selection--single .select2-selection__placeholder {
+.sfwd_options .ld-select2 .select2-container--learndash .select2-selection--single .select2-selection__placeholder {
   color: inherit;
 }
 */
-.sfwd_options .ld-select2 .select2-container--default .select2-selection--single .select2-selection__arrow b {
+.sfwd_options .ld-select2 .select2-container--learndash .select2-selection--single .select2-selection__arrow b {
   border-top-color: inherit;
 }
 
-.sfwd_options .select2-container--default .select2-selection--multiple {
-    border: 0px solid #aaa !important; 
+.sfwd_options .select2-container--learndash .select2-selection--multiple {
+    border: 0px solid #aaa !important;
 }
 .sfwd_options .select2-container .select2-search--inline .select2-search__field {
     padding-top: 5px !important;
@@ -601,13 +618,57 @@ width: 100% !important;
 }
 
 /*
-.select2-container--default .select2-selection--single {
+.select2-container--learndash .select2-selection--single {
     background-color: #fff;
     border: 1px solid #aaa;
     border-radius: 4px;
     height: 100%;
 }
 */
+
+/* Select2 Post Type listing selectors */
+body.edit-php .tablenav.top .select2-container--learndash,
+body.users-php .tablenav.top .select2-container--learndash {
+  margin-right: 6px;
+  margin-left: 1px;
+  font-size: 14px;
+	line-height: 2;
+	color: #32373c;
+	border-color: #7e8993;
+	box-shadow: none;
+	border-radius: 3px;
+	/* padding: 0 24px 0 8px; */
+	min-height: 30px;
+	max-width: 25rem;
+	-webkit-appearance: none;
+  color: #32373c !important;
+	cursor: pointer;
+  vertical-align: middle;
+  float: left;
+}
+
+body.edit-php .tablenav.top .select2-container--learndash .select2-selection--single,
+body.users-php .tablenav.top .select2-container--learndash .select2-selection--single {
+  height: 30px;
+  box-shadow: 0 0 0 transparent;
+	border-radius: 4px;
+	border: 1px solid #7e8993;
+	background-color: #fff;
+	color: #32373c !important;
+	background: #fff url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%206l5%205%205-5%202%201-7%207-7-7%202-1z%22%20fill%3D%22%23555%22%2F%3E%3C%2Fsvg%3E') no-repeat right 5px top 55%;
+  background-size: 16px 16px;
+}
+
+body.edit-php .tablenav.top .select2-container--learndash .select2-selection--single .select2-selection__placeholder,
+body.users-php .tablenav.top .select2-container--learndash .select2-selection--single .select2-selection__placeholder {
+  color: #32373c !important;
+}
+
+/* Hide the default */
+body.edit-php .tablenav.top .select2-container--learndash .select2-selection--single .select2-selection__arrow,
+body.users-php .tablenav.top .select2-container--learndash .select2-selection--single .select2-selection__arrow {
+  display: none;
+}
 
 /* Settings Row CSS */
 /*
@@ -633,7 +694,7 @@ width: 100% !important;
 
 .sfwd_options .sfwd_input textarea {
 	color: #515151;
-	
+
 	margin: 0px;
 	font-size: 14px;
 	line-height: 25px;
@@ -674,7 +735,7 @@ width: 100% !important;
 }
 
 .sfwd_options .ld-settings-sub.ld-settings-sub-state-open,
-.sfwd_options .ld-settings-inner-state-open 
+.sfwd_options .ld-settings-inner-state-open
 .sfwd_options .ld-theme-settings-section-state-open {
   display: block;
 }
@@ -703,11 +764,11 @@ width: 100% !important;
 /*
 .sfwd_options .sfwd_help_text_div {
   display: block;
-  position: absolute; 
-  top: 20px; 
-  border: 2px solid black; 
-  padding: 5px; 
-  background-color: yellow; 
+  position: absolute;
+  top: 20px;
+  border: 2px solid black;
+  padding: 5px;
+  background-color: yellow;
   color: black;
   z-index: 99;
 }
@@ -719,12 +780,12 @@ width: 100% !important;
     flex: 1 0 300px;
     margin-bottom: 0;
   }
-  
+
   .sfwd_options .sfwd_option_input {
     flex: 1 0 calc(100% - 300px);
     margin-bottom: 0;
   }
-  
+
   .sfwd_options .sfwd_input > .sfwd_input .sfwd_option_label {
     flex: 1 0 278px;
   }
@@ -785,7 +846,7 @@ width: 100% !important;
 /*
 .sfwd_options .tooltip .tooltiptext {
   top: -5px;
-  left: 120%; 
+  left: 120%;
 }
 
 .sfwd_options .tooltip .tooltiptext::after {
@@ -801,12 +862,12 @@ width: 100% !important;
 */
 
 /**
- * Quiz Custom Fields style 
+ * Quiz Custom Fields style
  */
 
  .sfwd_options .form_table_wrapper {
-   margin-top: 0px; 
-   padding: 0px; 
+   margin-top: 0px;
+   padding: 0px;
    border: 0px solid #C2C2C2;
  }
 
@@ -910,21 +971,21 @@ Quiz Edit Result Text lists
 }
 
 #learndash-quiz-resultList ul#resultList li {
-  
-  padding: 5px; 
-  border: 1; 
+
+  padding: 5px;
+  border: 1;
   border: 1px dotted;
 }
 
 #learndash-quiz-resultList ul#resultList li .resultHeader {
-  
-  margin-bottom: 5px; 
+
+  margin-bottom: 5px;
   padding: 10px;
   background-color:#ebebeb; /* rgb(207, 207, 207); */
 }
 
 #learndash-quiz-resultList ul#resultList li .resultEditor {
-  
+
   /*margin: 20px; */
 }
 
@@ -1116,12 +1177,12 @@ Quiz Edit Result Text lists
 .sfwd_options .learndash_settings_field_invalid label.sfwd_label {
   color: red;
 }
-.sfwd_options .learndash_settings_field_invalid input:invalid { 
+.sfwd_options .learndash_settings_field_invalid input:invalid {
   border: 1px solid red;
   box-shadow: none;
 }
 
-.sfwd_options .learndash_settings_field_invalid .learndash-section-field-error { 
+.sfwd_options .learndash_settings_field_invalid .learndash-section-field-error {
   color: red;
 }
 
@@ -1142,4 +1203,161 @@ Quiz Edit Result Text lists
  */
 .ld__builder-sidebar-widget .components-checkbox-control__input[type="checkbox"]:checked::before {
   content: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2020%2020%27%3E%3Cpath%20d%3D%27M14.83%204.89l1.34.94-5.81%208.38H9.02L5.78%209.67l1.34-1.25%202.57%202.4z%27%20fill%3D%27%231e8cbe%27%2F%3E%3C%2Fsvg%3E");
+}
+
+.plugin-update p.ld-plugin-update-notice::before {
+  content: '';
+  margin-right: 0;
+}
+
+.plugin-update .ld-plugin-update-notice,
+.notice.ld-plugin-update-notice {
+  /* background-color: #d54e21;  */
+	padding: 10px;
+	/* color: #f9f9f9; */
+	margin-top: 10px;
+}
+
+.plugin-update .ld-plugin-update-notice {
+  /* border-top: 3px solid #d54e21; */
+}
+.ld-plugin-update-notice .version {
+  font-weight: 700;
+}
+
+.ld-plugin-update-notice .header {
+  font-size: 130%;
+  font-weight: bold;
+}
+
+/**
+Sections/Settings Info banners.
+*/
+.ld_settings_postbox .ld-settings-info-banner {
+  display: block;
+  padding: 5px 10px 5px 10px;
+  margin: 5px 0;
+}
+
+.ld_settings_postbox .ld-settings-info-banner p::before {
+  font: normal 20px/1 dashicons;
+  float: left;
+}
+
+.ld_settings_postbox .ld-settings-info-banner p {
+  margin: .5em 0;
+  padding: 0;
+	font-size: 13px;
+	line-height: 1.5em;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	vertical-align: top;
+}
+
+.ld_settings_postbox .ld-settings-info-banner.ld-settings-info-banner-alert {
+  background-color: #fbeaea;
+  border-left-color: #dc3232;
+  border-left-width: 2px;
+  border-left-style: solid;
+}
+
+.ld_settings_postbox .ld-settings-info-banner.ld-settings-info-banner-alert p::before {
+	color: #dc3232;
+  content: "\f534";
+  margin-right: 6px;
+}
+
+.ld_settings_postbox .ld-settings-info-banner.ld-settings-info-banner-success {
+  border-color: #46b450;
+  border-width: 0 0 1px 2px;
+  border-style: solid;
+}
+
+/* LearnDash Settings Sub menu */
+ul.learndash-settings-sub {
+  float: none;
+}
+
+ul.learndash-settings-sub li.learndash-settings-sub-current a {
+  font-weight: bold;
+}
+
+/* LearnDash Settings Table general styles */
+table.learndash-settings-table th {
+  font-weight: bold;
+}
+
+table.learndash-settings-table td.col-valign-middle {
+  vertical-align: middle;
+}
+
+table.learndash-settings-table-sortable .ui-sortable-helper {
+    display: table;
+}
+
+table.learndash-settings-table-sortable td.col-name-move {
+  cursor: grab;
+}
+
+/*
+.sfwd_options .ld-settings-info-banner.ld-settings-info-banner-success p::before {
+	color: #46b450;
+}
+*/
+
+/** Settiings for Group Attributes metabox */
+
+.edit-post-sidebar #learndash_group_attributes_metabox select#group_parent_id {
+  max-width: 85%;
+  width: 100%;
+}
+
+#learndash_group_attributes_metabox input#group_menu_order {
+  display: block;
+}
+
+.edit-post-sidebar #learndash_group_attributes_metabox .group-menu-order-label-wrapper {
+  margin-top: 10px;
+}
+
+/** Styles for WordPress 5.5 changes */
+.ld_settings_postbox .postbox-header {
+	display: block;
+}
+
+.edit-post-meta-boxes-area #poststuff .ld_settings_postbox .postbox-header .hndle,
+.edit-post-meta-boxes-area #poststuff #learndash_course_builder .postbox-header .hndle,
+.edit-post-meta-boxes-area #poststuff #learndash_quiz_builder .postbox-header .hndle {
+	border-bottom: none;
+	width: auto;
+}
+
+.ld_settings_postbox .postbox-header .hndle {
+	display: inline-block;
+}
+
+.ld_settings_postbox .postbox-header .handle-actions {
+	display: inline-block;
+	float: right;
+}
+
+.ld_settings_postbox .postbox-header .handle-actions .handle-order-lower,
+.ld_settings_postbox .postbox-header .handle-actions .handle-order-higher,
+body[data-active-tab="learndash_course_builder"] .postbox-header .handle-actions .handle-order-lower,
+body[data-active-tab="learndash_course_builder"] .postbox-header .handle-actions .handle-order-higher,
+body[data-active-tab="learndash_quiz_builder"] .postbox-header .handle-actions .handle-order-lower,
+body[data-active-tab="learndash_quiz_builder"] .postbox-header .handle-actions .handle-order-higher {
+	display: none;
+}
+
+.ld_settings_postbox .postbox-header .ld-metabox-description {
+	display: block;
+	padding: 0 12px 5px;
+}
+
+#course-shortcodes.wrap .inside .dashicons,
+#course-shortcodes.wrap .inside .dashicons-before::before,
+#certificate-shortcodes.wrap .inside .dashicons,
+#certificate-shortcodes.wrap .inside .dashicons-before::before {
+  text-decoration: none;
 }

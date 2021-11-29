@@ -53,6 +53,12 @@ class LoginLogoutMenu extends Config implements RequiredFunctions {
 				add_shortcode( 'uo_register', array( __CLASS__, 'register_link' ) );
 
 			}
+			
+			if ( class_exists( '\uncanny_learndash_toolkit\FrontendLoginPlus', false ) ) {
+				if ( "" !== self::get_settings_value( 'uo_frontendloginplus_enable_ajax_support', 'FrontendLoginPlus', '' ) ) {
+					self::$login_menu_item_urls[] = '#ult-modal-open----ult-login';
+				}
+			}
 		}
 
 	}
@@ -63,7 +69,7 @@ class LoginLogoutMenu extends Config implements RequiredFunctions {
 	 * @return array
 	 */
 	public static function get_details() {
-
+		$module_id   = 'log-in-log-out-links';
 		$class_title = esc_html__( 'Log In/Log Out Links', 'uncanny-learndash-toolkit' );
 
 		$kb_link = 'https://www.uncannyowl.com/knowledge-base/log-in-log-out-links/';
@@ -77,6 +83,7 @@ class LoginLogoutMenu extends Config implements RequiredFunctions {
 		$type       = 'free';
 
 		return array(
+			'id'               => $module_id,
 			'title'            => $class_title,
 			'type'             => $type,
 			'category'         => $category,
@@ -151,6 +158,9 @@ class LoginLogoutMenu extends Config implements RequiredFunctions {
 				case '#uo_register_link':
 					$label = __( 'Register', 'uncanny-learndash-toolkit');
 					break;
+				case '#ult-modal-open----ult-login':
+					$label = __( 'Front end login modal', 'uncanny-learndash-toolkit');
+					break;
 				default:
 					$label = '';
 			}
@@ -220,6 +230,9 @@ class LoginLogoutMenu extends Config implements RequiredFunctions {
 				case '#uo_register_link':
 					$label = __( ' - Register', 'uncanny-learndash-toolkit');
 					break;
+				case '#ult-modal-open----ult-login':
+					$label = __( ' - Front end login modal', 'uncanny-learndash-toolkit');
+					break;
 				default:
 					$label = '';
 			}
@@ -233,7 +246,7 @@ class LoginLogoutMenu extends Config implements RequiredFunctions {
 	public static function override_setup_nav_menu_item( $item ) {
 
 		// Only do this when we are on the frontend and only if its a Uncanny Link
-		if ( ! defined( 'DOING_AJAX' ) && isset( $item->url ) && strpos( $item->url, '#uo_' ) !== false ) {
+		if ( ! defined( 'DOING_AJAX' ) && isset( $item->url ) && ( strpos( $item->url, '#uo_' ) !== false || strpos( $item->url, '#ult-' ) !== false ) ) {
 
 			switch ( $item->url ) {
 				case '#uo_log_in_out_link' :
@@ -275,6 +288,24 @@ class LoginLogoutMenu extends Config implements RequiredFunctions {
 						$item->url = '#uo_remove_item';
 					} else {
 						$item->url = site_url( 'wp-login.php?action=register', 'login' );
+					}
+					break;
+				case '#ult-modal-open----ult-login' :
+					if ( is_user_logged_in() ) {
+						$item->url = '#uo_remove_item';
+					} else {
+					    if( class_exists( '\uncanny_learndash_toolkit\FrontendLoginPlus', false ) ) {
+						    $login_page_id = \uncanny_learndash_toolkit\FrontendLoginPlus::get_login_redirect_page_id();
+						    $login_page    = '#ult-modal-open----ult-login';
+						    if ( $login_page_id ) {
+							    $login_page = get_permalink( $login_page_id ) . $login_page;
+						    } else {
+							    $login_page = site_url( 'wp-login.php' ) . $login_page;
+						    }
+						    $item->url = $login_page;
+					    } else {
+						    $item->url = site_url( 'wp-login.php' );
+                        }
 					}
 					break;
 			}

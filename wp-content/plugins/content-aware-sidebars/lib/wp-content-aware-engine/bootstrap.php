@@ -1,9 +1,9 @@
 <?php
 /**
- * @package WP Content Aware Engine
+ * @package wp-content-aware-engine
  * @author Joachim Jensen <joachim@dev.institute>
  * @license GPLv3
- * @copyright 2019 by Joachim Jensen
+ * @copyright 2021 by Joachim Jensen
  */
 
 defined('ABSPATH') || exit;
@@ -12,7 +12,7 @@ defined('ABSPATH') || exit;
  * Version of this WPCA
  * @var string
  */
-$this_wpca_version = '7.0.1';
+$this_wpca_version = '9.5a';
 
 /**
  * Class to make sure the latest
@@ -28,7 +28,7 @@ if (!class_exists('WPCALoader')) {
          * Absolute paths and versions
          * @var array
          */
-        private static $_paths = array();
+        private static $_paths = [];
 
         public function __construct()
         {
@@ -61,9 +61,8 @@ if (!class_exists('WPCALoader')) {
                 return;
             }
 
-            arsort(self::$_paths);
-
-            foreach (self::$_paths as $path => $version) {
+            uasort(self::$_paths, 'version_compare');
+            foreach (array_reverse(self::$_paths, true) as $path => $version) {
                 $file = $path.'core.php';
                 if (file_exists($file)) {
                     include($file);
@@ -88,6 +87,6 @@ if (!class_exists('WPCALoader')) {
         }
     }
     //Hook as early as possible after plugins are loaded
-    add_action('plugins_loaded', array('WPCALoader','load'), -999999);
+    add_action('plugins_loaded', ['WPCALoader','load'], -999999);
 }
 WPCALoader::add(plugin_dir_path(__FILE__), $this_wpca_version);

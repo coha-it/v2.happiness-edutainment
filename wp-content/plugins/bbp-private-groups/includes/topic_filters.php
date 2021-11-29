@@ -11,7 +11,8 @@ if (!empty ($rpg_topic_permissions['activate']) ) {
 	add_filter ( 'bbp_current_user_can_access_create_topic_form', 'pg_current_user_can_access_create_topic_form') ;
 	add_filter ( 'bbp_current_user_can_access_create_reply_form', 'pg_current_user_can_access_create_reply_form') ;
 }
- 
+
+
 function private_groups_topics ($args='') {
 		//we only need to filter topics if this forum has topic permissions set to 5 - Create/Edit/view OWN Topics, create/edit Replies to those topics and view any Replies to those topics
 		//so check if this is the case
